@@ -1,0 +1,49 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  PROFESSIONAL
+  SUPERVISOR
+}
+
+enum ReportStatus {
+  SENT
+  IN_REVIEW
+  PENDING
+  RESOLVED
+}
+
+model User {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  email         String    @unique
+  passwordHash  String
+  role          Role      @default(PROFESSIONAL)
+  supervisorId  String?   @db.ObjectId
+  supervisor    User?     @relation("Subordinates", fields: [supervisorId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  Subordinates  User[]    @relation("Subordinates")
+  reports       Report[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  }
+
+  model Report {
+    id          String   @id @default(auto()) @map("_id") @db.ObjectId
+    imageUrl    String
+    comment     String
+    status      ReportStatus @default(SENT)
+    userId      String   @db.ObjectId
+    user        User     @relation(fields: [userId], references: [id])
+
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+  }

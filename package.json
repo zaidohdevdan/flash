@@ -1,0 +1,17 @@
+{
+  "name": "flash",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "workspaces": [
+    "apps/*",
+    "server",
+    "packages/*"
+  ],
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}

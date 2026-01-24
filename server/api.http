@@ -1,0 +1,49 @@
+@baseUrl = http://localhost:3000
+
+### Login Supervisor
+# @name loginSupervisor
+POST {{baseUrl}}/login
+Content-Type: application/json
+
+{
+  "email": "super@sis.com",
+  "password": "123456"
+}
+
+### Login Professional
+# @name loginProfessional
+POST {{baseUrl}}/login
+Content-Type: application/json
+
+{
+  "email": "profissional@sistema.com",
+  "password": "123456"
+}
+
+@authToken = {{loginProfessional.response.body.token}}
+
+### Create Report (Protected)
+POST {{baseUrl}}/reports
+Authorization: Bearer {{authToken}}
+Content-Type: multipart/form-data; boundary=Boundary
+
+--Boundary
+Content-Disposition: form-data; name="comment"
+
+Este é um relatório protegido.
+--Boundary
+Content-Disposition: form-data; name="image"; filename="teste.txt"
+Content-Type: text/plain
+
+Conteudo simulado de uma imagem
+--Boundary--
+
+### Update Status (Protected)
+# Necessario pegar ID de um report criado
+PATCH {{baseUrl}}/reports/6793c9d7278dc5eb0fd309f7/status
+Authorization: Bearer {{loginSupervisor.response.body.token}}
+Content-Type: application/json
+
+{
+    "status": "IN_REVIEW"
+}
