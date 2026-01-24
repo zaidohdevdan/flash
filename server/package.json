@@ -15,7 +15,9 @@
   },
   "scripts": {
     "dev": "bun --watch src/index.ts",
-    "db:generate": "prisma generate"
+    "start": "bun src/index.ts",
+    "db:generate": "prisma generate",
+    "build": "bun run db:generate"
   },
   "peerDependencies": {
     "typescript": "^5.9.3"
