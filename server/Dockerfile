@@ -14,7 +14,8 @@ RUN bun install
 COPY . .
 
 # Gerar o cliente do Prisma (essencial para o MongoDB)
-RUN bun run db:generate
+# Passamos uma URL vazia apenas para o build não reclamar
+RUN DATABASE_URL="mongodb://localhost:27017/unused" bun run db:generate
 
 # Definir a porta de produção
 ENV PORT=3000
