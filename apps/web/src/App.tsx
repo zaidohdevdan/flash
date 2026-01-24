@@ -1,10 +1,13 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { Login } from './pages/Login';
+import { Register } from './pages/Register';
+import { Dashboard } from './pages/Dashboard';
+import { CreateReport } from './pages/CreateReport';
+import { AdminDashboard } from './pages/AdminDashboard';
+import { Home } from './pages/Home';
 
 // Placeholders for now
-const Dashboard = () => <div className="p-4"><h1>Dashboard (Supervisor)</h1></div>;
-const CreateReport = () => <div className="p-4"><h1>Novo Relatório (Profissional)</h1></div>;
 
 function PrivateRoute({ children, role }: { children: React.ReactNode, role?: string }) {
   const { isAuthenticated, loading, user } = useAuth();
@@ -14,11 +17,11 @@ function PrivateRoute({ children, role }: { children: React.ReactNode, role?: st
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/" />;
+    return <Navigate to="/login" />;
   }
 
   if (role && user?.role !== role) {
-    // Se tentar acessar rota de outro papel, manda para a correta dele
+    if (user?.role === 'ADMIN') return <Navigate to="/admin-dashboard" />;
     if (user?.role === 'SUPERVISOR') return <Navigate to="/dashboard" />;
     if (user?.role === 'PROFESSIONAL') return <Navigate to="/create-report" />;
   }
@@ -30,6 +33,7 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, user } = useAuth();
 
   if (isAuthenticated) {
+    if (user?.role === 'ADMIN') return <Navigate to="/admin-dashboard" />;
     if (user?.role === 'SUPERVISOR') return <Navigate to="/dashboard" />;
     if (user?.role === 'PROFESSIONAL') return <Navigate to="/create-report" />;
   }
@@ -40,7 +44,9 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
 function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<PublicRoute><Login /></PublicRoute>} />
+      <Route path="/" element={<Home />} />
+      <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+      <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
 
       <Route path="/dashboard" element={
         <PrivateRoute role="SUPERVISOR">
@@ -51,6 +57,12 @@ function AppRoutes() {
       <Route path="/create-report" element={
         <PrivateRoute role="PROFESSIONAL">
           <CreateReport />
+        </PrivateRoute>
+      } />
+
+      <Route path="/admin-dashboard" element={
+        <PrivateRoute role="ADMIN">
+          <AdminDashboard />
         </PrivateRoute>
       } />
     </Routes>

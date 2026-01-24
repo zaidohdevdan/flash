@@ -91,6 +91,8 @@ exports.Prisma.UserScalarFieldEnum = {
   name: 'name',
   email: 'email',
   passwordHash: 'passwordHash',
+  avatarUrl: 'avatarUrl',
+  statusPhrase: 'statusPhrase',
   role: 'role',
   supervisorId: 'supervisorId',
   createdAt: 'createdAt',
@@ -101,10 +103,28 @@ exports.Prisma.ReportScalarFieldEnum = {
   id: 'id',
   imageUrl: 'imageUrl',
   comment: 'comment',
+  feedback: 'feedback',
+  feedbackAt: 'feedbackAt',
   status: 'status',
   userId: 'userId',
+  departmentId: 'departmentId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
+};
+
+exports.Prisma.DepartmentScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.ReportHistoryScalarFieldEnum = {
+  id: 'id',
+  reportId: 'reportId',
+  status: 'status',
+  comment: 'comment',
+  userName: 'userName',
+  createdAt: 'createdAt'
 };
 
 exports.Prisma.SortOrder = {
@@ -125,13 +145,16 @@ exports.Role = exports.$Enums.Role = {
 exports.ReportStatus = exports.$Enums.ReportStatus = {
   SENT: 'SENT',
   IN_REVIEW: 'IN_REVIEW',
-  PENDING: 'PENDING',
-  RESOLVED: 'RESOLVED'
+  FORWARDED: 'FORWARDED',
+  RESOLVED: 'RESOLVED',
+  ARCHIVED: 'ARCHIVED'
 };
 
 exports.Prisma.ModelName = {
   User: 'User',
-  Report: 'Report'
+  Report: 'Report',
+  Department: 'Department',
+  ReportHistory: 'ReportHistory'
 };
 /**
  * Create the Client
@@ -180,13 +203,13 @@ const config = {
       }
     }
   },
-  "inlineSchema": "generator client {\n  provider = \"prisma-client-js\"\n  output   = \"../src/generated/prisma\"\n}\n\ndatasource db {\n  provider = \"mongodb\"\n  url      = env(\"DATABASE_URL\")\n}\n\nenum Role {\n  ADMIN\n  PROFESSIONAL\n  SUPERVISOR\n}\n\nenum ReportStatus {\n  SENT\n  IN_REVIEW\n  PENDING\n  RESOLVED\n}\n\nmodel User {\n  id           String   @id @default(auto()) @map(\"_id\") @db.ObjectId\n  name         String\n  email        String   @unique\n  passwordHash String\n  role         Role     @default(PROFESSIONAL)\n  supervisorId String?  @db.ObjectId\n  supervisor   User?    @relation(\"Subordinates\", fields: [supervisorId], references: [id], onDelete: NoAction, onUpdate: NoAction)\n  Subordinates User[]   @relation(\"Subordinates\")\n  reports      Report[]\n  createdAt    DateTime @default(now())\n  updatedAt    DateTime @updatedAt\n}\n\nmodel Report {\n  id       String       @id @default(auto()) @map(\"_id\") @db.ObjectId\n  imageUrl String\n  comment  String\n  status   ReportStatus @default(SENT)\n  userId   String       @db.ObjectId\n  user     User         @relation(fields: [userId], references: [id])\n\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n}\n",
-  "inlineSchemaHash": "3a39e4bfbf013bc6d42cea400feb64148c90efb3d3ee6d1fc40202f4ba2d2d77",
+  "inlineSchema": "generator client {\n  provider = \"prisma-client-js\"\n  output   = \"../src/generated/prisma\"\n}\n\ndatasource db {\n  provider = \"mongodb\"\n  url      = env(\"DATABASE_URL\")\n}\n\nenum Role {\n  ADMIN\n  PROFESSIONAL\n  SUPERVISOR\n}\n\nenum ReportStatus {\n  SENT\n  IN_REVIEW\n  FORWARDED // Encaminhado ao Departamento\n  RESOLVED\n  ARCHIVED // Arquivado para histórico\n}\n\nmodel User {\n  id           String   @id @default(auto()) @map(\"_id\") @db.ObjectId\n  name         String\n  email        String   @unique\n  passwordHash String\n  avatarUrl    String?\n  statusPhrase String?\n  role         Role     @default(PROFESSIONAL)\n  supervisorId String?  @db.ObjectId\n  supervisor   User?    @relation(\"Subordinates\", fields: [supervisorId], references: [id], onDelete: NoAction, onUpdate: NoAction)\n  Subordinates User[]   @relation(\"Subordinates\")\n  reports      Report[]\n  createdAt    DateTime @default(now())\n  updatedAt    DateTime @updatedAt\n}\n\nmodel Report {\n  id         String       @id @default(auto()) @map(\"_id\") @db.ObjectId\n  imageUrl   String\n  comment    String\n  feedback   String?\n  feedbackAt DateTime?\n  status     ReportStatus @default(SENT)\n  userId     String       @db.ObjectId\n  user       User         @relation(fields: [userId], references: [id])\n\n  departmentId String?     @db.ObjectId\n  department   Department? @relation(fields: [departmentId], references: [id])\n\n  history ReportHistory[]\n\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n}\n\nmodel Department {\n  id        String   @id @default(auto()) @map(\"_id\") @db.ObjectId\n  name      String   @unique\n  reports   Report[]\n  createdAt DateTime @default(now())\n}\n\nmodel ReportHistory {\n  id        String       @id @default(auto()) @map(\"_id\") @db.ObjectId\n  reportId  String       @db.ObjectId\n  report    Report       @relation(fields: [reportId], references: [id])\n  status    ReportStatus\n  comment   String? // O feedback ou observação deste passo\n  userName  String // Nome de quem registrou o passo para histórico rápido\n  createdAt DateTime     @default(now())\n}\n",
+  "inlineSchemaHash": "f48582f75e31cc6321cdc361a82b66fb7aa33c188dfc782715d4cff98e572d9a",
   "copyEngine": true
 }
 config.dirname = '/'
 
-config.runtimeDataModel = JSON.parse("{\"models\":{\"User\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"_id\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"email\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"passwordHash\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"role\",\"kind\":\"enum\",\"type\":\"Role\"},{\"name\":\"supervisorId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"supervisor\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"Subordinates\"},{\"name\":\"Subordinates\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"Subordinates\"},{\"name\":\"reports\",\"kind\":\"object\",\"type\":\"Report\",\"relationName\":\"ReportToUser\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null},\"Report\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"_id\"},{\"name\":\"imageUrl\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"comment\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"status\",\"kind\":\"enum\",\"type\":\"ReportStatus\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"user\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"ReportToUser\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null}},\"enums\":{},\"types\":{}}")
+config.runtimeDataModel = JSON.parse("{\"models\":{\"User\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"_id\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"email\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"passwordHash\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"avatarUrl\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"statusPhrase\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"role\",\"kind\":\"enum\",\"type\":\"Role\"},{\"name\":\"supervisorId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"supervisor\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"Subordinates\"},{\"name\":\"Subordinates\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"Subordinates\"},{\"name\":\"reports\",\"kind\":\"object\",\"type\":\"Report\",\"relationName\":\"ReportToUser\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null},\"Report\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"_id\"},{\"name\":\"imageUrl\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"comment\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"feedback\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"feedbackAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"status\",\"kind\":\"enum\",\"type\":\"ReportStatus\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"user\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"ReportToUser\"},{\"name\":\"departmentId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"department\",\"kind\":\"object\",\"type\":\"Department\",\"relationName\":\"DepartmentToReport\"},{\"name\":\"history\",\"kind\":\"object\",\"type\":\"ReportHistory\",\"relationName\":\"ReportToReportHistory\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null},\"Department\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"_id\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"reports\",\"kind\":\"object\",\"type\":\"Report\",\"relationName\":\"DepartmentToReport\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null},\"ReportHistory\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"_id\"},{\"name\":\"reportId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"report\",\"kind\":\"object\",\"type\":\"Report\",\"relationName\":\"ReportToReportHistory\"},{\"name\":\"status\",\"kind\":\"enum\",\"type\":\"ReportStatus\"},{\"name\":\"comment\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"userName\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null}},\"enums\":{},\"types\":{}}")
 defineDmmfProperty(exports.Prisma, config.runtimeDataModel)
 config.engineWasm = {
   getRuntime: async () => require('./query_engine_bg.js'),

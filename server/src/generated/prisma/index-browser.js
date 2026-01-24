@@ -119,6 +119,8 @@ exports.Prisma.UserScalarFieldEnum = {
   name: 'name',
   email: 'email',
   passwordHash: 'passwordHash',
+  avatarUrl: 'avatarUrl',
+  statusPhrase: 'statusPhrase',
   role: 'role',
   supervisorId: 'supervisorId',
   createdAt: 'createdAt',
@@ -129,10 +131,28 @@ exports.Prisma.ReportScalarFieldEnum = {
   id: 'id',
   imageUrl: 'imageUrl',
   comment: 'comment',
+  feedback: 'feedback',
+  feedbackAt: 'feedbackAt',
   status: 'status',
   userId: 'userId',
+  departmentId: 'departmentId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
+};
+
+exports.Prisma.DepartmentScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.ReportHistoryScalarFieldEnum = {
+  id: 'id',
+  reportId: 'reportId',
+  status: 'status',
+  comment: 'comment',
+  userName: 'userName',
+  createdAt: 'createdAt'
 };
 
 exports.Prisma.SortOrder = {
@@ -153,13 +173,16 @@ exports.Role = exports.$Enums.Role = {
 exports.ReportStatus = exports.$Enums.ReportStatus = {
   SENT: 'SENT',
   IN_REVIEW: 'IN_REVIEW',
-  PENDING: 'PENDING',
-  RESOLVED: 'RESOLVED'
+  FORWARDED: 'FORWARDED',
+  RESOLVED: 'RESOLVED',
+  ARCHIVED: 'ARCHIVED'
 };
 
 exports.Prisma.ModelName = {
   User: 'User',
-  Report: 'Report'
+  Report: 'Report',
+  Department: 'Department',
+  ReportHistory: 'ReportHistory'
 };
 
 /**

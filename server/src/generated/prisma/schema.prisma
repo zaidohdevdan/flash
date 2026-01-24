@@ -17,8 +17,9 @@ enum Role {
 enum ReportStatus {
   SENT
   IN_REVIEW
-  PENDING
+  FORWARDED // Encaminhado ao Departamento
   RESOLVED
+  ARCHIVED // Arquivado para histórico
 }
 
 model User {
@@ -26,6 +27,8 @@ model User {
   name         String
   email        String   @unique
   passwordHash String
+  avatarUrl    String?
+  statusPhrase String?
   role         Role     @default(PROFESSIONAL)
   supervisorId String?  @db.ObjectId
   supervisor   User?    @relation("Subordinates", fields: [supervisorId], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -36,13 +39,37 @@ model User {
 }
 
 model Report {
-  id       String       @id @default(auto()) @map("_id") @db.ObjectId
-  imageUrl String
-  comment  String
-  status   ReportStatus @default(SENT)
-  userId   String       @db.ObjectId
-  user     User         @relation(fields: [userId], references: [id])
+  id         String       @id @default(auto()) @map("_id") @db.ObjectId
+  imageUrl   String
+  comment    String
+  feedback   String?
+  feedbackAt DateTime?
+  status     ReportStatus @default(SENT)
+  userId     String       @db.ObjectId
+  user       User         @relation(fields: [userId], references: [id])
+
+  departmentId String?     @db.ObjectId
+  department   Department? @relation(fields: [departmentId], references: [id])
+
+  history ReportHistory[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Department {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String   @unique
+  reports   Report[]
+  createdAt DateTime @default(now())
+}
+
+model ReportHistory {
+  id        String       @id @default(auto()) @map("_id") @db.ObjectId
+  reportId  String       @db.ObjectId
+  report    Report       @relation(fields: [reportId], references: [id])
+  status    ReportStatus
+  comment   String? // O feedback ou observação deste passo
+  userName  String // Nome de quem registrou o passo para histórico rápido
+  createdAt DateTime     @default(now())
 }

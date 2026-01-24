@@ -1,5 +1,28 @@
 @baseUrl = http://localhost:3000
 
+### Register ADMIN (Exige Token Admin de um usuário logado)
+# Nota: Agora que o primeiro Admin existe, esta rota está PROTEGIDA
+POST {{baseUrl}}/register
+Authorization: Bearer {{loginAdmin.response.body.token}}
+Content-Type: application/json
+
+{
+  "name": "Admin Master",
+  "email": "admin@flash.com",
+  "password": "123456",
+  "role": "ADMIN"
+}
+
+### Login Admin
+# @name loginAdmin
+POST {{baseUrl}}/login
+Content-Type: application/json
+
+{
+  "email": "admin@flash.com",
+  "password": "123456"
+}
+
 ### Login Supervisor
 # @name loginSupervisor
 POST {{baseUrl}}/login

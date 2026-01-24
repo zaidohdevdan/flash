@@ -46,16 +46,39 @@ async function main() {
         await prisma.$connect();
         console.log('Connected to the database successfully.');
 
+        const onlineUsers = new Set<string>();
+
         io.on('connection', (socket) => {
             const { userId, role } = socket.handshake.query;
 
-            console.log(`User connected: ${userId} with role: ${role}`);
+            console.log(`[Socket] New connection: ${userId} (${role}) - SocketID: ${socket.id}`);
 
             if (userId) {
-                socket.join(userId.toString());
+                const roomName = userId.toString();
+                socket.join(roomName);
+                onlineUsers.add(roomName);
+
+                // Avisar a todos que alguém entrou (Presença)
+                io.emit('user_presence_changed', { userId: roomName, status: 'online' });
+                console.log(`[Socket] User ${userId} joined room: ${roomName}`);
+            } else {
+                console.warn(`[Socket] Connection without userId - SocketID: ${socket.id}`);
             }
-            socket.on('disconnect', () => {
-                console.log(`User disconnected: ${userId}`);
+
+            // Enviar lista inicial de quem está online para o novo conectado
+            socket.emit('initial_presence_list', Array.from(onlineUsers));
+
+            socket.on('disconnect', (reason) => {
+                if (userId) {
+                    const roomName = userId.toString();
+                    onlineUsers.delete(roomName);
+                    io.emit('user_presence_changed', { userId: roomName, status: 'offline' });
+                    console.log(`[Socket] User disconnected: ${userId} (${reason}) - Notify Offline`);
+                }
+            });
+
+            socket.on('error', (error) => {
+                console.error(`[Socket] Error for user ${userId}:`, error);
             });
         });
 

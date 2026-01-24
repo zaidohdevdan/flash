@@ -9,24 +9,145 @@ export class PrismaReportRepository implements IReportRepository {
             data: {
                 comment,
                 imageUrl: imageUrl || '',
-                userId
+                userId,
+                status: 'SENT',
+                history: {
+                    create: {
+                        status: 'SENT',
+                        comment: 'Relatório enviado pelo profissional.',
+                        userName: 'Operador'
+                    }
+                }
             },
             include: {
                 user: {
                     select: {
                         name: true,
                         supervisorId: true,
+                        avatarUrl: true,
+                        statusPhrase: true,
                     },
                 },
+                history: true
             },
         });
     }
 
-    async updateStatus(id: string, status: ReportStatus): Promise<Report & { user: User }> {
+    async findById(id: string): Promise<Report | null> {
+        return prisma.report.findUnique({
+            where: { id },
+            include: {
+                history: {
+                    orderBy: { createdAt: 'desc' }
+                }
+            }
+        });
+    }
+
+    async updateStatus(id: string, status: ReportStatus, feedback?: string, userName?: string, departmentId?: string): Promise<Report> {
         return prisma.report.update({
             where: { id },
-            data: { status },
-            include: { user: true },
+            data: {
+                status,
+                feedback,
+                feedbackAt: feedback ? new Date() : undefined,
+                departmentId,
+                history: {
+                    create: {
+                        status,
+                        comment: feedback,
+                        userName: userName || 'Sistema'
+                    }
+                }
+            },
+            include: { user: true, history: true, department: true },
+        });
+    }
+
+    async findStatsBySupervisor(supervisorId: string): Promise<{ status: string, _count: number }[]> {
+        const stats = await prisma.report.groupBy({
+            by: ['status'],
+            where: {
+                user: {
+                    supervisorId: supervisorId
+                }
+            },
+            _count: true
+        });
+
+        return stats.map(item => ({
+            status: item.status,
+            _count: item._count
+        }));
+    }
+
+    async findAll(supervisorId: string, page: number = 1, limit: number = 10, status?: ReportStatus, startDate?: Date, endDate?: Date): Promise<ReportWithUser[]> {
+        const skip = (page - 1) * limit;
+
+        return prisma.report.findMany({
+            where: {
+                user: {
+                    supervisorId: supervisorId
+                },
+                status: status,
+                createdAt: {
+                    gte: startDate,
+                    lte: endDate
+                }
+            },
+            include: {
+                user: {
+                    select: {
+                        name: true,
+                        supervisorId: true,
+                        avatarUrl: true,
+                        statusPhrase: true,
+                    }
+                },
+                history: {
+                    orderBy: { createdAt: 'desc' }
+                },
+                department: true
+            },
+            orderBy: {
+                createdAt: 'desc'
+            },
+            skip,
+            take: limit
+        });
+    }
+
+    async findByUserId(userId: string, page: number = 1, limit: number = 10, status?: ReportStatus, startDate?: Date, endDate?: Date): Promise<ReportWithUser[]> {
+        const skip = (page - 1) * limit;
+
+        return prisma.report.findMany({
+            where: {
+                userId,
+                status: status,
+                createdAt: {
+                    gte: startDate,
+                    lte: endDate
+                }
+            },
+            include: {
+                user: {
+                    select: {
+                        name: true,
+                        supervisorId: true,
+                        avatarUrl: true,
+                        statusPhrase: true,
+                    }
+                },
+                history: {
+                    orderBy: { createdAt: 'desc' }
+                },
+                department: true
+            },
+            orderBy: {
+                createdAt: 'desc'
+            },
+            skip,
+            take: limit
         });
     }
 }

@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { LogIn } from 'lucide-react';
 
 export function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const { signIn } = useAuth();
-    const navigate = useNavigate();
     const [error, setError] = useState('');
 
     async function handleSubmit(e: React.FormEvent) {
@@ -64,11 +63,17 @@ export function Login() {
                     </div>
                     <button
                         type="submit"
-                        className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-200 font-medium"
+                        className="w-full bg-blue-600 text-white py-4 rounded-2xl hover:bg-blue-700 transition-all font-black uppercase tracking-widest shadow-xl shadow-blue-100 active:scale-95"
                     >
                         Entrar
                     </button>
                 </form>
+
+                <div className="mt-8 text-center border-t pt-6">
+                    <p className="text-sm text-gray-500 font-medium">
+                        Novo por aqui? <Link to="/register" className="text-blue-600 font-bold hover:underline">Crie seu cadastro</Link>
+                    </p>
+                </div>
             </div>
         </div>
     );

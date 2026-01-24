@@ -7,12 +7,15 @@ interface User {
     email: string;
     role: 'SUPERVISOR' | 'PROFESSIONAL' | 'ADMIN';
     supervisorId: string | null;
+    avatarUrl?: string;
+    statusPhrase?: string;
 }
 
 interface AuthContextData {
     user: User | null;
     signIn: (email: string, password: string) => Promise<void>;
     signOut: () => void;
+    updateUser: (user: User) => void;
     isAuthenticated: boolean;
     loading: boolean;
 }
@@ -56,8 +59,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(null);
     }
 
+    function updateUser(userData: User) {
+        localStorage.setItem('@flash:user', JSON.stringify(userData));
+        setUser(userData);
+    }
+
     return (
-        <AuthContext.Provider value={{ user, signIn, signOut, isAuthenticated: !!user, loading }}>
+        <AuthContext.Provider value={{ user, signIn, signOut, updateUser, isAuthenticated: !!user, loading }}>
             {children}
         </AuthContext.Provider>
     );

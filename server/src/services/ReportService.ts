@@ -13,7 +13,19 @@ export class ReportService {
         return this.reportRepository.create(data);
     }
 
-    async updateStatus(id: string, status: ReportStatus) {
-        return this.reportRepository.updateStatus(id, status);
+    async updateStatus(id: string, status: ReportStatus, feedback?: string, operatorName?: string, departmentId?: string) {
+        return this.reportRepository.updateStatus(id, status, feedback, operatorName, departmentId);
+    }
+
+    async getDashboardStats(supervisorId: string) {
+        return this.reportRepository.findStatsBySupervisor(supervisorId);
+    }
+
+    async listReports(supervisorId: string, page?: number, limit?: number, status?: ReportStatus, startDate?: Date, endDate?: Date) {
+        return this.reportRepository.findAll(supervisorId, page, limit, status, startDate, endDate);
+    }
+
+    async listUserReports(userId: string, page?: number, limit?: number, status?: ReportStatus, startDate?: Date, endDate?: Date) {
+        return this.reportRepository.findByUserId(userId, page, limit, status, startDate, endDate);
     }
 }
