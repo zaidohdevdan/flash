@@ -14,7 +14,6 @@ import {
     CheckCircle2,
     Database,
     Globe,
-    Cpu,
     Github,
     Instagram,
     Linkedin

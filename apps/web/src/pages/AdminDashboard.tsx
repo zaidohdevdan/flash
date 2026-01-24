@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import axios from 'axios';
+import { api } from '../services/api';
 import { UserPlus, Shield, Users, LogOut, CheckCircle, Search, Filter, Edit2, X } from 'lucide-react';
 
 interface Supervisor {
@@ -46,7 +46,7 @@ export function AdminDashboard() {
 
     async function fetchUsers() {
         try {
-            const response = await axios.get('http://localhost:3000/users', {
+            const response = await api.get('/users', {
                 params: { search: searchQuery, role: roleFilter }
             });
             setUsers(response.data);
@@ -57,7 +57,7 @@ export function AdminDashboard() {
 
     async function fetchSupervisors() {
         try {
-            const response = await axios.get('http://localhost:3000/supervisors');
+            const response = await api.get('/supervisors');
             setSupervisors(response.data);
         } catch (err) {
             console.error('Erro ao buscar supervisores');
@@ -76,7 +76,7 @@ export function AdminDashboard() {
         }
 
         try {
-            await axios.post('http://localhost:3000/register', {
+            await api.post('/register', {
                 name, email, password, role,
                 supervisorId: role === 'PROFESSIONAL' ? supervisorId : undefined
             });
@@ -103,7 +103,7 @@ export function AdminDashboard() {
         setLoading(true);
 
         try {
-            await axios.put(`http://localhost:3000/users/${editingUser.id}`, {
+            await api.put(`/users/${editingUser.id}`, {
                 name, email, role,
                 password: password || undefined,
                 supervisorId: role === 'PROFESSIONAL' ? supervisorId : null

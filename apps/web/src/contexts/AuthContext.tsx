@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
+import { api } from '../services/api';
 
 interface User {
     id: string;
@@ -32,14 +32,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         if (storedUser && storedToken) {
             setUser(JSON.parse(storedUser));
-            axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
         }
         setLoading(false);
     }, []);
 
     async function signIn(email: string, password: string) {
-        // URL do Backend (Assumindo localhost:3000 por enquanto)
-        const response = await axios.post('http://localhost:3000/login', {
+        // Reduzido para usar instãncia centralizada
+        const response = await api.post('/login', {
             email,
             password,
         });
@@ -49,7 +48,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.setItem('@flash:user', JSON.stringify(user));
         localStorage.setItem('@flash:token', token);
 
-        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         setUser(user);
     }
 

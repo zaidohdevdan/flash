@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import axios from 'axios';
+import { api } from '../services/api';
 import { io } from 'socket.io-client';
 import { LogOut, CheckCircle, Clock, AlertCircle, MessageSquare, Users, User, Circle, Send, Archive, History, X, Folder, Plus } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+
+const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 interface ReportHistory {
     id: string;
@@ -82,7 +84,7 @@ export function Dashboard() {
         loadSubordinates();
         loadDepartments();
 
-        const socket = io('http://localhost:3000', {
+        const socket = io(SOCKET_URL, {
             query: { userId: user?.id, role: user?.role }
         });
 
@@ -118,12 +120,12 @@ export function Dashboard() {
 
     async function loadReports(pageNum: number, reset: boolean = false, status?: string) {
         try {
-            let url = `http://localhost:3000/reports?page=${pageNum}&limit=${LIMIT}`;
+            let url = `/reports?page=${pageNum}&limit=${LIMIT}`;
             if (status) url += `&status=${status}`;
             if (startDate) url += `&startDate=${new Date(startDate).toISOString()}`;
             if (endDate) url += `&endDate=${new Date(endDate).toISOString()}`;
 
-            const response = await axios.get(url);
+            const response = await api.get(url);
             setHasMore(response.data.length === LIMIT);
             setReports(prev => reset ? response.data : [...prev, ...response.data]);
         } catch (error) { console.error('Erro ao buscar relatórios'); }
@@ -131,21 +133,21 @@ export function Dashboard() {
 
     async function loadStats() {
         try {
-            const response = await axios.get('http://localhost:3000/reports/stats');
+            const response = await api.get('/reports/stats');
             setStats(response.data);
         } catch (error) { console.error('Erro ao buscar estatísticas'); }
     }
 
     async function loadSubordinates() {
         try {
-            const response = await axios.get('http://localhost:3000/subordinates');
+            const response = await api.get('/subordinates');
             setSubordinates(response.data);
         } catch (error) { console.error('Erro ao buscar subordinados'); }
     }
 
     async function loadDepartments() {
         try {
-            const response = await axios.get('http://localhost:3000/departments');
+            const response = await api.get('/departments');
             setDepartments(response.data);
         } catch (error) { console.error('Erro ao buscar departamentos'); }
     }
@@ -159,12 +161,12 @@ export function Dashboard() {
         try {
             // Se houver nome para novo departamento, cria primeiro
             if (status === 'FORWARDED' && newDeptName.trim()) {
-                const deptRes = await axios.post('http://localhost:3000/departments', { name: newDeptName });
+                const deptRes = await api.post('/departments', { name: newDeptName });
                 deptId = deptRes.data.id;
                 loadDepartments();
             }
 
-            const response = await axios.patch(`http://localhost:3000/reports/${analyzingReport.id}/status`, {
+            const response = await api.patch(`/reports/${analyzingReport.id}/status`, {
                 status,
                 feedback: formFeedback,
                 departmentId: status === 'FORWARDED' ? deptId : undefined
@@ -198,7 +200,7 @@ export function Dashboard() {
         if (feedback === null) return;
 
         try {
-            const response = await axios.patch(`http://localhost:3000/reports/${id}/status`, { status, feedback });
+            const response = await api.patch(`/reports/${id}/status`, { status, feedback });
             const updatedReport = response.data;
             setReports(prev => {
                 if (statusFilter && statusFilter !== status) return prev.filter(r => r.id !== id);
@@ -217,7 +219,7 @@ export function Dashboard() {
         }
 
         try {
-            const response = await axios.patch('http://localhost:3000/profile', formData, {
+            const response = await api.patch('/profile', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
             updateUser(response.data);
@@ -305,7 +307,7 @@ export function Dashboard() {
                         >
                             <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-white shadow-sm bg-blue-100 flex items-center justify-center">
                                 {user?.avatarUrl ? (
-                                    <img src={`http://localhost:3000/uploads/${user.avatarUrl}`} alt="" className="w-full h-full object-cover" />
+                                    <img src={`${SOCKET_URL}/uploads/${user.avatarUrl}`} alt="" className="w-full h-full object-cover" />
                                 ) : (
                                     <User className="w-4 h-4 text-blue-600" />
                                 )}
@@ -386,7 +388,7 @@ export function Dashboard() {
                                 {reports.map(report => (
                                     <div key={report.id} className="bg-white rounded-lg shadow-sm border overflow-hidden flex flex-col">
                                         <img
-                                            src={`http://localhost:3000/uploads/${report.imageUrl}`}
+                                            src={`${SOCKET_URL}/uploads/${report.imageUrl}`}
                                             alt="Relatado"
                                             className="w-full h-48 object-cover bg-gray-100"
                                         />
@@ -411,7 +413,7 @@ export function Dashboard() {
                                             <div className="flex flex-col gap-1 text-gray-500 mb-4">
                                                 <div className="flex items-center gap-2 text-sm">
                                                     {report.user.avatarUrl ? (
-                                                        <img src={`http://localhost:3000/uploads/${report.user.avatarUrl}`} alt="" className="w-5 h-5 rounded-full object-cover" />
+                                                        <img src={`${SOCKET_URL}/uploads/${report.user.avatarUrl}`} alt="" className="w-5 h-5 rounded-full object-cover" />
                                                     ) : (
                                                         <User className="w-4 h-4 text-gray-400" />
                                                     )}
@@ -683,7 +685,7 @@ export function Dashboard() {
                                 <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-xl bg-gray-100 mx-auto group">
                                     {(profileAvatar || user?.avatarUrl) ? (
                                         <img
-                                            src={profileAvatar ? URL.createObjectURL(profileAvatar) : `http://localhost:3000/uploads/${user?.avatarUrl}`}
+                                            src={profileAvatar ? URL.createObjectURL(profileAvatar) : `${SOCKET_URL}/uploads/${user?.avatarUrl}`}
                                             alt=""
                                             className="w-full h-full object-cover"
                                         />

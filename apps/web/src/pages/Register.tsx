@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+import { api } from '../services/api';
 import { UserPlus, ChevronDown, CheckCircle } from 'lucide-react';
 
 interface Supervisor {
@@ -28,7 +28,7 @@ export function Register() {
 
     async function fetchSupervisors() {
         try {
-            const response = await axios.get('http://localhost:3000/supervisors');
+            const response = await api.get('/supervisors');
             setSupervisors(response.data);
         } catch (err) {
             console.error('Erro ao buscar supervisores');
@@ -47,7 +47,7 @@ export function Register() {
         }
 
         try {
-            await axios.post('http://localhost:3000/register', {
+            await api.post('/register', {
                 name,
                 email,
                 password,

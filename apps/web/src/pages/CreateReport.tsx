@@ -1,8 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import axios from 'axios';
+import { api } from '../services/api';
 import { io } from 'socket.io-client';
 import { Camera, Send, LogOut, CheckCircle2, Clock, CheckCircle, AlertCircle, MessageSquare, Wifi, WifiOff, Plus, ArrowLeft, Archive } from 'lucide-react';
+
+const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 interface Report {
     id: string;
@@ -42,7 +44,7 @@ export function CreateReport() {
         };
         document.addEventListener('visibilitychange', handleVisibilityChange);
 
-        const socket = io('http://localhost:3000', {
+        const socket = io(SOCKET_URL, {
             query: { userId: user?.id, role: user?.role },
             transports: ['websocket', 'polling']
         });
@@ -72,8 +74,8 @@ export function CreateReport() {
 
     async function loadHistory(pageNum: number = 1, reset: boolean = false, status?: string) {
         try {
-            const url = `http://localhost:3000/reports/me?page=${pageNum}&limit=${LIMIT}${status ? `&status=${status}` : ''}`;
-            const response = await axios.get(url);
+            const url = `/reports/me?page=${pageNum}&limit=${LIMIT}${status ? `&status=${status}` : ''}`;
+            const response = await api.get(url);
             const newHistory = response.data;
 
             setHasMore(newHistory.length === LIMIT);
@@ -107,7 +109,7 @@ export function CreateReport() {
         formData.append('comment', comment);
 
         try {
-            await axios.post('http://localhost:3000/reports', formData);
+            await api.post('/reports', formData);
             setSuccess(true);
             setComment('');
             setImage(null);
@@ -214,7 +216,7 @@ export function CreateReport() {
                                     <div key={item.id} className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex gap-4 items-start active:scale-[0.98] transition">
                                         <div className="relative">
                                             <img
-                                                src={`http://localhost:3000/uploads/${item.imageUrl}`}
+                                                src={`${SOCKET_URL}/uploads/${item.imageUrl}`}
                                                 className="w-20 h-20 rounded-xl object-cover bg-gray-100 shadow-inner"
                                             />
                                             <div className="absolute -top-2 -right-2 bg-white rounded-full p-1 shadow-sm border border-gray-50">
