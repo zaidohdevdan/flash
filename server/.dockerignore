@@ -1,0 +1,11 @@
+node_modules
+.env
+dist
+.vscode
+.git
+.gitignore
+Dockerfile
+README.md
+api.http
+test_auth.ts
+uploads
