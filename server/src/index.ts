@@ -33,16 +33,13 @@ app.use(routes);
 
 // Função principal para iniciar o servidor e conectar ao banco de dados
 async function main() {
+    if (!process.env.DATABASE_URL) {
+        console.error('CRITICAL ERROR: DATABASE_URL is not defined in environment variables.');
+        process.exit(1);
+    }
 
     try {
-        const prisma = new PrismaClient({
-            datasources: {
-                db: {
-                    url: process.env.DATABASE_URL
-
-                }
-            },
-        });
+        const prisma = new PrismaClient();
         await prisma.$connect();
         console.log('Connected to the database successfully.');
 
