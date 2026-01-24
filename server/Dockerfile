@@ -1,20 +1,24 @@
-# Dockerfile para Bun no Koyeb
+# Dockerfile de Produção para FLASH (Bun + Prisma)
 FROM oven/bun:latest
+
+# Instalando dependências do sistema necessárias para o Prisma (OpenSSL)
+RUN apt-get update && apt-get install -y openssl libc6
 
 WORKDIR /app
 
-# Copiar arquivos de dependências
+# Copiar apenas o necessário para instalar dependências (Aproveita o Cache)
 COPY package.json ./
 RUN bun install
 
-# Copiar o restante do código
+# Copiar o restante do código (incluindo a pasta prisma)
 COPY . .
 
-# Gerar o cliente do Prisma
+# Gerar o cliente do Prisma (essencial para o MongoDB)
 RUN bun run db:generate
 
-# Expor a porta que o Koyeb vai usar
+# Definir a porta de produção
+ENV PORT=3000
 EXPOSE 3000
 
-# Comando para rodar em produção
-CMD ["bun", "src/index.ts"]
+# Usar o script de start definido no package.json
+CMD ["bun", "run", "start"]
