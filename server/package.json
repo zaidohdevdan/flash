@@ -16,7 +16,11 @@
     "dev": "bun --watch src/index.ts",
     "start": "bun src/index.ts",
     "db:generate": "prisma generate",
+    "db:seed": "prisma db seed",
     "build": "bun run db:generate"
+  },
+  "prisma": {
+    "seed": "bun run prisma/seed.ts"
   },
   "peerDependencies": {
     "typescript": "^5.9.3"
