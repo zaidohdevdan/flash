@@ -1,4 +1,4 @@
-# Dockerfile de Produção - FLASH Server
+# Dockerfile de Produção - FLASH (Contexto: raiz do repositório)
 FROM oven/bun:latest
 
 # Dependências do sistema para SSL e Prisma
@@ -11,20 +11,20 @@ COPY apps/web/package.json /app/frontend/package.json
 WORKDIR /app/frontend
 RUN bun install
 COPY apps/web/ ./
-# Cache bust: 2026-01-25-15h
 RUN bun run build
 
 # Configuração do Backend
-WORKDIR /app
+WORKDIR /app/server
 COPY server/package.json ./
 RUN bun install --production
 COPY server/ ./
 
-# Copiar build do frontend para o servidor
-RUN mkdir -p /app/dist
-RUN cp -r /app/frontend/dist/* /app/dist/
+# Copiar build do frontend para dentro da pasta server/dist
+RUN mkdir -p /app/server/dist
+RUN cp -r /app/frontend/dist/* /app/server/dist/
 
 # Geração do cliente Prisma com bypass de URL
+WORKDIR /app/server
 RUN DATABASE_URL="mongodb://localhost:27017/unused" bun run db:generate
 
 # Configuração de rede
