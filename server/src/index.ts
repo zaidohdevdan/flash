@@ -5,6 +5,7 @@ import { createServer } from 'http';
 import { PrismaClient } from './generated/prisma'
 import { routes } from './routes';
 import path from 'path';
+import fs from 'fs';
 
 const app = express();
 const httpServer = createServer(app);
@@ -31,15 +32,17 @@ app.use('/uploads', express.static(path.resolve(__dirname, '..', 'uploads')));
 // Rotas da aplicação
 app.use(routes);
 
-// ... imports existentes
 
-// ✅ ADICIONE ISSO após app.use(routes):
-app.use(express.static(path.resolve(__dirname, '..', 'dist')));  // Serve React build
+// ✅ SERVIR REACT BUILD (sem comentários de instrução)
+const distPath = path.resolve(__dirname, '..', 'dist');
+if (fs.existsSync(distPath)) {
+    app.use(express.static(distPath));
 
-// ✅ FALLBACK React Router (resolve F5 /dashboard)
-app.get('*', (req, res) => {
-    res.sendFile(path.resolve(__dirname, '..', 'dist', 'index.html'));
-});
+    // Fallback SPA: qualquer rota desconhecida → index.html
+    app.get('*', (req, res) => {
+        res.sendFile(path.join(distPath, 'index.html'));
+    });
+}
 
 
 // Função principal para iniciar o servidor e conectar ao banco de dados
