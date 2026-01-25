@@ -72,8 +72,7 @@ export function Dashboard() {
     const [newDeptName, setNewDeptName] = useState('');
 
     const [page, setPage] = useState(1);
-    const [statusFilter, setStatusFilter] = useState<string>('');
-    const [startDate, setStartDate] = useState<string>('');
+  const [statusFilter, setStatusFilter] = useState<string>('SENT');    const [startDate, setStartDate] = useState<string>('');
     const [endDate, setEndDate] = useState<string>('');
     const [hasMore, setHasMore] = useState(true);
     const LIMIT = 6;
