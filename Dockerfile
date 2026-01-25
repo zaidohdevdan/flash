@@ -11,6 +11,7 @@ COPY apps/web/package.json /app/frontend/package.json
 WORKDIR /app/frontend
 RUN bun install
 COPY apps/web/ ./
+# Cache bust: 2026-01-25-15h
 RUN bun run build
 
 # Configuração do Backend
