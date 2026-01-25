@@ -1,3 +1,4 @@
+import fs from 'fs';
 import express from 'express';
 import cors from 'cors';
 import { Server } from 'socket.io';
@@ -5,7 +6,6 @@ import { createServer } from 'http';
 import { PrismaClient } from './generated/prisma'
 import { routes } from './routes';
 import path from 'path';
-import fs from 'fs';
 
 const app = express();
 const httpServer = createServer(app);
