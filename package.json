@@ -11,6 +11,12 @@
     "server",
     "packages/*"
   ],
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ],
   "peerDependencies": {
     "typescript": "^5"
   }
