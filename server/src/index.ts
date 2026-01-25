@@ -11,49 +11,33 @@ const app = express();
 const httpServer = createServer(app);
 
 const io = new Server(httpServer, {
-    cors: {
-        origin: '*',
-        methods: ['GET', 'POST']
-    }
+    cors: { origin: '*', methods: ['GET', 'POST'] }
 });
 
 console.log(process.env.DATABASE_URL);
 app.use(cors());
 app.use(express.json());
 
-// Middleware para disponibilizar o IO nas rotas Express
 app.use((req, res, next) => {
     req.io = io;
     return next();
 });
 
-// Servir arquivos estáticos (imagens)
 app.use('/uploads', express.static(path.resolve(__dirname, '..', 'uploads')));
 
-// ✅ 1️⃣ SERVIR REACT BUILD ANTES DAS ROTAS
 const distPath = path.resolve(__dirname, '..', 'dist');
 if (fs.existsSync(distPath)) {
-    app.use(express.static(distPath, {
-        maxAge: '1d',
-        setHeaders: (res, filePath) => {
-            if (filePath.endsWith('.html')) {
-                res.setHeader('Cache-Control', 'no-cache');
-            }
-        }
-    }));
+    app.use(express.static(distPath));
 }
 
-// ✅ 2️⃣ ROTAS DA APLICACAO (DEPOIS do static serve)
 app.use(routes);
 
-// ✅ 3️⃣ FALLBACK SPA (DEVE SER ULTIMO - captura tudo que nao foi encontrado)
-if (fs.existsSync(path.join(distPath, 'index.html'))) {
+if (fs.existsSync(distPath)) {
     app.get('*', (req, res) => {
         res.sendFile(path.join(distPath, 'index.html'));
     });
 }
 
-// Funcao principal para iniciar o servidor e conectar ao banco de dados
 async function main() {
     if (!process.env.DATABASE_URL) {
         console.error('CRITICAL ERROR: DATABASE_URL is not defined in environment variables.');
@@ -63,28 +47,24 @@ async function main() {
     try {
         const prisma = new PrismaClient();
         await prisma.$connect();
-        console.log('✅ Connected to the database successfully.');
+        console.log('Connected to the database successfully.');
 
         const onlineUsers = new Set<string>();
 
         io.on('connection', (socket) => {
             const { userId, role } = socket.handshake.query;
-
             console.log(`[Socket] New connection: ${userId} (${role}) - SocketID: ${socket.id}`);
 
             if (userId) {
                 const roomName = userId.toString();
                 socket.join(roomName);
                 onlineUsers.add(roomName);
-
-                // Avisar a todos que alguem entrou (Presenca)
                 io.emit('user_presence_changed', { userId: roomName, status: 'online' });
                 console.log(`[Socket] User ${userId} joined room: ${roomName}`);
             } else {
                 console.warn(`[Socket] Connection without userId - SocketID: ${socket.id}`);
             }
 
-            // Enviar lista inicial de quem esta online para o novo conectado
             socket.emit('initial_presence_list', Array.from(onlineUsers));
 
             socket.on('disconnect', (reason) => {
@@ -103,9 +83,8 @@ async function main() {
 
         const PORT = process.env.PORT || 3000;
         httpServer.listen(PORT, () => {
-            console.log(`🚀 Server is running on port ${PORT}`);
+            console.log(`Server is running on port ${PORT}`);
         });
-
     } catch (error) {
         console.error('Error connecting to the database:', error);
         process.exit(1);
@@ -114,7 +93,6 @@ async function main() {
 
 main();
 
-// Extendendo o tipo do Request para incluir o IO (Opcional/Dica TS)
 declare global {
     namespace Express {
         interface Request {
