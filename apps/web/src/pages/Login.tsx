@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { Link } from 'react-router-dom';
 import { LogIn } from 'lucide-react';
 
 export function Login() {
@@ -69,11 +68,7 @@ export function Login() {
                     </button>
                 </form>
 
-                <div className="mt-8 text-center border-t pt-6">
-                    <p className="text-sm text-gray-500 font-medium">
-                        Novo por aqui? <Link to="/register" className="text-blue-600 font-bold hover:underline">Crie seu cadastro</Link>
-                    </p>
-                </div>
+
             </div>
         </div>
     );

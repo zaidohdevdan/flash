@@ -57,7 +57,7 @@ export const AuthController = {
 
     async update(req: Request, res: Response) {
         try {
-            const { id } = req.params;
+            const { id } = req.params as { id: string };
             const data = req.body;
             const result = await authService.updateUser(id, data);
             return res.json(result);
