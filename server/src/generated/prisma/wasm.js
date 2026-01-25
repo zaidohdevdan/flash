@@ -178,6 +178,14 @@ const config = {
         "fromEnvVar": null,
         "value": "debian-openssl-3.0.x",
         "native": true
+      },
+      {
+        "fromEnvVar": null,
+        "value": "debian-openssl-1.1.x"
+      },
+      {
+        "fromEnvVar": null,
+        "value": "debian-openssl-3.0.x"
       }
     ],
     "previewFeatures": [],
@@ -203,8 +211,8 @@ const config = {
       }
     }
   },
-  "inlineSchema": "generator client {\n  provider = \"prisma-client-js\"\n  output   = \"../src/generated/prisma\"\n}\n\ndatasource db {\n  provider = \"mongodb\"\n  url      = env(\"DATABASE_URL\")\n}\n\nenum Role {\n  ADMIN\n  PROFESSIONAL\n  SUPERVISOR\n}\n\nenum ReportStatus {\n  SENT\n  IN_REVIEW\n  FORWARDED // Encaminhado ao Departamento\n  RESOLVED\n  ARCHIVED // Arquivado para histórico\n}\n\nmodel User {\n  id           String   @id @default(auto()) @map(\"_id\") @db.ObjectId\n  name         String\n  email        String   @unique\n  passwordHash String\n  avatarUrl    String?\n  statusPhrase String?\n  role         Role     @default(PROFESSIONAL)\n  supervisorId String?  @db.ObjectId\n  supervisor   User?    @relation(\"Subordinates\", fields: [supervisorId], references: [id], onDelete: NoAction, onUpdate: NoAction)\n  Subordinates User[]   @relation(\"Subordinates\")\n  reports      Report[]\n  createdAt    DateTime @default(now())\n  updatedAt    DateTime @updatedAt\n}\n\nmodel Report {\n  id         String       @id @default(auto()) @map(\"_id\") @db.ObjectId\n  imageUrl   String\n  comment    String\n  feedback   String?\n  feedbackAt DateTime?\n  status     ReportStatus @default(SENT)\n  userId     String       @db.ObjectId\n  user       User         @relation(fields: [userId], references: [id])\n\n  departmentId String?     @db.ObjectId\n  department   Department? @relation(fields: [departmentId], references: [id])\n\n  history ReportHistory[]\n\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n}\n\nmodel Department {\n  id        String   @id @default(auto()) @map(\"_id\") @db.ObjectId\n  name      String   @unique\n  reports   Report[]\n  createdAt DateTime @default(now())\n}\n\nmodel ReportHistory {\n  id        String       @id @default(auto()) @map(\"_id\") @db.ObjectId\n  reportId  String       @db.ObjectId\n  report    Report       @relation(fields: [reportId], references: [id])\n  status    ReportStatus\n  comment   String? // O feedback ou observação deste passo\n  userName  String // Nome de quem registrou o passo para histórico rápido\n  createdAt DateTime     @default(now())\n}\n",
-  "inlineSchemaHash": "f48582f75e31cc6321cdc361a82b66fb7aa33c188dfc782715d4cff98e572d9a",
+  "inlineSchema": "generator client {\n  provider      = \"prisma-client-js\"\n  output        = \"../src/generated/prisma\"\n  binaryTargets = [\"native\", \"debian-openssl-1.1.x\", \"debian-openssl-3.0.x\"]\n}\n\ndatasource db {\n  provider = \"mongodb\"\n  url      = env(\"DATABASE_URL\")\n}\n\nenum Role {\n  ADMIN\n  PROFESSIONAL\n  SUPERVISOR\n}\n\nenum ReportStatus {\n  SENT\n  IN_REVIEW\n  FORWARDED // Encaminhado ao Departamento\n  RESOLVED\n  ARCHIVED // Arquivado para histórico\n}\n\nmodel User {\n  id           String   @id @default(auto()) @map(\"_id\") @db.ObjectId\n  name         String\n  email        String   @unique\n  passwordHash String\n  avatarUrl    String?\n  statusPhrase String?\n  role         Role     @default(PROFESSIONAL)\n  supervisorId String?  @db.ObjectId\n  supervisor   User?    @relation(\"Subordinates\", fields: [supervisorId], references: [id], onDelete: NoAction, onUpdate: NoAction)\n  Subordinates User[]   @relation(\"Subordinates\")\n  reports      Report[]\n  createdAt    DateTime @default(now())\n  updatedAt    DateTime @updatedAt\n}\n\nmodel Report {\n  id         String       @id @default(auto()) @map(\"_id\") @db.ObjectId\n  imageUrl   String\n  comment    String\n  feedback   String?\n  feedbackAt DateTime?\n  status     ReportStatus @default(SENT)\n  userId     String       @db.ObjectId\n  user       User         @relation(fields: [userId], references: [id])\n\n  departmentId String?     @db.ObjectId\n  department   Department? @relation(fields: [departmentId], references: [id])\n\n  history ReportHistory[]\n\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n}\n\nmodel Department {\n  id        String   @id @default(auto()) @map(\"_id\") @db.ObjectId\n  name      String   @unique\n  reports   Report[]\n  createdAt DateTime @default(now())\n}\n\nmodel ReportHistory {\n  id        String       @id @default(auto()) @map(\"_id\") @db.ObjectId\n  reportId  String       @db.ObjectId\n  report    Report       @relation(fields: [reportId], references: [id])\n  status    ReportStatus\n  comment   String? // O feedback ou observação deste passo\n  userName  String // Nome de quem registrou o passo para histórico rápido\n  createdAt DateTime     @default(now())\n}\n",
+  "inlineSchemaHash": "ccfb6b453211e843c8af3138250afe860a380109d56c3d56bab6ec2629304098",
   "copyEngine": true
 }
 config.dirname = '/'
