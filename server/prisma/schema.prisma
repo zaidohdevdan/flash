@@ -35,6 +35,7 @@ model User {
   supervisor    User?     @relation("Subordinates", fields: [supervisorId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   Subordinates  User[]    @relation("Subordinates")
   reports       Report[]
+  media         Media[]   // <- NEW: Relação com Media
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
@@ -53,6 +54,7 @@ model Report {
   department   Department? @relation(fields: [departmentId], references: [id])
 
   history     ReportHistory[]
+  media       Media[]  // <- NEW: Relação com Media
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -73,4 +75,29 @@ model ReportHistory {
   comment     String?  // O feedback ou observação deste passo
   userName    String   // Nome de quem registrou o passo para histórico rápido
   createdAt   DateTime @default(now())
+}
+
+model Media {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  publicId      String   @unique  // @unique já cria um índice automaticamente
+  url           String
+  secureUrl     String
+  format        String
+  width         Int?
+  height        Int?
+  bytes         Int
+  resourceType  String   // 'image', 'video', 'raw', 'auto'
+  folder        String   @default("flash")
+  uploadedAt    DateTime @default(now())
+  
+  // Relations
+  userId        String?  @db.ObjectId
+  user          User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  reportId      String?  @db.ObjectId
+  report        Report?  @relation(fields: [reportId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([reportId])
+  @@map("media")
 }

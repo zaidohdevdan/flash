@@ -155,6 +155,22 @@ exports.Prisma.ReportHistoryScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.MediaScalarFieldEnum = {
+  id: 'id',
+  publicId: 'publicId',
+  url: 'url',
+  secureUrl: 'secureUrl',
+  format: 'format',
+  width: 'width',
+  height: 'height',
+  bytes: 'bytes',
+  resourceType: 'resourceType',
+  folder: 'folder',
+  uploadedAt: 'uploadedAt',
+  userId: 'userId',
+  reportId: 'reportId'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -182,7 +198,8 @@ exports.Prisma.ModelName = {
   User: 'User',
   Report: 'Report',
   Department: 'Department',
-  ReportHistory: 'ReportHistory'
+  ReportHistory: 'ReportHistory',
+  Media: 'Media'
 };
 
 /**
