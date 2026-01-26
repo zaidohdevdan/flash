@@ -216,7 +216,7 @@ export function CreateReport() {
                                     <div key={item.id} className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex gap-4 items-start active:scale-[0.98] transition">
                                         <div className="relative">
                                             <img
-                                                src={`${SOCKET_URL}/uploads/${item.imageUrl}`}
+                                                src={item.imageUrl}
                                                 className="w-20 h-20 rounded-xl object-cover bg-gray-100 shadow-inner"
                                             />
                                             <div className="absolute -top-2 -right-2 bg-white rounded-full p-1 shadow-sm border border-gray-50">

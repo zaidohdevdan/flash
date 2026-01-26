@@ -1,6 +1,6 @@
 import { PrismaClient, type Media as PrismaMedia } from "../../generated/prisma";
 import type { IMediaRepository } from "../interfaces/IMediaRepository";
-import type { IMedia, IMediaFilters } from "../../@types/media";
+import type { IMedia, IMediaFilters,} from "../../@types/media";
 
 export class PrismaMediaRepository implements IMediaRepository {
     constructor(private prisma: PrismaClient) { }

@@ -128,4 +128,9 @@ export class AuthService {
     async updateProfile(userId: string, data: { avatarUrl?: string, statusPhrase?: string }) {
         return this.userRepository.updateProfile(userId, data);
     }
+
+    async getProfile(userId: string) {
+        const user = await this.userRepository.findById(userId);
+        return user;
+    }
 }

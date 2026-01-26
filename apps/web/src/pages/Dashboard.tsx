@@ -72,7 +72,7 @@ export function Dashboard() {
     const [newDeptName, setNewDeptName] = useState('');
 
     const [page, setPage] = useState(1);
-  const [statusFilter, setStatusFilter] = useState<string>('SENT');    const [startDate, setStartDate] = useState<string>('');
+    const [statusFilter, setStatusFilter] = useState<string>('SENT'); const [startDate, setStartDate] = useState<string>('');
     const [endDate, setEndDate] = useState<string>('');
     const [hasMore, setHasMore] = useState(true);
     const LIMIT = 6;
@@ -255,6 +255,22 @@ export function Dashboard() {
         }
     };
 
+    function buildThumbUrl(originalUrl: string) {
+        if (!originalUrl) return originalUrl;
+
+        const uploadMarker = "/upload/";
+        const idx = originalUrl.indexOf(uploadMarker);
+        if (idx === -1) return originalUrl; // não é URL Cloudinary
+
+        const prefix = originalUrl.slice(0, idx + uploadMarker.length);
+        const suffix = originalUrl.slice(idx + uploadMarker.length);
+
+        const transform = "w_400,h_250,c_fill,q_auto,f_auto";
+
+        return `${prefix}${transform}/${suffix}`;
+    }
+
+
     return (
         <div className="min-h-screen bg-gray-50">
             {/* Header */}
@@ -306,7 +322,7 @@ export function Dashboard() {
                         >
                             <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-white shadow-sm bg-blue-100 flex items-center justify-center">
                                 {user?.avatarUrl ? (
-                                    <img src={`${SOCKET_URL}/uploads/${user.avatarUrl}`} alt="" className="w-full h-full object-cover" />
+                                    <img src={user.avatarUrl} alt="" className="w-full h-full object-cover" />
                                 ) : (
                                     <User className="w-4 h-4 text-blue-600" />
                                 )}
@@ -378,16 +394,20 @@ export function Dashboard() {
                             </div>
                         </div>
 
+
                         {reports.length === 0 ? (
                             <div className="bg-white p-12 rounded-lg text-center border-2 border-dashed border-gray-200">
                                 <p className="text-gray-500">Nenhum relatório pendente.</p>
                             </div>
                         ) : (
+
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {reports.map(report => (
                                     <div key={report.id} className="bg-white rounded-lg shadow-sm border overflow-hidden flex flex-col">
+
+
                                         <img
-                                            src={`${SOCKET_URL}/uploads/${report.imageUrl}`}
+                                            src={report.imageUrl}
                                             alt="Relatado"
                                             className="w-full h-48 object-cover bg-gray-100"
                                         />
@@ -412,7 +432,7 @@ export function Dashboard() {
                                             <div className="flex flex-col gap-1 text-gray-500 mb-4">
                                                 <div className="flex items-center gap-2 text-sm">
                                                     {report.user.avatarUrl ? (
-                                                        <img src={`${SOCKET_URL}/uploads/${report.user.avatarUrl}`} alt="" className="w-5 h-5 rounded-full object-cover" />
+                                                        <img src={report.user.avatarUrl} alt="" className="w-5 h-5 rounded-full object-cover" />
                                                     ) : (
                                                         <User className="w-4 h-4 text-gray-400" />
                                                     )}
@@ -684,9 +704,11 @@ export function Dashboard() {
                                 <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-xl bg-gray-100 mx-auto group">
                                     {(profileAvatar || user?.avatarUrl) ? (
                                         <img
-                                            src={profileAvatar ? URL.createObjectURL(profileAvatar) : `${SOCKET_URL}/uploads/${user?.avatarUrl}`}
-                                            alt=""
-                                            className="w-full h-full object-cover"
+                                            src={
+                                                profileAvatar
+                                                    ? URL.createObjectURL(profileAvatar)
+                                                    : user?.avatarUrl ?? ''
+                                            }
                                         />
                                     ) : (
                                         <User className="w-12 h-12 text-gray-300 mx-auto mt-6" />
