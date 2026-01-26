@@ -1,4 +1,4 @@
-# Dockerfile de Produção - FLASH
+# Dockerfile - FLASH Backend API (Apenas servidor)
 FROM oven/bun:latest
 
 # Dependências do sistema para SSL e Prisma
@@ -6,18 +6,18 @@ RUN apt-get update && apt-get install -y openssl ca-certificates && rm -rf /var/
 
 WORKDIR /app
 
-# Instalação limpa das dependências
+# Instalar dependências do backend
 COPY package.json ./
 RUN bun install --production
 
-# Copia o código
+# Copiar código do servidor
 COPY . .
 
-# Geração do cliente Prisma com bypass de URL
+# Gerar cliente Prisma
 RUN DATABASE_URL="mongodb://localhost:27017/unused" bun run db:generate
 
-# Configuração de rede (Fly.io usa PORT dinâmico)
+# Configuração
 ENV NODE_ENV=production
 
-# Execução
+# Executar servidor
 CMD ["bun", "run", "start"]
