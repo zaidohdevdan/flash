@@ -14,7 +14,7 @@ import { MediaController } from './controllers/MediaController';
 const routes = Router();
 
 // Cloudinay
-const upload = multer({ dest: 'uploads/' });
+const upload = multer({ storage: multer.memoryStorage() })
 
 const prisma = new PrismaClient();
 const mediaRepository = new PrismaMediaRepository(prisma);
@@ -25,7 +25,7 @@ export const mediaRouter = Router();
 
 mediaRouter.post(
     '/reports/:reportId/media', AuthMiddleware,
-    upload.single('file'),
+    upload.single('image'),
     mediaController.upload,
 );
 

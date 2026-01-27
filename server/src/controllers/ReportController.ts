@@ -64,34 +64,34 @@ export const ReportController = {
     },
 
     // Create a new report (imagem obrigatória + Cloudinary)
+    // controllers/ReportController.ts
     create: async (req: Request, res: Response) => {
         const { comment } = req.body;
         const userId = req.userId!;
 
-        if (!req.file?.path) {
-            return res.status(400).json({ error: 'Imagem é obrigatória' });
+        if (!req.file?.buffer) {
+            return res.status(400).json({ error: "Imagem é obrigatória" });
         }
 
         try {
-            // 1) faz upload na Cloudinary primeiro
-            const media = await mediaService.upload({
-                filePath: req.file.path,
+            // 1) upload direto do buffer para Cloudinary
+            const media = await mediaService.uploadFromBuffer({
+                buffer: req.file.buffer,
                 userId,
-                // sem reportId aqui; o vínculo principal é via imageUrl no report
             });
 
-            // 2) cria o report já com a secureUrl
+            // 2) cria o report com a URL da Cloudinary
             const report = await reportService.create({
                 comment,
                 userId,
                 imageUrl: media.secureUrl,
             });
 
-            // 3) notifica supervisor
+            // 3) notifica supervisor (igual já está)
             if (report.user.supervisorId) {
                 req.io
                     .to(report.user.supervisorId.toString())
-                    .emit('new_report_to_review', {
+                    .emit("new_report_to_review", {
                         message: `New report submitted by ${report.user.name}`,
                         data: report,
                     });
@@ -100,9 +100,10 @@ export const ReportController = {
             return res.status(201).json(report);
         } catch (error) {
             console.error(error);
-            return res.status(500).json({ error: 'Erro ao criar relatório' });
+            return res.status(500).json({ error: "Erro ao criar relatório" });
         }
     },
+
 
     // update status of a report
     updateStatus: async (req: Request, res: Response) => {
