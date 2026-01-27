@@ -1,4 +1,4 @@
-import {cloudinary} from '../config/cloudinary'
+import {cloudinary } from '../config/cloudinary'
 import type { IMediaRepository } from '../repositories/interfaces/IMediaRepository'
 import type { IMedia, IMediaFilters, IDeleteResponse, IUploadOptions, IUploadResponse } from '../@types/media'
 import type { CloudinaryUploadResult } from '../@types/cloudinary'
