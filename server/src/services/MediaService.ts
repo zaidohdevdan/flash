@@ -40,6 +40,7 @@ export class MediaService {
             await cloudinary.uploader.upload(filePath, {
                 folder: options?.folder ?? 'flash',
                 resource_type: options?.resourceType ?? 'auto',
+                upload_preset: 'flash',
                 width: options?.width,
                 height: options?.height,
                 crop: options?.crop,
