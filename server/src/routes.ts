@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import multer from 'multer';
-import { PrismaClient } from './generated/prisma';
+import { prisma } from './lib/prisma'
 import { AuthController } from './controllers/AuthController';
 import { ReportController } from './controllers/ReportController';
 import { DepartmentController } from './controllers/DepartmentController';
@@ -16,40 +16,28 @@ const routes = Router();
 // Cloudinay
 const upload = multer({ storage: multer.memoryStorage() })
 
-const prisma = new PrismaClient();
 const mediaRepository = new PrismaMediaRepository(prisma);
 const mediaService = new MediaService(mediaRepository);
 const mediaController = new MediaController(mediaService);
 
-export const mediaRouter = Router();
 
-mediaRouter.post(
+routes.post(
     '/reports/:reportId/media', AuthMiddleware,
     upload.single('image'),
     mediaController.upload,
 );
 
-mediaRouter.get(
+routes.get(
     '/reports/:reportId/media',
     AuthMiddleware,
     mediaController.listByReport,
 );
 
-mediaRouter.delete(
+routes.delete(
     '/media/:publicId',
     AuthMiddleware,
     mediaController.deleteByPublicId,
 );
-
-// Configuração do Multer para capturar as imagens
-// const upload = multer({
-// storage: multer.diskStorage({
-//     destination: 'uploads/',
-//     filename: (req, file, cb) => {
-//         cb(null, `${Date.now()}-${file.originalname}`);
-//     }
-// })
-// });
 
 // Autenticação// Auth
 routes.post('/login', AuthController.login);

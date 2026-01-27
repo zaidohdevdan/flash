@@ -1,12 +1,12 @@
 // controllers/ReportController.ts
 import type { Request, Response } from 'express';
-import { ReportStatus, PrismaClient } from '../generated/prisma';
+import { ReportStatus } from '../generated/prisma'
+import { prisma } from '../lib/prisma';
 import { ReportService } from '../services/ReportService';
 import { MediaService } from '../services/MediaService';
 import { PrismaMediaRepository } from '../repositories/implementations/PrismaMediaRepository';
 
 // Instâncias compartilhadas
-const prisma = new PrismaClient();
 const reportService = new ReportService();
 const mediaRepository = new PrismaMediaRepository(prisma);
 const mediaService = new MediaService(mediaRepository);

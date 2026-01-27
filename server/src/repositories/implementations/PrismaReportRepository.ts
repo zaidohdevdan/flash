@@ -1,7 +1,6 @@
-import { PrismaClient, type Report, type ReportStatus, type User } from '../../generated/prisma';
+import {prisma} from '../../lib/prisma'
+import { type Report, type ReportStatus, type User } from '../../generated/prisma';
 import type { CreateReportDTO, IReportRepository, ReportWithUser } from '../interfaces/IReportRepository';
-
-const prisma = new PrismaClient();
 
 export class PrismaReportRepository implements IReportRepository {
     async create({ comment, userId, imageUrl }: CreateReportDTO): Promise<ReportWithUser> {

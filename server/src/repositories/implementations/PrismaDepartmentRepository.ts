@@ -1,7 +1,6 @@
-import { PrismaClient, type Department } from "../../generated/prisma";
+import { prisma } from "../../lib/prisma";
+import { type Department } from "../../generated/prisma";
 import type { IDepartmentRepository } from "../interfaces/IDepartmentRepository";
-
-const prisma = new PrismaClient();
 
 export class PrismaDepartmentRepository implements IDepartmentRepository {
     async findAll(): Promise<Department[]> {

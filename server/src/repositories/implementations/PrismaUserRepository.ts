@@ -1,7 +1,6 @@
+import { prisma } from '../../lib/prisma'
 import { PrismaClient, type User, type Role } from '../../generated/prisma';
 import type { CreateUserDTO, IUserRepository } from '../interfaces/IUserRepository';
-
-const prisma = new PrismaClient();
 
 export class PrismaUserRepository implements IUserRepository {
     async findByEmail(email: string): Promise<User | null> {

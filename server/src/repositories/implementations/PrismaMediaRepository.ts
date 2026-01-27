@@ -1,9 +1,10 @@
-import { PrismaClient, type Media as PrismaMedia } from "../../generated/prisma";
+import {prisma} from '../../lib/prisma'
+import { type Media as PrismaMedia } from "../../generated/prisma";
 import type { IMediaRepository } from "../interfaces/IMediaRepository";
-import type { IMedia, IMediaFilters,} from "../../@types/media";
+import type { IMedia, IMediaFilters, } from "../../@types/media";
 
 export class PrismaMediaRepository implements IMediaRepository {
-    constructor(private prisma: PrismaClient) { }
+    constructor(private prismaInstance = prisma){}
 
     private mapToMedia(media: PrismaMedia): IMedia {
         return {
@@ -25,22 +26,22 @@ export class PrismaMediaRepository implements IMediaRepository {
     }
 
     async create(data: Omit<IMedia, "id">): Promise<IMedia> {
-        const media = await this.prisma.media.create({ data })
+        const media = await this.prismaInstance.media.create({ data })
         return this.mapToMedia(media)
     }
 
     async findById(id: string): Promise<IMedia | null> {
-        const media = await this.prisma.media.findUnique({ where: { id } })
+        const media = await this.prismaInstance.media.findUnique({ where: { id } })
         return media ? this.mapToMedia(media) : null
 
     }
     async findByPublicId(publicId: string): Promise<IMedia | null> {
-        const media = await this.prisma.media.findUnique({ where: { publicId } })
+        const media = await this.prismaInstance.media.findUnique({ where: { publicId } })
         return media ? this.mapToMedia(media) : null
     }
 
     async findByReportId(reportId: string): Promise<IMedia[]> {
-        const mediaList = await this.prisma.media.findMany({
+        const mediaList = await this.prismaInstance.media.findMany({
             where: { reportId },
             orderBy: { uploadedAt: 'desc' }
         })
@@ -48,7 +49,7 @@ export class PrismaMediaRepository implements IMediaRepository {
     }
 
     async findAll(filters?: IMediaFilters): Promise<IMedia[]> {
-        const mediaList = await this.prisma.media.findMany({
+        const mediaList = await this.prismaInstance.media.findMany({
             where: {
                 userId: filters?.userId,
                 reportId: filters?.reportId,
@@ -63,15 +64,15 @@ export class PrismaMediaRepository implements IMediaRepository {
     }
 
     async delete(id: string): Promise<void> {
-        await this.prisma.media.delete({ where: { id } })
+        await this.prismaInstance.media.delete({ where: { id } })
     }
 
     async deleteByPublicId(publicId: string): Promise<void> {
-        await this.prisma.media.delete({ where: { publicId } })
+        await this.prismaInstance.media.delete({ where: { publicId } })
     }
 
     async update(id: string, data: Partial<IMedia>): Promise<IMedia> {
-        const media = await this.prisma.media.update({ where: { id }, data })
+        const media = await this.prismaInstance.media.update({ where: { id }, data })
         return this.mapToMedia(media)
     }
 

@@ -1,10 +1,10 @@
 import fs from 'fs';
 import path from 'path';
+import {prisma} from './lib/prisma'
 import express, { type Application, type Request, type Response, type NextFunction } from 'express';
 import cors from 'cors';
 import { createServer } from 'http';
 import { Server as SocketIOServer } from 'socket.io';
-import { PrismaClient } from './generated/prisma';
 import { routes } from './routes';
 
 // ---------- Tipagens globais ----------
@@ -73,8 +73,6 @@ async function bootstrap() {
         );
         process.exit(1);
     }
-
-    const prisma = new PrismaClient();
 
     try {
         await prisma.$connect();
