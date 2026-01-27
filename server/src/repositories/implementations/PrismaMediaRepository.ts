@@ -1,10 +1,10 @@
-import {prisma} from '../../lib/prisma'
+import { prisma } from '../../lib/prisma'
 import { type Media as PrismaMedia } from "../../generated/prisma";
 import type { IMediaRepository } from "../interfaces/IMediaRepository";
 import type { IMedia, IMediaFilters, } from "../../@types/media";
 
 export class PrismaMediaRepository implements IMediaRepository {
-    constructor(private prismaInstance = prisma){}
+    constructor(private readonly prismaInstance = prisma) { }
 
     private mapToMedia(media: PrismaMedia): IMedia {
         return {

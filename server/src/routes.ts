@@ -14,7 +14,10 @@ import { MediaController } from './controllers/MediaController';
 const routes = Router();
 
 // Cloudinay
-const upload = multer({ storage: multer.memoryStorage() })
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 20 * 1024 * 1024 }
+})
 
 const mediaRepository = new PrismaMediaRepository(prisma);
 const mediaService = new MediaService(mediaRepository);
