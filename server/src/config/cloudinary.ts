@@ -3,8 +3,9 @@ import { env } from './env'
 
 
 cloudinary.config({
-    CLOUDINARY_URL: env.CLOUDINARY_URL,
-
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME!,
+    api_key: process.env.CLOUDINARY_API_KEY!,
+    api_secret: process.env.CLOUDINARY_API_SECRET!,
 })
 
 export default cloudinary
