@@ -41,7 +41,7 @@ resource_type: 'image',
             await cloudinary.uploader.upload(filePath, {
                 folder: options?.folder ?? 'flash',
                 resource_type: options?.resourceType ?? 'auto',
-**unsigned: false**,
+unsigned: false,
                 width: options?.width,
                 height: options?.height,
                 crop: options?.crop,
