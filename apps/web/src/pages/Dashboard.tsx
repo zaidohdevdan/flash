@@ -255,21 +255,6 @@ export function Dashboard() {
         }
     };
 
-    function buildThumbUrl(originalUrl: string) {
-        if (!originalUrl) return originalUrl;
-
-        const uploadMarker = "/upload/";
-        const idx = originalUrl.indexOf(uploadMarker);
-        if (idx === -1) return originalUrl; // não é URL Cloudinary
-
-        const prefix = originalUrl.slice(0, idx + uploadMarker.length);
-        const suffix = originalUrl.slice(idx + uploadMarker.length);
-
-        const transform = "w_400,h_250,c_fill,q_auto,f_auto";
-
-        return `${prefix}${transform}/${suffix}`;
-    }
-
 
     return (
         <div className="min-h-screen bg-gray-50">
