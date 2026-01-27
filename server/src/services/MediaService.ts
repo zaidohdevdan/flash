@@ -1,5 +1,5 @@
 import { Readable } from 'stream';
-import cloudinary from '../config/cloudinary';
+import { cloudinary } from '../config/cloudinary';
 import type { IMediaRepository } from '../repositories/interfaces/IMediaRepository';
 import type {
     IMedia,
