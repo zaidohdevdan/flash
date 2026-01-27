@@ -11,9 +11,7 @@ const envSchema = z.object({
     JWT_SECRET: z.string().min(10, 'JWT_SECRET must be at least 10 characters'),
 
     // Cloudinary
-    CLOUDINARY_CLOUD_NAME: z.string(),
-    CLOUDINARY_API_KEY: z.string(),
-    CLOUDINARY_API_SECRET: z.string(),
+    CLOUDINARY_URL:z.string()
 })
 
 export const env = envSchema.parse(process.env)
