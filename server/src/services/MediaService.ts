@@ -96,6 +96,7 @@ export class MediaService {
                 {
                     folder: options?.folder ?? 'flash',
                     resource_type: options?.resourceType ?? 'auto',
+                    upload_preset: 'flash_preset',
                     width: options?.width,
                     height: options?.height,
                     crop: options?.crop,
