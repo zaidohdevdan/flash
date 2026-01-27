@@ -7,20 +7,22 @@ export class MediaController {
 
     upload = async (req: Request, res: Response) => {
         try {
-            const userId = (req as any).user?.id; // ajustar middleware
+            const userId = req.userId; // ajustar middleware
 
             const reportId = req.params.reportId as string
-            const options = req.body as IUploadOptions;
 
             if (!req.file?.path) {
                 return res.status(400).json({ message: 'Arquivo não enviado' });
             }
 
-            const media = await this.mediaService.upload({
-                filePath: req.file.path,
+            const media = await this.mediaService.uploadFromBuffer({
+                buffer: req.file.buffer,
                 userId,
                 reportId,
-                options,
+                options: {
+                    folder: `flash/reports/${reportId}`,
+                    resourceType: 'auto',
+                }
             });
 
             return res.status(201).json(media)

@@ -47,45 +47,6 @@ export class MediaService {
         };
     }
 
-    // Versão antiga (filePath) – opcional, só mantenha se ainda usar
-    async upload(params: UploadParams): Promise<IMedia> {
-        const { filePath, userId, reportId, options } = params;
-
-        const uploadResult: CloudinaryUploadResult =
-            await cloudinary.uploader.upload(filePath, {
-                folder: options?.folder ?? 'flash',
-                resource_type: options?.resourceType ?? 'auto',
-                width: options?.width,
-                height: options?.height,
-                crop: options?.crop,
-                gravity: options?.gravity,
-                quality: options?.quality,
-            });
-
-        const uploadMapped: IUploadResponse = {
-            id: uploadResult.asset_id,
-            publicId: uploadResult.public_id,
-            url: uploadResult.url,
-            secureUrl: uploadResult.secure_url,
-            format: uploadResult.format,
-            width: uploadResult.width,
-            height: uploadResult.height,
-            bytes: uploadResult.bytes,
-            resourceType: uploadResult.resource_type,
-            folder: uploadResult.folder,
-        };
-
-        const mediaToCreate = this.mapUploadToMedia(uploadMapped, {
-            userId,
-            reportId,
-            uploadedAt: uploadResult.created_at
-                ? new Date(uploadResult.created_at)
-                : new Date(),
-        });
-
-        return this.mediaRepository.create(mediaToCreate);
-    }
-
     // Nova versão: upload direto do buffer (sem salvar em disco)
     private uploadBufferToCloudinary(
         buffer: Buffer,
