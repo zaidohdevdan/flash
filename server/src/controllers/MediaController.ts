@@ -1,6 +1,5 @@
 import type { Request, Response } from 'express';
 import { MediaService } from '../services/MediaService'
-import type { IUploadOptions } from '../@types/media';
 
 export class MediaController {
     constructor(private mediaService: MediaService) { }
@@ -11,7 +10,7 @@ export class MediaController {
 
             const reportId = req.params.reportId as string
 
-            if (!req.file?.path) {
+            if (!req.file?.buffer) {
                 return res.status(400).json({ message: 'Arquivo não enviado' });
             }
 
@@ -21,7 +20,6 @@ export class MediaController {
                 reportId,
                 options: {
                     folder: `flash/reports/${reportId}`,
-                    resourceType: 'auto',
                 }
             });
 

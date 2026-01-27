@@ -1,4 +1,5 @@
 import { Readable } from 'stream';
+import sharp from 'sharp'
 import { cloudinary } from '../config/cloudinary';
 import type { IMediaRepository } from '../repositories/interfaces/IMediaRepository';
 import type {
@@ -27,24 +28,14 @@ interface UploadFromBufferParams {
 export class MediaService {
     constructor(private mediaRepository: IMediaRepository) { }
 
-    private mapUploadToMedia(
-        upload: IUploadResponse,
-        extra: { userId?: string; reportId?: string; uploadedAt?: Date },
-    ): Omit<IMedia, 'id'> {
-        return {
-            publicId: upload.publicId,
-            url: upload.url,
-            secureUrl: upload.secureUrl,
-            format: upload.format,
-            bytes: upload.bytes,
-            width: upload.width,
-            height: upload.height,
-            resourceType: upload.resourceType as IMedia['resourceType'],
-            folder: upload.folder,
-            uploadedAt: extra.uploadedAt ?? new Date(),
-            userId: extra.userId,
-            reportId: extra.reportId,
-        };
+    private async otimizedBuffer(buffer: Buffer): Promise<Buffer> {
+        return sharp(buffer)
+            .rotate()
+            .resize({
+                width: 1280,
+                withoutEnlargement: true,
+            })
+            .jpeg({ quality: 75 }).toBuffer()
     }
 
     // Nova versão: upload direto do buffer (sem salvar em disco)
@@ -56,7 +47,7 @@ export class MediaService {
             const stream = cloudinary.uploader.upload_stream(
                 {
                     folder: options?.folder ?? 'flash',
-                    resource_type: options?.resourceType ?? 'auto',
+                    resource_type: options?.resourceType ?? 'image',
                     upload_preset: 'flash_preset',
                     width: options?.width,
                     height: options?.height,
@@ -77,10 +68,11 @@ export class MediaService {
     async uploadFromBuffer(params: UploadFromBufferParams): Promise<IMedia> {
         const { buffer, userId, reportId, options } = params;
 
-        const uploadResult = await this.uploadBufferToCloudinary(buffer, options);
+        const otimizedBuffer = await this.otimizedBuffer(buffer)
 
-        const uploadMapped: IUploadResponse = {
-            id: uploadResult.asset_id,
+        const uploadResult = await this.uploadBufferToCloudinary(otimizedBuffer, options);
+
+        const mediaToCreate: Omit<IMedia, 'id'> = {
             publicId: uploadResult.public_id,
             url: uploadResult.url,
             secureUrl: uploadResult.secure_url,
@@ -90,15 +82,13 @@ export class MediaService {
             bytes: uploadResult.bytes,
             resourceType: uploadResult.resource_type,
             folder: uploadResult.folder,
-        };
-
-        const mediaToCreate = this.mapUploadToMedia(uploadMapped, {
-            userId,
-            reportId,
             uploadedAt: uploadResult.created_at
                 ? new Date(uploadResult.created_at)
                 : new Date(),
-        });
+            userId,
+            reportId,
+        };
+
 
         return this.mediaRepository.create(mediaToCreate);
     }
