@@ -416,8 +416,8 @@ export function Dashboard() {
 
                                             <div className="flex flex-col gap-1 text-gray-500 mb-4">
                                                 <div className="flex items-center gap-2 text-sm">
-                                                    {report.user.avatarUrl ? (
-                                                        <img src={report.user.avatarUrl} alt="" className="w-5 h-5 rounded-full object-cover" />
+                                                    {report.user?.avatarUrl ? (
+                                                        <img src={report.user?.avatarUrl} alt="" className="w-5 h-5 rounded-full object-cover" />
                                                     ) : (
                                                         <User className="w-4 h-4 text-gray-400" />
                                                     )}

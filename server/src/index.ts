@@ -1,104 +1,141 @@
 import fs from 'fs';
-import express from 'express';
-import cors from 'cors';
-import { Server } from 'socket.io';
-import { createServer } from 'http';
-import { PrismaClient } from './generated/prisma'
-import { routes } from './routes';
 import path from 'path';
+import express, { type Application, type Request, type Response, type NextFunction } from 'express';
+import cors from 'cors';
+import { createServer } from 'http';
+import { Server as SocketIOServer } from 'socket.io';
+import { PrismaClient } from './generated/prisma';
+import { routes } from './routes';
 
-const app = express();
-const httpServer = createServer(app);
-
-const io = new Server(httpServer, {
-    cors: { origin: '*', methods: ['GET', 'POST'] }
-});
-
-console.log(process.env.DATABASE_URL);
-app.use(cors());
-app.use(express.json());
-
-app.use((req, res, next) => {
-    req.io = io;
-    return next();
-});
-
-app.use('/uploads', express.static(path.resolve(__dirname, '..', 'uploads')));
-
-const distPath = path.resolve(__dirname, '..', 'dist');
-if (fs.existsSync(distPath)) {
-    app.use(express.static(distPath));
-}
-
-app.use(routes);
-
-if (fs.existsSync(distPath)) {
-    app.get('*', (req, res) => {
-        res.sendFile(path.join(distPath, 'index.html'));
-    });
-}
-
-async function main() {
-    if (!process.env.DATABASE_URL) {
-        console.error('CRITICAL ERROR: DATABASE_URL is not defined in environment variables.');
-        process.exit(1);
-    }
-
-    try {
-        const prisma = new PrismaClient();
-        await prisma.$connect();
-        console.log('Connected to the database successfully.');
-
-        const onlineUsers = new Set<string>();
-
-        io.on('connection', (socket) => {
-            const { userId, role } = socket.handshake.query;
-            console.log(`[Socket] New connection: ${userId} (${role}) - SocketID: ${socket.id}`);
-
-            if (userId) {
-                const roomName = userId.toString();
-                socket.join(roomName);
-                onlineUsers.add(roomName);
-                io.emit('user_presence_changed', { userId: roomName, status: 'online' });
-                console.log(`[Socket] User ${userId} joined room: ${roomName}`);
-            } else {
-                console.warn(`[Socket] Connection without userId - SocketID: ${socket.id}`);
-            }
-
-            socket.emit('initial_presence_list', Array.from(onlineUsers));
-
-            socket.on('disconnect', (reason) => {
-                if (userId) {
-                    const roomName = userId.toString();
-                    onlineUsers.delete(roomName);
-                    io.emit('user_presence_changed', { userId: roomName, status: 'offline' });
-                    console.log(`[Socket] User disconnected: ${userId} (${reason}) - Notify Offline`);
-                }
-            });
-
-            socket.on('error', (error) => {
-                console.error(`[Socket] Error for user ${userId}:`, error);
-            });
-        });
-
-        const PORT = process.env.PORT || 3000;
-        httpServer.listen(PORT, () => {
-            console.log(`Server is running on port ${PORT}`);
-        });
-    } catch (error) {
-        console.error('Error connecting to the database:', error);
-        process.exit(1);
-    }
-}
-
-main();
+// ---------- Tipagens globais ----------
 
 declare global {
     namespace Express {
         interface Request {
-            io: Server;
+            io: SocketIOServer;
             userId?: string;
             userRole?: string;
         }
     }
 }
+
+// ---------- Configuração básica ----------
+
+const app: Application = express();
+const httpServer = createServer(app);
+
+const io = new SocketIOServer(httpServer, {
+    cors: {
+        origin: '*',
+        methods: ['GET', 'POST'],
+    },
+});
+
+// Middlewares de infraestrutura
+app.use(cors());
+app.use(express.json());
+
+// Injeta o io em todas as requisições
+app.use((req: Request, _res: Response, next: NextFunction) => {
+    req.io = io;
+    next();
+});
+
+// ---------- Servir arquivos estáticos (uploads + SPA) ----------
+
+const uploadsPath = path.resolve(__dirname, '..', 'uploads');
+app.use('/uploads', express.static(uploadsPath));
+
+const distPath = path.resolve(__dirname, '..', 'dist');
+const hasDist = fs.existsSync(distPath);
+
+if (hasDist) {
+    app.use(express.static(distPath));
+}
+
+// ---------- Rotas de API ----------
+
+app.use(routes);
+
+// Fallback do SPA (React / Vite)
+if (hasDist) {
+    app.get('*', (_req: Request, res: Response) => {
+        res.sendFile(path.join(distPath, 'index.html'));
+    });
+}
+
+// ---------- Inicialização (DB + WebSocket + HTTP) ----------
+
+async function bootstrap() {
+    if (!process.env.DATABASE_URL) {
+        console.error(
+            '[CRITICAL] DATABASE_URL is not defined in environment variables.',
+        );
+        process.exit(1);
+    }
+
+    const prisma = new PrismaClient();
+
+    try {
+        await prisma.$connect();
+        console.log('[DB] Connected to the database successfully.');
+
+        const onlineUsers = new Set<string>();
+
+        io.on('connection', (socket) => {
+            const { userId, role } = socket.handshake.query;
+
+            if (userId) {
+                const roomName = String(userId);
+
+                socket.join(roomName);
+                onlineUsers.add(roomName);
+
+                io.emit('user_presence_changed', {
+                    userId: roomName,
+                    status: 'online',
+                });
+            } else {
+                console.warn(
+                    `[Socket] [WARN] Connection without userId - socketId=${socket.id}`,
+                );
+            }
+
+            // Envia lista inicial de quem está online
+            socket.emit('initial_presence_list', Array.from(onlineUsers));
+
+            socket.on('disconnect', (reason) => {
+                const userIdFromQuery = socket.handshake.query.userId;
+
+                if (userIdFromQuery) {
+                    const roomName = String(userIdFromQuery);
+                    onlineUsers.delete(roomName);
+
+                    io.emit('user_presence_changed', {
+                        userId: roomName,
+                        status: 'offline',
+                    });
+
+
+                }
+            });
+
+            socket.on('error', (error) => {
+                console.error(
+                    `[Socket] [ERROR] userId=${socket.handshake.query.userId}:`,
+                    error,
+                );
+            });
+        });
+
+        const PORT = process.env.PORT || 3000;
+        httpServer.listen(PORT, () => {
+            console.log(`[HTTP] Server is running on port ${PORT}`);
+        });
+    } catch (error) {
+        console.error('[CRITICAL]  Error connecting to the database:', error);
+        process.exit(1);
+    }
+}
+
+bootstrap();

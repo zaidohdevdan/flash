@@ -125,7 +125,6 @@ export const ReportController = {
             );
 
             const targetRoom = updatedReport.userId.toString();
-            console.log(`[Socket] Emitting status update to room: ${targetRoom}`);
 
             req.io.to(targetRoom).emit('report_status_updated', {
                 reportId: id,
