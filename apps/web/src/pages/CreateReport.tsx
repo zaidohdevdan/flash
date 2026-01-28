@@ -149,6 +149,10 @@ export function CreateReport() {
         );
     }
 
+     const Spinner = () => (
+  <div className="w-6 h-6 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+);
+
     return (
         <div className="min-h-screen bg-white flex flex-col">
             {/* Header */}
@@ -311,11 +315,16 @@ export function CreateReport() {
                                 disabled={sending}
                                 className={`w-full py-5 rounded-3xl font-black text-white flex items-center justify-center gap-3 shadow-xl shadow-blue-100 active:scale-95 transition-all ${sending ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'}`}
                             >
-                                {sending ? 'ENVIANDO...' : (
-                                    <>
-                                        ENVIAR AGORA <Send className="w-5 h-5" />
-                                    </>
-                                )}
+                              {sending ? (
+  <>
+    <Spinner />
+    <span className="text-sm tracking-widest">ENVIANDO</span>
+  </>
+) : (
+  <>
+    ENVIAR AGORA <Send className="w-5 h-5" />
+  </>
+)}
                             </button>
                         </form>
                     </div>
