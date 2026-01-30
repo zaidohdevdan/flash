@@ -71,4 +71,7 @@ routes.post('/departments', AuthMiddleware, DepartmentController.store);
 routes.get('/profile/me', AuthMiddleware, ProfileController.me);
 routes.patch('/profile', AuthMiddleware, upload.single('avatar'), ProfileController.update);
 
+// Chat Media
+routes.post('/chat/media', AuthMiddleware, upload.single('file'), mediaController.uploadGeneric);
+
 export { routes };

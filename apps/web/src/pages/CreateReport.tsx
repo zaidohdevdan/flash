@@ -16,9 +16,12 @@ interface Report {
     createdAt: string;
 }
 
+import { ChatWidget } from '../components/ChatWidget';
+
 export function CreateReport() {
     const { user, signOut } = useAuth();
     const [view, setView] = useState<'history' | 'form'>('history');
+    const [isChatOpen, setIsChatOpen] = useState(false);
     const [comment, setComment] = useState('');
     const [image, setImage] = useState<File | null>(null);
     const [preview, setPreview] = useState<string | null>(null);
@@ -164,9 +167,17 @@ export function CreateReport() {
                         {isConnected ? <Wifi className="w-3 h-3" /> : <WifiOff className="w-3 h-3" />}
                     </div>
                 </div>
-                <button onClick={signOut} className="text-gray-400 p-1">
-                    <LogOut className="w-5 h-5" />
-                </button>
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => setIsChatOpen(true)}
+                        className="p-2 text-blue-600 bg-blue-50 rounded-full hover:bg-blue-100 transition"
+                    >
+                        <MessageSquare className="w-5 h-5" />
+                    </button>
+                    <button onClick={signOut} className="text-gray-400 p-1">
+                        <LogOut className="w-5 h-5" />
+                    </button>
+                </div>
             </header>
 
             <main className="flex-1 overflow-y-auto bg-gray-50">
@@ -330,6 +341,14 @@ export function CreateReport() {
                 >
                     <Plus className="w-8 h-8" />
                 </button>
+            )}
+
+            {isChatOpen && user && (
+                <ChatWidget
+                    currentUser={user}
+                    targetUser={{ id: user.supervisorId || 'supervisor', name: 'Supervisor', role: 'SUPERVISOR' }}
+                    onClose={() => setIsChatOpen(false)}
+                />
             )}
         </div>
     );

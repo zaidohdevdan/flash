@@ -57,7 +57,21 @@ export const ReportController = {
                 startDate ? new Date(startDate as string) : undefined,
                 endDate ? new Date(endDate as string) : undefined,
             );
-            return res.json(reports);
+
+            // Filter out sensitive feedback for professionals
+            const safeReports = reports.map(r => {
+                const isResolved = r.status === 'RESOLVED';
+                return {
+                    ...r,
+                    // Hide feedback unless it's the final resolution or specific cases
+                    // The user requested to hide "tramitação" details.
+                    feedback: isResolved ? r.feedback : undefined,
+                    // History shouldn't be fully exposed or at least sanitized
+                    history: [] // Hide history or sanitize it? The user said "apenas a atualizaçao do status".
+                };
+            });
+
+            return res.json(safeReports);
         } catch (error) {
             return res.status(500).json({ error: 'Erro ao listar histórico' });
         }
@@ -126,12 +140,16 @@ export const ReportController = {
 
             const targetRoom = updatedReport.userId.toString();
 
+            // Notify professional (Sanitized)
+            // Only send feedback if Resolved
+            const isResolved = status === 'RESOLVED';
+
             req.io.to(targetRoom).emit('report_status_updated', {
                 reportId: id,
                 newStatus: status,
-                feedback: updatedReport.feedback,
+                feedback: isResolved ? updatedReport.feedback : undefined,
                 feedbackAt: updatedReport.feedbackAt,
-                message: `Your report status has been updated to ${status}`,
+                message: `Status atualizado: ${status}`,
             });
 
             const supervisorRoom = (updatedReport as any).user.supervisorId?.toString();

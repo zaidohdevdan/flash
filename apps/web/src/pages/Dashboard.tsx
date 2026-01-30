@@ -4,6 +4,7 @@ import { api } from '../services/api';
 import { io } from 'socket.io-client';
 import { LogOut, CheckCircle, Clock, AlertCircle, MessageSquare, Users, User, Circle, Send, Archive, History, X, Folder, Plus } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { ChatWidget } from '../components/ChatWidget';
 
 const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
@@ -65,6 +66,9 @@ export function Dashboard() {
     const [profilePhrase, setProfilePhrase] = useState(user?.statusPhrase || '');
     const [profileAvatar, setProfileAvatar] = useState<File | null>(null);
     const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
+
+    // Chat
+    const [chatTarget, setChatTarget] = useState<Subordinate | null>(null);
 
     // Form for Forwarding/Review
     const [formFeedback, setFormFeedback] = useState('');
@@ -506,9 +510,18 @@ export function Dashboard() {
                                                 <p className="text-[10px] text-gray-400 uppercase font-black">{sub.role}</p>
                                             </div>
                                         </div>
-                                        <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${sub.isOnline ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
-                                            {sub.isOnline ? 'ONLINE' : 'OFFLINE'}
-                                        </span>
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                onClick={() => setChatTarget(sub)}
+                                                className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                                                title="Abrir Chat Privado"
+                                            >
+                                                <MessageSquare className="w-4 h-4" />
+                                            </button>
+                                            <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${sub.isOnline ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                                                {sub.isOnline ? 'ONLINE' : 'OFFLINE'}
+                                            </span>
+                                        </div>
                                     </div>
                                 ))}
                             </div>
@@ -694,6 +707,7 @@ export function Dashboard() {
                                                     ? URL.createObjectURL(profileAvatar)
                                                     : user?.avatarUrl ?? ''
                                             }
+                                            className="w-full h-full object-cover"
                                         />
                                     ) : (
                                         <User className="w-12 h-12 text-gray-300 mx-auto mt-6" />
@@ -748,6 +762,15 @@ export function Dashboard() {
                         </div>
                     </div>
                 </div>
+            )}
+
+            {/* Chat Widget */}
+            {chatTarget && user && (
+                <ChatWidget
+                    currentUser={user!}
+                    targetUser={chatTarget}
+                    onClose={() => setChatTarget(null)}
+                />
             )}
         </div>
     );

@@ -103,6 +103,58 @@ async function bootstrap() {
             // Envia lista inicial de quem está online
             socket.emit('initial_presence_list', Array.from(onlineUsers));
 
+            socket.on('join_private_chat', (data: { targetUserId: string }) => {
+                const myId = socket.handshake.query.userId as string;
+                const myRole = socket.handshake.query.role as string;
+                const { targetUserId } = data;
+
+                // Define logic for room name. Convention: "chat:professionalUserId"
+                // If I am professional, I can only join "chat:myId"
+                // If I am supervisor, I can join "chat:targetUserId" (where target is professional)
+
+                let roomName = '';
+
+                // If I am the professional, I am the target of the chat room
+                if (targetUserId === myId) {
+                    roomName = `chat:${myId}`;
+                }
+                // If I am supervisor, I am joining the professional's room
+                else if (myRole === 'SUPERVISOR' || myRole === 'ADMIN') {
+                    roomName = `chat:${targetUserId}`;
+                } else {
+                    console.warn(`[Socket] Unauthorized chat join attempt by ${myId} to ${targetUserId}`);
+                    return;
+                }
+
+                socket.join(roomName);
+                // console.log(`[Socket] ${myId} joined room ${roomName}`);
+            });
+
+            socket.on('private_message', (data: { targetUserId: string, text?: string, audioUrl?: string }) => {
+                const myId = socket.handshake.query.userId as string;
+                const { targetUserId, text, audioUrl } = data;
+
+                // The room is always identified by the PROFESSIONAL's ID
+                // If I am professional, room is `chat:${myId}`
+                // If I am supervisor, room is `chat:${targetUserId}`
+
+                const myRole = socket.handshake.query.role as string;
+                let roomName = '';
+
+                if (myRole === 'SUPERVISOR' || myRole === 'ADMIN') {
+                    roomName = `chat:${targetUserId}`;
+                } else {
+                    roomName = `chat:${myId}`; // Professional sending to supervisor (in their own room)
+                }
+
+                io.to(roomName).emit('private_message', {
+                    from: myId,
+                    text,
+                    audioUrl,
+                    createdAt: new Date()
+                });
+            });
+
             socket.on('disconnect', (reason) => {
                 const userIdFromQuery = socket.handshake.query.userId;
 

@@ -29,6 +29,30 @@ export class MediaController {
             return res.status(500).json({ message: 'Erro ao fazer upload de mídia' });
         }
     }
+
+    uploadGeneric = async (req: Request, res: Response) => {
+        try {
+            const userId = req.userId;
+
+            if (!req.file?.buffer) {
+                return res.status(400).json({ message: 'Arquivo não enviado' });
+            }
+
+            const media = await this.mediaService.uploadFromBuffer({
+                buffer: req.file.buffer,
+                userId,
+                options: {
+                    folder: `flash/chat`,
+                    resourceType: 'auto'
+                }
+            });
+
+            return res.status(201).json(media)
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ message: 'Erro ao fazer upload de mídia genérica' });
+        }
+    }
     listByReport = async (req: Request, res: Response) => {
         try {
             const reportId = req.params.reportId as string
