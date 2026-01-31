@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
 import { io } from 'socket.io-client';
+import { toast } from 'react-hot-toast';
 import { LogOut, CheckCircle, Clock, AlertCircle, MessageSquare, Users, User, Circle, Send, Archive, History, X, Folder, Plus } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { ChatWidget } from '../components/ChatWidget';
@@ -124,10 +125,14 @@ export function Dashboard() {
             loadStats();
         });
 
-        socket.on('new_chat_notification', (data: { from: string }) => {
+        socket.on('new_chat_notification', (data: { from: string, fromName?: string, text: string }) => {
             if (chatTarget?.id !== data.from) {
                 setUnreadMessages(prev => ({ ...prev, [data.from]: true }));
                 playNotificationSound();
+                toast(`Mensagem de ${data.fromName || 'Subordinado'}: ${data.text}`, {
+                    icon: '💬',
+                    duration: 4000
+                });
             }
         });
 

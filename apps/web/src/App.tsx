@@ -6,6 +6,7 @@ import { Dashboard } from './pages/Dashboard';
 import { CreateReport } from './pages/CreateReport';
 import { AdminDashboard } from './pages/AdminDashboard';
 import { Home } from './pages/Home';
+import { Toaster } from 'react-hot-toast';
 
 // Placeholders for now
 
@@ -72,6 +73,7 @@ function AppRoutes() {
 function App() {
   return (
     <AuthProvider>
+      <Toaster position="top-right" reverseOrder={false} />
       <BrowserRouter>
         <AppRoutes />
       </BrowserRouter>

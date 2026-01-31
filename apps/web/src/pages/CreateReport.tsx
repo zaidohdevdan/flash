@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
 import { io } from 'socket.io-client';
+import { toast } from 'react-hot-toast';
 import { Camera, Send, LogOut, CheckCircle2, Clock, CheckCircle, AlertCircle, MessageSquare, Wifi, WifiOff, Plus, ArrowLeft, Archive, User } from 'lucide-react';
 
 const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
@@ -75,10 +76,14 @@ export function CreateReport() {
             });
         });
 
-        socket.on('new_chat_notification', () => {
+        socket.on('new_chat_notification', (data: { from: string, fromName?: string, text: string }) => {
             if (!isChatOpen) {
                 setHasUnread(true);
                 playNotificationSound();
+                toast(`Mensagem do Supervisor: ${data.text}`, {
+                    icon: '💬',
+                    duration: 4000
+                });
             }
         });
 
