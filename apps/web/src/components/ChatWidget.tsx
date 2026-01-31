@@ -50,6 +50,10 @@ export function ChatWidget({ currentUser, targetUser, onClose }: ChatWidgetProps
 
         newSocket.on('private_message', (msg: Message) => {
             setMessages(prev => [...prev, msg]);
+            if (msg.from !== currentUser.id) {
+                const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+                audio.play().catch(e => console.error('Erro ao tocar som:', e));
+            }
         });
 
         setSocket(newSocket);

@@ -69,6 +69,12 @@ export function Dashboard() {
 
     // Chat
     const [chatTarget, setChatTarget] = useState<Subordinate | null>(null);
+    const [unreadMessages, setUnreadMessages] = useState<Record<string, boolean>>({});
+
+    const playNotificationSound = () => {
+        const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+        audio.play().catch(e => console.error('Erro ao tocar som:', e));
+    };
 
     // Form for Forwarding/Review
     const [formFeedback, setFormFeedback] = useState('');
@@ -116,6 +122,13 @@ export function Dashboard() {
             });
             setSelectedReport(current => current?.id === data.id ? data : current);
             loadStats();
+        });
+
+        socket.on('new_chat_notification', (data: { from: string }) => {
+            if (chatTarget?.id !== data.from) {
+                setUnreadMessages(prev => ({ ...prev, [data.from]: true }));
+                playNotificationSound();
+            }
         });
 
         return () => { socket.disconnect(); };
@@ -512,11 +525,17 @@ export function Dashboard() {
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <button
-                                                onClick={() => setChatTarget(sub)}
-                                                className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                                                onClick={() => {
+                                                    setChatTarget(sub);
+                                                    setUnreadMessages(prev => ({ ...prev, [sub.id]: false }));
+                                                }}
+                                                className="relative p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition"
                                                 title="Abrir Chat Privado"
                                             >
                                                 <MessageSquare className="w-4 h-4" />
+                                                {unreadMessages[sub.id] && (
+                                                    <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 border-2 border-white rounded-full animate-pulse" />
+                                                )}
                                             </button>
                                             <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${sub.isOnline ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
                                                 {sub.isOnline ? 'ONLINE' : 'OFFLINE'}

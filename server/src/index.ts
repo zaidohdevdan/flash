@@ -153,6 +153,14 @@ async function bootstrap() {
                     audioUrl,
                     createdAt: new Date()
                 });
+
+                // Emit a separate notification event to the recipient's private room
+                io.to(String(targetUserId)).emit('new_chat_notification', {
+                    from: myId,
+                    fromName: socket.handshake.query.userName || 'Alguém', // Assuming we might want the name too
+                    text: text || (audioUrl ? 'Mensagem de áudio' : 'Nova mensagem'),
+                    createdAt: new Date()
+                });
             });
 
             socket.on('disconnect', (reason) => {

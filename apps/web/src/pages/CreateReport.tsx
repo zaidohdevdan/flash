@@ -34,7 +34,13 @@ export function CreateReport() {
     const [isConnected, setIsConnected] = useState(false);
     const LIMIT = 10;
 
+    const [hasUnread, setHasUnread] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const playNotificationSound = () => {
+        const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+        audio.play().catch(e => console.error('Erro ao tocar som:', e));
+    };
 
     useEffect(() => {
         loadHistory(1, true, statusFilter);
@@ -67,6 +73,13 @@ export function CreateReport() {
                         : item
                 );
             });
+        });
+
+        socket.on('new_chat_notification', () => {
+            if (!isChatOpen) {
+                setHasUnread(true);
+                playNotificationSound();
+            }
         });
 
         return () => {
@@ -173,10 +186,16 @@ export function CreateReport() {
                 </div>
                 <div className="flex items-center gap-2">
                     <button
-                        onClick={() => setIsChatOpen(true)}
-                        className="p-2 text-blue-600 bg-blue-50 rounded-full hover:bg-blue-100 transition"
+                        onClick={() => {
+                            setIsChatOpen(true);
+                            setHasUnread(false);
+                        }}
+                        className="relative p-2 text-blue-600 bg-blue-50 rounded-full hover:bg-blue-100 transition"
                     >
                         <MessageSquare className="w-5 h-5" />
+                        {hasUnread && (
+                            <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-red-500 border-2 border-white rounded-full animate-pulse" />
+                        )}
                     </button>
                     <button onClick={signOut} className="text-gray-400 p-1">
                         <LogOut className="w-5 h-5" />
@@ -207,10 +226,16 @@ export function CreateReport() {
                                     </div>
                                 </div>
                                 <button
-                                    onClick={() => setIsChatOpen(true)}
-                                    className="px-4 py-2 bg-blue-600 text-white text-[10px] font-black rounded-xl shadow-lg shadow-blue-100 hover:bg-blue-700 transition active:scale-95"
+                                    onClick={() => {
+                                        setIsChatOpen(true);
+                                        setHasUnread(false);
+                                    }}
+                                    className="relative px-4 py-2 bg-blue-600 text-white text-[10px] font-black rounded-xl shadow-lg shadow-blue-100 hover:bg-blue-700 transition active:scale-95"
                                 >
                                     ABRIR CHAT
+                                    {hasUnread && (
+                                        <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 border-2 border-white rounded-full animate-pulse" />
+                                    )}
                                 </button>
                             </div>
                         )}
