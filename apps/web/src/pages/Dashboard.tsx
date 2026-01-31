@@ -95,7 +95,7 @@ export function Dashboard() {
         loadDepartments();
 
         const socket = io(SOCKET_URL, {
-            query: { userId: user?.id, role: user?.role }
+            query: { userId: user?.id, role: user?.role, userName: user?.name }
         });
 
         socket.on('new_report_to_review', (data: { data: Report }) => {

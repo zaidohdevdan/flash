@@ -48,7 +48,7 @@ export function ChatWidget({ currentUser, targetUser, onClose }: ChatWidgetProps
         fetchHistory();
 
         const newSocket = io(SOCKET_URL, {
-            query: { userId: currentUser.id, role: currentUser.role }
+            query: { userId: currentUser.id, role: currentUser.role, userName: currentUser.name }
         });
 
         newSocket.on('connect', () => {
@@ -86,7 +86,7 @@ export function ChatWidget({ currentUser, targetUser, onClose }: ChatWidgetProps
         if (!inputText.trim() || !socket) return;
 
         socket.emit('private_message', {
-            targetUserId: professionalId,
+            targetUserId: targetUser.id,
             text: inputText
         });
         setInputText('');
@@ -141,7 +141,7 @@ export function ChatWidget({ currentUser, targetUser, onClose }: ChatWidgetProps
 
             if (socket) {
                 socket.emit('private_message', {
-                    targetUserId: professionalId,
+                    targetUserId: targetUser.id,
                     audioUrl
                 });
             }

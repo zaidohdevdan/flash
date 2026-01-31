@@ -55,7 +55,7 @@ export function CreateReport() {
         document.addEventListener('visibilitychange', handleVisibilityChange);
 
         const socket = io(SOCKET_URL, {
-            query: { userId: user?.id, role: user?.role },
+            query: { userId: user?.id, role: user?.role, userName: user?.name },
             transports: ['websocket', 'polling']
         });
 

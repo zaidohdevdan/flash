@@ -140,6 +140,7 @@ async function bootstrap() {
                 // The room is always identified by the PROFESSIONAL's ID
                 // If I am professional, room is `chat:${myId}`
                 // If I am supervisor, room is `chat:${targetUserId}`
+                console.log(`[Socket] Mensagem de ${myId} para ${targetUserId}`);
 
                 const myRole = socket.handshake.query.role as string;
                 let roomName = '';
