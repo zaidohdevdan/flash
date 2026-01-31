@@ -27,7 +27,8 @@ export class AuthService {
                 userId: user.id,
                 name: user.name,
                 role: user.role,
-                supervisorId: user.supervisorId
+                supervisorId: user.supervisorId,
+                supervisorName: (user as any).supervisor?.name
             },
             secret,
             { expiresIn: '1d' }
@@ -40,7 +41,8 @@ export class AuthService {
                 name: user.name,
                 email: user.email,
                 role: user.role,
-                supervisorId: user.supervisorId
+                supervisorId: user.supervisorId,
+                supervisorName: (user as any).supervisor?.name
             }
         };
     }

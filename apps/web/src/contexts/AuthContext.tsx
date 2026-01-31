@@ -7,6 +7,7 @@ interface User {
     email: string;
     role: 'SUPERVISOR' | 'PROFESSIONAL' | 'ADMIN';
     supervisorId: string | null;
+    supervisorName?: string;
     avatarUrl?: string;
     statusPhrase?: string;
 }

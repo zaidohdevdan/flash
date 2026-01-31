@@ -5,7 +5,14 @@ import type { CreateUserDTO, IUserRepository } from '../interfaces/IUserReposito
 export class PrismaUserRepository implements IUserRepository {
     async findByEmail(email: string): Promise<User | null> {
         return prisma.user.findUnique({
-            where: { email }
+            where: { email },
+            include: {
+                supervisor: {
+                    select: {
+                        name: true
+                    }
+                }
+            }
         });
     }
 

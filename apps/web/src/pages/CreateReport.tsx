@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
 import { io } from 'socket.io-client';
-import { Camera, Send, LogOut, CheckCircle2, Clock, CheckCircle, AlertCircle, MessageSquare, Wifi, WifiOff, Plus, ArrowLeft, Archive } from 'lucide-react';
+import { Camera, Send, LogOut, CheckCircle2, Clock, CheckCircle, AlertCircle, MessageSquare, Wifi, WifiOff, Plus, ArrowLeft, Archive, User } from 'lucide-react';
 
 const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
@@ -152,9 +152,9 @@ export function CreateReport() {
         );
     }
 
-     const Spinner = () => (
-  <div className="w-6 h-6 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-);
+    const Spinner = () => (
+        <div className="w-6 h-6 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+    );
 
     return (
         <div className="min-h-screen bg-white flex flex-col">
@@ -193,6 +193,27 @@ export function CreateReport() {
                                 <p className="text-sm text-gray-500">Seu histórico de atividades.</p>
                             </div>
                         </div>
+
+                        {/* Supervisor Info Card - NEW */}
+                        {user?.supervisorId && (
+                            <div className="bg-white p-5 rounded-3xl shadow-sm border border-gray-100 flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-4">
+                                    <div className="bg-blue-100 p-3 rounded-2xl">
+                                        <User className="w-5 h-5 text-blue-600" />
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">Meu Supervisor</p>
+                                        <h3 className="text-sm font-bold text-gray-800">{user.supervisorName || 'Supervisor Responsável'}</h3>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => setIsChatOpen(true)}
+                                    className="px-4 py-2 bg-blue-600 text-white text-[10px] font-black rounded-xl shadow-lg shadow-blue-100 hover:bg-blue-700 transition active:scale-95"
+                                >
+                                    ABRIR CHAT
+                                </button>
+                            </div>
+                        )}
 
                         {/* Filter Bar */}
                         <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
@@ -326,16 +347,16 @@ export function CreateReport() {
                                 disabled={sending}
                                 className={`w-full py-5 rounded-3xl font-black text-white flex items-center justify-center gap-3 shadow-xl shadow-blue-100 active:scale-95 transition-all ${sending ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'}`}
                             >
-                              {sending ? (
-  <>
-    <Spinner />
-    <span className="text-sm tracking-widest">ENVIANDO</span>
-  </>
-) : (
-  <>
-    ENVIAR AGORA <Send className="w-5 h-5" />
-  </>
-)}
+                                {sending ? (
+                                    <>
+                                        <Spinner />
+                                        <span className="text-sm tracking-widest">ENVIANDO</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        ENVIAR AGORA <Send className="w-5 h-5" />
+                                    </>
+                                )}
                             </button>
                         </form>
                     </div>
@@ -355,7 +376,7 @@ export function CreateReport() {
             {isChatOpen && user && (
                 <ChatWidget
                     currentUser={user}
-                    targetUser={{ id: user.supervisorId || 'supervisor', name: 'Supervisor', role: 'SUPERVISOR' }}
+                    targetUser={{ id: user.supervisorId || 'supervisor', name: user.supervisorName || 'Supervisor', role: 'SUPERVISOR' }}
                     onClose={() => setIsChatOpen(false)}
                 />
             )}
