@@ -151,21 +151,6 @@ async function bootstrap() {
                     roomName = `chat:${myId}`; // Professional sending to supervisor (in their own room)
                 }
 
-                io.to(roomName).emit('private_message', {
-                    from: myId,
-                    text,
-                    audioUrl,
-                    createdAt: new Date()
-                });
-
-                // Emit a separate notification event to the recipient's private room
-                io.to(String(targetUserId)).emit('new_chat_notification', {
-                    from: myId,
-                    fromName: socket.handshake.query.userName || 'Alguém', // Assuming we might want the name too
-                    text: text || (audioUrl ? 'Mensagem de áudio' : 'Nova mensagem'),
-                    createdAt: new Date()
-                });
-
                 // Persist message in database
                 chatService.saveMessage({
                     fromId: String(myId),
@@ -174,7 +159,33 @@ async function bootstrap() {
                     audioUrl,
                     audioPublicId,
                     room: roomName
-                }).catch(err => console.error('[Socket] Erro ao salvar mensagem no banco:', err));
+                }).then(savedMsg => {
+                    io.to(roomName).emit('private_message', {
+                        from: myId,
+                        text,
+                        audioUrl,
+                        createdAt: savedMsg.createdAt,
+                        expiresAt: savedMsg.expiresAt
+                    });
+
+                    // Emit a separate notification event to the recipient's private room
+                    io.to(String(targetUserId)).emit('new_chat_notification', {
+                        from: myId,
+                        fromName: socket.handshake.query.userName || 'Alguém',
+                        text: text || (audioUrl ? 'Mensagem de áudio' : 'Nova mensagem'),
+                        createdAt: savedMsg.createdAt,
+                        expiresAt: savedMsg.expiresAt
+                    });
+                }).catch(err => {
+                    console.error('[Socket] Erro ao salvar mensagem no banco:', err);
+                    // Fallback emit if save fails (though shouldn't happen)
+                    io.to(roomName).emit('private_message', {
+                        from: myId,
+                        text,
+                        audioUrl,
+                        createdAt: new Date()
+                    });
+                });
             });
 
             socket.on('disconnect', (reason) => {

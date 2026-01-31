@@ -14,6 +14,10 @@ interface Report {
     feedback?: string;
     feedbackAt?: string;
     status: 'SENT' | 'IN_REVIEW' | 'FORWARDED' | 'RESOLVED' | 'ARCHIVED';
+    user?: {
+        name: string;
+        avatarUrl?: string;
+    };
     createdAt: string;
 }
 
@@ -293,9 +297,20 @@ export function CreateReport() {
                                             <span className="text-[10px] text-gray-400 uppercase font-black tracking-widest">
                                                 {new Date(item.createdAt).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
                                             </span>
-                                            <p className="text-sm text-gray-800 font-medium line-clamp-2 mt-1 leading-tight">
-                                                {item.comment}
-                                            </p>
+                                            <div className="flex items-center justify-between mt-1">
+                                                <p className="text-sm text-gray-800 font-medium line-clamp-2 leading-tight">
+                                                    {item.comment}
+                                                </p>
+                                                <div className="flex-shrink-0 ml-2">
+                                                    {item.user?.avatarUrl ? (
+                                                        <img src={item.user.avatarUrl} alt="" className="w-8 h-8 rounded-full object-cover border-2 border-white shadow-sm" />
+                                                    ) : (
+                                                        <div className="w-8 h-8 bg-gray-50 rounded-full flex items-center justify-center border-2 border-white shadow-sm">
+                                                            <User className="w-4 h-4 text-gray-300" />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
                                             {item.feedback && (
                                                 <div className={`mt-2 p-2 rounded-lg border-l-2 ${item.status === 'RESOLVED'
                                                     ? 'bg-green-50 border-green-400'

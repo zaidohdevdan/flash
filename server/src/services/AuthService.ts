@@ -40,6 +40,8 @@ export class AuthService {
                 id: user.id,
                 name: user.name,
                 email: user.email,
+                avatarUrl: user.avatarUrl,
+                statusPhrase: user.statusPhrase,
                 role: user.role,
                 supervisorId: user.supervisorId,
                 supervisorName: (user as any).supervisor?.name
@@ -53,6 +55,8 @@ export class AuthService {
             id: u.id,
             name: u.name,
             email: u.email,
+            avatarUrl: u.avatarUrl,
+            statusPhrase: u.statusPhrase,
             role: u.role,
             supervisor: (u as any).supervisor?.name
         }));
@@ -72,6 +76,8 @@ export class AuthService {
             id: user.id,
             name: user.name,
             email: user.email,
+            avatarUrl: user.avatarUrl,
+            statusPhrase: user.statusPhrase,
             role: user.role,
             supervisorId: user.supervisorId
         };
@@ -105,6 +111,8 @@ export class AuthService {
             id: user.id,
             name: user.name,
             email: user.email,
+            avatarUrl: user.avatarUrl,
+            statusPhrase: user.statusPhrase,
             role: user.role,
             supervisorId: user.supervisorId
         };
@@ -123,6 +131,8 @@ export class AuthService {
         return subordinates.map(s => ({
             id: s.id,
             name: s.name,
+            avatarUrl: s.avatarUrl,
+            statusPhrase: s.statusPhrase,
             role: s.role
         }));
     }

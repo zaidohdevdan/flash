@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
-import { Send, Mic, X, MessageSquare, Square, Trash2 } from 'lucide-react';
+import { Send, Mic, X, MessageSquare, Square, Trash2, Hourglass } from 'lucide-react';
 import { api } from '../services/api';
 
 const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
@@ -10,6 +10,7 @@ interface Message {
     text?: string;
     audioUrl?: string;
     createdAt: string;
+    expiresAt?: string;
 }
 
 interface ChatWidgetProps {
@@ -24,6 +25,7 @@ export function ChatWidget({ currentUser, targetUser, onClose }: ChatWidgetProps
     const [isRecording, setIsRecording] = useState(false);
     const [socket, setSocket] = useState<Socket | null>(null);
     const [recordingTime, setRecordingTime] = useState(0);
+    const [now, setNow] = useState(Date.now());
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -73,6 +75,11 @@ export function ChatWidget({ currentUser, targetUser, onClose }: ChatWidgetProps
             newSocket.disconnect();
         };
     }, [currentUser, professionalId]);
+
+    useEffect(() => {
+        const interval = setInterval(() => setNow(Date.now()), 1000);
+        return () => clearInterval(interval);
+    }, []);
 
     useEffect(() => {
         scrollToBottom();
@@ -217,7 +224,23 @@ export function ChatWidget({ currentUser, targetUser, onClose }: ChatWidgetProps
                                 }`}>
                                 {msg.text && <p>{msg.text}</p>}
                                 {msg.audioUrl && (
-                                    <audio controls src={msg.audioUrl} className="h-8 max-w-[200px]" />
+                                    <div className="space-y-1.5">
+                                        <audio controls src={msg.audioUrl} className="h-8 max-w-[200px]" />
+                                        {msg.expiresAt && (
+                                            <div className="flex items-center justify-end gap-1 text-[9px] font-bold text-red-500 bg-red-50/50 px-2 py-0.5 rounded-full border border-red-100/50 animate-pulse">
+                                                <Hourglass className="w-2.5 h-2.5" />
+                                                <span>
+                                                    {(() => {
+                                                        const diff = new Date(msg.expiresAt).getTime() - now;
+                                                        if (diff <= 0) return 'Expirando...';
+                                                        const mins = Math.floor(diff / 60000);
+                                                        const secs = Math.floor((diff % 60000) / 1000);
+                                                        return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+                                                    })()}
+                                                </span>
+                                            </div>
+                                        )}
+                                    </div>
                                 )}
                                 <span className={`text-[9px] block mt-1 text-right font-medium opacity-70 ${isMe ? 'text-blue-100' : 'text-gray-400'}`}>
                                     {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
