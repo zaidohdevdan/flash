@@ -14,6 +14,7 @@ interface ReportHistory {
     status: string;
     comment: string;
     userName: string;
+    departmentName?: string;
     createdAt: string;
 }
 
@@ -695,7 +696,14 @@ export function Dashboard() {
                                                     }`}>{step.status}</span>
                                             </div>
                                             <p className="text-sm font-bold text-gray-800">{step.comment || 'Sem observações.'}</p>
-                                            <p className="text-[10px] text-gray-400 font-medium">Responsável: <b className="text-gray-600">{step.userName}</b></p>
+                                            <div className="flex justify-between items-center mt-1">
+                                                <p className="text-[10px] text-gray-400 font-medium">Responsável: <b className="text-gray-600">{step.userName}</b></p>
+                                                {step.departmentName && (
+                                                    <span className="text-[9px] font-black text-purple-600 bg-purple-50 px-2 py-0.5 rounded-lg border border-purple-100 flex items-center gap-1">
+                                                        <Folder className="w-3 h-3" /> {step.departmentName.toUpperCase()}
+                                                    </span>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 ))}

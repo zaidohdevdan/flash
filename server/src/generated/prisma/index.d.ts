@@ -4671,6 +4671,7 @@ export namespace Prisma {
     status: $Enums.ReportStatus | null
     comment: string | null
     userName: string | null
+    departmentName: string | null
     createdAt: Date | null
   }
 
@@ -4680,6 +4681,7 @@ export namespace Prisma {
     status: $Enums.ReportStatus | null
     comment: string | null
     userName: string | null
+    departmentName: string | null
     createdAt: Date | null
   }
 
@@ -4689,6 +4691,7 @@ export namespace Prisma {
     status: number
     comment: number
     userName: number
+    departmentName: number
     createdAt: number
     _all: number
   }
@@ -4700,6 +4703,7 @@ export namespace Prisma {
     status?: true
     comment?: true
     userName?: true
+    departmentName?: true
     createdAt?: true
   }
 
@@ -4709,6 +4713,7 @@ export namespace Prisma {
     status?: true
     comment?: true
     userName?: true
+    departmentName?: true
     createdAt?: true
   }
 
@@ -4718,6 +4723,7 @@ export namespace Prisma {
     status?: true
     comment?: true
     userName?: true
+    departmentName?: true
     createdAt?: true
     _all?: true
   }
@@ -4800,6 +4806,7 @@ export namespace Prisma {
     status: $Enums.ReportStatus
     comment: string | null
     userName: string
+    departmentName: string | null
     createdAt: Date
     _count: ReportHistoryCountAggregateOutputType | null
     _min: ReportHistoryMinAggregateOutputType | null
@@ -4826,6 +4833,7 @@ export namespace Prisma {
     status?: boolean
     comment?: boolean
     userName?: boolean
+    departmentName?: boolean
     createdAt?: boolean
     report?: boolean | ReportDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["reportHistory"]>
@@ -4838,10 +4846,11 @@ export namespace Prisma {
     status?: boolean
     comment?: boolean
     userName?: boolean
+    departmentName?: boolean
     createdAt?: boolean
   }
 
-  export type ReportHistoryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "reportId" | "status" | "comment" | "userName" | "createdAt", ExtArgs["result"]["reportHistory"]>
+  export type ReportHistoryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "reportId" | "status" | "comment" | "userName" | "departmentName" | "createdAt", ExtArgs["result"]["reportHistory"]>
   export type ReportHistoryInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     report?: boolean | ReportDefaultArgs<ExtArgs>
   }
@@ -4857,6 +4866,7 @@ export namespace Prisma {
       status: $Enums.ReportStatus
       comment: string | null
       userName: string
+      departmentName: string | null
       createdAt: Date
     }, ExtArgs["result"]["reportHistory"]>
     composites: {}
@@ -5256,6 +5266,7 @@ export namespace Prisma {
     readonly status: FieldRef<"ReportHistory", 'ReportStatus'>
     readonly comment: FieldRef<"ReportHistory", 'String'>
     readonly userName: FieldRef<"ReportHistory", 'String'>
+    readonly departmentName: FieldRef<"ReportHistory", 'String'>
     readonly createdAt: FieldRef<"ReportHistory", 'DateTime'>
   }
     
@@ -6812,8 +6823,10 @@ export namespace Prisma {
     toId: string | null
     text: string | null
     audioUrl: string | null
+    audioPublicId: string | null
     room: string | null
     createdAt: Date | null
+    expiresAt: Date | null
   }
 
   export type ChatMessageMaxAggregateOutputType = {
@@ -6822,8 +6835,10 @@ export namespace Prisma {
     toId: string | null
     text: string | null
     audioUrl: string | null
+    audioPublicId: string | null
     room: string | null
     createdAt: Date | null
+    expiresAt: Date | null
   }
 
   export type ChatMessageCountAggregateOutputType = {
@@ -6832,8 +6847,10 @@ export namespace Prisma {
     toId: number
     text: number
     audioUrl: number
+    audioPublicId: number
     room: number
     createdAt: number
+    expiresAt: number
     _all: number
   }
 
@@ -6844,8 +6861,10 @@ export namespace Prisma {
     toId?: true
     text?: true
     audioUrl?: true
+    audioPublicId?: true
     room?: true
     createdAt?: true
+    expiresAt?: true
   }
 
   export type ChatMessageMaxAggregateInputType = {
@@ -6854,8 +6873,10 @@ export namespace Prisma {
     toId?: true
     text?: true
     audioUrl?: true
+    audioPublicId?: true
     room?: true
     createdAt?: true
+    expiresAt?: true
   }
 
   export type ChatMessageCountAggregateInputType = {
@@ -6864,8 +6885,10 @@ export namespace Prisma {
     toId?: true
     text?: true
     audioUrl?: true
+    audioPublicId?: true
     room?: true
     createdAt?: true
+    expiresAt?: true
     _all?: true
   }
 
@@ -6947,8 +6970,10 @@ export namespace Prisma {
     toId: string
     text: string | null
     audioUrl: string | null
+    audioPublicId: string | null
     room: string
     createdAt: Date
+    expiresAt: Date | null
     _count: ChatMessageCountAggregateOutputType | null
     _min: ChatMessageMinAggregateOutputType | null
     _max: ChatMessageMaxAggregateOutputType | null
@@ -6974,8 +6999,10 @@ export namespace Prisma {
     toId?: boolean
     text?: boolean
     audioUrl?: boolean
+    audioPublicId?: boolean
     room?: boolean
     createdAt?: boolean
+    expiresAt?: boolean
   }, ExtArgs["result"]["chatMessage"]>
 
 
@@ -6986,11 +7013,13 @@ export namespace Prisma {
     toId?: boolean
     text?: boolean
     audioUrl?: boolean
+    audioPublicId?: boolean
     room?: boolean
     createdAt?: boolean
+    expiresAt?: boolean
   }
 
-  export type ChatMessageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "fromId" | "toId" | "text" | "audioUrl" | "room" | "createdAt", ExtArgs["result"]["chatMessage"]>
+  export type ChatMessageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "fromId" | "toId" | "text" | "audioUrl" | "audioPublicId" | "room" | "createdAt" | "expiresAt", ExtArgs["result"]["chatMessage"]>
 
   export type $ChatMessagePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "ChatMessage"
@@ -7001,8 +7030,10 @@ export namespace Prisma {
       toId: string
       text: string | null
       audioUrl: string | null
+      audioPublicId: string | null
       room: string
       createdAt: Date
+      expiresAt: Date | null
     }, ExtArgs["result"]["chatMessage"]>
     composites: {}
   }
@@ -7400,8 +7431,10 @@ export namespace Prisma {
     readonly toId: FieldRef<"ChatMessage", 'String'>
     readonly text: FieldRef<"ChatMessage", 'String'>
     readonly audioUrl: FieldRef<"ChatMessage", 'String'>
+    readonly audioPublicId: FieldRef<"ChatMessage", 'String'>
     readonly room: FieldRef<"ChatMessage", 'String'>
     readonly createdAt: FieldRef<"ChatMessage", 'DateTime'>
+    readonly expiresAt: FieldRef<"ChatMessage", 'DateTime'>
   }
     
 
@@ -7801,6 +7834,7 @@ export namespace Prisma {
     status: 'status',
     comment: 'comment',
     userName: 'userName',
+    departmentName: 'departmentName',
     createdAt: 'createdAt'
   };
 
@@ -7832,8 +7866,10 @@ export namespace Prisma {
     toId: 'toId',
     text: 'text',
     audioUrl: 'audioUrl',
+    audioPublicId: 'audioPublicId',
     room: 'room',
-    createdAt: 'createdAt'
+    createdAt: 'createdAt',
+    expiresAt: 'expiresAt'
   };
 
   export type ChatMessageScalarFieldEnum = (typeof ChatMessageScalarFieldEnum)[keyof typeof ChatMessageScalarFieldEnum]
@@ -8179,6 +8215,7 @@ export namespace Prisma {
     status?: EnumReportStatusFilter<"ReportHistory"> | $Enums.ReportStatus
     comment?: StringNullableFilter<"ReportHistory"> | string | null
     userName?: StringFilter<"ReportHistory"> | string
+    departmentName?: StringNullableFilter<"ReportHistory"> | string | null
     createdAt?: DateTimeFilter<"ReportHistory"> | Date | string
     report?: XOR<ReportScalarRelationFilter, ReportWhereInput>
   }
@@ -8189,6 +8226,7 @@ export namespace Prisma {
     status?: SortOrder
     comment?: SortOrder
     userName?: SortOrder
+    departmentName?: SortOrder
     createdAt?: SortOrder
     report?: ReportOrderByWithRelationInput
   }
@@ -8202,6 +8240,7 @@ export namespace Prisma {
     status?: EnumReportStatusFilter<"ReportHistory"> | $Enums.ReportStatus
     comment?: StringNullableFilter<"ReportHistory"> | string | null
     userName?: StringFilter<"ReportHistory"> | string
+    departmentName?: StringNullableFilter<"ReportHistory"> | string | null
     createdAt?: DateTimeFilter<"ReportHistory"> | Date | string
     report?: XOR<ReportScalarRelationFilter, ReportWhereInput>
   }, "id">
@@ -8212,6 +8251,7 @@ export namespace Prisma {
     status?: SortOrder
     comment?: SortOrder
     userName?: SortOrder
+    departmentName?: SortOrder
     createdAt?: SortOrder
     _count?: ReportHistoryCountOrderByAggregateInput
     _max?: ReportHistoryMaxOrderByAggregateInput
@@ -8227,6 +8267,7 @@ export namespace Prisma {
     status?: EnumReportStatusWithAggregatesFilter<"ReportHistory"> | $Enums.ReportStatus
     comment?: StringNullableWithAggregatesFilter<"ReportHistory"> | string | null
     userName?: StringWithAggregatesFilter<"ReportHistory"> | string
+    departmentName?: StringNullableWithAggregatesFilter<"ReportHistory"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"ReportHistory"> | Date | string
   }
 
@@ -8339,8 +8380,10 @@ export namespace Prisma {
     toId?: StringFilter<"ChatMessage"> | string
     text?: StringNullableFilter<"ChatMessage"> | string | null
     audioUrl?: StringNullableFilter<"ChatMessage"> | string | null
+    audioPublicId?: StringNullableFilter<"ChatMessage"> | string | null
     room?: StringFilter<"ChatMessage"> | string
     createdAt?: DateTimeFilter<"ChatMessage"> | Date | string
+    expiresAt?: DateTimeNullableFilter<"ChatMessage"> | Date | string | null
   }
 
   export type ChatMessageOrderByWithRelationInput = {
@@ -8349,8 +8392,10 @@ export namespace Prisma {
     toId?: SortOrder
     text?: SortOrder
     audioUrl?: SortOrder
+    audioPublicId?: SortOrder
     room?: SortOrder
     createdAt?: SortOrder
+    expiresAt?: SortOrder
   }
 
   export type ChatMessageWhereUniqueInput = Prisma.AtLeast<{
@@ -8362,8 +8407,10 @@ export namespace Prisma {
     toId?: StringFilter<"ChatMessage"> | string
     text?: StringNullableFilter<"ChatMessage"> | string | null
     audioUrl?: StringNullableFilter<"ChatMessage"> | string | null
+    audioPublicId?: StringNullableFilter<"ChatMessage"> | string | null
     room?: StringFilter<"ChatMessage"> | string
     createdAt?: DateTimeFilter<"ChatMessage"> | Date | string
+    expiresAt?: DateTimeNullableFilter<"ChatMessage"> | Date | string | null
   }, "id">
 
   export type ChatMessageOrderByWithAggregationInput = {
@@ -8372,8 +8419,10 @@ export namespace Prisma {
     toId?: SortOrder
     text?: SortOrder
     audioUrl?: SortOrder
+    audioPublicId?: SortOrder
     room?: SortOrder
     createdAt?: SortOrder
+    expiresAt?: SortOrder
     _count?: ChatMessageCountOrderByAggregateInput
     _max?: ChatMessageMaxOrderByAggregateInput
     _min?: ChatMessageMinOrderByAggregateInput
@@ -8388,8 +8437,10 @@ export namespace Prisma {
     toId?: StringWithAggregatesFilter<"ChatMessage"> | string
     text?: StringNullableWithAggregatesFilter<"ChatMessage"> | string | null
     audioUrl?: StringNullableWithAggregatesFilter<"ChatMessage"> | string | null
+    audioPublicId?: StringNullableWithAggregatesFilter<"ChatMessage"> | string | null
     room?: StringWithAggregatesFilter<"ChatMessage"> | string
     createdAt?: DateTimeWithAggregatesFilter<"ChatMessage"> | Date | string
+    expiresAt?: DateTimeNullableWithAggregatesFilter<"ChatMessage"> | Date | string | null
   }
 
   export type UserCreateInput = {
@@ -8630,6 +8681,7 @@ export namespace Prisma {
     status: $Enums.ReportStatus
     comment?: string | null
     userName: string
+    departmentName?: string | null
     createdAt?: Date | string
     report: ReportCreateNestedOneWithoutHistoryInput
   }
@@ -8640,6 +8692,7 @@ export namespace Prisma {
     status: $Enums.ReportStatus
     comment?: string | null
     userName: string
+    departmentName?: string | null
     createdAt?: Date | string
   }
 
@@ -8647,6 +8700,7 @@ export namespace Prisma {
     status?: EnumReportStatusFieldUpdateOperationsInput | $Enums.ReportStatus
     comment?: NullableStringFieldUpdateOperationsInput | string | null
     userName?: StringFieldUpdateOperationsInput | string
+    departmentName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     report?: ReportUpdateOneRequiredWithoutHistoryNestedInput
   }
@@ -8656,6 +8710,7 @@ export namespace Prisma {
     status?: EnumReportStatusFieldUpdateOperationsInput | $Enums.ReportStatus
     comment?: NullableStringFieldUpdateOperationsInput | string | null
     userName?: StringFieldUpdateOperationsInput | string
+    departmentName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -8665,6 +8720,7 @@ export namespace Prisma {
     status: $Enums.ReportStatus
     comment?: string | null
     userName: string
+    departmentName?: string | null
     createdAt?: Date | string
   }
 
@@ -8672,6 +8728,7 @@ export namespace Prisma {
     status?: EnumReportStatusFieldUpdateOperationsInput | $Enums.ReportStatus
     comment?: NullableStringFieldUpdateOperationsInput | string | null
     userName?: StringFieldUpdateOperationsInput | string
+    departmentName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -8680,6 +8737,7 @@ export namespace Prisma {
     status?: EnumReportStatusFieldUpdateOperationsInput | $Enums.ReportStatus
     comment?: NullableStringFieldUpdateOperationsInput | string | null
     userName?: StringFieldUpdateOperationsInput | string
+    departmentName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -8795,8 +8853,10 @@ export namespace Prisma {
     toId: string
     text?: string | null
     audioUrl?: string | null
+    audioPublicId?: string | null
     room: string
     createdAt?: Date | string
+    expiresAt?: Date | string | null
   }
 
   export type ChatMessageUncheckedCreateInput = {
@@ -8805,8 +8865,10 @@ export namespace Prisma {
     toId: string
     text?: string | null
     audioUrl?: string | null
+    audioPublicId?: string | null
     room: string
     createdAt?: Date | string
+    expiresAt?: Date | string | null
   }
 
   export type ChatMessageUpdateInput = {
@@ -8814,8 +8876,10 @@ export namespace Prisma {
     toId?: StringFieldUpdateOperationsInput | string
     text?: NullableStringFieldUpdateOperationsInput | string | null
     audioUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    audioPublicId?: NullableStringFieldUpdateOperationsInput | string | null
     room?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type ChatMessageUncheckedUpdateInput = {
@@ -8823,8 +8887,10 @@ export namespace Prisma {
     toId?: StringFieldUpdateOperationsInput | string
     text?: NullableStringFieldUpdateOperationsInput | string | null
     audioUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    audioPublicId?: NullableStringFieldUpdateOperationsInput | string | null
     room?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type ChatMessageCreateManyInput = {
@@ -8833,8 +8899,10 @@ export namespace Prisma {
     toId: string
     text?: string | null
     audioUrl?: string | null
+    audioPublicId?: string | null
     room: string
     createdAt?: Date | string
+    expiresAt?: Date | string | null
   }
 
   export type ChatMessageUpdateManyMutationInput = {
@@ -8842,8 +8910,10 @@ export namespace Prisma {
     toId?: StringFieldUpdateOperationsInput | string
     text?: NullableStringFieldUpdateOperationsInput | string | null
     audioUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    audioPublicId?: NullableStringFieldUpdateOperationsInput | string | null
     room?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type ChatMessageUncheckedUpdateManyInput = {
@@ -8851,8 +8921,10 @@ export namespace Prisma {
     toId?: StringFieldUpdateOperationsInput | string
     text?: NullableStringFieldUpdateOperationsInput | string | null
     audioUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    audioPublicId?: NullableStringFieldUpdateOperationsInput | string | null
     room?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type StringFilter<$PrismaModel = never> = {
@@ -9171,6 +9243,7 @@ export namespace Prisma {
     status?: SortOrder
     comment?: SortOrder
     userName?: SortOrder
+    departmentName?: SortOrder
     createdAt?: SortOrder
   }
 
@@ -9180,6 +9253,7 @@ export namespace Prisma {
     status?: SortOrder
     comment?: SortOrder
     userName?: SortOrder
+    departmentName?: SortOrder
     createdAt?: SortOrder
   }
 
@@ -9189,6 +9263,7 @@ export namespace Prisma {
     status?: SortOrder
     comment?: SortOrder
     userName?: SortOrder
+    departmentName?: SortOrder
     createdAt?: SortOrder
   }
 
@@ -9319,8 +9394,10 @@ export namespace Prisma {
     toId?: SortOrder
     text?: SortOrder
     audioUrl?: SortOrder
+    audioPublicId?: SortOrder
     room?: SortOrder
     createdAt?: SortOrder
+    expiresAt?: SortOrder
   }
 
   export type ChatMessageMaxOrderByAggregateInput = {
@@ -9329,8 +9406,10 @@ export namespace Prisma {
     toId?: SortOrder
     text?: SortOrder
     audioUrl?: SortOrder
+    audioPublicId?: SortOrder
     room?: SortOrder
     createdAt?: SortOrder
+    expiresAt?: SortOrder
   }
 
   export type ChatMessageMinOrderByAggregateInput = {
@@ -9339,8 +9418,10 @@ export namespace Prisma {
     toId?: SortOrder
     text?: SortOrder
     audioUrl?: SortOrder
+    audioPublicId?: SortOrder
     room?: SortOrder
     createdAt?: SortOrder
+    expiresAt?: SortOrder
   }
 
   export type UserCreateNestedOneWithoutSubordinatesInput = {
@@ -10304,6 +10385,7 @@ export namespace Prisma {
     status: $Enums.ReportStatus
     comment?: string | null
     userName: string
+    departmentName?: string | null
     createdAt?: Date | string
   }
 
@@ -10312,6 +10394,7 @@ export namespace Prisma {
     status: $Enums.ReportStatus
     comment?: string | null
     userName: string
+    departmentName?: string | null
     createdAt?: Date | string
   }
 
@@ -10448,6 +10531,7 @@ export namespace Prisma {
     status?: EnumReportStatusFilter<"ReportHistory"> | $Enums.ReportStatus
     comment?: StringNullableFilter<"ReportHistory"> | string | null
     userName?: StringFilter<"ReportHistory"> | string
+    departmentName?: StringNullableFilter<"ReportHistory"> | string | null
     createdAt?: DateTimeFilter<"ReportHistory"> | Date | string
   }
 
@@ -10896,6 +10980,7 @@ export namespace Prisma {
     status: $Enums.ReportStatus
     comment?: string | null
     userName: string
+    departmentName?: string | null
     createdAt?: Date | string
   }
 
@@ -10918,6 +11003,7 @@ export namespace Prisma {
     status?: EnumReportStatusFieldUpdateOperationsInput | $Enums.ReportStatus
     comment?: NullableStringFieldUpdateOperationsInput | string | null
     userName?: StringFieldUpdateOperationsInput | string
+    departmentName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -10925,6 +11011,7 @@ export namespace Prisma {
     status?: EnumReportStatusFieldUpdateOperationsInput | $Enums.ReportStatus
     comment?: NullableStringFieldUpdateOperationsInput | string | null
     userName?: StringFieldUpdateOperationsInput | string
+    departmentName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -10932,6 +11019,7 @@ export namespace Prisma {
     status?: EnumReportStatusFieldUpdateOperationsInput | $Enums.ReportStatus
     comment?: NullableStringFieldUpdateOperationsInput | string | null
     userName?: StringFieldUpdateOperationsInput | string
+    departmentName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 

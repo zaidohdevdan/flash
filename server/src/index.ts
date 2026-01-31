@@ -133,9 +133,9 @@ async function bootstrap() {
                 // console.log(`[Socket] ${myId} joined room ${roomName}`);
             });
 
-            socket.on('private_message', (data: { targetUserId: string, text?: string, audioUrl?: string }) => {
+            socket.on('private_message', (data: { targetUserId: string, text?: string, audioUrl?: string, audioPublicId?: string }) => {
                 const myId = socket.handshake.query.userId as string;
-                const { targetUserId, text, audioUrl } = data;
+                const { targetUserId, text, audioUrl, audioPublicId } = data;
 
                 // The room is always identified by the PROFESSIONAL's ID
                 // If I am professional, room is `chat:${myId}`
@@ -172,6 +172,7 @@ async function bootstrap() {
                     toId: String(targetUserId),
                     text,
                     audioUrl,
+                    audioPublicId,
                     room: roomName
                 }).catch(err => console.error('[Socket] Erro ao salvar mensagem no banco:', err));
             });
@@ -203,6 +204,11 @@ async function bootstrap() {
         const PORT = process.env.PORT || 3000;
         httpServer.listen(PORT, () => {
             console.log(`[HTTP] Server is running on port ${PORT}`);
+
+            // Background cleanup task for expired audios
+            setInterval(() => {
+                chatService.cleanupExpiredMessages().catch(e => console.error('[Cleanup] Error:', e));
+            }, 30000); // Check every 30 seconds
         });
     } catch (error) {
         console.error('[CRITICAL]  Error connecting to the database:', error);

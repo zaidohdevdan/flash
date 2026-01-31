@@ -152,6 +152,7 @@ exports.Prisma.ReportHistoryScalarFieldEnum = {
   status: 'status',
   comment: 'comment',
   userName: 'userName',
+  departmentName: 'departmentName',
   createdAt: 'createdAt'
 };
 
@@ -177,8 +178,10 @@ exports.Prisma.ChatMessageScalarFieldEnum = {
   toId: 'toId',
   text: 'text',
   audioUrl: 'audioUrl',
+  audioPublicId: 'audioPublicId',
   room: 'room',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  expiresAt: 'expiresAt'
 };
 
 exports.Prisma.SortOrder = {

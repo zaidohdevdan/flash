@@ -1,4 +1,4 @@
-import {prisma} from '../../lib/prisma'
+import { prisma } from '../../lib/prisma'
 import { type Report, type ReportStatus, type User } from '../../generated/prisma';
 import type { CreateReportDTO, IReportRepository, ReportWithUser } from '../interfaces/IReportRepository';
 
@@ -44,6 +44,12 @@ export class PrismaReportRepository implements IReportRepository {
     }
 
     async updateStatus(id: string, status: ReportStatus, feedback?: string, userName?: string, departmentId?: string): Promise<Report> {
+        let departmentName: string | null = null;
+        if (departmentId) {
+            const dept = await prisma.department.findUnique({ where: { id: departmentId } });
+            departmentName = dept?.name || null;
+        }
+
         return prisma.report.update({
             where: { id },
             data: {
@@ -55,7 +61,8 @@ export class PrismaReportRepository implements IReportRepository {
                     create: {
                         status,
                         comment: feedback,
-                        userName: userName || 'Sistema'
+                        userName: userName || 'Sistema',
+                        departmentName
                     }
                 }
             },

@@ -138,11 +138,13 @@ export function ChatWidget({ currentUser, targetUser, onClose }: ChatWidgetProps
         try {
             const response = await api.post('/chat/media', formData);
             const audioUrl = response.data.secureUrl;
+            const audioPublicId = response.data.publicId;
 
             if (socket) {
                 socket.emit('private_message', {
                     targetUserId: targetUser.id,
-                    audioUrl
+                    audioUrl,
+                    audioPublicId
                 });
             }
         } catch (error) {

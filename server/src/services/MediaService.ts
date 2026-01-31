@@ -68,9 +68,14 @@ export class MediaService {
     async uploadFromBuffer(params: UploadFromBufferParams): Promise<IMedia> {
         const { buffer, userId, reportId, options } = params;
 
-        const otimizedBuffer = await this.otimizedBuffer(buffer)
+        let finalBuffer = buffer;
 
-        const uploadResult = await this.uploadBufferToCloudinary(otimizedBuffer, options);
+        // Só otimiza se for explicitamente imagem ou se não houver resourceType (default)
+        if (!options?.resourceType || options.resourceType === 'image') {
+            finalBuffer = await this.otimizedBuffer(buffer)
+        }
+
+        const uploadResult = await this.uploadBufferToCloudinary(finalBuffer, options);
 
         const mediaToCreate: Omit<IMedia, 'id'> = {
             publicId: uploadResult.public_id,

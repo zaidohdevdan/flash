@@ -68,13 +68,14 @@ model Department {
 }
 
 model ReportHistory {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  reportId    String   @db.ObjectId
-  report      Report   @relation(fields: [reportId], references: [id])
-  status      ReportStatus
-  comment     String?  // O feedback ou observação deste passo
-  userName    String   // Nome de quem registrou o passo para histórico rápido
-  createdAt   DateTime @default(now())
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  reportId      String   @db.ObjectId
+  report        Report   @relation(fields: [reportId], references: [id])
+  status        ReportStatus
+  comment       String?  // O feedback ou observação deste passo
+  userName      String   // Nome de quem registrou o passo para histórico rápido
+  departmentName String? // NEW: Setor por onde passou
+  createdAt     DateTime @default(now())
 }
 
 model Media {
@@ -108,8 +109,10 @@ model ChatMessage {
   toId          String   @db.ObjectId
   text          String?
   audioUrl      String?
+  audioPublicId String?
   room          String   // e.g., "chat:professionalUserId"
   createdAt     DateTime @default(now())
+  expiresAt     DateTime?
 
   @@index([room])
 }
