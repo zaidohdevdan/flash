@@ -10,6 +10,7 @@ import { AdminMiddleware } from './middlewares/AdminMiddleware';
 import { PrismaMediaRepository } from './repositories/implementations/PrismaMediaRepository';
 import { MediaService } from './services/MediaService';
 import { MediaController } from './controllers/MediaController';
+import { ChatController } from './controllers/ChatController';
 
 const routes = Router();
 
@@ -73,5 +74,9 @@ routes.patch('/profile', AuthMiddleware, upload.single('avatar'), ProfileControl
 
 // Chat Media
 routes.post('/chat/media', AuthMiddleware, upload.single('file'), mediaController.uploadGeneric);
+
+// Chat History
+routes.get('/chat/history/:room', AuthMiddleware, ChatController.listHistory);
+routes.delete('/chat/history/:room', AuthMiddleware, ChatController.clearHistory);
 
 export { routes };

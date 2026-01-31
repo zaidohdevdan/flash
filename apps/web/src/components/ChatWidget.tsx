@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
-import { Send, Mic, X, MessageSquare, Square } from 'lucide-react';
+import { Send, Mic, X, MessageSquare, Square, Trash2 } from 'lucide-react';
 import { api } from '../services/api';
 
 const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
@@ -36,6 +36,17 @@ export function ChatWidget({ currentUser, targetUser, onClose }: ChatWidgetProps
     const professionalId = currentUser.role === 'SUPERVISOR' || currentUser.role === 'ADMIN' ? targetUser.id : currentUser.id;
 
     useEffect(() => {
+        // Fetch history
+        async function fetchHistory() {
+            try {
+                const response = await api.get(`/chat/history/chat:${professionalId}`);
+                setMessages(response.data);
+            } catch (error) {
+                console.error('Error fetching chat history:', error);
+            }
+        }
+        fetchHistory();
+
         const newSocket = io(SOCKET_URL, {
             query: { userId: currentUser.id, role: currentUser.role }
         });
@@ -140,6 +151,18 @@ export function ChatWidget({ currentUser, targetUser, onClose }: ChatWidgetProps
         }
     };
 
+    const handleClearHistory = async () => {
+        if (!window.confirm('Você tem certeza que deseja excluir todo o histórico desta conversa?')) return;
+
+        try {
+            await api.delete(`/chat/history/chat:${professionalId}`);
+            setMessages([]);
+        } catch (error) {
+            console.error('Error clearing chat history:', error);
+            alert('Erro ao excluir histórico.');
+        }
+    };
+
     const formatTime = (seconds: number) => {
         const mins = Math.floor(seconds / 60);
         const secs = seconds % 60;
@@ -147,7 +170,7 @@ export function ChatWidget({ currentUser, targetUser, onClose }: ChatWidgetProps
     };
 
     return (
-        <div className="fixed bottom-4 right-4 w-96 h-[500px] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-gray-100 z-50 animate-in slide-in-from-bottom-10 fade-in duration-300">
+        <div className="fixed bottom-0 right-0 sm:bottom-4 sm:right-4 w-full sm:w-96 h-[500px] max-h-[100vh] sm:max-h-[calc(100vh-2rem)] bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-gray-100 z-50 animate-in slide-in-from-bottom-10 fade-in duration-300">
             {/* Header */}
             <div className="p-4 bg-blue-600 text-white flex justify-between items-center">
                 <div className="flex items-center gap-3">
@@ -159,13 +182,22 @@ export function ChatWidget({ currentUser, targetUser, onClose }: ChatWidgetProps
                         <p className="text-[10px] opacity-80 uppercase tracking-wider">{currentUser.role === 'SUPERVISOR' ? 'Subordinado' : 'Supervisor'}</p>
                     </div>
                 </div>
-                <button onClick={onClose} className="p-1 hover:bg-white/20 rounded-full transition">
-                    <X className="w-5 h-5" />
-                </button>
+                <div className="flex items-center gap-1">
+                    <button
+                        onClick={handleClearHistory}
+                        className="p-1.5 hover:bg-white/20 rounded-lg transition text-white/70 hover:text-white"
+                        title="Excluir Histórico"
+                    >
+                        <Trash2 className="w-4 h-4" />
+                    </button>
+                    <button onClick={onClose} className="p-1 hover:bg-white/20 rounded-full transition">
+                        <X className="w-5 h-5" />
+                    </button>
+                </div>
             </div>
 
             {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto p-4 bg-gray-50/50 space-y-4">
+            <div className="flex-1 overflow-y-auto p-4 bg-gray-50/50 space-y-4 overscroll-contain">
                 {messages.length === 0 && (
                     <div className="flex flex-col items-center justify-center h-full text-gray-400 opacity-50">
                         <MessageSquare className="w-12 h-12 mb-2" />

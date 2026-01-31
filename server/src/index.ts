@@ -6,6 +6,9 @@ import cors from 'cors';
 import { createServer } from 'http';
 import { Server as SocketIOServer } from 'socket.io';
 import { routes } from './routes';
+import { ChatService } from './services/ChatService';
+
+const chatService = new ChatService();
 
 // ---------- Tipagens globais ----------
 
@@ -161,6 +164,15 @@ async function bootstrap() {
                     text: text || (audioUrl ? 'Mensagem de áudio' : 'Nova mensagem'),
                     createdAt: new Date()
                 });
+
+                // Persist message in database
+                chatService.saveMessage({
+                    fromId: String(myId),
+                    toId: String(targetUserId),
+                    text,
+                    audioUrl,
+                    room: roomName
+                }).catch(err => console.error('[Socket] Erro ao salvar mensagem no banco:', err));
             });
 
             socket.on('disconnect', (reason) => {

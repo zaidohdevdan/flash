@@ -522,6 +522,11 @@ export function Dashboard() {
                                                     <User className="w-4 h-4 text-blue-600" />
                                                 </div>
                                                 <Circle className={`absolute -bottom-1 -right-1 w-3 h-3 border-2 border-white rounded-full ${sub.isOnline ? 'fill-green-500 text-green-500' : 'fill-gray-300 text-gray-300'}`} />
+
+                                                {/* NEW: Unread badge on avatar */}
+                                                {unreadMessages[sub.id] && (
+                                                    <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 border-2 border-white rounded-full animate-pulse shadow-sm z-10" />
+                                                )}
                                             </div>
                                             <div>
                                                 <p className="text-xs font-bold text-gray-800">{sub.name}</p>

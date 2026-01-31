@@ -22,11 +22,11 @@ exports.$Enums = {}
 
 /**
  * Prisma Client JS version: 6.19.2
- * Query Engine version: c2990dca591cba766e3b7ef5d9e8a84796e47ab7
+ * Query Engine version: acc0b9dd43eb689cbd20c9470515d719db10d0b0
  */
 Prisma.prismaVersion = {
   client: "6.19.2",
-  engine: "c2990dca591cba766e3b7ef5d9e8a84796e47ab7"
+  engine: "acc0b9dd43eb689cbd20c9470515d719db10d0b0"
 }
 
 Prisma.PrismaClientKnownRequestError = () => {
@@ -171,6 +171,16 @@ exports.Prisma.MediaScalarFieldEnum = {
   reportId: 'reportId'
 };
 
+exports.Prisma.ChatMessageScalarFieldEnum = {
+  id: 'id',
+  fromId: 'fromId',
+  toId: 'toId',
+  text: 'text',
+  audioUrl: 'audioUrl',
+  room: 'room',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -199,7 +209,8 @@ exports.Prisma.ModelName = {
   Report: 'Report',
   Department: 'Department',
   ReportHistory: 'ReportHistory',
-  Media: 'Media'
+  Media: 'Media',
+  ChatMessage: 'ChatMessage'
 };
 
 /**

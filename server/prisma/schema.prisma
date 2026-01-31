@@ -101,3 +101,15 @@ model Media {
   @@index([reportId])
   @@map("media")
 }
+
+model ChatMessage {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  fromId        String   @db.ObjectId
+  toId          String   @db.ObjectId
+  text          String?
+  audioUrl      String?
+  room          String   // e.g., "chat:professionalUserId"
+  createdAt     DateTime @default(now())
+
+  @@index([room])
+}

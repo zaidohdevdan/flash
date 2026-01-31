@@ -73,7 +73,7 @@ function AppRoutes() {
 function App() {
   return (
     <AuthProvider>
-      <Toaster position="top-right" reverseOrder={false} />
+      <Toaster position="top-center" reverseOrder={false} />
       <BrowserRouter>
         <AppRoutes />
       </BrowserRouter>
