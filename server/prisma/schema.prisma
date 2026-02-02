@@ -13,6 +13,7 @@ enum Role {
   ADMIN
   PROFESSIONAL
   SUPERVISOR
+  MANAGER
 }
 
 enum ReportStatus {
@@ -34,6 +35,8 @@ model User {
   supervisorId  String?   @db.ObjectId
   supervisor    User?     @relation("Subordinates", fields: [supervisorId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   Subordinates  User[]    @relation("Subordinates")
+  departmentId  String?   @db.ObjectId
+  department    Department? @relation("DepartmentMembers", fields: [departmentId], references: [id])
   reports       Report[]
   media         Media[]   // <- NEW: Relação com Media
   createdAt     DateTime  @default(now())
@@ -64,6 +67,7 @@ model Department {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   name      String   @unique
   reports   Report[]
+  members   User[]   @relation("DepartmentMembers")
   createdAt DateTime @default(now())
 }
 

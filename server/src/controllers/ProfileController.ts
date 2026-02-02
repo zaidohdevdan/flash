@@ -39,19 +39,12 @@ export const ProfileController = {
         }
 
         try {
-            const user = await authService.updateProfile(userId, {
+            const user = await authService.updateUser(userId, {
                 statusPhrase,
                 avatarUrl
             });
 
-            return res.json({
-                id: user.id,
-                name: user.name,
-                email: user.email,
-                avatarUrl: user.avatarUrl,
-                statusPhrase: user.statusPhrase,
-                role: user.role
-            });
+            return res.json(user);
         } catch (error) {
             return res.status(500).json({ error: "Erro ao atualizar perfil" });
         }
@@ -60,8 +53,16 @@ export const ProfileController = {
     async me(req: Request, res: Response) {
         const userId = req.userId!;
         try {
-            // Reutilizando lógica de AuthService ou UserRepository se necessário
-            const user = await authService.updateProfile(userId, {});
+            const user = await prisma.user.findUnique({
+                where: { id: userId },
+                include: {
+                    supervisor: {
+                        select: { name: true }
+                    }
+                }
+            });
+
+            if (!user) return res.status(404).json({ error: 'Usuário não encontrado' });
 
             return res.json({
                 id: user.id,
@@ -69,7 +70,10 @@ export const ProfileController = {
                 email: user.email,
                 avatarUrl: user.avatarUrl,
                 statusPhrase: user.statusPhrase,
-                role: user.role
+                role: user.role,
+                departmentId: user.departmentId,
+                supervisorId: user.supervisorId,
+                supervisorName: user.supervisor?.name
             });
         } catch (error) {
             return res.status(500).json({ error: "Erro ao buscar perfil" });

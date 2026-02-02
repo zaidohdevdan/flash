@@ -3,6 +3,12 @@ import type { ChatMessage } from '../../generated/prisma';
 import type { IChatRepository } from '../interfaces/IChatRepository';
 
 export class PrismaChatRepository implements IChatRepository {
+    async findById(id: string): Promise<ChatMessage | null> {
+        return prisma.chatMessage.findUnique({
+            where: { id }
+        });
+    }
+
     async save(data: { fromId: string, toId: string, text?: string, audioUrl?: string, audioPublicId?: string, room: string, expiresAt?: Date }): Promise<ChatMessage> {
         return prisma.chatMessage.create({
             data
@@ -35,6 +41,13 @@ export class PrismaChatRepository implements IChatRepository {
     async deleteById(id: string): Promise<void> {
         await prisma.chatMessage.delete({
             where: { id }
+        });
+    }
+
+    async update(id: string, text: string): Promise<ChatMessage> {
+        return prisma.chatMessage.update({
+            where: { id },
+            data: { text }
         });
     }
 }

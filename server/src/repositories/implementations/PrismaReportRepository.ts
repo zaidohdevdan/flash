@@ -56,7 +56,7 @@ export class PrismaReportRepository implements IReportRepository {
                 status,
                 feedback,
                 feedbackAt: feedback ? new Date() : undefined,
-                departmentId,
+                departmentId: departmentId || null,
                 history: {
                     create: {
                         status,
@@ -95,7 +95,8 @@ export class PrismaReportRepository implements IReportRepository {
                 user: {
                     supervisorId: supervisorId
                 },
-                status: status,
+                // Regra: Supervisor não vê o que já foi encaminhado para Departamento
+                status: status ? status : { notIn: ['FORWARDED', 'ARCHIVED'] as ReportStatus[] },
                 createdAt: {
                     gte: startDate,
                     lte: endDate
@@ -155,5 +156,54 @@ export class PrismaReportRepository implements IReportRepository {
             skip,
             take: limit
         });
+    }
+
+    async findByDepartment(departmentId: string, page: number = 1, limit: number = 10, status?: ReportStatus, startDate?: Date, endDate?: Date): Promise<ReportWithUser[]> {
+        const skip = (page - 1) * limit;
+
+        return prisma.report.findMany({
+            where: {
+                departmentId,
+                status: status,
+                createdAt: {
+                    gte: startDate,
+                    lte: endDate
+                }
+            },
+            include: {
+                user: {
+                    select: {
+                        name: true,
+                        supervisorId: true,
+                        avatarUrl: true,
+                        statusPhrase: true,
+                    }
+                },
+                history: {
+                    orderBy: { createdAt: 'desc' }
+                },
+                department: true
+            },
+            orderBy: {
+                createdAt: 'desc'
+            },
+            skip,
+            take: limit
+        });
+    }
+
+    async findStatsByDepartment(departmentId: string): Promise<{ status: string, _count: number }[]> {
+        const stats = await prisma.report.groupBy({
+            by: ['status'],
+            where: {
+                departmentId
+            },
+            _count: true
+        });
+
+        return stats.map(item => ({
+            status: item.status,
+            _count: item._count
+        }));
     }
 }

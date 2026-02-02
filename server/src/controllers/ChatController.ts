@@ -24,5 +24,40 @@ export const ChatController = {
             console.error('Erro ao excluir histórico do chat:', error);
             return res.status(500).json({ error: 'Erro ao excluir histórico.' });
         }
+    },
+
+    async updateMessage(req: Request, res: Response) {
+        try {
+            const { id } = req.params;
+            const { text } = req.body;
+            const userId = req.userId!;
+
+            const message = await chatService.getMessageById(id as string);
+            if (!message) return res.status(404).json({ error: 'Mensagem não encontrada.' });
+            if (message.fromId !== userId) return res.status(403).json({ error: 'Não autorizado.' });
+
+            const updated = await chatService.updateMessage(id as string, text);
+            return res.json(updated);
+        } catch (error) {
+            console.error('Erro ao editar mensagem:', error);
+            return res.status(500).json({ error: 'Erro ao editar mensagem.' });
+        }
+    },
+
+    async deleteMessage(req: Request, res: Response) {
+        try {
+            const { id } = req.params;
+            const userId = req.userId!;
+
+            const message = await chatService.getMessageById(id as string);
+            if (!message) return res.status(404).json({ error: 'Mensagem não encontrada.' });
+            if (message.fromId !== userId) return res.status(403).json({ error: 'Não autorizado.' });
+
+            await chatService.deleteMessage(id as string);
+            return res.status(204).send();
+        } catch (error) {
+            console.error('Erro ao deletar mensagem:', error);
+            return res.status(500).json({ error: 'Erro ao deletar mensagem.' });
+        }
     }
 }

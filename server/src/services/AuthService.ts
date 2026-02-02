@@ -44,7 +44,9 @@ export class AuthService {
                 statusPhrase: user.statusPhrase,
                 role: user.role,
                 supervisorId: user.supervisorId,
-                supervisorName: (user as any).supervisor?.name
+                supervisorName: (user as any).supervisor?.name,
+                departmentId: user.departmentId,
+                departmentName: (user as any).department?.name
             }
         };
     }
@@ -58,17 +60,22 @@ export class AuthService {
             avatarUrl: u.avatarUrl,
             statusPhrase: u.statusPhrase,
             role: u.role,
-            supervisor: (u as any).supervisor?.name
+            supervisor: (u as any).supervisor?.name,
+            departmentId: u.departmentId,
+            departmentName: (u as any).department?.name
         }));
     }
 
-    async updateUser(id: string, data: { name?: string, email?: string, password?: string, role?: Role, supervisorId?: string }) {
+    async updateUser(id: string, data: { name?: string, email?: string, password?: string, role?: Role, supervisorId?: string, departmentId?: string, avatarUrl?: string, statusPhrase?: string }) {
         const updateData: any = { ...data };
         delete updateData.password;
 
         if (data.password) {
             updateData.passwordHash = await bcrypt.hash(data.password, 10);
         }
+
+        if (data.departmentId === '') updateData.departmentId = null;
+        if (data.supervisorId === '') updateData.supervisorId = null;
 
         const user = await this.userRepository.update(id, updateData);
 
@@ -79,11 +86,12 @@ export class AuthService {
             avatarUrl: user.avatarUrl,
             statusPhrase: user.statusPhrase,
             role: user.role,
-            supervisorId: user.supervisorId
+            supervisorId: user.supervisorId,
+            departmentId: user.departmentId
         };
     }
 
-    async register(data: { name: string, email: string, password: string, role: Role, supervisorId?: string }) {
+    async register(data: { name: string, email: string, password: string, role: Role, supervisorId?: string, departmentId?: string }) {
         // Trava de segurança: Admins só podem ser criados via Banco/Seed
         if (data.role === Role.ADMIN) {
             throw new Error('UNAUTHORIZED_ROLE_CREATION');
@@ -104,7 +112,8 @@ export class AuthService {
             email: data.email,
             passwordHash,
             role: data.role,
-            supervisorId: data.supervisorId
+            supervisorId: data.supervisorId || null,
+            departmentId: data.departmentId || null
         });
 
         return {
@@ -114,7 +123,8 @@ export class AuthService {
             avatarUrl: user.avatarUrl,
             statusPhrase: user.statusPhrase,
             role: user.role,
-            supervisorId: user.supervisorId
+            supervisorId: user.supervisorId,
+            departmentId: user.departmentId
         };
     }
 

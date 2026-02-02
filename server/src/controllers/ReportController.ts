@@ -33,13 +33,51 @@ export const ReportController = {
                 supervisorId,
                 page ? Number(page) : undefined,
                 limit ? Number(limit) : undefined,
-                status as ReportStatus,
+                (status && status !== '') ? (status as ReportStatus) : undefined,
                 startDate ? new Date(startDate as string) : undefined,
                 endDate ? new Date(endDate as string) : undefined,
             );
             return res.json(reports);
         } catch (error) {
             return res.status(500).json({ error: 'Erro ao listar relatórios' });
+        }
+    },
+
+    // List reports for department (Manager)
+    indexByDepartment: async (req: Request, res: Response) => {
+        const userId = req.userId!;
+        const { page, limit, status, startDate, endDate } = req.query;
+
+        try {
+            // Buscamos o departamento do usuário manager
+            const user = await prisma.user.findUnique({ where: { id: userId }, select: { departmentId: true } });
+            if (!user?.departmentId) return res.status(403).json({ error: 'Usuário não vinculado a um departamento' });
+
+            const reports = await reportService.listDepartmentReports(
+                user.departmentId,
+                page ? Number(page) : undefined,
+                limit ? Number(limit) : undefined,
+                (status && status !== '') ? (status as ReportStatus) : undefined,
+                startDate ? new Date(startDate as string) : undefined,
+                endDate ? new Date(endDate as string) : undefined,
+            );
+            return res.json(reports);
+        } catch (error) {
+            return res.status(500).json({ error: 'Erro ao listar relatórios do departamento' });
+        }
+    },
+
+    // Stats for department manager
+    departmentStats: async (req: Request, res: Response) => {
+        const userId = req.userId!;
+        try {
+            const user = await prisma.user.findUnique({ where: { id: userId }, select: { departmentId: true } });
+            if (!user?.departmentId) return res.status(403).json({ error: 'Usuário não vinculado a um departamento' });
+
+            const stats = await reportService.getDepartmentStats(user.departmentId);
+            return res.json(stats);
+        } catch (error) {
+            return res.status(500).json({ error: 'Erro ao buscar estatísticas do departamento' });
         }
     },
 
@@ -53,21 +91,18 @@ export const ReportController = {
                 userId,
                 page ? Number(page) : undefined,
                 limit ? Number(limit) : undefined,
-                status as ReportStatus,
+                (status && status !== '') ? (status as ReportStatus) : undefined,
                 startDate ? new Date(startDate as string) : undefined,
                 endDate ? new Date(endDate as string) : undefined,
             );
 
-            // Filter out sensitive feedback for professionals
+            // Filter out sensitive history for professionals, but KEEP feedback
             const safeReports = reports.map(r => {
-                const isResolved = r.status === 'RESOLVED';
                 return {
                     ...r,
-                    // Hide feedback unless it's the final resolution or specific cases
-                    // The user requested to hide "tramitação" details.
-                    feedback: isResolved ? r.feedback : undefined,
-                    // History shouldn't be fully exposed or at least sanitized
-                    history: [] // Hide history or sanitize it? The user said "apenas a atualizaçao do status".
+                    // Feedback is for the professional to see, so we don't hide it
+                    feedback: r.feedback || undefined,
+                    history: [] // Hide internal movements history
                 };
             });
 
@@ -157,6 +192,14 @@ export const ReportController = {
                 req.io
                     .to(supervisorRoom)
                     .emit('report_status_updated_for_supervisor', updatedReport);
+            }
+
+            // Notifica o departamento se houver vínculo
+            if (departmentId || (updatedReport as any).departmentId) {
+                const finalDeptId = departmentId || (updatedReport as any).departmentId;
+                const eventName = status === 'FORWARDED' ? 'report_forwarded_to_department' : 'report_status_updated_for_supervisor';
+                req.io.to(`dept-${finalDeptId}`).emit(eventName, updatedReport);
+                console.log(`[Socket] Evento ${eventName} emitido para sala dept-${finalDeptId}. ReportId: ${id}`);
             }
 
             return res.status(200).json(updatedReport);

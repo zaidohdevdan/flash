@@ -21,8 +21,8 @@ export const AuthController = {
 
     async register(req: Request, res: Response) {
         try {
-            const { name, email, password, role, supervisorId } = req.body;
-            const result = await authService.register({ name, email, password, role, supervisorId });
+            const { name, email, password, role, supervisorId, departmentId } = req.body;
+            const result = await authService.register({ name, email, password, role, supervisorId, departmentId } as any);
             return res.status(201).json(result);
         } catch (error: any) {
             if (error.message === 'USER_ALREADY_EXISTS') {

@@ -3,7 +3,23 @@ import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
 import { io } from 'socket.io-client';
 import { toast } from 'react-hot-toast';
-import { Camera, Send, LogOut, CheckCircle2, Clock, CheckCircle, AlertCircle, MessageSquare, Wifi, WifiOff, Plus, ArrowLeft, Archive, User } from 'lucide-react';
+import {
+    Camera,
+    Send,
+    ArrowLeft,
+    Plus,
+    History,
+    MessageSquare
+} from 'lucide-react';
+import { ChatWidget } from '../components/ChatWidget';
+import {
+    Button,
+    TextArea,
+    Header,
+    Card,
+    ReportShimmer
+} from '../components/ui';
+import { ReportCard } from '../components/domain';
 
 const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
@@ -16,15 +32,13 @@ interface Report {
     status: 'SENT' | 'IN_REVIEW' | 'FORWARDED' | 'RESOLVED' | 'ARCHIVED';
     user?: {
         name: string;
-        avatarUrl?: string;
+        avatarUrl?: string | null;
     };
     createdAt: string;
 }
 
-import { ChatWidget } from '../components/ChatWidget';
-
 export function CreateReport() {
-    const { user, signOut } = useAuth();
+    const { user, signOut, updateUser } = useAuth();
     const [view, setView] = useState<'history' | 'form'>('history');
     const [isChatOpen, setIsChatOpen] = useState(false);
     const [comment, setComment] = useState('');
@@ -40,7 +54,13 @@ export function CreateReport() {
     const LIMIT = 10;
 
     const [hasUnread, setHasUnread] = useState(false);
+    const [loadingHistory, setLoadingHistory] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const isChatOpenRef = useRef(isChatOpen);
+
+    useEffect(() => {
+        isChatOpenRef.current = isChatOpen;
+    }, [isChatOpen]);
 
     const playNotificationSound = () => {
         const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
@@ -48,11 +68,17 @@ export function CreateReport() {
     };
 
     useEffect(() => {
+        api.get('/profile/me').then(res => {
+            if (res.data) updateUser(res.data);
+        }).catch(() => { });
+    }, []);
+
+    useEffect(() => {
         loadHistory(1, true, statusFilter);
 
         const handleVisibilityChange = () => {
             if (document.visibilityState === 'visible') {
-                loadHistory(1, true);
+                loadHistory(1, true, statusFilter);
                 setPage(1);
             }
         };
@@ -68,7 +94,6 @@ export function CreateReport() {
 
         socket.on('report_status_updated', (data: { reportId: string, newStatus: any, feedback?: string, feedbackAt?: string }) => {
             setHistory(prev => {
-                // Se houver um filtro ativo e o novo status for diferente dele, removemos da lista
                 if (statusFilter && statusFilter !== data.newStatus) {
                     return prev.filter(item => item.id !== data.reportId);
                 }
@@ -81,7 +106,7 @@ export function CreateReport() {
         });
 
         socket.on('new_chat_notification', (data: { from: string, fromName?: string, text: string }) => {
-            if (!isChatOpen) {
+            if (!isChatOpenRef.current) {
                 setHasUnread(true);
                 playNotificationSound();
                 toast(`Mensagem do Supervisor: ${data.text}`, {
@@ -95,9 +120,10 @@ export function CreateReport() {
             socket.disconnect();
             document.removeEventListener('visibilitychange', handleVisibilityChange);
         };
-    }, [user, statusFilter]);
+    }, [statusFilter]);
 
     async function loadHistory(pageNum: number = 1, reset: boolean = false, status?: string) {
+        setLoadingHistory(pageNum === 1);
         try {
             const url = `/reports/me?page=${pageNum}&limit=${LIMIT}${status ? `&status=${status}` : ''}`;
             const response = await api.get(url);
@@ -107,8 +133,19 @@ export function CreateReport() {
             setHistory(prev => reset ? newHistory : [...prev, ...newHistory]);
         } catch (error) {
             console.error('Erro ao carregar histórico');
+        } finally {
+            setLoadingHistory(false);
         }
     }
+
+    const handleOpenChat = () => {
+        if (!user?.supervisorId) {
+            toast.error('Você ainda não possui um supervisor atribuído.', { icon: '⚠️' });
+            return;
+        }
+        setIsChatOpen(true);
+        setHasUnread(false);
+    };
 
     function handleLoadMore() {
         const nextPage = page + 1;
@@ -126,7 +163,7 @@ export function CreateReport() {
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
-        if (!image) return alert('Por favor, tire uma foto para o relatório.');
+        if (!image) return toast.error('Por favor, tire uma foto para o relatório.');
 
         setSending(true);
         const formData = new FormData();
@@ -142,132 +179,90 @@ export function CreateReport() {
             setView('history');
             loadHistory(1, true);
         } catch (error) {
-            alert('Erro ao enviar relatório.');
+            toast.error('Erro ao enviar relatório.');
         } finally {
             setSending(false);
         }
     }
 
-    const getStatusIcon = (status: string) => {
-        switch (status) {
-            case 'RESOLVED': return <CheckCircle className="text-green-500 w-4 h-4" />;
-            case 'IN_REVIEW': return <Clock className="text-blue-500 w-4 h-4" />;
-            case 'FORWARDED': return <Send className="text-purple-500 w-4 h-4" />;
-            case 'ARCHIVED': return <Archive className="text-gray-400 w-4 h-4" />;
-            default: return <AlertCircle className="text-yellow-500 w-4 h-4" />;
-        }
-    };
-
     if (success) {
         return (
-            <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-6 text-center">
-                <CheckCircle2 className="w-20 h-20 text-green-500 mb-4" />
-                <h2 className="text-2xl font-bold text-gray-800 mb-2">Relatório Enviado!</h2>
-                <p className="text-gray-600 mb-8">O seu supervisor foi notificado em tempo real.</p>
-                <button
-                    onClick={() => setSuccess(false)}
-                    className="bg-blue-600 text-white px-8 py-3 rounded-full font-bold shadow-lg"
-                >
-                    CONCLUIR
-                </button>
+            <div className="min-h-screen flex flex-col items-center justify-center bg-[#0f172a] p-6 text-center">
+                <div className="bg-emerald-500/10 p-8 rounded-[3rem] border border-emerald-500/20 mb-8 animate-in zoom-in-50 duration-500">
+                    <Send className="w-20 h-20 text-emerald-500" />
+                </div>
+                <h2 className="text-3xl font-black text-white mb-2 tracking-tight uppercase">Relatório Enviado!</h2>
+                <p className="text-gray-400 mb-10 font-medium uppercase tracking-widest text-[10px]">O seu supervisor foi notificado em tempo real.</p>
+                <Button variant="success" size="lg" className="px-12" onClick={() => setSuccess(false)}>
+                    VOLTAR AO INÍCIO
+                </Button>
             </div>
         );
     }
 
-    const Spinner = () => (
-        <div className="w-6 h-6 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-    );
-
     return (
-        <div className="min-h-screen bg-white flex flex-col">
-            {/* Header */}
-            <header className="bg-white border-b px-6 py-4 flex justify-between items-center shadow-sm sticky top-0 z-20">
-                <div className="flex items-center gap-3">
-                    {view === 'form' && (
-                        <button onClick={() => setView('history')} className="p-1 -ml-2 text-gray-400">
-                            <ArrowLeft className="w-6 h-6" />
-                        </button>
-                    )}
-                    <span className="font-black text-blue-600 tracking-tighter text-xl">FLASH</span>
-                    <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold ${isConnected ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
-                        {isConnected ? <Wifi className="w-3 h-3" /> : <WifiOff className="w-3 h-3" />}
-                    </div>
-                </div>
-                <div className="flex items-center gap-2">
-                    <button
-                        onClick={() => {
-                            setIsChatOpen(true);
-                            setHasUnread(false);
-                        }}
-                        className="relative p-2 text-blue-600 bg-blue-50 rounded-full hover:bg-blue-100 transition"
-                    >
-                        <MessageSquare className="w-5 h-5" />
-                        {hasUnread && (
-                            <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-red-500 border-2 border-white rounded-full animate-pulse" />
-                        )}
-                    </button>
-                    <button onClick={signOut} className="text-gray-400 p-1">
-                        <LogOut className="w-5 h-5" />
-                    </button>
-                </div>
-            </header>
+        <div className="min-h-screen bg-white flex flex-col font-sans">
+            <Header
+                user={{
+                    name: user?.name,
+                    avatarUrl: user?.avatarUrl
+                }}
+                onLogout={signOut}
+            />
 
-            <main className="flex-1 overflow-y-auto bg-gray-50">
+            <main className="flex-1 bg-gray-50/50">
                 {view === 'history' ? (
-                    <div className="p-6 max-w-md mx-auto space-y-6">
-                        <div className="flex justify-between items-center mb-2">
+                    <div className="p-6 max-w-2xl mx-auto space-y-8">
+                        <header className="flex justify-between items-center">
                             <div>
-                                <h1 className="text-2xl font-bold text-gray-900">Olá, {user?.name.split(' ')[0]}!</h1>
-                                <p className="text-sm text-gray-500">Seu histórico de atividades.</p>
+                                <h1 className="text-3xl font-black text-gray-900 tracking-tight uppercase">Olá, {user?.name.split(' ')[0]}!</h1>
+                                <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mt-1">Seu histórico operacional</p>
                             </div>
-                        </div>
 
-                        {/* Supervisor Info Card - NEW */}
+                            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-100 rounded-full shadow-sm">
+                                <span className={`w-2 h-2 rounded-full ${isConnected ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
+                                <span className="text-[9px] font-black uppercase text-gray-400">{isConnected ? 'Online' : 'Offline'}</span>
+                            </div>
+                        </header>
+
+                        {/* Supervisor Info */}
                         {user?.supervisorId && (
-                            <div className="bg-white p-5 rounded-3xl shadow-sm border border-gray-100 flex items-center justify-between mb-2">
-                                <div className="flex items-center gap-4">
-                                    <div className="bg-blue-100 p-3 rounded-2xl">
-                                        <User className="w-5 h-5 text-blue-600" />
+                            <Card variant="blue" className="!bg-blue-600 p-6 shadow-xl shadow-blue-900/10 flex flex-col sm:flex-row items-center justify-between gap-6">
+                                <div className="flex items-center gap-4 text-white">
+                                    <div className="bg-white/20 p-3 rounded-2xl backdrop-blur-md">
+                                        <MessageSquare className="w-6 h-6" />
                                     </div>
                                     <div>
-                                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">Meu Supervisor</p>
-                                        <h3 className="text-sm font-bold text-gray-800">{user.supervisorName || 'Supervisor Responsável'}</h3>
+                                        <p className="text-[9px] font-black text-white/60 uppercase tracking-widest">Supervisor Direto</p>
+                                        <h3 className="text-lg font-bold">{user.supervisorName || 'Responsável Técnico'}</h3>
                                     </div>
                                 </div>
-                                <button
-                                    onClick={() => {
-                                        setIsChatOpen(true);
-                                        setHasUnread(false);
-                                    }}
-                                    className="relative px-4 py-2 bg-blue-600 text-white text-[10px] font-black rounded-xl shadow-lg shadow-blue-100 hover:bg-blue-700 transition active:scale-95"
+                                <Button
+                                    variant="glass"
+                                    className="!bg-white/10 !text-white !border-white/20 hover:!bg-white/20"
+                                    onClick={handleOpenChat}
                                 >
-                                    ABRIR CHAT
-                                    {hasUnread && (
-                                        <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 border-2 border-white rounded-full animate-pulse" />
-                                    )}
-                                </button>
-                            </div>
+                                    {hasUnread && <span className="w-2 h-2 bg-red-500 rounded-full mr-2" />}
+                                    ABRIR CANAL DE CHAT
+                                </Button>
+                            </Card>
                         )}
 
-                        {/* Filter Bar */}
-                        <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
+                        {/* Filters */}
+                        <div className="flex gap-2 overflow-x-auto pb-4 no-scrollbar">
                             {[
                                 { id: '', label: 'Tudo' },
                                 { id: 'SENT', label: 'Enviados' },
                                 { id: 'IN_REVIEW', label: 'Análise' },
                                 { id: 'FORWARDED', label: 'Depto' },
-                                { id: 'RESOLVED', label: 'Fim' },
-                                { id: 'ARCHIVED', label: 'Arq' },
+                                { id: 'RESOLVED', label: 'Finalizado' },
                             ].map(filter => (
                                 <button
                                     key={filter.id}
-                                    onClick={() => {
-                                        setStatusFilter(filter.id);
-                                        setPage(1);
-                                    }}
-                                    className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all border ${statusFilter === filter.id
-                                        ? 'bg-blue-600 text-white border-blue-600 shadow-md'
-                                        : 'bg-white text-gray-500 border-gray-100'
+                                    onClick={() => { setStatusFilter(filter.id); setPage(1); }}
+                                    className={`px-6 py-2.5 rounded-2xl text-[10px] font-black tracking-widest uppercase transition-all border ${statusFilter === filter.id
+                                        ? 'bg-[#0f172a] text-white border-[#0f172a] shadow-lg shadow-gray-900/10'
+                                        : 'bg-white text-gray-400 border-gray-100 hover:border-gray-200'
                                         }`}
                                 >
                                     {filter.label}
@@ -275,95 +270,65 @@ export function CreateReport() {
                             ))}
                         </div>
 
-                        {history.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center py-20 text-gray-400">
-                                <MessageSquare className="w-12 h-12 mb-3 opacity-20" />
-                                <p className="text-sm italic">Nenhum reporte encontrado.</p>
+                        {loadingHistory ? (
+                            <div className="space-y-6">
+                                <ReportShimmer />
+                                <ReportShimmer />
+                                <ReportShimmer />
                             </div>
+                        ) : history.length === 0 ? (
+                            <Card variant="glass" className="py-20 flex flex-col items-center justify-center text-gray-300">
+                                <History className="w-12 h-12 mb-4 opacity-20" />
+                                <p className="text-[10px] font-black uppercase tracking-widest underline decoration-2 decoration-blue-500/30">Nenhum evento registrado</p>
+                            </Card>
                         ) : (
-                            <div className="grid grid-cols-1 gap-4">
+                            <div className="grid gap-6">
                                 {history.map(item => (
-                                    <div key={item.id} className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex gap-4 items-start active:scale-[0.98] transition">
-                                        <div className="relative">
-                                            <img
-                                                src={item.imageUrl}
-                                                className="w-20 h-20 rounded-xl object-cover bg-gray-100 shadow-inner"
-                                            />
-                                            <div className="absolute -top-2 -right-2 bg-white rounded-full p-1 shadow-sm border border-gray-50">
-                                                {getStatusIcon(item.status)}
-                                            </div>
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <span className="text-[10px] text-gray-400 uppercase font-black tracking-widest">
-                                                {new Date(item.createdAt).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
-                                            </span>
-                                            <div className="flex items-center justify-between mt-1">
-                                                <p className="text-sm text-gray-800 font-medium line-clamp-2 leading-tight">
-                                                    {item.comment}
-                                                </p>
-                                                <div className="flex-shrink-0 ml-2">
-                                                    {item.user?.avatarUrl ? (
-                                                        <img src={item.user.avatarUrl} alt="" className="w-8 h-8 rounded-full object-cover border-2 border-white shadow-sm" />
-                                                    ) : (
-                                                        <div className="w-8 h-8 bg-gray-50 rounded-full flex items-center justify-center border-2 border-white shadow-sm">
-                                                            <User className="w-4 h-4 text-gray-300" />
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                            {item.feedback && (
-                                                <div className={`mt-2 p-2 rounded-lg border-l-2 ${item.status === 'RESOLVED'
-                                                    ? 'bg-green-50 border-green-400'
-                                                    : 'bg-yellow-50 border-yellow-400'
-                                                    }`}>
-                                                    <div className="flex justify-between items-center mb-1">
-                                                        <p className={`text-[9px] font-bold uppercase italic ${item.status === 'RESOLVED' ? 'text-green-800' : 'text-yellow-800'
-                                                            }`}>Supervisor:</p>
-                                                        {item.feedbackAt && (
-                                                            <span className={`${item.status === 'RESOLVED' ? 'text-green-400' : 'text-yellow-400'
-                                                                } text-[8px] font-bold`}>
-                                                                {new Date(item.feedbackAt).toLocaleString('pt-BR', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' })}
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                    <p className={`text-[10px] italic leading-tight ${item.status === 'RESOLVED' ? 'text-green-700' : 'text-yellow-700'
-                                                        }`}>{item.feedback}</p>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
+                                    <ReportCard
+                                        key={item.id}
+                                        report={item}
+                                        actions={
+                                            <Button variant="ghost" size="sm" onClick={() => toast('Histórico detalhado em breve!')}>
+                                                Detalhes
+                                            </Button>
+                                        }
+                                    />
                                 ))}
 
                                 {hasMore && (
-                                    <button
-                                        onClick={handleLoadMore}
-                                        className="w-full py-4 text-blue-600 text-xs font-bold uppercase tracking-widest hover:bg-white rounded-xl transition"
-                                    >
-                                        Carregar mais resultados
-                                    </button>
+                                    <Button variant="secondary" size="lg" fullWidth onClick={handleLoadMore} className="bg-white mt-4">
+                                        Carregar Mais Atividades
+                                    </Button>
                                 )}
                             </div>
                         )}
-                        <div className="h-24"></div> {/* Spacer for FAB */}
+                        <div className="h-24"></div>
                     </div>
                 ) : (
-                    <div className="p-6 max-w-md mx-auto">
-                        <h2 className="text-2xl font-bold text-gray-900 mb-1">Novo Relatório</h2>
-                        <p className="text-sm text-gray-500 mb-8">Registre a ocorrência com detalhes.</p>
+                    <div className="p-6 max-w-xl mx-auto space-y-8 animate-in slide-in-from-bottom-5 duration-500">
+                        <header className="flex items-center gap-4">
+                            <button onClick={() => setView('history')} className="p-2 hover:bg-white rounded-2xl border border-transparent hover:border-gray-100 transition-all">
+                                <ArrowLeft className="w-6 h-6 text-gray-400" />
+                            </button>
+                            <div>
+                                <h1 className="text-3xl font-black text-gray-900 tracking-tight uppercase">Novo Reporte</h1>
+                                <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mt-1">Sinalização de conformidade ou ocorrência</p>
+                            </div>
+                        </header>
 
-                        <form onSubmit={handleSubmit} className="space-y-6">
+                        <form onSubmit={handleSubmit} className="space-y-8">
                             <div
                                 onClick={() => fileInputRef.current?.click()}
-                                className="aspect-[4/3] bg-white border-2 border-dashed border-gray-200 rounded-3xl flex flex-col items-center justify-center cursor-pointer overflow-hidden relative shadow-sm active:bg-gray-100 transition"
+                                className="aspect-video bg-white border-2 border-dashed border-gray-200 rounded-[2.5rem] flex flex-col items-center justify-center cursor-pointer overflow-hidden relative shadow-sm hover:border-blue-400 transition-all group"
                             >
                                 {preview ? (
                                     <img src={preview} alt="Preview" className="w-full h-full object-cover" />
                                 ) : (
                                     <>
-                                        <div className="bg-blue-600 p-5 rounded-full mb-3 shadow-lg shadow-blue-200">
+                                        <div className="bg-[#0f172a] p-6 rounded-full mb-4 shadow-xl shadow-gray-900/10 group-hover:scale-110 transition-transform">
                                             <Camera className="w-8 h-8 text-white" />
                                         </div>
-                                        <span className="text-sm font-bold text-gray-400 uppercase tracking-widest">Capturar Imagem</span>
+                                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Capturar Evidência Visual</span>
                                     </>
                                 )}
                                 <input
@@ -376,52 +341,48 @@ export function CreateReport() {
                                 />
                             </div>
 
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Observações de Campo</label>
-                                <textarea
-                                    value={comment}
-                                    onChange={e => setComment(e.target.value)}
-                                    placeholder="O que está acontecendo no local?"
-                                    className="w-full h-40 p-4 border-gray-200 border rounded-3xl resize-none outline-none focus:ring-4 focus:ring-blue-50/50 focus:border-blue-500 transition shadow-sm"
-                                    required
-                                />
-                            </div>
+                            <TextArea
+                                label="Relatório de Atividade / Observação"
+                                value={comment}
+                                onChange={e => setComment(e.target.value)}
+                                placeholder="Descreva os detalhes da ocorrência ou atividade realizada..."
+                                rows={6}
+                                required
+                            />
 
-                            <button
+                            <Button
                                 type="submit"
-                                disabled={sending}
-                                className={`w-full py-5 rounded-3xl font-black text-white flex items-center justify-center gap-3 shadow-xl shadow-blue-100 active:scale-95 transition-all ${sending ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'}`}
+                                variant="primary"
+                                size="lg"
+                                fullWidth
+                                isLoading={sending}
+                                className="!py-6 text-sm"
                             >
-                                {sending ? (
-                                    <>
-                                        <Spinner />
-                                        <span className="text-sm tracking-widest">ENVIANDO</span>
-                                    </>
-                                ) : (
-                                    <>
-                                        ENVIAR AGORA <Send className="w-5 h-5" />
-                                    </>
-                                )}
-                            </button>
+                                ENVIAR AGORA
+                            </Button>
                         </form>
                     </div>
                 )}
             </main>
 
-            {/* FAB Button */}
+            {/* Float Action Button */}
             {view === 'history' && (
                 <button
                     onClick={() => setView('form')}
-                    className="fixed bottom-8 right-6 w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-2xl shadow-blue-400 active:scale-90 transition-transform z-30"
+                    className="fixed bottom-8 right-6 w-18 h-18 bg-[#0f172a] rounded-[2rem] flex items-center justify-center text-white shadow-2xl shadow-gray-900/20 active:scale-90 transition-all hover:-translate-y-1 z-30 p-5 group"
                 >
-                    <Plus className="w-8 h-8" />
+                    <Plus className="w-10 h-10 group-hover:rotate-90 transition-transform" />
                 </button>
             )}
 
             {isChatOpen && user && (
                 <ChatWidget
-                    currentUser={user}
-                    targetUser={{ id: user.supervisorId || 'supervisor', name: user.supervisorName || 'Supervisor', role: 'SUPERVISOR' }}
+                    currentUser={{ id: user.id, name: user.name, role: user.role }}
+                    targetUser={{
+                        id: user.supervisorId || 'supervisor',
+                        name: user.supervisorName || 'Supervisor',
+                        role: 'SUPERVISOR'
+                    }}
                     onClose={() => setIsChatOpen(false)}
                 />
             )}

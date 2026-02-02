@@ -55,6 +55,10 @@ routes.get('/subordinates', AuthMiddleware, AuthController.listSubordinates);
 routes.get('/reports', AuthMiddleware, ReportController.index);
 routes.get('/reports/stats', AuthMiddleware, ReportController.stats);
 
+// Listagem de relatórios (Gerente de Departamento)
+routes.get('/reports/department', AuthMiddleware, ReportController.indexByDepartment);
+routes.get('/reports/department/stats', AuthMiddleware, ReportController.departmentStats);
+
 // Histórico do Profissional
 routes.get('/reports/me', AuthMiddleware, ReportController.indexByUser);
 
@@ -78,5 +82,7 @@ routes.post('/chat/media', AuthMiddleware, upload.single('file'), mediaControlle
 // Chat History
 routes.get('/chat/history/:room', AuthMiddleware, ChatController.listHistory);
 routes.delete('/chat/history/:room', AuthMiddleware, ChatController.clearHistory);
+routes.patch('/chat/messages/:id', AuthMiddleware, ChatController.updateMessage);
+routes.delete('/chat/messages/:id', AuthMiddleware, ChatController.deleteMessage);
 
 export { routes };

@@ -3,6 +3,12 @@
   "module": "index.ts",
   "type": "module",
   "private": true,
+  "scripts": {
+    "dev:web": "bun --cwd apps/web dev",
+    "dev:server": "bun --cwd server dev",
+    "dev": "bun run dev:server & bun run dev:web",
+    "install:all": "bun install"
+  },
   "devDependencies": {
     "@types/bun": "latest"
   },

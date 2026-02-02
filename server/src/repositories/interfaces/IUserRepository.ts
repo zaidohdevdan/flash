@@ -6,6 +6,7 @@ export interface CreateUserDTO {
     passwordHash: string;
     role: Role;
     supervisorId?: string;
+    departmentId?: string;
 }
 
 export interface IUserRepository {

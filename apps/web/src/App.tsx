@@ -5,6 +5,7 @@ import { Register } from './pages/Register';
 import { Dashboard } from './pages/Dashboard';
 import { CreateReport } from './pages/CreateReport';
 import { AdminDashboard } from './pages/AdminDashboard';
+import { ManagerDashboard } from './pages/ManagerDashboard';
 import { Home } from './pages/Home';
 import { Toaster } from 'react-hot-toast';
 
@@ -25,6 +26,7 @@ function PrivateRoute({ children, role }: { children: React.ReactNode, role?: st
     if (user?.role === 'ADMIN') return <Navigate to="/admin-dashboard" />;
     if (user?.role === 'SUPERVISOR') return <Navigate to="/dashboard" />;
     if (user?.role === 'PROFESSIONAL') return <Navigate to="/create-report" />;
+    if (user?.role === 'MANAGER') return <Navigate to="/manager-dashboard" />;
   }
 
   return <>{children}</>;
@@ -37,6 +39,7 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
     if (user?.role === 'ADMIN') return <Navigate to="/admin-dashboard" />;
     if (user?.role === 'SUPERVISOR') return <Navigate to="/dashboard" />;
     if (user?.role === 'PROFESSIONAL') return <Navigate to="/create-report" />;
+    if (user?.role === 'MANAGER') return <Navigate to="/manager-dashboard" />;
   }
 
   return <>{children}</>;
@@ -64,6 +67,12 @@ function AppRoutes() {
       <Route path="/admin-dashboard" element={
         <PrivateRoute role="ADMIN">
           <AdminDashboard />
+        </PrivateRoute>
+      } />
+
+      <Route path="/manager-dashboard" element={
+        <PrivateRoute role="MANAGER">
+          <ManagerDashboard />
         </PrivateRoute>
       } />
     </Routes>

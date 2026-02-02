@@ -51,7 +51,8 @@ export namespace $Enums {
   export const Role: {
   ADMIN: 'ADMIN',
   PROFESSIONAL: 'PROFESSIONAL',
-  SUPERVISOR: 'SUPERVISOR'
+  SUPERVISOR: 'SUPERVISOR',
+  MANAGER: 'MANAGER'
 };
 
 export type Role = (typeof Role)[keyof typeof Role]
@@ -280,7 +281,7 @@ export namespace Prisma {
 
   /**
    * Prisma Client JS version: 6.19.2
-   * Query Engine version: c2990dca591cba766e3b7ef5d9e8a84796e47ab7
+   * Query Engine version: acc0b9dd43eb689cbd20c9470515d719db10d0b0
    */
   export type PrismaVersion = {
     client: string
@@ -1389,10 +1390,12 @@ export namespace Prisma {
 
   export type DepartmentCountOutputType = {
     reports: number
+    members: number
   }
 
   export type DepartmentCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     reports?: boolean | DepartmentCountOutputTypeCountReportsArgs
+    members?: boolean | DepartmentCountOutputTypeCountMembersArgs
   }
 
   // Custom InputTypes
@@ -1411,6 +1414,13 @@ export namespace Prisma {
    */
   export type DepartmentCountOutputTypeCountReportsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: ReportWhereInput
+  }
+
+  /**
+   * DepartmentCountOutputType without action
+   */
+  export type DepartmentCountOutputTypeCountMembersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: UserWhereInput
   }
 
 
@@ -1437,6 +1447,7 @@ export namespace Prisma {
     statusPhrase: string | null
     role: $Enums.Role | null
     supervisorId: string | null
+    departmentId: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -1450,6 +1461,7 @@ export namespace Prisma {
     statusPhrase: string | null
     role: $Enums.Role | null
     supervisorId: string | null
+    departmentId: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -1463,6 +1475,7 @@ export namespace Prisma {
     statusPhrase: number
     role: number
     supervisorId: number
+    departmentId: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -1478,6 +1491,7 @@ export namespace Prisma {
     statusPhrase?: true
     role?: true
     supervisorId?: true
+    departmentId?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -1491,6 +1505,7 @@ export namespace Prisma {
     statusPhrase?: true
     role?: true
     supervisorId?: true
+    departmentId?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -1504,6 +1519,7 @@ export namespace Prisma {
     statusPhrase?: true
     role?: true
     supervisorId?: true
+    departmentId?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -1590,6 +1606,7 @@ export namespace Prisma {
     statusPhrase: string | null
     role: $Enums.Role
     supervisorId: string | null
+    departmentId: string | null
     createdAt: Date
     updatedAt: Date
     _count: UserCountAggregateOutputType | null
@@ -1620,10 +1637,12 @@ export namespace Prisma {
     statusPhrase?: boolean
     role?: boolean
     supervisorId?: boolean
+    departmentId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     supervisor?: boolean | User$supervisorArgs<ExtArgs>
     Subordinates?: boolean | User$SubordinatesArgs<ExtArgs>
+    department?: boolean | User$departmentArgs<ExtArgs>
     reports?: boolean | User$reportsArgs<ExtArgs>
     media?: boolean | User$mediaArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
@@ -1640,14 +1659,16 @@ export namespace Prisma {
     statusPhrase?: boolean
     role?: boolean
     supervisorId?: boolean
+    departmentId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "email" | "passwordHash" | "avatarUrl" | "statusPhrase" | "role" | "supervisorId" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "email" | "passwordHash" | "avatarUrl" | "statusPhrase" | "role" | "supervisorId" | "departmentId" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     supervisor?: boolean | User$supervisorArgs<ExtArgs>
     Subordinates?: boolean | User$SubordinatesArgs<ExtArgs>
+    department?: boolean | User$departmentArgs<ExtArgs>
     reports?: boolean | User$reportsArgs<ExtArgs>
     media?: boolean | User$mediaArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
@@ -1658,6 +1679,7 @@ export namespace Prisma {
     objects: {
       supervisor: Prisma.$UserPayload<ExtArgs> | null
       Subordinates: Prisma.$UserPayload<ExtArgs>[]
+      department: Prisma.$DepartmentPayload<ExtArgs> | null
       reports: Prisma.$ReportPayload<ExtArgs>[]
       media: Prisma.$MediaPayload<ExtArgs>[]
     }
@@ -1670,6 +1692,7 @@ export namespace Prisma {
       statusPhrase: string | null
       role: $Enums.Role
       supervisorId: string | null
+      departmentId: string | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["user"]>
@@ -2037,6 +2060,7 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     supervisor<T extends User$supervisorArgs<ExtArgs> = {}>(args?: Subset<T, User$supervisorArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     Subordinates<T extends User$SubordinatesArgs<ExtArgs> = {}>(args?: Subset<T, User$SubordinatesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    department<T extends User$departmentArgs<ExtArgs> = {}>(args?: Subset<T, User$departmentArgs<ExtArgs>>): Prisma__DepartmentClient<$Result.GetResult<Prisma.$DepartmentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     reports<T extends User$reportsArgs<ExtArgs> = {}>(args?: Subset<T, User$reportsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ReportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     media<T extends User$mediaArgs<ExtArgs> = {}>(args?: Subset<T, User$mediaArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MediaPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
@@ -2076,6 +2100,7 @@ export namespace Prisma {
     readonly statusPhrase: FieldRef<"User", 'String'>
     readonly role: FieldRef<"User", 'Role'>
     readonly supervisorId: FieldRef<"User", 'String'>
+    readonly departmentId: FieldRef<"User", 'String'>
     readonly createdAt: FieldRef<"User", 'DateTime'>
     readonly updatedAt: FieldRef<"User", 'DateTime'>
   }
@@ -2488,6 +2513,25 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: UserScalarFieldEnum | UserScalarFieldEnum[]
+  }
+
+  /**
+   * User.department
+   */
+  export type User$departmentArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Department
+     */
+    select?: DepartmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Department
+     */
+    omit?: DepartmentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DepartmentInclude<ExtArgs> | null
+    where?: DepartmentWhereInput
   }
 
   /**
@@ -3821,6 +3865,7 @@ export namespace Prisma {
     name?: boolean
     createdAt?: boolean
     reports?: boolean | Department$reportsArgs<ExtArgs>
+    members?: boolean | Department$membersArgs<ExtArgs>
     _count?: boolean | DepartmentCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["department"]>
 
@@ -3835,6 +3880,7 @@ export namespace Prisma {
   export type DepartmentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "createdAt", ExtArgs["result"]["department"]>
   export type DepartmentInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     reports?: boolean | Department$reportsArgs<ExtArgs>
+    members?: boolean | Department$membersArgs<ExtArgs>
     _count?: boolean | DepartmentCountOutputTypeDefaultArgs<ExtArgs>
   }
 
@@ -3842,6 +3888,7 @@ export namespace Prisma {
     name: "Department"
     objects: {
       reports: Prisma.$ReportPayload<ExtArgs>[]
+      members: Prisma.$UserPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -4211,6 +4258,7 @@ export namespace Prisma {
   export interface Prisma__DepartmentClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     reports<T extends Department$reportsArgs<ExtArgs> = {}>(args?: Subset<T, Department$reportsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ReportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    members<T extends Department$membersArgs<ExtArgs> = {}>(args?: Subset<T, Department$membersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -4634,6 +4682,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: ReportScalarFieldEnum | ReportScalarFieldEnum[]
+  }
+
+  /**
+   * Department.members
+   */
+  export type Department$membersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    where?: UserWhereInput
+    orderBy?: UserOrderByWithRelationInput | UserOrderByWithRelationInput[]
+    cursor?: UserWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: UserScalarFieldEnum | UserScalarFieldEnum[]
   }
 
   /**
@@ -7796,6 +7868,7 @@ export namespace Prisma {
     statusPhrase: 'statusPhrase',
     role: 'role',
     supervisorId: 'supervisorId',
+    departmentId: 'departmentId',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -7995,10 +8068,12 @@ export namespace Prisma {
     statusPhrase?: StringNullableFilter<"User"> | string | null
     role?: EnumRoleFilter<"User"> | $Enums.Role
     supervisorId?: StringNullableFilter<"User"> | string | null
+    departmentId?: StringNullableFilter<"User"> | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     supervisor?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     Subordinates?: UserListRelationFilter
+    department?: XOR<DepartmentNullableScalarRelationFilter, DepartmentWhereInput> | null
     reports?: ReportListRelationFilter
     media?: MediaListRelationFilter
   }
@@ -8012,10 +8087,12 @@ export namespace Prisma {
     statusPhrase?: SortOrder
     role?: SortOrder
     supervisorId?: SortOrder
+    departmentId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     supervisor?: UserOrderByWithRelationInput
     Subordinates?: UserOrderByRelationAggregateInput
+    department?: DepartmentOrderByWithRelationInput
     reports?: ReportOrderByRelationAggregateInput
     media?: MediaOrderByRelationAggregateInput
   }
@@ -8032,10 +8109,12 @@ export namespace Prisma {
     statusPhrase?: StringNullableFilter<"User"> | string | null
     role?: EnumRoleFilter<"User"> | $Enums.Role
     supervisorId?: StringNullableFilter<"User"> | string | null
+    departmentId?: StringNullableFilter<"User"> | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     supervisor?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     Subordinates?: UserListRelationFilter
+    department?: XOR<DepartmentNullableScalarRelationFilter, DepartmentWhereInput> | null
     reports?: ReportListRelationFilter
     media?: MediaListRelationFilter
   }, "id" | "email">
@@ -8049,6 +8128,7 @@ export namespace Prisma {
     statusPhrase?: SortOrder
     role?: SortOrder
     supervisorId?: SortOrder
+    departmentId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: UserCountOrderByAggregateInput
@@ -8068,6 +8148,7 @@ export namespace Prisma {
     statusPhrase?: StringNullableWithAggregatesFilter<"User"> | string | null
     role?: EnumRoleWithAggregatesFilter<"User"> | $Enums.Role
     supervisorId?: StringNullableWithAggregatesFilter<"User"> | string | null
+    departmentId?: StringNullableWithAggregatesFilter<"User"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
   }
@@ -8169,6 +8250,7 @@ export namespace Prisma {
     name?: StringFilter<"Department"> | string
     createdAt?: DateTimeFilter<"Department"> | Date | string
     reports?: ReportListRelationFilter
+    members?: UserListRelationFilter
   }
 
   export type DepartmentOrderByWithRelationInput = {
@@ -8176,6 +8258,7 @@ export namespace Prisma {
     name?: SortOrder
     createdAt?: SortOrder
     reports?: ReportOrderByRelationAggregateInput
+    members?: UserOrderByRelationAggregateInput
   }
 
   export type DepartmentWhereUniqueInput = Prisma.AtLeast<{
@@ -8186,6 +8269,7 @@ export namespace Prisma {
     NOT?: DepartmentWhereInput | DepartmentWhereInput[]
     createdAt?: DateTimeFilter<"Department"> | Date | string
     reports?: ReportListRelationFilter
+    members?: UserListRelationFilter
   }, "id" | "name">
 
   export type DepartmentOrderByWithAggregationInput = {
@@ -8455,6 +8539,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     supervisor?: UserCreateNestedOneWithoutSubordinatesInput
     Subordinates?: UserCreateNestedManyWithoutSupervisorInput
+    department?: DepartmentCreateNestedOneWithoutMembersInput
     reports?: ReportCreateNestedManyWithoutUserInput
     media?: MediaCreateNestedManyWithoutUserInput
   }
@@ -8468,6 +8553,7 @@ export namespace Prisma {
     statusPhrase?: string | null
     role?: $Enums.Role
     supervisorId?: string | null
+    departmentId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     Subordinates?: UserUncheckedCreateNestedManyWithoutSupervisorInput
@@ -8486,6 +8572,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     supervisor?: UserUpdateOneWithoutSubordinatesNestedInput
     Subordinates?: UserUpdateManyWithoutSupervisorNestedInput
+    department?: DepartmentUpdateOneWithoutMembersNestedInput
     reports?: ReportUpdateManyWithoutUserNestedInput
     media?: MediaUpdateManyWithoutUserNestedInput
   }
@@ -8498,6 +8585,7 @@ export namespace Prisma {
     statusPhrase?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     supervisorId?: NullableStringFieldUpdateOperationsInput | string | null
+    departmentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     Subordinates?: UserUncheckedUpdateManyWithoutSupervisorNestedInput
@@ -8514,6 +8602,7 @@ export namespace Prisma {
     statusPhrase?: string | null
     role?: $Enums.Role
     supervisorId?: string | null
+    departmentId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -8537,6 +8626,7 @@ export namespace Prisma {
     statusPhrase?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     supervisorId?: NullableStringFieldUpdateOperationsInput | string | null
+    departmentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -8639,6 +8729,7 @@ export namespace Prisma {
     name: string
     createdAt?: Date | string
     reports?: ReportCreateNestedManyWithoutDepartmentInput
+    members?: UserCreateNestedManyWithoutDepartmentInput
   }
 
   export type DepartmentUncheckedCreateInput = {
@@ -8646,18 +8737,21 @@ export namespace Prisma {
     name: string
     createdAt?: Date | string
     reports?: ReportUncheckedCreateNestedManyWithoutDepartmentInput
+    members?: UserUncheckedCreateNestedManyWithoutDepartmentInput
   }
 
   export type DepartmentUpdateInput = {
     name?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     reports?: ReportUpdateManyWithoutDepartmentNestedInput
+    members?: UserUpdateManyWithoutDepartmentNestedInput
   }
 
   export type DepartmentUncheckedUpdateInput = {
     name?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     reports?: ReportUncheckedUpdateManyWithoutDepartmentNestedInput
+    members?: UserUncheckedUpdateManyWithoutDepartmentNestedInput
   }
 
   export type DepartmentCreateManyInput = {
@@ -8987,6 +9081,11 @@ export namespace Prisma {
     none?: UserWhereInput
   }
 
+  export type DepartmentNullableScalarRelationFilter = {
+    is?: DepartmentWhereInput | null
+    isNot?: DepartmentWhereInput | null
+  }
+
   export type ReportListRelationFilter = {
     every?: ReportWhereInput
     some?: ReportWhereInput
@@ -9020,6 +9119,7 @@ export namespace Prisma {
     statusPhrase?: SortOrder
     role?: SortOrder
     supervisorId?: SortOrder
+    departmentId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -9033,6 +9133,7 @@ export namespace Prisma {
     statusPhrase?: SortOrder
     role?: SortOrder
     supervisorId?: SortOrder
+    departmentId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -9046,6 +9147,7 @@ export namespace Prisma {
     statusPhrase?: SortOrder
     role?: SortOrder
     supervisorId?: SortOrder
+    departmentId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -9133,11 +9235,6 @@ export namespace Prisma {
   export type UserScalarRelationFilter = {
     is?: UserWhereInput
     isNot?: UserWhereInput
-  }
-
-  export type DepartmentNullableScalarRelationFilter = {
-    is?: DepartmentWhereInput | null
-    isNot?: DepartmentWhereInput | null
   }
 
   export type ReportHistoryListRelationFilter = {
@@ -9437,6 +9534,12 @@ export namespace Prisma {
     connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
   }
 
+  export type DepartmentCreateNestedOneWithoutMembersInput = {
+    create?: XOR<DepartmentCreateWithoutMembersInput, DepartmentUncheckedCreateWithoutMembersInput>
+    connectOrCreate?: DepartmentCreateOrConnectWithoutMembersInput
+    connect?: DepartmentWhereUniqueInput
+  }
+
   export type ReportCreateNestedManyWithoutUserInput = {
     create?: XOR<ReportCreateWithoutUserInput, ReportUncheckedCreateWithoutUserInput> | ReportCreateWithoutUserInput[] | ReportUncheckedCreateWithoutUserInput[]
     connectOrCreate?: ReportCreateOrConnectWithoutUserInput | ReportCreateOrConnectWithoutUserInput[]
@@ -9511,6 +9614,16 @@ export namespace Prisma {
     update?: UserUpdateWithWhereUniqueWithoutSupervisorInput | UserUpdateWithWhereUniqueWithoutSupervisorInput[]
     updateMany?: UserUpdateManyWithWhereWithoutSupervisorInput | UserUpdateManyWithWhereWithoutSupervisorInput[]
     deleteMany?: UserScalarWhereInput | UserScalarWhereInput[]
+  }
+
+  export type DepartmentUpdateOneWithoutMembersNestedInput = {
+    create?: XOR<DepartmentCreateWithoutMembersInput, DepartmentUncheckedCreateWithoutMembersInput>
+    connectOrCreate?: DepartmentCreateOrConnectWithoutMembersInput
+    upsert?: DepartmentUpsertWithoutMembersInput
+    disconnect?: boolean
+    delete?: DepartmentWhereInput | boolean
+    connect?: DepartmentWhereUniqueInput
+    update?: XOR<XOR<DepartmentUpdateToOneWithWhereWithoutMembersInput, DepartmentUpdateWithoutMembersInput>, DepartmentUncheckedUpdateWithoutMembersInput>
   }
 
   export type ReportUpdateManyWithoutUserNestedInput = {
@@ -9713,11 +9826,25 @@ export namespace Prisma {
     connect?: ReportWhereUniqueInput | ReportWhereUniqueInput[]
   }
 
+  export type UserCreateNestedManyWithoutDepartmentInput = {
+    create?: XOR<UserCreateWithoutDepartmentInput, UserUncheckedCreateWithoutDepartmentInput> | UserCreateWithoutDepartmentInput[] | UserUncheckedCreateWithoutDepartmentInput[]
+    connectOrCreate?: UserCreateOrConnectWithoutDepartmentInput | UserCreateOrConnectWithoutDepartmentInput[]
+    createMany?: UserCreateManyDepartmentInputEnvelope
+    connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+  }
+
   export type ReportUncheckedCreateNestedManyWithoutDepartmentInput = {
     create?: XOR<ReportCreateWithoutDepartmentInput, ReportUncheckedCreateWithoutDepartmentInput> | ReportCreateWithoutDepartmentInput[] | ReportUncheckedCreateWithoutDepartmentInput[]
     connectOrCreate?: ReportCreateOrConnectWithoutDepartmentInput | ReportCreateOrConnectWithoutDepartmentInput[]
     createMany?: ReportCreateManyDepartmentInputEnvelope
     connect?: ReportWhereUniqueInput | ReportWhereUniqueInput[]
+  }
+
+  export type UserUncheckedCreateNestedManyWithoutDepartmentInput = {
+    create?: XOR<UserCreateWithoutDepartmentInput, UserUncheckedCreateWithoutDepartmentInput> | UserCreateWithoutDepartmentInput[] | UserUncheckedCreateWithoutDepartmentInput[]
+    connectOrCreate?: UserCreateOrConnectWithoutDepartmentInput | UserCreateOrConnectWithoutDepartmentInput[]
+    createMany?: UserCreateManyDepartmentInputEnvelope
+    connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
   }
 
   export type ReportUpdateManyWithoutDepartmentNestedInput = {
@@ -9734,6 +9861,20 @@ export namespace Prisma {
     deleteMany?: ReportScalarWhereInput | ReportScalarWhereInput[]
   }
 
+  export type UserUpdateManyWithoutDepartmentNestedInput = {
+    create?: XOR<UserCreateWithoutDepartmentInput, UserUncheckedCreateWithoutDepartmentInput> | UserCreateWithoutDepartmentInput[] | UserUncheckedCreateWithoutDepartmentInput[]
+    connectOrCreate?: UserCreateOrConnectWithoutDepartmentInput | UserCreateOrConnectWithoutDepartmentInput[]
+    upsert?: UserUpsertWithWhereUniqueWithoutDepartmentInput | UserUpsertWithWhereUniqueWithoutDepartmentInput[]
+    createMany?: UserCreateManyDepartmentInputEnvelope
+    set?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    disconnect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    delete?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    update?: UserUpdateWithWhereUniqueWithoutDepartmentInput | UserUpdateWithWhereUniqueWithoutDepartmentInput[]
+    updateMany?: UserUpdateManyWithWhereWithoutDepartmentInput | UserUpdateManyWithWhereWithoutDepartmentInput[]
+    deleteMany?: UserScalarWhereInput | UserScalarWhereInput[]
+  }
+
   export type ReportUncheckedUpdateManyWithoutDepartmentNestedInput = {
     create?: XOR<ReportCreateWithoutDepartmentInput, ReportUncheckedCreateWithoutDepartmentInput> | ReportCreateWithoutDepartmentInput[] | ReportUncheckedCreateWithoutDepartmentInput[]
     connectOrCreate?: ReportCreateOrConnectWithoutDepartmentInput | ReportCreateOrConnectWithoutDepartmentInput[]
@@ -9746,6 +9887,20 @@ export namespace Prisma {
     update?: ReportUpdateWithWhereUniqueWithoutDepartmentInput | ReportUpdateWithWhereUniqueWithoutDepartmentInput[]
     updateMany?: ReportUpdateManyWithWhereWithoutDepartmentInput | ReportUpdateManyWithWhereWithoutDepartmentInput[]
     deleteMany?: ReportScalarWhereInput | ReportScalarWhereInput[]
+  }
+
+  export type UserUncheckedUpdateManyWithoutDepartmentNestedInput = {
+    create?: XOR<UserCreateWithoutDepartmentInput, UserUncheckedCreateWithoutDepartmentInput> | UserCreateWithoutDepartmentInput[] | UserUncheckedCreateWithoutDepartmentInput[]
+    connectOrCreate?: UserCreateOrConnectWithoutDepartmentInput | UserCreateOrConnectWithoutDepartmentInput[]
+    upsert?: UserUpsertWithWhereUniqueWithoutDepartmentInput | UserUpsertWithWhereUniqueWithoutDepartmentInput[]
+    createMany?: UserCreateManyDepartmentInputEnvelope
+    set?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    disconnect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    delete?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    update?: UserUpdateWithWhereUniqueWithoutDepartmentInput | UserUpdateWithWhereUniqueWithoutDepartmentInput[]
+    updateMany?: UserUpdateManyWithWhereWithoutDepartmentInput | UserUpdateManyWithWhereWithoutDepartmentInput[]
+    deleteMany?: UserScalarWhereInput | UserScalarWhereInput[]
   }
 
   export type ReportCreateNestedOneWithoutHistoryInput = {
@@ -10051,6 +10206,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     supervisor?: UserCreateNestedOneWithoutSubordinatesInput
+    department?: DepartmentCreateNestedOneWithoutMembersInput
     reports?: ReportCreateNestedManyWithoutUserInput
     media?: MediaCreateNestedManyWithoutUserInput
   }
@@ -10064,6 +10220,7 @@ export namespace Prisma {
     statusPhrase?: string | null
     role?: $Enums.Role
     supervisorId?: string | null
+    departmentId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     reports?: ReportUncheckedCreateNestedManyWithoutUserInput
@@ -10086,6 +10243,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     Subordinates?: UserCreateNestedManyWithoutSupervisorInput
+    department?: DepartmentCreateNestedOneWithoutMembersInput
     reports?: ReportCreateNestedManyWithoutUserInput
     media?: MediaCreateNestedManyWithoutUserInput
   }
@@ -10098,6 +10256,7 @@ export namespace Prisma {
     avatarUrl?: string | null
     statusPhrase?: string | null
     role?: $Enums.Role
+    departmentId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     Subordinates?: UserUncheckedCreateNestedManyWithoutSupervisorInput
@@ -10112,6 +10271,25 @@ export namespace Prisma {
 
   export type UserCreateManySupervisorInputEnvelope = {
     data: UserCreateManySupervisorInput | UserCreateManySupervisorInput[]
+  }
+
+  export type DepartmentCreateWithoutMembersInput = {
+    id?: string
+    name: string
+    createdAt?: Date | string
+    reports?: ReportCreateNestedManyWithoutDepartmentInput
+  }
+
+  export type DepartmentUncheckedCreateWithoutMembersInput = {
+    id?: string
+    name: string
+    createdAt?: Date | string
+    reports?: ReportUncheckedCreateNestedManyWithoutDepartmentInput
+  }
+
+  export type DepartmentCreateOrConnectWithoutMembersInput = {
+    where: DepartmentWhereUniqueInput
+    create: XOR<DepartmentCreateWithoutMembersInput, DepartmentUncheckedCreateWithoutMembersInput>
   }
 
   export type ReportCreateWithoutUserInput = {
@@ -10211,6 +10389,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     supervisor?: UserUpdateOneWithoutSubordinatesNestedInput
+    department?: DepartmentUpdateOneWithoutMembersNestedInput
     reports?: ReportUpdateManyWithoutUserNestedInput
     media?: MediaUpdateManyWithoutUserNestedInput
   }
@@ -10223,6 +10402,7 @@ export namespace Prisma {
     statusPhrase?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     supervisorId?: NullableStringFieldUpdateOperationsInput | string | null
+    departmentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     reports?: ReportUncheckedUpdateManyWithoutUserNestedInput
@@ -10257,8 +10437,32 @@ export namespace Prisma {
     statusPhrase?: StringNullableFilter<"User"> | string | null
     role?: EnumRoleFilter<"User"> | $Enums.Role
     supervisorId?: StringNullableFilter<"User"> | string | null
+    departmentId?: StringNullableFilter<"User"> | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
+  }
+
+  export type DepartmentUpsertWithoutMembersInput = {
+    update: XOR<DepartmentUpdateWithoutMembersInput, DepartmentUncheckedUpdateWithoutMembersInput>
+    create: XOR<DepartmentCreateWithoutMembersInput, DepartmentUncheckedCreateWithoutMembersInput>
+    where?: DepartmentWhereInput
+  }
+
+  export type DepartmentUpdateToOneWithWhereWithoutMembersInput = {
+    where?: DepartmentWhereInput
+    data: XOR<DepartmentUpdateWithoutMembersInput, DepartmentUncheckedUpdateWithoutMembersInput>
+  }
+
+  export type DepartmentUpdateWithoutMembersInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    reports?: ReportUpdateManyWithoutDepartmentNestedInput
+  }
+
+  export type DepartmentUncheckedUpdateWithoutMembersInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    reports?: ReportUncheckedUpdateManyWithoutDepartmentNestedInput
   }
 
   export type ReportUpsertWithWhereUniqueWithoutUserInput = {
@@ -10340,6 +10544,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     supervisor?: UserCreateNestedOneWithoutSubordinatesInput
     Subordinates?: UserCreateNestedManyWithoutSupervisorInput
+    department?: DepartmentCreateNestedOneWithoutMembersInput
     media?: MediaCreateNestedManyWithoutUserInput
   }
 
@@ -10352,6 +10557,7 @@ export namespace Prisma {
     statusPhrase?: string | null
     role?: $Enums.Role
     supervisorId?: string | null
+    departmentId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     Subordinates?: UserUncheckedCreateNestedManyWithoutSupervisorInput
@@ -10367,12 +10573,14 @@ export namespace Prisma {
     id?: string
     name: string
     createdAt?: Date | string
+    members?: UserCreateNestedManyWithoutDepartmentInput
   }
 
   export type DepartmentUncheckedCreateWithoutReportsInput = {
     id?: string
     name: string
     createdAt?: Date | string
+    members?: UserUncheckedCreateNestedManyWithoutDepartmentInput
   }
 
   export type DepartmentCreateOrConnectWithoutReportsInput = {
@@ -10468,6 +10676,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     supervisor?: UserUpdateOneWithoutSubordinatesNestedInput
     Subordinates?: UserUpdateManyWithoutSupervisorNestedInput
+    department?: DepartmentUpdateOneWithoutMembersNestedInput
     media?: MediaUpdateManyWithoutUserNestedInput
   }
 
@@ -10479,6 +10688,7 @@ export namespace Prisma {
     statusPhrase?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     supervisorId?: NullableStringFieldUpdateOperationsInput | string | null
+    departmentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     Subordinates?: UserUncheckedUpdateManyWithoutSupervisorNestedInput
@@ -10499,11 +10709,13 @@ export namespace Prisma {
   export type DepartmentUpdateWithoutReportsInput = {
     name?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    members?: UserUpdateManyWithoutDepartmentNestedInput
   }
 
   export type DepartmentUncheckedUpdateWithoutReportsInput = {
     name?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    members?: UserUncheckedUpdateManyWithoutDepartmentNestedInput
   }
 
   export type ReportHistoryUpsertWithWhereUniqueWithoutReportInput = {
@@ -10588,6 +10800,47 @@ export namespace Prisma {
     data: ReportCreateManyDepartmentInput | ReportCreateManyDepartmentInput[]
   }
 
+  export type UserCreateWithoutDepartmentInput = {
+    id?: string
+    name: string
+    email: string
+    passwordHash: string
+    avatarUrl?: string | null
+    statusPhrase?: string | null
+    role?: $Enums.Role
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    supervisor?: UserCreateNestedOneWithoutSubordinatesInput
+    Subordinates?: UserCreateNestedManyWithoutSupervisorInput
+    reports?: ReportCreateNestedManyWithoutUserInput
+    media?: MediaCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutDepartmentInput = {
+    id?: string
+    name: string
+    email: string
+    passwordHash: string
+    avatarUrl?: string | null
+    statusPhrase?: string | null
+    role?: $Enums.Role
+    supervisorId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    Subordinates?: UserUncheckedCreateNestedManyWithoutSupervisorInput
+    reports?: ReportUncheckedCreateNestedManyWithoutUserInput
+    media?: MediaUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutDepartmentInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutDepartmentInput, UserUncheckedCreateWithoutDepartmentInput>
+  }
+
+  export type UserCreateManyDepartmentInputEnvelope = {
+    data: UserCreateManyDepartmentInput | UserCreateManyDepartmentInput[]
+  }
+
   export type ReportUpsertWithWhereUniqueWithoutDepartmentInput = {
     where: ReportWhereUniqueInput
     update: XOR<ReportUpdateWithoutDepartmentInput, ReportUncheckedUpdateWithoutDepartmentInput>
@@ -10602,6 +10855,22 @@ export namespace Prisma {
   export type ReportUpdateManyWithWhereWithoutDepartmentInput = {
     where: ReportScalarWhereInput
     data: XOR<ReportUpdateManyMutationInput, ReportUncheckedUpdateManyWithoutDepartmentInput>
+  }
+
+  export type UserUpsertWithWhereUniqueWithoutDepartmentInput = {
+    where: UserWhereUniqueInput
+    update: XOR<UserUpdateWithoutDepartmentInput, UserUncheckedUpdateWithoutDepartmentInput>
+    create: XOR<UserCreateWithoutDepartmentInput, UserUncheckedCreateWithoutDepartmentInput>
+  }
+
+  export type UserUpdateWithWhereUniqueWithoutDepartmentInput = {
+    where: UserWhereUniqueInput
+    data: XOR<UserUpdateWithoutDepartmentInput, UserUncheckedUpdateWithoutDepartmentInput>
+  }
+
+  export type UserUpdateManyWithWhereWithoutDepartmentInput = {
+    where: UserScalarWhereInput
+    data: XOR<UserUpdateManyMutationInput, UserUncheckedUpdateManyWithoutDepartmentInput>
   }
 
   export type ReportCreateWithoutHistoryInput = {
@@ -10686,6 +10955,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     supervisor?: UserCreateNestedOneWithoutSubordinatesInput
     Subordinates?: UserCreateNestedManyWithoutSupervisorInput
+    department?: DepartmentCreateNestedOneWithoutMembersInput
     reports?: ReportCreateNestedManyWithoutUserInput
   }
 
@@ -10698,6 +10968,7 @@ export namespace Prisma {
     statusPhrase?: string | null
     role?: $Enums.Role
     supervisorId?: string | null
+    departmentId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     Subordinates?: UserUncheckedCreateNestedManyWithoutSupervisorInput
@@ -10764,6 +11035,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     supervisor?: UserUpdateOneWithoutSubordinatesNestedInput
     Subordinates?: UserUpdateManyWithoutSupervisorNestedInput
+    department?: DepartmentUpdateOneWithoutMembersNestedInput
     reports?: ReportUpdateManyWithoutUserNestedInput
   }
 
@@ -10775,6 +11047,7 @@ export namespace Prisma {
     statusPhrase?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     supervisorId?: NullableStringFieldUpdateOperationsInput | string | null
+    departmentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     Subordinates?: UserUncheckedUpdateManyWithoutSupervisorNestedInput
@@ -10826,6 +11099,7 @@ export namespace Prisma {
     avatarUrl?: string | null
     statusPhrase?: string | null
     role?: $Enums.Role
+    departmentId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -10867,6 +11141,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     Subordinates?: UserUpdateManyWithoutSupervisorNestedInput
+    department?: DepartmentUpdateOneWithoutMembersNestedInput
     reports?: ReportUpdateManyWithoutUserNestedInput
     media?: MediaUpdateManyWithoutUserNestedInput
   }
@@ -10878,6 +11153,7 @@ export namespace Prisma {
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
     statusPhrase?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    departmentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     Subordinates?: UserUncheckedUpdateManyWithoutSupervisorNestedInput
@@ -10892,6 +11168,7 @@ export namespace Prisma {
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
     statusPhrase?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    departmentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -11077,6 +11354,19 @@ export namespace Prisma {
     updatedAt?: Date | string
   }
 
+  export type UserCreateManyDepartmentInput = {
+    id?: string
+    name: string
+    email: string
+    passwordHash: string
+    avatarUrl?: string | null
+    statusPhrase?: string | null
+    role?: $Enums.Role
+    supervisorId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
   export type ReportUpdateWithoutDepartmentInput = {
     imageUrl?: StringFieldUpdateOperationsInput | string
     comment?: StringFieldUpdateOperationsInput | string
@@ -11110,6 +11400,48 @@ export namespace Prisma {
     feedbackAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     status?: EnumReportStatusFieldUpdateOperationsInput | $Enums.ReportStatus
     userId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type UserUpdateWithoutDepartmentInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    statusPhrase?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    supervisor?: UserUpdateOneWithoutSubordinatesNestedInput
+    Subordinates?: UserUpdateManyWithoutSupervisorNestedInput
+    reports?: ReportUpdateManyWithoutUserNestedInput
+    media?: MediaUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutDepartmentInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    statusPhrase?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    supervisorId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    Subordinates?: UserUncheckedUpdateManyWithoutSupervisorNestedInput
+    reports?: ReportUncheckedUpdateManyWithoutUserNestedInput
+    media?: MediaUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateManyWithoutDepartmentInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    statusPhrase?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    supervisorId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }

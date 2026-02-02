@@ -3,8 +3,28 @@ import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
 import { io } from 'socket.io-client';
 import { toast } from 'react-hot-toast';
-import { LogOut, CheckCircle, Clock, AlertCircle, MessageSquare, Users, User, Send, Archive, History, X, Folder, Plus } from 'lucide-react';
+import {
+    Clock,
+    CheckCircle,
+    AlertCircle,
+    History,
+    Folder,
+    MessageSquare,
+    TrendingUp
+} from 'lucide-react';
 import { ChatWidget } from '../components/ChatWidget';
+import {
+    Avatar,
+    Badge,
+    Button,
+    Input,
+    TextArea,
+    GlassCard,
+    Modal,
+    Header,
+    Card
+} from '../components/ui';
+import { KpiCard, ReportCard, TeamSidebar } from '../components/domain';
 
 const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
@@ -21,7 +41,7 @@ interface Subordinate {
     id: string;
     name: string;
     role: string;
-    avatarUrl?: string;
+    avatarUrl?: string | null;
     statusPhrase?: string;
     isOnline?: boolean;
 }
@@ -42,7 +62,7 @@ interface Report {
     createdAt: string;
     user: {
         name: string;
-        avatarUrl?: string;
+        avatarUrl?: string | null;
         statusPhrase?: string;
     };
 }
@@ -82,13 +102,55 @@ export function Dashboard() {
     // Form for Forwarding/Review
     const [formFeedback, setFormFeedback] = useState('');
     const [selectedDeptId, setSelectedDeptId] = useState('');
-    const [newDeptName, setNewDeptName] = useState('');
 
     const [page, setPage] = useState(1);
-    const [statusFilter, setStatusFilter] = useState<string>('SENT'); const [startDate, setStartDate] = useState<string>('');
+    const [statusFilter, setStatusFilter] = useState<string>('SENT');
+    const [startDate, setStartDate] = useState<string>('');
     const [endDate, setEndDate] = useState<string>('');
     const [hasMore, setHasMore] = useState(true);
     const LIMIT = 6;
+
+    const loadReports = async (pageNum: number, reset: boolean = false, status?: string) => {
+        try {
+            let url = `/reports?page=${pageNum}&limit=${LIMIT}`;
+            if (status) url += `&status=${status}`;
+            if (startDate) url += `&startDate=${new Date(startDate).toISOString()}`;
+            if (endDate) url += `&endDate=${new Date(endDate).toISOString()}`;
+
+            const response = await api.get(url);
+            setHasMore(response.data.length === LIMIT);
+            setReports(prev => reset ? response.data : [...prev, ...response.data]);
+        } catch (error) {
+            console.error('Erro ao buscar relatórios:', error);
+        }
+    };
+
+    const loadStats = async () => {
+        try {
+            const response = await api.get('/reports/stats');
+            setStats(response.data);
+        } catch (error) {
+            console.error('Erro ao buscar estatísticas:', error);
+        }
+    };
+
+    const loadSubordinates = async () => {
+        try {
+            const response = await api.get('/subordinates');
+            setSubordinates(response.data);
+        } catch (error) {
+            console.error('Erro ao buscar subordinados:', error);
+        }
+    };
+
+    const loadDepartments = async () => {
+        try {
+            const response = await api.get('/departments');
+            setDepartments(response.data);
+        } catch (error) {
+            console.error('Erro ao buscar departamentos:', error);
+        }
+    };
 
     useEffect(() => {
         loadReports(1, true, statusFilter);
@@ -127,129 +189,83 @@ export function Dashboard() {
             loadStats();
         });
 
+        const chatTargetId = chatTarget?.id;
+
         socket.on('new_chat_notification', (data: { from: string, fromName?: string, text: string }) => {
-            if (chatTarget?.id !== data.from) {
+            if (chatTargetId !== data.from) {
                 setUnreadMessages(prev => ({ ...prev, [data.from]: true }));
                 playNotificationSound();
                 toast(`Mensagem de ${data.fromName || 'Subordinado'}: ${data.text}`, {
                     icon: '💬',
-                    duration: 4000
+                    duration: 5000,
+                    style: {
+                        borderRadius: '1.5rem',
+                        background: '#333',
+                        color: '#fff',
+                        fontSize: '12px',
+                        fontWeight: 'bold'
+                    }
                 });
             }
         });
 
         return () => { socket.disconnect(); };
-    }, [user, statusFilter, startDate, endDate]);
-
-    async function loadReports(pageNum: number, reset: boolean = false, status?: string) {
-        try {
-            let url = `/reports?page=${pageNum}&limit=${LIMIT}`;
-            if (status) url += `&status=${status}`;
-            if (startDate) url += `&startDate=${new Date(startDate).toISOString()}`;
-            if (endDate) url += `&endDate=${new Date(endDate).toISOString()}`;
-
-            const response = await api.get(url);
-            setHasMore(response.data.length === LIMIT);
-            setReports(prev => reset ? response.data : [...prev, ...response.data]);
-        } catch (error) { console.error('Erro ao buscar relatórios'); }
-    }
-
-    async function loadStats() {
-        try {
-            const response = await api.get('/reports/stats');
-            setStats(response.data);
-        } catch (error) { console.error('Erro ao buscar estatísticas'); }
-    }
-
-    async function loadSubordinates() {
-        try {
-            const response = await api.get('/subordinates');
-            setSubordinates(response.data);
-        } catch (error) { console.error('Erro ao buscar subordinados'); }
-    }
-
-    async function loadDepartments() {
-        try {
-            const response = await api.get('/departments');
-            setDepartments(response.data);
-        } catch (error) { console.error('Erro ao buscar departamentos'); }
-    }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [user?.id, user?.name, user?.role, statusFilter, startDate, endDate, chatTarget?.id]);
 
     async function handleProcessAnalysis() {
         if (!analyzingReport) return;
 
-        const status = targetStatus;
-        let deptId = selectedDeptId;
-
         try {
-            // Se houver nome para novo departamento, cria primeiro
-            if (status === 'FORWARDED' && newDeptName.trim()) {
-                const deptRes = await api.post('/departments', { name: newDeptName });
-                deptId = deptRes.data.id;
-                loadDepartments();
-            }
 
             const response = await api.patch(`/reports/${analyzingReport.id}/status`, {
-                status,
+                status: targetStatus,
                 feedback: formFeedback,
-                departmentId: status === 'FORWARDED' ? deptId : undefined
+                departmentId: targetStatus === 'FORWARDED' ? selectedDeptId : undefined
             });
 
+            toast.success('Reporte atualizado com sucesso!');
             const updatedReport = response.data;
             setReports(prev => {
-                if (statusFilter && statusFilter !== status) return prev.filter(r => r.id !== analyzingReport.id);
+                if (statusFilter && statusFilter !== targetStatus) return prev.filter(r => r.id !== analyzingReport.id);
                 return prev.map(r => r.id === analyzingReport.id ? updatedReport : r);
             });
 
             setAnalyzingReport(null);
-            resetAnalysisForm();
-            loadStats();
-        } catch (error) {
-            alert('Erro ao processar análise');
+        } catch (error: any) {
+            const apiError = error as { response?: { data?: { error?: string } } };
+            toast.error(apiError.response?.data?.error || 'Erro ao processar análise.');
         }
     }
 
-    async function handleUpdateStatus(id: string, status: string) {
-        if (status === 'IN_REVIEW' || status === 'FORWARDED') {
-            const report = reports.find(r => r.id === id);
-            if (report) {
-                setAnalyzingReport(report);
-                setTargetStatus(status as any);
-                return;
-            }
-        }
-
-        const feedback = window.prompt(`Adicione um comentário para (${status}):`);
-        if (feedback === null) return;
-
+    async function handleUpdateStatus(reportId: string, status: string) {
         try {
-            const response = await api.patch(`/reports/${id}/status`, { status, feedback });
-            const updatedReport = response.data;
-            setReports(prev => {
-                if (statusFilter && statusFilter !== status) return prev.filter(r => r.id !== id);
-                return prev.map(r => r.id === id ? updatedReport : r);
-            });
+            await api.patch(`/reports/${reportId}/status`, { status });
+            toast.success('Status atualizado!');
+            loadReports(1, true, statusFilter);
             loadStats();
-        } catch (error) { alert('Erro ao atualizar status'); }
+        } catch (error: any) {
+            const apiError = error as { response?: { data?: { error?: string } } };
+            console.error('Erro ao atualizar status:', apiError);
+            toast.error(apiError.response?.data?.error || 'Erro ao atualizar status.');
+        }
     }
 
-    async function handleUpdateProfile() {
+    async function handleUpdateProfile(e: React.FormEvent) {
+        e.preventDefault();
         setIsUpdatingProfile(true);
         const formData = new FormData();
         formData.append('statusPhrase', profilePhrase);
-        if (profileAvatar) {
-            formData.append('avatar', profileAvatar);
-        }
+        if (profileAvatar) formData.append('avatar', profileAvatar);
 
         try {
-            const response = await api.patch('/profile', formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            });
+            const response = await api.patch('/profile', formData);
             updateUser(response.data);
+            toast.success('Perfil atualizado!');
             setIsProfileOpen(false);
-            setProfileAvatar(null);
-        } catch (error) {
-            alert('Erro ao atualizar perfil');
+        } catch (err) {
+            console.error('Erro ao atualizar perfil:', err);
+            toast.error('Erro ao atualizar perfil.');
         } finally {
             setIsUpdatingProfile(false);
         }
@@ -264,556 +280,334 @@ export function Dashboard() {
     function resetAnalysisForm() {
         setFormFeedback('');
         setSelectedDeptId('');
-        setNewDeptName('');
         setTargetStatus('IN_REVIEW');
     }
 
-
-    const getStatusIcon = (status: string) => {
-        switch (status) {
-            case 'RESOLVED': return <CheckCircle className="text-green-500 w-5 h-5" />;
-            case 'IN_REVIEW': return <Clock className="text-blue-500 w-5 h-5" />;
-            case 'FORWARDED': return <Send className="text-purple-500 w-5 h-5" />;
-            case 'ARCHIVED': return <Archive className="text-gray-400 w-5 h-5" />;
-            default: return <AlertCircle className="text-yellow-500 w-5 h-5" />;
-        }
-    };
-
-
     return (
-        <div className="min-h-screen bg-gray-50">
-            {/* Header */}
-            <header className="bg-white/80 backdrop-blur-md border-b sticky top-0 z-40">
-                <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                        <div className="bg-blue-600 p-2 rounded-xl shadow-lg shadow-blue-200">
-                            <Send className="w-5 h-5 text-white" />
-                        </div>
-                        <div>
-                            <h1 className="text-xl font-black text-gray-800 tracking-tighter">FLASH <span className="text-blue-600">DASH</span></h1>
-                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mt-1">Supervisor: {user?.name}</p>
-                        </div>
-                    </div>
+        <div className="min-h-screen bg-slate-50/50 flex flex-col font-sans selection:bg-blue-100 selection:text-blue-900 transition-colors duration-700">
+            <Header
+                user={{
+                    name: user?.name,
+                    avatarUrl: user?.avatarUrl
+                }}
+                onLogout={signOut}
+            />
 
-                    <div className="hidden md:flex items-center gap-3 bg-gray-50 p-1.5 rounded-2xl border">
-                        <div className="flex items-center gap-2 px-3 border-r">
-                            <Clock className="w-4 h-4 text-gray-400" />
-                            <input
-                                type="date"
-                                value={startDate}
-                                onChange={e => setStartDate(e.target.value)}
-                                className="bg-transparent text-[10px] font-bold outline-none text-gray-600"
-                            />
-                        </div>
-                        <div className="flex items-center gap-2 px-3">
-                            <Clock className="w-4 h-4 text-gray-400" />
-                            <input
-                                type="date"
-                                value={endDate}
-                                onChange={e => setEndDate(e.target.value)}
-                                className="bg-transparent text-[10px] font-bold outline-none text-gray-600"
-                            />
-                        </div>
-                        {(startDate || endDate) && (
-                            <button
-                                onClick={() => { setStartDate(''); setEndDate(''); }}
-                                className="p-1 hover:bg-white rounded-lg transition text-gray-400 hover:text-red-500"
-                            >
-                                <X className="w-4 h-4" />
-                            </button>
-                        )}
-                    </div>
+            {/* Hero / Filter Section */}
+            <div className="bg-[#020617] relative overflow-hidden pb-24 pt-12">
+                <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-blue-600/25 rounded-full blur-[160px] -mr-96 -mt-96 animate-pulse duration-[10s]" />
+                <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-indigo-600/20 rounded-full blur-[140px] -ml-40 -mb-40" />
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.08),transparent_80%)]" />
 
-                    <div className="flex items-center gap-3">
-                        <button
-                            onClick={() => setIsProfileOpen(true)}
-                            className="flex items-center gap-3 p-1 pr-4 bg-gray-50 hover:bg-gray-100 rounded-full border transition"
-                        >
-                            <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-white shadow-sm bg-blue-100 flex items-center justify-center">
-                                {user?.avatarUrl ? (
-                                    <img src={user.avatarUrl} alt="" className="w-full h-full object-cover" />
-                                ) : (
-                                    <User className="w-4 h-4 text-blue-600" />
-                                )}
-                            </div>
-                            <span className="text-[10px] font-black text-gray-700 uppercase tracking-tight">Meu Perfil</span>
-                        </button>
-                        <button onClick={signOut} className="p-3 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-2xl transition">
-                            <LogOut className="w-5 h-5" />
-                        </button>
-                    </div>
-                </div>
-            </header>
-
-            {/* Dashboard Hero / Metrics (Top of the T) */}
-            <div className="bg-gradient-to-br from-blue-700 to-blue-900 border-b border-white/10 pb-20 pt-10">
-                <div className="max-w-5xl mx-auto px-6">
+                <div className="max-w-7xl mx-auto px-6 relative z-10">
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-10">
                         <div>
-                            <h2 className="text-3xl font-black text-white tracking-tight">Painel de Controle</h2>
-                            <p className="text-blue-200 text-sm font-medium mt-1">Visão geral do trâmite operacional da sua equipe.</p>
+                            <h2 className="text-3xl font-black text-white tracking-tight uppercase">Painel de Controle</h2>
+                            <p className="text-white/60 text-sm font-medium mt-1 uppercase tracking-widest">Controle operacional em tempo real</p>
                         </div>
-                        <div className="flex items-center gap-2 bg-black/20 backdrop-blur-lg p-1.5 rounded-2xl border border-white/10">
-                            {[
-                                { id: '', label: 'Status' },
-                                { id: 'SENT', label: 'Recebidos' },
-                                { id: 'IN_REVIEW', label: 'Análise' },
-                                { id: 'FORWARDED', label: 'Depto.' },
-                                { id: 'RESOLVED', label: 'Feitos' },
-                            ].map(filter => (
-                                <button
-                                    key={filter.id}
-                                    onClick={() => { setStatusFilter(filter.id); setPage(1); }}
-                                    className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${statusFilter === filter.id
-                                        ? 'bg-white text-blue-900 shadow-xl'
-                                        : 'text-white/60 hover:text-white hover:bg-white/5'
-                                        }`}
-                                >
-                                    {filter.label}
-                                </button>
-                            ))}
+
+                        <div className="flex flex-col gap-4">
+                            <GlassCard blur="lg" className="p-1 px-1.5 flex items-center gap-1 border-white/10 !rounded-2xl">
+                                {[
+                                    { id: 'SENT', label: 'Recebidos' },
+                                    { id: 'IN_REVIEW', label: 'Análise' },
+                                    { id: 'FORWARDED', label: 'Tramite' },
+                                    { id: 'RESOLVED', label: 'Feitos' },
+                                ].map(filter => (
+                                    <button
+                                        key={filter.id}
+                                        onClick={() => { setStatusFilter(filter.id); setPage(1); }}
+                                        className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${statusFilter === filter.id
+                                            ? filter.id === 'SENT' ? 'bg-yellow-500 text-yellow-950 shadow-lg shadow-yellow-500/30'
+                                                : filter.id === 'IN_REVIEW' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
+                                                    : filter.id === 'FORWARDED' ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/30'
+                                                        : filter.id === 'RESOLVED' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/30'
+                                                            : 'bg-blue-600 text-white shadow-lg'
+                                            : 'text-white/60 hover:text-white hover:bg-white/10'
+                                            }`}
+                                    >
+                                        {filter.label}
+                                    </button>
+                                ))}
+                            </GlassCard>
+
+                            <GlassCard variant="light" blur="lg" className="flex items-center gap-2 !bg-white/5 backdrop-blur-xl p-1.5 !rounded-2xl border border-white/10">
+                                <div className="flex items-center gap-2 px-3 border-r border-white/10">
+                                    <Clock className="w-3.5 h-3.5 text-blue-400" />
+                                    <input
+                                        type="date"
+                                        value={startDate}
+                                        onChange={e => setStartDate(e.target.value)}
+                                        className="bg-transparent text-[9px] font-bold outline-none text-white appearance-none h-6 uppercase filter invert brightness-200"
+                                    />
+                                </div>
+                                <div className="flex items-center gap-2 px-3">
+                                    <Clock className="w-3.5 h-3.5 text-gray-400" />
+                                    <input
+                                        type="date"
+                                        value={endDate}
+                                        onChange={e => setEndDate(e.target.value)}
+                                        className="bg-transparent text-[9px] font-bold outline-none text-white appearance-none h-6 uppercase filter invert brightness-200"
+                                    />
+                                </div>
+                                {(startDate || endDate) && (
+                                    <button
+                                        onClick={() => { setStartDate(''); setEndDate(''); }}
+                                        className="p-1 hover:bg-white/10 rounded-lg transition text-gray-400 hover:text-red-400"
+                                    >
+                                        <AlertCircle className="w-3.5 h-3.5" />
+                                    </button>
+                                )}
+                            </GlassCard>
                         </div>
                     </div>
 
-                    {/* KPI Cards (Glassmorphism) */}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         {[
-                            { label: 'Recebidos', status: 'SENT', icon: AlertCircle, color: 'text-yellow-400' },
-                            { label: 'Em Análise', status: 'IN_REVIEW', icon: Clock, color: 'text-blue-400' },
-                            { label: 'No Depto.', status: 'FORWARDED', icon: Send, color: 'text-purple-400' },
-                            { label: 'Resolvidos', status: 'RESOLVED', icon: CheckCircle, color: 'text-green-400' },
-                        ].map(kpi => {
-                            const count = stats.find(s => s.status === kpi.status)?._count || 0;
-                            return (
-                                <div key={kpi.label} className="bg-white/10 backdrop-blur-2xl border border-white/20 p-5 rounded-3xl group hover:bg-white/20 transition-all cursor-default">
-                                    <div className="flex justify-between items-start mb-4">
-                                        <div className={`p-2.5 rounded-2xl bg-white/10 ${kpi.color}`}>
-                                            <kpi.icon className="w-5 h-5" />
-                                        </div>
-                                        <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">Tempo Médio: 2h</span>
-                                    </div>
-                                    <p className="text-white/60 text-[10px] font-black uppercase tracking-widest mb-1">{kpi.label}</p>
-                                    <h4 className="text-3xl font-black text-white">{count}</h4>
-                                </div>
-                            );
-                        })}
+                            { label: 'Recebidos', status: 'SENT', icon: AlertCircle, color: 'blue' as const },
+                            { label: 'Em Análise', status: 'IN_REVIEW', icon: Clock, color: 'purple' as const },
+                            { label: 'Encaminhados', status: 'FORWARDED', icon: Folder, color: 'orange' as const },
+                            { label: 'Finalizados', status: 'RESOLVED', icon: CheckCircle, color: 'emerald' as const },
+                        ].map(kpi => (
+                            <KpiCard
+                                key={kpi.status}
+                                label={kpi.label}
+                                value={stats.find(s => s.status === kpi.status)?._count || 0}
+                                icon={kpi.icon}
+                                variant={kpi.color}
+                                trend={kpi.status === 'SENT' ? 'Pendentes' : undefined}
+                            />
+                        ))}
                     </div>
                 </div>
             </div>
 
-            {/* Main Content (Stem of the T) */}
-            <main className="max-w-4xl mx-auto px-6 -mt-10 pb-20 relative z-10 flex flex-col lg:flex-row gap-10">
-                {/* Center Feed */}
-                <div className="flex-1 space-y-8">
+            {/* Main Content */}
+            <main className="max-w-7xl mx-auto px-6 w-full -mt-16 mb-20 relative z-20 flex flex-col lg:flex-row gap-8 lg:gap-12">
+                {/* Visual Blobs behind the glass content */}
+                <div className="absolute -z-10 top-0 left-1/4 w-[500px] h-[500px] bg-blue-400/10 rounded-full blur-[120px] pointer-events-none" />
+                <div className="absolute -z-10 bottom-0 right-1/4 w-[400px] h-[400px] bg-purple-400/10 rounded-full blur-[100px] pointer-events-none" />
 
-
-
+                {/* Reports Feed */}
+                <div className="flex-1 space-y-6">
                     {reports.length === 0 ? (
-                        <div className="bg-white p-12 rounded-lg text-center border-2 border-dashed border-gray-200">
-                            <p className="text-gray-500">Nenhum relatório pendente.</p>
-                        </div>
+                        <Card variant="glass" className="p-20 flex flex-col items-center justify-center text-gray-400">
+                            <MessageSquare className="w-12 h-12 mb-4 opacity-20" />
+                            <p className="font-bold uppercase tracking-widest text-[10px]">Nenhum reporte encontrado</p>
+                        </Card>
                     ) : (
-                        <>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                {reports.map(report => (
-                                    <div key={report.id} className="bg-white rounded-lg shadow-sm border overflow-hidden flex flex-col">
-
-
-                                        <img
-                                            src={report.imageUrl}
-                                            alt="Relatado"
-                                            className="w-full h-48 object-cover bg-gray-100"
-                                        />
-                                        <div className="p-4 flex-1">
-                                            <div className="flex justify-between items-start mb-2">
-                                                <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                                                    {new Date(report.createdAt).toLocaleString()}
-                                                </span>
-                                                {getStatusIcon(report.status)}
-                                            </div>
-                                            <p className="text-sm text-gray-700 mb-4 h-12 line-clamp-2">{report.comment}</p>
-
-                                            {report.feedback && (
-                                                <div className="bg-blue-50 border-l-4 border-blue-400 p-2 mb-4">
-                                                    <p className="text-[10px] font-bold text-blue-800 uppercase flex items-center gap-1">
-                                                        <MessageSquare className="w-3 h-3" /> Feedback:
-                                                    </p>
-                                                    <p className="text-xs text-blue-700 italic mt-1">{report.feedback}</p>
-                                                </div>
+                        <div className="grid gap-6">
+                            {reports.map(report => (
+                                <ReportCard
+                                    key={report.id}
+                                    report={report}
+                                    showUser
+                                    actions={
+                                        <div className="flex gap-2 w-full">
+                                            {report.status !== 'RESOLVED' && report.status !== 'ARCHIVED' && (
+                                                <Button variant="primary" size="sm" fullWidth onClick={() => { setAnalyzingReport(report); setTargetStatus('FORWARDED'); }}>Trâmite</Button>
                                             )}
-
-                                            <div className="flex flex-col gap-1 text-gray-500 mb-4">
-                                                <div className="flex items-center gap-2 text-sm">
-                                                    {report.user?.avatarUrl ? (
-                                                        <img src={report.user.avatarUrl} alt="" className="w-8 h-8 flex-shrink-0 rounded-full object-cover border-2 border-white shadow-sm" />
-                                                    ) : (
-                                                        <div className="w-8 h-8 flex-shrink-0 bg-gray-100 rounded-full flex items-center justify-center border-2 border-white shadow-sm">
-                                                            <User className="w-4 h-4 text-gray-400" />
-                                                        </div>
-                                                    )}
-                                                    Por: <span className="font-medium text-gray-800">{report.user?.name || 'Sistema'}</span>
-                                                </div>
-                                                {report.user?.statusPhrase && (
-                                                    <p className="text-[10px] text-gray-400 italic leading-tight pl-7">
-                                                        "{report.user.statusPhrase}"
-                                                    </p>
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        <div className="p-4 bg-gray-50 border-t flex flex-wrap gap-2">
-                                            {report.status === 'FORWARDED' ? (
-                                                <button
-                                                    onClick={() => { setAnalyzingReport(report); setTargetStatus('FORWARDED'); }}
-                                                    className="w-full bg-blue-600 text-white py-2.5 text-[10px] font-black rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-100 flex items-center justify-center gap-2"
-                                                >
-                                                    <Folder className="w-4 h-4" /> TRÂMITE {report.department?.name.toUpperCase()}
-                                                </button>
-                                            ) : (
-                                                <>
-                                                    {report.status !== 'RESOLVED' && report.status !== 'ARCHIVED' && (
-                                                        <>
-                                                            {report.status !== 'IN_REVIEW' && (
-                                                                <button onClick={() => handleUpdateStatus(report.id, 'IN_REVIEW')} className="flex-1 min-w-[100px] bg-white border py-2 text-[10px] font-bold rounded-lg hover:bg-gray-100 transition uppercase">Analisar</button>
-                                                            )}
-                                                            <button onClick={() => handleUpdateStatus(report.id, 'RESOLVED')} className="flex-1 min-w-[100px] bg-green-600 text-white py-2 text-[10px] font-bold rounded-lg hover:bg-green-700 transition">RESOLVER</button>
-                                                        </>
-                                                    )}
-                                                    {report.status === 'RESOLVED' && (
-                                                        <button onClick={() => handleUpdateStatus(report.id, 'ARCHIVED')} className="flex-1 bg-gray-200 text-gray-600 py-2 text-[10px] font-bold rounded-lg hover:bg-gray-300 transition">ARQUIVAR</button>
-                                                    )}
-                                                </>
+                                            {report.status === 'RESOLVED' && (
+                                                <Button variant="secondary" size="sm" fullWidth onClick={() => handleUpdateStatus(report.id, 'ARCHIVED')}>Arquivar</Button>
                                             )}
-
-                                            <button
-                                                onClick={() => setSelectedReport(report)}
-                                                className="w-full mt-1 flex items-center justify-center gap-1 text-[10px] font-black text-gray-400 uppercase tracking-widest py-1 hover:text-blue-600 transition"
-                                            >
-                                                <History className="w-3 h-3" /> Ver Linha do Tempo
-                                            </button>
+                                            <Button variant="ghost" size="sm" onClick={() => setSelectedReport(report)}>
+                                                <History className="w-4 h-4" />
+                                            </Button>
                                         </div>
-                                    </div>
-                                ))}
-                            </div>
-                            {hasMore && reports.length > 0 && (
-                                <div className="mt-12 flex justify-center pb-10">
-                                    <button
-                                        onClick={handleLoadMore}
-                                        className="bg-white border-2 border-blue-100 text-blue-600 px-10 py-3 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-50 transition shadow-xl shadow-blue-100/50 hover:-translate-y-1"
-                                    >
-                                        CARREGAR MAIS CONTEÚDO
-                                    </button>
-                                </div>
-                            )}
-                        </>
+                                    }
+                                />
+                            ))}
+                        </div>
+                    )}
+
+                    {hasMore && reports.length > 0 && (
+                        <div className="flex justify-center pt-8">
+                            <Button variant="secondary" size="lg" onClick={handleLoadMore} className="bg-white px-10">
+                                Carregar Mais
+                            </Button>
+                        </div>
                     )}
                 </div>
-                {/* Right Side: Team Sidebar */}
-                <aside className="w-full lg:w-80 space-y-6">
-                    <div className="bg-white/80 backdrop-blur-xl p-8 rounded-[2rem] shadow-2xl shadow-blue-900/5 border border-white sticky top-24">
-                        <div className="flex items-center gap-3 mb-8 pb-4 border-b border-gray-100">
-                            <div className="bg-blue-50 p-2 rounded-xl">
-                                <Users className="w-5 h-5 text-blue-600" />
-                            </div>
-                            <h2 className="text-xs font-black text-gray-800 uppercase tracking-widest">Minha Equipe</h2>
-                        </div>
 
-                        {subordinates.length === 0 ? (
-                            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider text-center py-10">Nenhum colega conectado</p>
-                        ) : (
-                            <div className="space-y-6">
-                                {subordinates.map(sub => (
-                                    <div key={sub.id} className="group flex items-center justify-between p-3 hover:bg-gray-50 rounded-2xl transition-all border border-transparent hover:border-gray-100">
-                                        <div className="flex items-center gap-4">
-                                            <div className="relative">
-                                                <div className="w-11 h-11 rounded-2xl overflow-hidden shadow-sm border border-gray-100 bg-gray-50 flex items-center justify-center group-hover:bg-white transition-all">
-                                                    {sub.avatarUrl ? (
-                                                        <img src={sub.avatarUrl} alt="" className="w-full h-full object-cover" />
-                                                    ) : (
-                                                        <User className="w-6 h-6 text-gray-300" />
-                                                    )}
-                                                </div>
-                                                <div className={`absolute -bottom-1 -right-1 w-3.5 h-3.5 border-[3px] border-white rounded-full ${sub.isOnline ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]' : 'bg-gray-300'}`} />
-                                                {unreadMessages[sub.id] && (
-                                                    <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 border-2 border-white rounded-full animate-ping" />
-                                                )}
-                                            </div>
-                                            <div>
-                                                <p className="text-xs font-black text-gray-800">{sub.name}</p>
-                                                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tighter opacity-70">{sub.role}</p>
-                                            </div>
-                                        </div>
-                                        <button
-                                            onClick={() => {
-                                                setChatTarget(sub);
-                                                setUnreadMessages(prev => ({ ...prev, [sub.id]: false }));
-                                            }}
-                                            className="p-2.5 text-blue-600 hover:bg-blue-600 hover:text-white rounded-xl transition-all shadow-lg shadow-blue-100 border border-blue-50"
-                                        >
-                                            <MessageSquare className="w-4 h-4" />
-                                        </button>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
+                {/* Sidebar */}
+                <aside className="w-full lg:w-80 shrink-0">
+                    <TeamSidebar
+                        members={subordinates.map(s => ({
+                            id: s.id,
+                            name: s.name,
+                            role: s.role,
+                            avatarUrl: s.avatarUrl,
+                            isOnline: !!s.isOnline,
+                            statusPhrase: s.statusPhrase,
+                            hasUnread: !!unreadMessages[s.id]
+                        }))}
+                        onMemberClick={(member) => {
+                            setChatTarget(member);
+                            setUnreadMessages(prev => ({ ...prev, [member.id]: false }));
+                        }}
+                    />
                 </aside>
             </main>
 
-            {/* Analysis & Forwarding Modal */}
-            {analyzingReport && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-6 animate-in zoom-in duration-300">
-                    <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col">
-                        <div className="p-6 border-b flex justify-between items-center bg-gray-50/50">
-                            <div className="flex items-center gap-3">
-                                {analyzingReport.status === 'FORWARDED' ? <Folder className="text-purple-600 w-5 h-5" /> : <AlertCircle className="text-blue-600 w-5 h-5" />}
-                                <h3 className="font-black text-gray-800 uppercase tracking-widest">
-                                    {analyzingReport.status === 'FORWARDED' ? `Resposta do Depto: ${analyzingReport.department?.name}` : 'Análise de Processo'}
-                                </h3>
-                            </div>
-                            <button onClick={() => { setAnalyzingReport(null); resetAnalysisForm(); }} className="p-2 hover:bg-gray-100 rounded-full transition"><X className="w-5 h-5 text-gray-400" /></button>
+            {/* Analysis Modal */}
+            <Modal
+                isOpen={!!analyzingReport}
+                onClose={() => { setAnalyzingReport(null); resetAnalysisForm(); }}
+                title={analyzingReport?.status === 'FORWARDED' ? `Resposta: ${analyzingReport?.department?.name}` : 'Análise de Fluxo'}
+                subtitle="Gestão de Operações e Feedback"
+                maxWidth="lg"
+                footer={
+                    <>
+                        <Button variant="secondary" onClick={() => { setAnalyzingReport(null); resetAnalysisForm(); }}>
+                            Cancelar
+                        </Button>
+                        <Button
+                            variant={targetStatus === 'RESOLVED' ? 'success' : targetStatus === 'FORWARDED' ? 'primary' : 'primary'}
+                            onClick={handleProcessAnalysis}
+                        >
+                            {targetStatus === 'RESOLVED' ? 'Finalizar e Resolver' : targetStatus === 'FORWARDED' ? 'Encaminhar Agora' : 'Atualizar Status'}
+                        </Button>
+                    </>
+                }
+            >
+                <div className="space-y-6 py-2">
+                    <TextArea
+                        label="Parecer Técnico / Resumo da Ação"
+                        value={formFeedback}
+                        onChange={e => setFormFeedback(e.target.value)}
+                        placeholder="Descreva as providências ou análise técnica..."
+                        rows={5}
+                    />
+
+                    <div className="space-y-4">
+                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Próxima Etapa</label>
+                        <div className="flex items-center justify-between p-1 bg-blue-50/40 rounded-2xl border border-blue-50/60">
+                            {[
+                                { id: 'IN_REVIEW', label: 'ANÁLISE', color: 'text-blue-600' },
+                                { id: 'FORWARDED', label: 'DEPARTAMENTO', color: 'text-purple-600' },
+                                { id: 'RESOLVED', label: 'RESOLVIDO', color: 'text-emerald-600' }
+                            ].map(opt => (
+                                <button
+                                    key={opt.id}
+                                    onClick={() => setTargetStatus(opt.id as 'IN_REVIEW' | 'FORWARDED' | 'RESOLVED')}
+                                    className={`flex-1 py-3 text-[9px] font-black tracking-widest rounded-xl transition-all ${targetStatus === opt.id ? 'bg-white shadow-xl ' + opt.color : 'text-gray-400 hover:text-gray-600'}`}
+                                >
+                                    {opt.label}
+                                </button>
+                            ))}
                         </div>
 
-                        <div className="p-8 space-y-6">
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Parecer Técnico / Feedback</label>
-                                <textarea
-                                    value={formFeedback}
-                                    onChange={e => setFormFeedback(e.target.value)}
-                                    placeholder="Descreva as providências ou análise do caso..."
-                                    className="w-full h-32 p-4 bg-gray-50 border border-gray-100 rounded-2xl resize-none outline-none focus:bg-white focus:border-blue-500 transition-all text-sm font-medium"
-                                />
-                            </div>
-
-                            <div className="space-y-4 pt-2">
-                                <div className="flex items-center justify-between p-1 bg-gray-100 rounded-xl">
-                                    <button
-                                        onClick={() => setTargetStatus('IN_REVIEW')}
-                                        className={`flex-1 py-2 text-[10px] font-black tracking-widest rounded-lg transition-all ${targetStatus === 'IN_REVIEW' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-500'}`}
+                        {targetStatus === 'FORWARDED' && (
+                            <div className="space-y-4 animate-in slide-in-from-top-4 duration-500">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Destinar para:</label>
+                                    <select
+                                        value={selectedDeptId}
+                                        onChange={e => setSelectedDeptId(e.target.value)}
+                                        className="w-full px-5 py-3.5 bg-gray-50/50 border border-gray-100 rounded-2xl outline-none focus:bg-white focus:border-purple-500/50 transition-all font-bold text-gray-700 appearance-none text-xs"
                                     >
-                                        ANÁLISE
-                                    </button>
-                                    <button
-                                        onClick={() => setTargetStatus('FORWARDED')}
-                                        className={`flex-1 py-2 text-[10px] font-black tracking-widest rounded-lg transition-all ${targetStatus === 'FORWARDED' ? 'bg-white shadow-sm text-purple-600' : 'text-gray-500'}`}
-                                    >
-                                        DEPARTAMENTO
-                                    </button>
-                                    <button
-                                        onClick={() => setTargetStatus('RESOLVED')}
-                                        className={`flex-1 py-2 text-[10px] font-black tracking-widest rounded-lg transition-all ${targetStatus === 'RESOLVED' ? 'bg-white shadow-sm text-green-600' : 'text-gray-500'}`}
-                                    >
-                                        RESOLVIDO
-                                    </button>
+                                        <option value="">-- Escolha um destino --</option>
+                                        {departments.map(d => (
+                                            <option key={d.id} value={d.id}>{d.name}</option>
+                                        ))}
+                                    </select>
                                 </div>
-
-                                {targetStatus === 'FORWARDED' && (
-                                    <div className="space-y-4 animate-in slide-in-from-top-2 duration-300">
-                                        <div className="space-y-1">
-                                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Selecionar Departamento</label>
-                                            <select
-                                                value={selectedDeptId}
-                                                onChange={e => setSelectedDeptId(e.target.value)}
-                                                className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:bg-white focus:border-purple-500 transition-all font-bold text-gray-700 appearance-none"
-                                            >
-                                                <option value="">-- Escolha um destino --</option>
-                                                {departments.map(d => (
-                                                    <option key={d.id} value={d.id}>{d.name}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-
-                                        <div className="flex items-center gap-3">
-                                            <div className="h-px bg-gray-100 flex-1"></div>
-                                            <span className="text-[8px] font-black text-gray-300 uppercase">Ou criar novo</span>
-                                            <div className="h-px bg-gray-100 flex-1"></div>
-                                        </div>
-
-                                        <input
-                                            type="text"
-                                            value={newDeptName}
-                                            onChange={e => setNewDeptName(e.target.value)}
-                                            placeholder="Nome do novo departamento..."
-                                            className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:bg-white focus:border-purple-500 transition-all font-medium text-sm"
-                                        />
-                                    </div>
-                                )}
                             </div>
-                        </div>
-
-                        <div className="p-6 bg-gray-50 border-t flex gap-3">
-                            <button
-                                onClick={() => { setAnalyzingReport(null); resetAnalysisForm(); }}
-                                className="flex-1 py-4 bg-white border border-gray-200 rounded-2xl font-black text-gray-400 text-xs uppercase tracking-widest hover:bg-gray-100 transition"
-                            >
-                                CANCELAR
-                            </button>
-
-                            <button
-                                onClick={handleProcessAnalysis}
-                                className={`flex-[2] py-4 rounded-2xl font-black text-white text-xs uppercase tracking-widest shadow-xl transition-all ${targetStatus === 'RESOLVED' ? 'bg-green-600 hover:bg-green-700 shadow-green-100' :
-                                    targetStatus === 'FORWARDED' ? 'bg-purple-600 hover:bg-purple-700 shadow-purple-100' :
-                                        'bg-blue-600 hover:bg-blue-700 shadow-blue-100'
-                                    }`}
-                            >
-                                {targetStatus === 'RESOLVED' ? 'FINALIZAR E RESOLVER' :
-                                    targetStatus === 'FORWARDED' ? 'ENVIAR PARA DEPTO.' : 'SALVAR ANÁLISE'}
-                            </button>
-                        </div>
+                        )}
                     </div>
                 </div>
-            )
-            }
+            </Modal>
 
-            {/* Timeline Modal */}
-            {
-                selectedReport && (
-                    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-6 animate-in fade-in duration-300">
-                        <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh]">
-                            <div className="p-6 border-b flex justify-between items-center bg-gray-50/50">
-                                <div className="flex items-center gap-3">
-                                    <History className="text-blue-600 w-5 h-5" />
-                                    <h3 className="font-black text-gray-800 uppercase tracking-widest">Linha do Tempo</h3>
+            {/* History Modal */}
+            <Modal
+                isOpen={!!selectedReport}
+                onClose={() => setSelectedReport(null)}
+                title="Fluxo de Resolução"
+                subtitle="Histórico Completo do Reporte"
+                maxWidth="lg"
+            >
+                <div className="space-y-8 py-4 px-2 relative before:absolute before:left-[19px] before:top-4 before:bottom-4 before:w-[2px] before:bg-gray-100">
+                    {selectedReport?.history?.map((step, idx) => (
+                        <div key={idx} className="relative pl-12 group">
+                            <div className={`absolute left-0 top-1 w-10 h-10 rounded-2xl border-4 border-white shadow-md flex items-center justify-center z-10 transition-transform group-hover:scale-110 ${step.status === 'SENT' ? 'bg-yellow-400' :
+                                step.status === 'IN_REVIEW' ? 'bg-blue-500' :
+                                    step.status === 'FORWARDED' ? 'bg-purple-500' :
+                                        step.status === 'RESOLVED' ? 'bg-emerald-500' : 'bg-gray-400'
+                                }`} />
+
+                            <div className="bg-white p-5 rounded-[1.5rem] shadow-sm border border-gray-100 group-hover:shadow-md transition-all">
+                                <div className="flex justify-between items-start mb-3">
+                                    <span className="text-[9px] font-black text-gray-400 uppercase tracking-tight">{new Date(step.createdAt).toLocaleString('pt-BR')}</span>
+                                    <Badge status={step.status as
+                                        'SENT' | 'IN_REVIEW' | 'FORWARDED' | 'RESOLVED' | 'ARCHIVED'}
+                                    />
                                 </div>
-                                <button onClick={() => setSelectedReport(null)} className="p-2 hover:bg-gray-100 rounded-full transition"><X className="w-5 h-5 text-gray-400" /></button>
-                            </div>
-
-                            <div className="p-8 overflow-y-auto flex-1">
-                                <div className="space-y-8 relative before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-0.5 before:bg-blue-100">
-                                    {selectedReport.history?.map((step, idx) => (
-                                        <div key={idx} className="relative pl-10">
-                                            <div className={`absolute left-0 top-1 w-6 h-6 rounded-full border-4 border-white shadow-sm flex items-center justify-center ${step.status === 'SENT' ? 'bg-yellow-400' :
-                                                step.status === 'IN_REVIEW' ? 'bg-blue-500' :
-                                                    step.status === 'FORWARDED' ? 'bg-purple-500' :
-                                                        step.status === 'RESOLVED' ? 'bg-green-500' : 'bg-gray-400'
-                                                }`} />
-
-                                            <div className="flex flex-col">
-                                                <div className="flex justify-between items-start mb-1">
-                                                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-tighter">{new Date(step.createdAt).toLocaleString()}</span>
-                                                    <span className={`text-[8px] font-black px-2 py-0.5 rounded-full border ${step.status === 'SENT' ? 'text-yellow-600 border-yellow-100 bg-yellow-50' :
-                                                        step.status === 'IN_REVIEW' ? 'text-blue-600 border-blue-100 bg-blue-50' :
-                                                            step.status === 'FORWARDED' ? 'text-purple-600 border-purple-100 bg-purple-50' :
-                                                                'text-gray-600 border-gray-100 bg-gray-50'
-                                                        }`}>{step.status}</span>
-                                                </div>
-                                                <p className="text-sm font-bold text-gray-800">{step.comment || 'Sem observações.'}</p>
-                                                <div className="flex justify-between items-center mt-1">
-                                                    <p className="text-[10px] text-gray-400 font-medium">Responsável: <b className="text-gray-600">{step.userName}</b></p>
-                                                    {step.departmentName && (
-                                                        <span className="text-[9px] font-black text-purple-600 bg-purple-50 px-2 py-0.5 rounded-lg border border-purple-100 flex items-center gap-1">
-                                                            <Folder className="w-3 h-3" /> {step.departmentName.toUpperCase()}
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
+                                <p className="text-sm font-medium text-gray-600 leading-relaxed mb-4">{step.comment || 'Nenhuma observação registrada.'}</p>
+                                <div className="flex justify-between items-center pt-3 border-t border-gray-50">
+                                    <div className="flex items-center gap-2">
+                                        <p className="text-[9px] text-gray-400 font-black uppercase">Por: <span className="text-gray-900">{step.userName}</span></p>
+                                    </div>
+                                    {step.departmentName && (
+                                        <Badge status="FORWARDED" label={step.departmentName.toUpperCase()} />
+                                    )}
                                 </div>
-                            </div>
-
-                            <div className="p-6 bg-gray-50 border-t">
-                                <button
-                                    onClick={() => setSelectedReport(null)}
-                                    className="w-full py-4 bg-white border border-gray-200 rounded-2xl font-black text-gray-500 uppercase tracking-widest hover:bg-gray-100 transition"
-                                >
-                                    FECHAR LINHA DO TEMPO
-                                </button>
                             </div>
                         </div>
-                    </div>
-                )
-            }
+                    ))}
+                </div>
+            </Modal>
 
             {/* Profile Modal */}
-            {
-                isProfileOpen && (
-                    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-6 animate-in zoom-in duration-300">
-                        <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden flex flex-col">
-                            <div className="p-6 border-b flex justify-between items-center bg-gray-50/50">
-                                <div className="flex items-center gap-3">
-                                    <User className="text-blue-600 w-5 h-5" />
-                                    <h3 className="font-black text-gray-800 uppercase tracking-widest">Meu Perfil</h3>
-                                </div>
-                                <button onClick={() => setIsProfileOpen(false)} className="p-2 hover:bg-gray-100 rounded-full transition"><X className="w-5 h-5 text-gray-400" /></button>
+            <Modal
+                isOpen={isProfileOpen}
+                onClose={() => setIsProfileOpen(false)}
+                title="Configurações de Perfil"
+                subtitle="Atualize suas informações"
+                footer={
+                    <Button
+                        variant="primary"
+                        fullWidth
+                        isLoading={isUpdatingProfile}
+                        onClick={handleUpdateProfile}
+                    >
+                        Salvar Alterações
+                    </Button>
+                }
+            >
+                <form className="space-y-6 py-2" onSubmit={handleUpdateProfile}>
+                    <div className="flex flex-col items-center gap-4 mb-6">
+                        <div className="relative group cursor-pointer" onClick={() => document.getElementById('avatar-input')?.click()}>
+                            <Avatar src={user?.avatarUrl} size="xl" className="ring-8 ring-blue-50" />
+                            <div className="absolute inset-0 bg-black/40 rounded-2xl md:rounded-[1.5rem] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                <TrendingUp className="text-white w-6 h-6" />
                             </div>
-
-                            <div className="p-8 space-y-6 text-center">
-                                <div className="relative inline-block mx-auto">
-                                    <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-xl bg-gray-100 mx-auto group">
-                                        {(profileAvatar || user?.avatarUrl) ? (
-                                            <img
-                                                src={
-                                                    profileAvatar
-                                                        ? URL.createObjectURL(profileAvatar)
-                                                        : user?.avatarUrl ?? ''
-                                                }
-                                                className="w-full h-full object-cover"
-                                            />
-                                        ) : (
-                                            <User className="w-12 h-12 text-gray-300 mx-auto mt-6" />
-                                        )}
-                                        <label className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition cursor-pointer">
-                                            <Plus className="w-6 h-6 text-white" />
-                                            <input
-                                                type="file"
-                                                className="hidden"
-                                                onChange={e => setProfileAvatar(e.target.files?.[0] || null)}
-                                                accept="image/*"
-                                            />
-                                        </label>
-                                    </div>
-                                    <div className="absolute -bottom-1 -right-1 bg-blue-600 p-1.5 rounded-full border-2 border-white shadow-lg">
-                                        <Plus className="w-3 h-3 text-white" />
-                                    </div>
-                                </div>
-
-                                <div className="space-y-4">
-                                    <div>
-                                        <h4 className="font-black text-gray-800 text-lg">{user?.name}</h4>
-                                        <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest">{user?.role}</p>
-                                    </div>
-
-                                    <div className="space-y-2 text-left">
-                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Frase Motivacional / Status</label>
-                                        <textarea
-                                            value={profilePhrase}
-                                            onChange={e => setProfilePhrase(e.target.value)}
-                                            placeholder="Digite algo que te inspire..."
-                                            className="w-full h-24 p-4 bg-gray-50 border border-gray-100 rounded-2xl resize-none outline-none focus:bg-white focus:border-blue-500 transition-all text-sm font-medium italic text-gray-600"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="p-6 bg-gray-50 border-t flex gap-3">
-                                <button
-                                    onClick={() => setIsProfileOpen(false)}
-                                    className="flex-1 py-4 bg-white border border-gray-200 rounded-2xl font-black text-gray-400 text-xs uppercase tracking-widest hover:bg-gray-100 transition"
-                                >
-                                    FECHAR
-                                </button>
-                                <button
-                                    onClick={handleUpdateProfile}
-                                    disabled={isUpdatingProfile}
-                                    className="flex-[2] py-4 bg-blue-600 hover:bg-blue-700 rounded-2xl font-black text-white text-xs uppercase tracking-widest shadow-xl shadow-blue-100 transition-all disabled:opacity-50"
-                                >
-                                    {isUpdatingProfile ? 'SALVANDO...' : 'SALVAR ALTERAÇÕES'}
-                                </button>
-                            </div>
+                            <input
+                                id="avatar-input"
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={e => setProfileAvatar(e.target.files?.[0] || null)}
+                            />
                         </div>
+                        <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Clique para alterar foto</p>
                     </div>
-                )
-            }
 
-            {/* Chat Widget */}
+                    <Input
+                        label="Frase de Status"
+                        value={profilePhrase}
+                        onChange={e => setProfilePhrase(e.target.value)}
+                        placeholder="Ex: Em campo / Operacional hoje"
+                    />
+                </form>
+            </Modal>
+
             {chatTarget && user && (
                 <ChatWidget
-                    currentUser={user!}
-                    targetUser={chatTarget}
+                    currentUser={{ id: user.id || '', name: user.name || '', role: user.role || '' }}
+                    targetUser={{ id: chatTarget.id || '', name: chatTarget.name || '', role: chatTarget.role || 'PROFESSIONAL' }}
                     onClose={() => setChatTarget(null)}
                 />
             )}
-        </div>
+        </div >
     );
 }

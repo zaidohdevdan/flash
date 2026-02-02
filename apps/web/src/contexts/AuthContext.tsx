@@ -5,8 +5,9 @@ interface User {
     id: string;
     name: string;
     email: string;
-    role: 'SUPERVISOR' | 'PROFESSIONAL' | 'ADMIN';
+    role: 'SUPERVISOR' | 'PROFESSIONAL' | 'ADMIN' | 'MANAGER';
     supervisorId: string | null;
+    departmentId?: string | null;
     supervisorName?: string;
     avatarUrl?: string;
     statusPhrase?: string;

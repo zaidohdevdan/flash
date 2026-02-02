@@ -1,0 +1,53 @@
+import React from 'react';
+
+/**
+ * Propriedades para o componente GlassCard.
+ */
+export interface GlassCardProps {
+    children: React.ReactNode;
+    /** Classes CSS adicionais. */
+    className?: string;
+    /** Variante de transparência. 'light' é mais transparente, 'deep' é mais sólido. */
+    variant?: 'light' | 'deep' | 'gradient';
+    /** Nível de desfoque (blur). */
+    blur?: 'sm' | 'md' | 'lg';
+    /** Se deve aplicar borda semi-transparente. */
+    withBorder?: boolean;
+}
+
+/**
+ * Cartão especializado em Glassmorphism.
+ * Utilizado para elementos flutuantes e seções que precisam de destaque visual suave.
+ */
+export const GlassCard: React.FC<GlassCardProps> = ({
+    children,
+    className = '',
+    variant = 'light',
+    blur = 'md',
+    withBorder = true
+}) => {
+    const blurClasses = {
+        sm: 'backdrop-blur-md',
+        md: 'backdrop-blur-xl',
+        lg: 'backdrop-blur-[32px]'
+    };
+
+    const variants = {
+        light: 'bg-white/60 shadow-xl shadow-blue-500/10',
+        deep: 'bg-white/90 shadow-2xl',
+        gradient: 'bg-gradient-to-br from-white/70 to-blue-50/30 shadow-xl'
+    };
+
+    return (
+        <div className={`
+      ${variants[variant]} 
+      ${blurClasses[blur]} 
+      ${withBorder ? 'border border-white/50 ring-1 ring-white/30' : ''} 
+      rounded-[2.5rem] 
+      overflow-hidden 
+      ${className}
+    `}>
+            {children}
+        </div>
+    );
+};

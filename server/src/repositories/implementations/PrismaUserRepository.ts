@@ -7,11 +7,8 @@ export class PrismaUserRepository implements IUserRepository {
         return prisma.user.findUnique({
             where: { email },
             include: {
-                supervisor: {
-                    select: {
-                        name: true
-                    }
-                }
+                supervisor: { select: { name: true } },
+                department: { select: { name: true } }
             }
         });
     }
@@ -39,11 +36,8 @@ export class PrismaUserRepository implements IUserRepository {
         return prisma.user.findMany({
             where,
             include: {
-                supervisor: {
-                    select: {
-                        name: true
-                    }
-                }
+                supervisor: { select: { name: true } },
+                department: { select: { name: true } }
             },
             orderBy: {
                 name: 'asc'

@@ -10,6 +10,10 @@ import { ChatService } from './services/ChatService';
 
 const chatService = new ChatService();
 
+const getRoomName = (id1: string, id2: string) => {
+    return `private-${[String(id1), String(id2)].map(id => id.trim().toLowerCase()).sort().join('-')}`;
+};
+
 // ---------- Tipagens globais ----------
 
 declare global {
@@ -84,14 +88,31 @@ async function bootstrap() {
 
         const onlineUsers = new Set<string>();
 
-        io.on('connection', (socket) => {
-            const { userId, role } = socket.handshake.query;
+        io.on('connection', async (socket) => {
+            const { userId } = socket.handshake.query;
 
             if (userId) {
                 const roomName = String(userId);
-
                 socket.join(roomName);
                 onlineUsers.add(roomName);
+
+                // Busca dados do usuário no banco para garantir entrada na sala do departamento
+                try {
+                    const user = await prisma.user.findUnique({
+                        where: { id: String(userId) },
+                        select: { departmentId: true, name: true, role: true }
+                    });
+
+                    if (user?.departmentId) {
+                        const deptRoom = `dept-${user.departmentId}`;
+                        socket.join(deptRoom);
+                        console.log(`[Socket] Usuário ${user.name} (${user.role}) entrou na sala ${deptRoom}. ID: ${userId}`);
+                    } else {
+                        console.log(`[Socket] Usuário ${user?.name || userId} não possui departamento vinculado.`);
+                    }
+                } catch (err) {
+                    console.error(`[Socket] Erro ao buscar dados do usuário ${userId} para entrar na sala:`, err);
+                }
 
                 io.emit('user_presence_changed', {
                     userId: roomName,
@@ -108,26 +129,11 @@ async function bootstrap() {
 
             socket.on('join_private_chat', (data: { targetUserId: string }) => {
                 const myId = socket.handshake.query.userId as string;
-                const myRole = socket.handshake.query.role as string;
                 const { targetUserId } = data;
 
-                // Define logic for room name. Convention: "chat:professionalUserId"
-                // If I am professional, I can only join "chat:myId"
-                // If I am supervisor, I can join "chat:targetUserId" (where target is professional)
+                if (!targetUserId || !myId) return;
 
-                let roomName = '';
-
-                // If I am the professional, I am the target of the chat room
-                if (targetUserId === myId) {
-                    roomName = `chat:${myId}`;
-                }
-                // If I am supervisor, I am joining the professional's room
-                else if (myRole === 'SUPERVISOR' || myRole === 'ADMIN') {
-                    roomName = `chat:${targetUserId}`;
-                } else {
-                    console.warn(`[Socket] Unauthorized chat join attempt by ${myId} to ${targetUserId}`);
-                    return;
-                }
+                const roomName = getRoomName(myId, targetUserId);
 
                 socket.join(roomName);
                 // console.log(`[Socket] ${myId} joined room ${roomName}`);
@@ -137,19 +143,10 @@ async function bootstrap() {
                 const myId = socket.handshake.query.userId as string;
                 const { targetUserId, text, audioUrl, audioPublicId } = data;
 
-                // The room is always identified by the PROFESSIONAL's ID
-                // If I am professional, room is `chat:${myId}`
-                // If I am supervisor, room is `chat:${targetUserId}`
-                console.log(`[Socket] Mensagem de ${myId} para ${targetUserId}`);
+                if (!targetUserId || !myId) return;
 
-                const myRole = socket.handshake.query.role as string;
-                let roomName = '';
-
-                if (myRole === 'SUPERVISOR' || myRole === 'ADMIN') {
-                    roomName = `chat:${targetUserId}`;
-                } else {
-                    roomName = `chat:${myId}`; // Professional sending to supervisor (in their own room)
-                }
+                const roomName = getRoomName(myId, targetUserId);
+                console.log(`[Socket] Mensagem de ${myId} para ${targetUserId} na sala ${roomName}`);
 
                 // Persist message in database
                 chatService.saveMessage({
@@ -161,6 +158,7 @@ async function bootstrap() {
                     room: roomName
                 }).then(savedMsg => {
                     io.to(roomName).emit('private_message', {
+                        id: savedMsg.id,
                         from: myId,
                         text,
                         audioUrl,
@@ -186,6 +184,14 @@ async function bootstrap() {
                         createdAt: new Date()
                     });
                 });
+            });
+
+            socket.on('edit_message', (data: { messageId: string, newText: string, roomName: string }) => {
+                io.to(data.roomName).emit('message_edited', data);
+            });
+
+            socket.on('delete_message', (data: { messageId: string, roomName: string }) => {
+                io.to(data.roomName).emit('message_deleted', data);
             });
 
             socket.on('disconnect', (reason) => {

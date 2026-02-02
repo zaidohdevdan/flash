@@ -14,3 +14,12 @@ api.interceptors.request.use((config) => {
 });
 
 export { api };
+
+export function formatUrl(url: string | null | undefined): string | undefined {
+    if (!url) return undefined;
+    if (url.startsWith('http') || url.startsWith('data:')) return url;
+
+    // Fallback for local uploads if they exist in the future or if any relative paths were stored
+    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+    return `${baseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+}

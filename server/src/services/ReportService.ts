@@ -28,4 +28,12 @@ export class ReportService {
     async listUserReports(userId: string, page?: number, limit?: number, status?: ReportStatus, startDate?: Date, endDate?: Date) {
         return this.reportRepository.findByUserId(userId, page, limit, status, startDate, endDate);
     }
+
+    async listDepartmentReports(departmentId: string, page?: number, limit?: number, status?: ReportStatus, startDate?: Date, endDate?: Date) {
+        return this.reportRepository.findByDepartment(departmentId, page, limit, status, startDate, endDate);
+    }
+
+    async getDepartmentStats(departmentId: string) {
+        return this.reportRepository.findStatsByDepartment(departmentId);
+    }
 }

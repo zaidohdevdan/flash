@@ -1,12 +1,18 @@
 import { useState, useEffect, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
-import { Send, Mic, X, MessageSquare, Square, Trash2, Hourglass } from 'lucide-react';
+import { Send, Mic, X, MessageSquare, Square, Trash2, Hourglass, Pencil, Check, Trash } from 'lucide-react';
 import { api } from '../services/api';
 
 const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
+const getRoomName = (id1: string, id2: string) => {
+    return `private-${[id1, id2].map(id => id.trim().toLowerCase()).sort().join('-')}`;
+};
+
 interface Message {
-    from: string;
+    id?: string;
+    from?: string;
+    fromId?: string;
     text?: string;
     audioUrl?: string;
     createdAt: string;
@@ -26,55 +32,84 @@ export function ChatWidget({ currentUser, targetUser, onClose }: ChatWidgetProps
     const [socket, setSocket] = useState<Socket | null>(null);
     const [recordingTime, setRecordingTime] = useState(0);
     const [now, setNow] = useState(Date.now());
+    const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null);
+    const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+    const [editText, setEditText] = useState('');
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const chunksRef = useRef<Blob[]>([]);
     const timerRef = useRef<number | null>(null);
 
-    // Determines the "room owner" (the professional)
-    // If I am Supervisor talking to Pro X, target is X. Room is chat:X
-    // If I am Pro Y talking to Supervisor, target is Supervisor. Room is chat:Y (myself)
-    const professionalId = currentUser.role === 'SUPERVISOR' || currentUser.role === 'ADMIN' ? targetUser.id : currentUser.id;
+    // Identificador único da sala baseado em IDs ordenados
+    const chatRoom = currentUser?.id && targetUser?.id ? getRoomName(currentUser.id, targetUser.id) : '';
 
     useEffect(() => {
-        // Fetch history
+        if (!chatRoom) return;
+        let isMounted = true;
+
         async function fetchHistory() {
             try {
-                const response = await api.get(`/chat/history/chat:${professionalId}`);
-                setMessages(response.data);
+                const response = await api.get(`/chat/history/${encodeURIComponent(chatRoom)}`);
+                if (isMounted) {
+                    setMessages(response.data);
+                }
             } catch (error) {
                 console.error('Error fetching chat history:', error);
             }
         }
+
+        // Initial fetch
         fetchHistory();
 
         const newSocket = io(SOCKET_URL, {
-            query: { userId: currentUser.id, role: currentUser.role, userName: currentUser.name }
+            query: { userId: currentUser.id, role: currentUser.role, userName: currentUser.name },
+            transports: ['websocket', 'polling']
         });
 
         newSocket.on('connect', () => {
-            // Join the specific chat room
-            // We pass 'targetUserId' as the PROFESSIONAL's ID we want to join
-            // If I am Pro, I join my own room (professionalId = my id)
-            // If I am Supervisor, I join targetUser.id (professionalId)
-            newSocket.emit('join_private_chat', { targetUserId: professionalId });
+            newSocket.emit('join_private_chat', { targetUserId: targetUser.id });
+            // After joining, fetch again to ensure no messages were missed during the switch/mount
+            fetchHistory();
         });
 
         newSocket.on('private_message', (msg: Message) => {
-            setMessages(prev => [...prev, msg]);
-            if (msg.from !== currentUser.id) {
-                const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
-                audio.play().catch(e => console.error('Erro ao tocar som:', e));
+            if (isMounted) {
+                const senderId = msg.from || msg.fromId;
+
+                setMessages(prev => {
+                    // Evita duplicatas
+                    const exists = prev.some(m => m.createdAt === msg.createdAt && (m.from === msg.from || m.fromId === msg.fromId) && m.text === msg.text);
+                    if (exists) return prev;
+                    return [...prev, msg];
+                });
+
+                if (senderId !== currentUser.id) {
+                    const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+                    audio.play().catch(e => console.error('Erro ao tocar som:', e));
+                }
+            }
+        });
+
+        newSocket.on('message_edited', (data: { messageId: string, newText: string }) => {
+            if (isMounted) {
+                setMessages(prev => prev.map(m => m.id === data.messageId ? { ...m, text: data.newText } : m));
+            }
+        });
+
+        newSocket.on('message_deleted', (data: { messageId: string }) => {
+            if (isMounted) {
+                setMessages(prev => prev.filter(m => m.id !== data.messageId));
             }
         });
 
         setSocket(newSocket);
 
         return () => {
+            isMounted = false;
             newSocket.disconnect();
         };
-    }, [currentUser, professionalId]);
+    }, [currentUser.id, targetUser.id, chatRoom]);
 
     useEffect(() => {
         const interval = setInterval(() => setNow(Date.now()), 1000);
@@ -164,11 +199,45 @@ export function ChatWidget({ currentUser, targetUser, onClose }: ChatWidgetProps
         if (!window.confirm('Você tem certeza que deseja excluir todo o histórico desta conversa?')) return;
 
         try {
-            await api.delete(`/chat/history/chat:${professionalId}`);
+            await api.delete(`/chat/history/${encodeURIComponent(chatRoom)}`);
             setMessages([]);
         } catch (error) {
             console.error('Error clearing chat history:', error);
             alert('Erro ao excluir histórico.');
+        }
+    };
+
+    const handleStartEdit = (msg: Message) => {
+        setEditingMessageId(msg.id!);
+        setEditText(msg.text || '');
+        setSelectedMessageId(null);
+    };
+
+    const handleUpdateMessage = async () => {
+        if (!editText.trim() || !editingMessageId) return;
+
+        try {
+            await api.patch(`/chat/messages/${editingMessageId}`, { text: editText });
+            socket?.emit('edit_message', { messageId: editingMessageId, newText: editText, roomName: chatRoom });
+            setMessages(prev => prev.map(m => m.id === editingMessageId ? { ...m, text: editText } : m));
+            setEditingMessageId(null);
+        } catch (error) {
+            console.error('Error updating message:', error);
+            alert('Falha ao editar mensagem.');
+        }
+    };
+
+    const handleDeleteMessage = async (messageId: string) => {
+        if (!window.confirm('Excluir esta mensagem?')) return;
+
+        try {
+            await api.delete(`/chat/messages/${messageId}`);
+            socket?.emit('delete_message', { messageId, roomName: chatRoom });
+            setMessages(prev => prev.filter(m => m.id !== messageId));
+            setSelectedMessageId(null);
+        } catch (error) {
+            console.error('Error deleting message:', error);
+            alert('Falha ao excluir mensagem.');
         }
     };
 
@@ -179,9 +248,9 @@ export function ChatWidget({ currentUser, targetUser, onClose }: ChatWidgetProps
     };
 
     return (
-        <div className="fixed bottom-0 right-0 sm:bottom-4 sm:right-4 w-full sm:w-96 h-[500px] max-h-[100vh] sm:max-h-[calc(100vh-2rem)] bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-gray-100 z-50 animate-in slide-in-from-bottom-10 fade-in duration-300">
+        <div className="fixed bottom-0 right-0 sm:bottom-4 sm:right-4 w-full sm:w-96 h-[500px] max-h-[100vh] sm:max-h-[calc(100vh-2rem)] bg-white/60 backdrop-blur-[32px] rounded-t-2xl sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-white/50 ring-1 ring-white/20 z-50 animate-in slide-in-from-bottom-10 fade-in duration-300">
             {/* Header */}
-            <div className="p-4 bg-blue-600 text-white flex justify-between items-center">
+            <div className="p-4 bg-blue-600/80 backdrop-blur-xl text-white flex justify-between items-center border-b border-white/10">
                 <div className="flex items-center gap-3">
                     <div className="bg-white/20 p-2 rounded-full">
                         <MessageSquare className="w-5 h-5 text-white" />
@@ -215,36 +284,83 @@ export function ChatWidget({ currentUser, targetUser, onClose }: ChatWidgetProps
                 )}
 
                 {messages.map((msg, idx) => {
-                    const isMe = msg.from === currentUser.id;
+                    const senderId = msg.from || msg.fromId;
+                    const isMe = senderId === currentUser.id;
+                    const isSelected = selectedMessageId === msg.id;
+                    const isEditing = editingMessageId === msg.id;
+
                     return (
-                        <div key={idx} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
-                            <div className={`max-w-[80%] p-3 rounded-2xl shadow-sm text-sm ${isMe
-                                ? 'bg-blue-600 text-white rounded-tr-none'
-                                : 'bg-white border text-gray-800 rounded-tl-none'
-                                }`}>
-                                {msg.text && <p>{msg.text}</p>}
-                                {msg.audioUrl && (
-                                    <div className="space-y-1.5">
-                                        <audio controls src={msg.audioUrl} className="h-8 max-w-[200px]" />
-                                        {msg.expiresAt && (
-                                            <div className="flex items-center justify-end gap-1 text-[9px] font-bold text-red-500 bg-red-50/50 px-2 py-0.5 rounded-full border border-red-100/50 animate-pulse">
-                                                <Hourglass className="w-2.5 h-2.5" />
-                                                <span>
-                                                    {(() => {
-                                                        const diff = new Date(msg.expiresAt).getTime() - now;
-                                                        if (diff <= 0) return 'Expirando...';
-                                                        const mins = Math.floor(diff / 60000);
-                                                        const secs = Math.floor((diff % 60000) / 1000);
-                                                        return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-                                                    })()}
-                                                </span>
+                        <div key={idx} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
+                            <div
+                                onClick={() => isMe && !isEditing && msg.id && setSelectedMessageId(isSelected ? null : msg.id)}
+                                className={`group relative max-w-[80%] p-3 rounded-2xl shadow-sm text-sm transition-all cursor-pointer ${isMe
+                                    ? 'bg-blue-600 text-white rounded-tr-none'
+                                    : 'bg-white border text-gray-800 rounded-tl-none'
+                                    } ${isSelected ? 'ring-2 ring-blue-300 ring-offset-2' : ''}`}
+                            >
+                                {isEditing ? (
+                                    <div className="flex flex-col gap-2 min-w-[200px]">
+                                        <textarea
+                                            value={editText}
+                                            onChange={e => setEditText(e.target.value)}
+                                            className="w-full bg-white/20 text-white placeholder-white/50 border-none outline-none rounded-lg p-2 text-xs resize-none"
+                                            rows={2}
+                                            autoFocus
+                                        />
+                                        <div className="flex justify-end gap-2">
+                                            <button onClick={() => setEditingMessageId(null)} className="p-1 hover:bg-white/10 rounded">
+                                                <X className="w-3.5 h-3.5" />
+                                            </button>
+                                            <button onClick={handleUpdateMessage} className="p-1 bg-white text-blue-600 rounded">
+                                                <Check className="w-3.5 h-3.5" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <>
+                                        {msg.text && <p className="whitespace-pre-wrap">{msg.text}</p>}
+                                        {msg.audioUrl && (
+                                            <div className="space-y-1.5">
+                                                <audio controls src={msg.audioUrl} className="h-8 max-w-[200px]" />
+                                                {msg.expiresAt && (
+                                                    <div className="flex items-center justify-end gap-1 text-[9px] font-bold text-red-500 bg-red-50/50 px-2 py-0.5 rounded-full border border-red-100/50 animate-pulse">
+                                                        <Hourglass className="w-2.5 h-2.5" />
+                                                        <span>
+                                                            {(() => {
+                                                                const diff = new Date(msg.expiresAt).getTime() - now;
+                                                                if (diff <= 0) return 'Expirando...';
+                                                                const mins = Math.floor(diff / 60000);
+                                                                const secs = Math.floor((diff % 60000) / 1000);
+                                                                return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+                                                            })()}
+                                                        </span>
+                                                    </div>
+                                                )}
                                             </div>
                                         )}
+                                        <span className={`text-[9px] block mt-1 text-right font-medium opacity-70 ${isMe ? 'text-blue-100' : 'text-gray-400'}`}>
+                                            {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                        </span>
+                                    </>
+                                )}
+
+                                {/* Action Buttons Overlay */}
+                                {isSelected && isMe && !isEditing && (
+                                    <div className="absolute -left-12 top-0 flex flex-col gap-1 animate-in slide-in-from-right-2 fade-in">
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); handleStartEdit(msg); }}
+                                            className="p-2 bg-white shadow-lg border rounded-full text-gray-500 hover:text-blue-600 transition"
+                                        >
+                                            <Pencil className="w-3.5 h-3.5" />
+                                        </button>
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); handleDeleteMessage(msg.id!); }}
+                                            className="p-2 bg-white shadow-lg border rounded-full text-gray-500 hover:text-red-600 transition"
+                                        >
+                                            <Trash className="w-3.5 h-3.5" />
+                                        </button>
                                     </div>
                                 )}
-                                <span className={`text-[9px] block mt-1 text-right font-medium opacity-70 ${isMe ? 'text-blue-100' : 'text-gray-400'}`}>
-                                    {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                </span>
                             </div>
                         </div>
                     );

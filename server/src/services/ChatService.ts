@@ -25,6 +25,18 @@ export class ChatService {
         return this.chatRepository.deleteByRoom(room);
     }
 
+    async updateMessage(id: string, text: string) {
+        return this.chatRepository.update(id, text);
+    }
+
+    async deleteMessage(id: string) {
+        return this.chatRepository.deleteById(id);
+    }
+
+    async getMessageById(id: string) {
+        return this.chatRepository.findById(id);
+    }
+
     async cleanupExpiredMessages() {
         const expired = await this.chatRepository.findExpired();
         for (const msg of expired) {
