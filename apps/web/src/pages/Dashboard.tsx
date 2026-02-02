@@ -364,6 +364,7 @@ export function Dashboard() {
                         <div className="flex flex-col gap-4">
                             <GlassCard blur="lg" className="p-1 px-1.5 flex items-center gap-1 border-white/10 !rounded-2xl">
                                 {[
+                                    { id: '', label: 'Todos' },
                                     { id: 'SENT', label: 'Recebidos' },
                                     { id: 'IN_REVIEW', label: 'Análise' },
                                     { id: 'FORWARDED', label: 'Tramite' },
@@ -377,7 +378,8 @@ export function Dashboard() {
                                                 : filter.id === 'IN_REVIEW' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
                                                     : filter.id === 'FORWARDED' ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/30'
                                                         : filter.id === 'RESOLVED' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/30'
-                                                            : 'bg-blue-600 text-white shadow-lg'
+                                                            : filter.id === '' ? 'bg-gray-900 text-white shadow-lg shadow-gray-900/10'
+                                                                : 'bg-blue-600 text-white shadow-lg'
                                             : 'text-gray-400 hover:text-white hover:bg-white/10'
                                             }`}
                                     >

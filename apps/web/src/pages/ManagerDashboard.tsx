@@ -323,10 +323,10 @@ export function ManagerDashboard() {
                         <div className="flex flex-col gap-4">
                             <GlassCard blur="lg" className="p-1 px-1.5 flex items-center gap-1 border-white/10 !rounded-2xl">
                                 {[
-                                    { id: '', label: 'TODOS' },
-                                    { id: 'FORWARDED', label: 'PENDENTES' },
-                                    { id: 'IN_REVIEW', label: 'ANÁLISE' },
-                                    { id: 'RESOLVED', label: 'RESOLVIDOS' },
+                                    { id: '', label: 'Todos' },
+                                    { id: 'FORWARDED', label: 'Setor' },
+                                    { id: 'IN_REVIEW', label: 'Análise' },
+                                    { id: 'RESOLVED', label: 'Feitos' },
                                 ].map(filter => (
                                     <button
                                         key={filter.id}
@@ -335,7 +335,8 @@ export function ManagerDashboard() {
                                             ? filter.id === 'FORWARDED' ? 'bg-blue-600 text-white shadow-lg'
                                                 : filter.id === 'IN_REVIEW' ? 'bg-purple-600 text-white shadow-lg'
                                                     : filter.id === 'RESOLVED' ? 'bg-emerald-600 text-white shadow-lg'
-                                                        : 'bg-white/20 text-white'
+                                                        : filter.id === '' ? 'bg-gray-900 text-white shadow-lg'
+                                                            : 'bg-white/20 text-white'
                                             : 'text-gray-400 hover:text-white hover:bg-white/10'
                                             }`}
                                     >

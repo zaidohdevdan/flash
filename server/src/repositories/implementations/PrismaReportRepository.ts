@@ -108,10 +108,14 @@ export class PrismaReportRepository implements IReportRepository {
         const where: any = {
             user: {
                 supervisorId: supervisorId
-            },
-            // Regra: Supervisor não vê o que já foi encaminhado para Departamento
-            status: status ? status : { notIn: ['FORWARDED', 'ARCHIVED'] as ReportStatus[] }
+            }
         };
+
+        // Se um status específico for passado, filtra por ele.
+        // Se NÃO for passado (filtro "Todos"), não aplica restrição de status.
+        if (status) {
+            where.status = status;
+        }
 
         if (startDate || endDate) {
             where.createdAt = {};
