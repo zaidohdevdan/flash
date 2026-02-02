@@ -50,22 +50,28 @@ export class PrismaReportRepository implements IReportRepository {
             departmentName = dept?.name || null;
         }
 
+        const updateData: any = {
+            status,
+            feedback,
+            feedbackAt: feedback ? new Date() : undefined,
+            history: {
+                create: {
+                    status,
+                    comment: feedback,
+                    userName: userName || 'Sistema',
+                    departmentName
+                }
+            }
+        };
+
+        // Só altera o departamento se for explicitamente passado (inclusive se for "" -> null)
+        if (departmentId !== undefined) {
+            updateData.departmentId = departmentId || null;
+        }
+
         return prisma.report.update({
             where: { id },
-            data: {
-                status,
-                feedback,
-                feedbackAt: feedback ? new Date() : undefined,
-                departmentId: departmentId || null,
-                history: {
-                    create: {
-                        status,
-                        comment: feedback,
-                        userName: userName || 'Sistema',
-                        departmentName
-                    }
-                }
-            },
+            data: updateData,
             include: { user: true, history: true, department: true },
         });
     }
