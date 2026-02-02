@@ -4,6 +4,9 @@ import type { CreateReportDTO, IReportRepository, ReportWithUser } from '../inte
 
 export class PrismaReportRepository implements IReportRepository {
     async create({ comment, userId, imageUrl }: CreateReportDTO): Promise<ReportWithUser> {
+        const user = await prisma.user.findUnique({ where: { id: userId }, select: { name: true } });
+        const userName = user?.name || 'Operador';
+
         return prisma.report.create({
             data: {
                 comment,
@@ -14,7 +17,7 @@ export class PrismaReportRepository implements IReportRepository {
                     create: {
                         status: 'SENT',
                         comment: 'Relatório enviado pelo profissional.',
-                        userName: 'Operador'
+                        userName: userName
                     }
                 }
             },
