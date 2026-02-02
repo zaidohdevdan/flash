@@ -270,7 +270,7 @@ export function CreateReport() {
                                     </div>
                                     <div>
                                         <div className="flex items-center gap-2">
-                                            <p className="text-[9px] font-black text-white/60 uppercase tracking-widest">Supervisor Direto</p>
+                                            <p className="text-[9px] font-black text-white uppercase tracking-widest">Supervisor Direto</p>
                                             <div className={`w-1.5 h-1.5 rounded-full ${user.supervisorId && onlineUserIds.includes(user.supervisorId) ? 'bg-emerald-400 animate-pulse' : 'bg-white/30'}`} />
                                         </div>
                                         <h3 className="text-lg font-bold">{user.supervisorName || 'Responsável Técnico'}</h3>
@@ -333,7 +333,7 @@ export function CreateReport() {
                         ) : history.length === 0 ? (
                             <Card variant="glass" className="py-20 flex flex-col items-center justify-center text-gray-300">
                                 <History className="w-12 h-12 mb-4 opacity-20" />
-                                <p className="text-[10px] font-black uppercase tracking-widest underline decoration-2 decoration-blue-500/30">Nenhum evento registrado</p>
+                                <p className="text-[10px] font-black uppercase tracking-widest text-gray-700 underline decoration-2 decoration-blue-500/30">Nenhum evento registrado</p>
                             </Card>
                         ) : (
                             <div className="grid gap-6">

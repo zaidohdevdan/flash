@@ -384,7 +384,7 @@ export function ManagerDashboard() {
                     {reports.length === 0 ? (
                         <Card variant="glass" className="p-20 flex flex-col items-center justify-center text-gray-400">
                             <MessageSquare className="w-12 h-12 mb-4 opacity-20" />
-                            <p className="font-bold uppercase tracking-widest text-[10px]">Tudo em ordem no momento</p>
+                            <p className="font-bold uppercase tracking-widest text-[10px] text-white/90">Tudo em ordem no momento</p>
                         </Card>
                     ) : (
                         <div className="grid gap-6">
@@ -492,7 +492,7 @@ export function ManagerDashboard() {
                     />
 
                     <div className="space-y-4">
-                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Ação Final</label>
+                        <label className="text-[10px] font-black text-gray-700 uppercase tracking-widest ml-1">Ação Final</label>
                         <div className="flex items-center justify-between p-1 bg-gray-100 rounded-2xl border border-gray-100">
                             {[
                                 { id: 'RESOLVED', label: 'RESOLVER AGORA', color: 'text-emerald-600' },
@@ -511,7 +511,7 @@ export function ManagerDashboard() {
 
                         {targetStatus === 'FORWARDED' && (
                             <div className="space-y-2 animate-in slide-in-from-top-4 duration-500">
-                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Mover para:</label>
+                                <label className="text-[10px] font-black text-gray-700 uppercase tracking-widest ml-1">Mover para:</label>
                                 <select
                                     value={selectedDeptId}
                                     onChange={e => setSelectedDeptId(e.target.value)}

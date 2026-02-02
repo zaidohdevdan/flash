@@ -461,7 +461,7 @@ export function Dashboard() {
                     {reports.length === 0 ? (
                         <Card variant="glass" className="p-20 flex flex-col items-center justify-center text-gray-400">
                             <MessageSquare className="w-12 h-12 mb-4 opacity-20" />
-                            <p className="font-bold uppercase tracking-widest text-[10px]">Nenhum reporte encontrado</p>
+                            <p className="font-bold uppercase tracking-widest text-[10px] text-white/90">Nenhum reporte encontrado</p>
                         </Card>
                     ) : (
                         <div className="grid gap-6">
@@ -579,7 +579,7 @@ export function Dashboard() {
                     />
 
                     <div className="space-y-4">
-                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Próxima Etapa</label>
+                        <label className="text-[10px] font-black text-gray-700 uppercase tracking-widest ml-1">Próxima Etapa</label>
                         <div className="flex items-center justify-between p-1 bg-blue-50/40 rounded-2xl border border-blue-50/60">
                             {[
                                 { id: 'IN_REVIEW', label: 'ANÁLISE', color: 'text-blue-600' },
@@ -599,7 +599,7 @@ export function Dashboard() {
                         {targetStatus === 'FORWARDED' && (
                             <div className="space-y-4 animate-in slide-in-from-top-4 duration-500">
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Destinar para:</label>
+                                    <label className="text-[10px] font-black text-gray-700 uppercase tracking-widest ml-1">Destinar para:</label>
                                     <select
                                         value={selectedDeptId}
                                         onChange={e => setSelectedDeptId(e.target.value)}

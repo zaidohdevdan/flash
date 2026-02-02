@@ -53,7 +53,7 @@ export const KpiCard: React.FC<KpiCardProps> = ({
             </div>
 
             <div>
-                <h3 className="text-[10px] font-black text-white/80 uppercase tracking-widest leading-none mb-1">
+                <h3 className="text-[10px] font-black text-white uppercase tracking-widest leading-none mb-1">
                     {label}
                 </h3>
                 <p className="text-2xl font-black text-white tracking-tighter shadow-sm">
