@@ -365,7 +365,7 @@ export function ManagerDashboard() {
             </div>
 
             {/* Main Content */}
-            <main className="max-w-7xl mx-auto px-6 w-full -mt-20 mb-20 relative z-10 flex flex-col lg:flex-row gap-12">
+            <main className="max-w-7xl mx-auto px-6 w-full -mt-20 mb-20 relative flex flex-col lg:flex-row gap-12">
                 {/* Reports Feed */}
                 <div className="flex-1 space-y-6">
                     <Card variant="glass" className="p-4 border-white/10 !rounded-[2rem]">
