@@ -105,18 +105,26 @@ export class PrismaReportRepository implements IReportRepository {
     async findAll(supervisorId: string, page: number = 1, limit: number = 10, status?: ReportStatus, startDate?: Date, endDate?: Date): Promise<ReportWithUser[]> {
         const skip = (page - 1) * limit;
 
-        return prisma.report.findMany({
-            where: {
-                user: {
-                    supervisorId: supervisorId
-                },
-                // Regra: Supervisor não vê o que já foi encaminhado para Departamento
-                status: status ? status : { notIn: ['FORWARDED', 'ARCHIVED'] as ReportStatus[] },
-                createdAt: {
-                    gte: startDate,
-                    lte: endDate
-                }
+        const where: any = {
+            user: {
+                supervisorId: supervisorId
             },
+            // Regra: Supervisor não vê o que já foi encaminhado para Departamento
+            status: status ? status : { notIn: ['FORWARDED', 'ARCHIVED'] as ReportStatus[] }
+        };
+
+        if (startDate || endDate) {
+            where.createdAt = {};
+            if (startDate) where.createdAt.gte = startDate;
+            if (endDate) {
+                const end = new Date(endDate);
+                end.setUTCHours(23, 59, 59, 999);
+                where.createdAt.lte = end;
+            }
+        }
+
+        return prisma.report.findMany({
+            where,
             include: {
                 user: {
                     select: {
@@ -142,15 +150,23 @@ export class PrismaReportRepository implements IReportRepository {
     async findByUserId(userId: string, page: number = 1, limit: number = 10, status?: ReportStatus, startDate?: Date, endDate?: Date): Promise<ReportWithUser[]> {
         const skip = (page - 1) * limit;
 
+        const where: any = {
+            userId,
+            status: status,
+        };
+
+        if (startDate || endDate) {
+            where.createdAt = {};
+            if (startDate) where.createdAt.gte = startDate;
+            if (endDate) {
+                const end = new Date(endDate);
+                end.setUTCHours(23, 59, 59, 999);
+                where.createdAt.lte = end;
+            }
+        }
+
         return prisma.report.findMany({
-            where: {
-                userId,
-                status: status,
-                createdAt: {
-                    gte: startDate,
-                    lte: endDate
-                }
-            },
+            where,
             include: {
                 user: {
                     select: {
@@ -176,15 +192,23 @@ export class PrismaReportRepository implements IReportRepository {
     async findByDepartment(departmentId: string, page: number = 1, limit: number = 10, status?: ReportStatus, startDate?: Date, endDate?: Date): Promise<ReportWithUser[]> {
         const skip = (page - 1) * limit;
 
+        const where: any = {
+            departmentId,
+            status: status,
+        };
+
+        if (startDate || endDate) {
+            where.createdAt = {};
+            if (startDate) where.createdAt.gte = startDate;
+            if (endDate) {
+                const end = new Date(endDate);
+                end.setUTCHours(23, 59, 59, 999);
+                where.createdAt.lte = end;
+            }
+        }
+
         return prisma.report.findMany({
-            where: {
-                departmentId,
-                status: status,
-                createdAt: {
-                    gte: startDate,
-                    lte: endDate
-                }
-            },
+            where,
             include: {
                 user: {
                     select: {
