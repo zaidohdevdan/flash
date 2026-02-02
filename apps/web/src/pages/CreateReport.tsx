@@ -228,7 +228,7 @@ export function CreateReport() {
                     <Send className="w-20 h-20 text-emerald-500" />
                 </div>
                 <h2 className="text-3xl font-black text-white mb-2 tracking-tight uppercase">Relatório Enviado!</h2>
-                <p className="text-gray-400 mb-10 font-medium uppercase tracking-widest text-[10px]">O seu supervisor foi notificado em tempo real.</p>
+                <p className="text-gray-600 mb-10 font-medium uppercase tracking-widest text-[10px]">O seu supervisor foi notificado em tempo real.</p>
                 <Button variant="success" size="lg" className="px-12" onClick={() => setSuccess(false)}>
                     VOLTAR AO INÍCIO
                 </Button>
@@ -252,12 +252,12 @@ export function CreateReport() {
                         <header className="flex justify-between items-center">
                             <div>
                                 <h1 className="text-3xl font-black text-gray-900 tracking-tight uppercase">Olá, {user?.name.split(' ')[0]}!</h1>
-                                <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mt-1">Seu histórico operacional</p>
+                                <p className="text-[10px] text-gray-700 font-black uppercase tracking-widest mt-1">Seu histórico operacional</p>
                             </div>
 
                             <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-100 rounded-full shadow-sm">
                                 <span className={`w-2 h-2 rounded-full ${isConnected ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
-                                <span className="text-[9px] font-black uppercase text-gray-400">{isConnected ? 'Online' : 'Offline'}</span>
+                                <span className={`text-[9px] font-black uppercase ${isConnected ? 'text-emerald-600' : 'text-gray-600'}`}>{isConnected ? 'Online' : 'Offline'}</span>
                             </div>
                         </header>
 
@@ -297,7 +297,7 @@ export function CreateReport() {
                                         placeholder="Buscar por protocolo ou descrição..."
                                         value={searchTerm}
                                         onChange={e => setSearchTerm(e.target.value)}
-                                        className="w-full pl-14 pr-8 py-3 bg-gray-50 border border-transparent rounded-2xl outline-none focus:bg-white focus:border-blue-500/30 transition-all text-xs font-bold text-gray-800 placeholder:text-gray-400 placeholder:font-medium placeholder:uppercase"
+                                        className="w-full pl-14 pr-8 py-3 bg-gray-50 border border-transparent rounded-2xl outline-none focus:bg-white focus:border-blue-500/30 transition-all text-xs font-bold text-gray-800 placeholder:text-gray-500 placeholder:font-bold placeholder:uppercase"
                                     />
                                 </div>
                             </Card>
@@ -315,7 +315,7 @@ export function CreateReport() {
                                         onClick={() => { setStatusFilter(filter.id); setPage(1); }}
                                         className={`px-6 py-2.5 rounded-2xl text-[10px] font-black tracking-widest uppercase transition-all border shrink-0 ${statusFilter === filter.id
                                             ? 'bg-[#0f172a] text-white border-[#0f172a] shadow-lg shadow-gray-900/10'
-                                            : 'bg-white text-gray-400 border-gray-100 hover:border-gray-200'
+                                            : 'bg-white text-gray-600 border-gray-100 hover:border-gray-200'
                                             }`}
                                     >
                                         {filter.label}
@@ -369,7 +369,7 @@ export function CreateReport() {
                             </button>
                             <div>
                                 <h1 className="text-3xl font-black text-gray-900 tracking-tight uppercase">Novo Reporte</h1>
-                                <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mt-1">Sinalização de conformidade ou ocorrência</p>
+                                <p className="text-[10px] text-gray-700 font-black uppercase tracking-widest mt-1">Sinalização de conformidade ou ocorrência</p>
                             </div>
                         </header>
 
@@ -385,7 +385,7 @@ export function CreateReport() {
                                         <div className="bg-[#0f172a] p-6 rounded-full mb-4 shadow-xl shadow-gray-900/10 group-hover:scale-110 transition-transform">
                                             <Camera className="w-8 h-8 text-white" />
                                         </div>
-                                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Capturar Evidência Visual</span>
+                                        <span className="text-[10px] font-black text-gray-600 uppercase tracking-widest">Capturar Evidência Visual</span>
                                     </>
                                 )}
                                 <input

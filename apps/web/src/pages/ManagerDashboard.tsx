@@ -317,7 +317,7 @@ export function ManagerDashboard() {
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-10">
                         <div>
                             <h2 className="text-3xl font-black text-white tracking-tight uppercase">Dashboard Gerencial</h2>
-                            <p className="text-white/60 text-sm font-medium mt-1 uppercase tracking-widest">Resolução de Demandas por Departamento</p>
+                            <p className="text-white/90 text-sm font-medium mt-1 uppercase tracking-widest">Resolução de Demandas por Departamento</p>
                         </div>
 
                         <div className="flex flex-col gap-4">
@@ -336,7 +336,7 @@ export function ManagerDashboard() {
                                                 : filter.id === 'IN_REVIEW' ? 'bg-purple-600 text-white shadow-lg'
                                                     : filter.id === 'RESOLVED' ? 'bg-emerald-600 text-white shadow-lg'
                                                         : 'bg-white/20 text-white'
-                                            : 'text-white/60 hover:text-white hover:bg-white/10'
+                                            : 'text-white/80 hover:text-white hover:bg-white/10'
                                             }`}
                                     >
                                         {filter.label}

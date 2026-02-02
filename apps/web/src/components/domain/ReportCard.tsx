@@ -85,11 +85,11 @@ export const ReportCard: React.FC<ReportCardProps> = ({
                 <div>
                     <div className="flex justify-between items-start mb-2">
                         <div className="flex items-center gap-3">
-                            <div className="flex items-center gap-1 text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                            <div className="flex items-center gap-1 text-[10px] text-gray-600 font-bold uppercase tracking-widest">
                                 <Calendar className="w-3 h-3" />
                                 {new Date(report.createdAt).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
                             </div>
-                            <div className="flex items-center gap-1 px-2 py-0.5 bg-gray-100 rounded-md text-[9px] font-black text-gray-500 uppercase tracking-tighter shadow-sm border border-gray-200/50">
+                            <div className="flex items-center gap-1 px-2 py-0.5 bg-gray-100 rounded-md text-[9px] font-black text-gray-700 uppercase tracking-tighter shadow-sm border border-gray-200/50">
                                 <Hash className="w-2.5 h-2.5 opacity-60" />
                                 PROTOCOLO: {report.id.slice(-6).toUpperCase()}
                             </div>
@@ -104,7 +104,7 @@ export const ReportCard: React.FC<ReportCardProps> = ({
                         )}
                     </div>
 
-                    <h4 className="text-sm font-bold text-gray-800 leading-snug line-clamp-2 md:line-clamp-3 mb-2">
+                    <h4 className="text-sm font-bold text-gray-950 leading-snug line-clamp-2 md:line-clamp-3 mb-2">
                         {report.comment}
                     </h4>
 
@@ -123,7 +123,7 @@ export const ReportCard: React.FC<ReportCardProps> = ({
                                 <MessageSquare className="w-3 h-3 text-blue-600" />
                                 <span className="text-[9px] font-black text-blue-800 uppercase italic">Supervisor:</span>
                             </div>
-                            <p className="text-[10px] text-blue-700 italic leading-tight line-clamp-2">
+                            <p className="text-[10px] text-blue-900 font-medium italic leading-tight line-clamp-2">
                                 {report.feedback}
                             </p>
                         </div>
@@ -137,6 +137,6 @@ export const ReportCard: React.FC<ReportCardProps> = ({
                     </div>
                 )}
             </div>
-        </Card>
+        </Card >
     );
 };

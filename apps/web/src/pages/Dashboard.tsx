@@ -358,7 +358,7 @@ export function Dashboard() {
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-10">
                         <div>
                             <h2 className="text-3xl font-black text-white tracking-tight uppercase">Painel de Controle</h2>
-                            <p className="text-white/60 text-sm font-medium mt-1 uppercase tracking-widest">Controle operacional em tempo real</p>
+                            <p className="text-white/90 text-sm font-medium mt-1 uppercase tracking-widest">Controle operacional em tempo real</p>
                         </div>
 
                         <div className="flex flex-col gap-4">
@@ -378,7 +378,7 @@ export function Dashboard() {
                                                     : filter.id === 'FORWARDED' ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/30'
                                                         : filter.id === 'RESOLVED' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/30'
                                                             : 'bg-blue-600 text-white shadow-lg'
-                                            : 'text-white/60 hover:text-white hover:bg-white/10'
+                                            : 'text-white/80 hover:text-white hover:bg-white/10'
                                             }`}
                                     >
                                         {filter.label}
