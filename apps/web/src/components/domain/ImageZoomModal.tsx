@@ -59,7 +59,7 @@ export const ImageZoomModal: React.FC<ImageZoomModalProps> = ({ isOpen, onClose,
     const handleMouseUp = () => setIsDragging(false);
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-[9998] flex items-center justify-center p-4 animate-in fade-in duration-300">
             {/* Backdrop */}
             <div
                 className="absolute inset-0 bg-slate-950/80 backdrop-blur-xl"
@@ -67,8 +67,8 @@ export const ImageZoomModal: React.FC<ImageZoomModalProps> = ({ isOpen, onClose,
             />
 
             {/* Controls bar */}
-            <div className="fixed top-0 left-0 right-0 p-6 flex justify-center z-[110] pointer-events-none">
-                <div className="w-full max-w-5xl flex items-center justify-between pointer-events-auto">
+            <div className="fixed top-0 left-0 right-0 p-8 flex justify-center z-[9999] pointer-events-none">
+                <div className="w-full max-w-6xl flex items-center justify-between pointer-events-auto">
                     <div className="flex bg-white/10 backdrop-blur-md rounded-2xl p-1.5 border border-white/20 shadow-2xl">
                         <button
                             onClick={handleZoomOut}

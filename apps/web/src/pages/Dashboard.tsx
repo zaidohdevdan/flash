@@ -438,7 +438,7 @@ export function Dashboard() {
             </div>
 
             {/* Main Content */}
-            <main className="max-w-7xl mx-auto px-6 w-full -mt-20 mb-20 relative z-20 flex flex-col lg:flex-row gap-12">
+            <main className="max-w-7xl mx-auto px-6 w-full -mt-20 mb-20 relative flex flex-col lg:flex-row gap-12">
                 {/* Visual Blobs behind the glass content */}
                 <div className="absolute -z-10 top-0 left-1/4 w-[500px] h-[500px] bg-blue-400/10 rounded-full blur-[120px] pointer-events-none" />
                 <div className="absolute -z-10 bottom-0 right-1/4 w-[400px] h-[400px] bg-purple-400/10 rounded-full blur-[100px] pointer-events-none" />
