@@ -236,6 +236,28 @@ export function ManagerDashboard() {
         };
     }, [socket, chatTarget?.id]);
 
+    async function handleUpdateStatus(reportId: string, status: string, feedback?: string) {
+        try {
+            const response = await api.patch(`/reports/${reportId}/status`, {
+                status,
+                feedback
+            });
+
+            toast.success(`Status atualizado para ${status === 'IN_REVIEW' ? 'Análise' : 'concluído'}!`);
+
+            setReports(prev => {
+                if (statusFilter && statusFilter !== status) {
+                    return prev.filter(r => r.id !== reportId);
+                }
+                return prev.map(r => r.id === reportId ? response.data : r);
+            });
+
+            loadStats();
+        } catch (error: any) {
+            toast.error('Erro ao atualizar status.');
+        }
+    }
+
     async function handleProcessAnalysis() {
         if (!analyzingReport) return;
 
@@ -249,11 +271,9 @@ export function ManagerDashboard() {
             toast.success('Reporte atualizado com sucesso!');
 
             setReports(prev => {
-                // Se o novo status não bate com o filtro atual, remove da lista
                 if (statusFilter && statusFilter !== targetStatus) {
                     return prev.filter(r => r.id !== analyzingReport.id);
                 }
-                // Caso contrário, atualiza o item na lista
                 return prev.map(r => r.id === analyzingReport.id ? response.data : r);
             });
 
@@ -301,17 +321,19 @@ export function ManagerDashboard() {
                         <div className="flex flex-col gap-4">
                             <GlassCard blur="lg" className="p-1 px-1.5 flex items-center gap-1 border-white/10 !rounded-2xl">
                                 {[
-                                    { id: 'FORWARDED', label: 'Pendentes' },
-                                    { id: 'IN_REVIEW', label: 'Em Análise' },
-                                    { id: 'RESOLVED', label: 'Finalizados' },
+                                    { id: '', label: 'TODOS' },
+                                    { id: 'FORWARDED', label: 'PENDENTES' },
+                                    { id: 'IN_REVIEW', label: 'ANÁLISE' },
+                                    { id: 'RESOLVED', label: 'RESOLVIDOS' },
                                 ].map(filter => (
                                     <button
                                         key={filter.id}
                                         onClick={() => { setStatusFilter(filter.id); setPage(1); }}
                                         className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${statusFilter === filter.id
-                                            ? filter.id === 'FORWARDED' ? 'bg-purple-600 text-white shadow-lg'
-                                                : filter.id === 'IN_REVIEW' ? 'bg-blue-600 text-white shadow-lg'
-                                                    : 'bg-emerald-600 text-white shadow-lg'
+                                            ? filter.id === 'FORWARDED' ? 'bg-blue-600 text-white shadow-lg'
+                                                : filter.id === 'IN_REVIEW' ? 'bg-purple-600 text-white shadow-lg'
+                                                    : filter.id === 'RESOLVED' ? 'bg-emerald-600 text-white shadow-lg'
+                                                        : 'bg-white/20 text-white'
                                             : 'text-white/60 hover:text-white hover:bg-white/10'
                                             }`}
                                     >
@@ -324,8 +346,8 @@ export function ManagerDashboard() {
 
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                         {[
-                            { label: 'Demandas do Setor', status: 'FORWARDED', icon: Folder, color: 'purple' as const },
-                            { label: 'Em Análise', status: 'IN_REVIEW', icon: Clock, color: 'blue' as const },
+                            { label: 'Pendentes no Setor', status: 'FORWARDED', icon: Folder, color: 'blue' as const },
+                            { label: 'Em Análise', status: 'IN_REVIEW', icon: Clock, color: 'purple' as const },
                             { label: 'Resolvidos', status: 'RESOLVED', icon: CheckCircle, color: 'emerald' as const },
                         ].map(kpi => (
                             <KpiCard
@@ -358,8 +380,25 @@ export function ManagerDashboard() {
                                     showUser
                                     actions={
                                         <div className="flex gap-2 w-full">
-                                            {report.status !== 'RESOLVED' && report.status !== 'ARCHIVED' && (
-                                                <Button variant="primary" size="sm" fullWidth onClick={() => { setAnalyzingReport(report); setTargetStatus(report.status as any); }}>Análise</Button>
+                                            {report.status === 'FORWARDED' && (
+                                                <Button
+                                                    variant="primary"
+                                                    size="sm"
+                                                    fullWidth
+                                                    onClick={() => handleUpdateStatus(report.id, 'IN_REVIEW')}
+                                                >
+                                                    Iniciar Análise
+                                                </Button>
+                                            )}
+                                            {report.status === 'IN_REVIEW' && (
+                                                <Button
+                                                    variant="success"
+                                                    size="sm"
+                                                    fullWidth
+                                                    onClick={() => { setAnalyzingReport(report); setTargetStatus('RESOLVED'); }}
+                                                >
+                                                    Resolver
+                                                </Button>
                                             )}
                                             <Button variant="ghost" size="sm" onClick={() => setSelectedReport(report)}>
                                                 <History className="w-4 h-4" />
