@@ -230,11 +230,16 @@ export function ManagerDashboard() {
             toast.success('Reporte atualizado com sucesso!');
 
             setReports(prev => {
-                // Se o gerente resolveu ou encaminhou para outro DP, remove da visão dele (seguindo a regra de posse exclusiva)
-                return prev.filter(r => r.id !== analyzingReport.id);
+                // Se o novo status não bate com o filtro atual, remove da lista
+                if (statusFilter && statusFilter !== targetStatus) {
+                    return prev.filter(r => r.id !== analyzingReport.id);
+                }
+                // Caso contrário, atualiza o item na lista
+                return prev.map(r => r.id === analyzingReport.id ? response.data : r);
             });
 
             setAnalyzingReport(null);
+            resetAnalysisForm();
             loadStats();
         } catch (error: any) {
             const apiError = error as { response?: { data?: { error?: string } } };
@@ -390,10 +395,12 @@ export function ManagerDashboard() {
                             Cancelar
                         </Button>
                         <Button
-                            variant={targetStatus === 'RESOLVED' ? 'success' : 'primary'}
+                            variant={targetStatus === 'RESOLVED' ? 'success' : targetStatus === 'FORWARDED' ? 'primary' : 'primary'}
                             onClick={handleProcessAnalysis}
                         >
-                            {targetStatus === 'RESOLVED' ? 'Confirmar Resolução' : 'Redirecionar Setor'}
+                            {targetStatus === 'RESOLVED' ? 'Confirmar Resolução' :
+                                targetStatus === 'FORWARDED' ? 'Redirecionar Setor' :
+                                    'Confirmar Análise'}
                         </Button>
                     </>
                 }
