@@ -33,9 +33,9 @@ export const GlassCard: React.FC<GlassCardProps> = ({
     };
 
     const variants = {
-        light: 'bg-white/85 shadow-xl shadow-blue-500/10',
-        deep: 'bg-white/95 shadow-2xl',
-        gradient: 'bg-gradient-to-br from-white/90 to-blue-50/50 shadow-xl'
+        light: 'bg-white/95 shadow-xl shadow-blue-500/5',
+        deep: 'bg-white shadow-2xl',
+        gradient: 'bg-gradient-to-br from-white to-blue-50/80 shadow-xl'
     };
 
     return (
