@@ -108,15 +108,17 @@ model Media {
 }
 
 model ChatMessage {
-  id            String    @id @default(auto()) @map("_id") @db.ObjectId
-  fromId        String    @db.ObjectId
-  toId          String    @db.ObjectId
-  text          String?
-  audioUrl      String?
-  audioPublicId String?
-  room          String // e.g., "chat:professionalUserId"
-  createdAt     DateTime  @default(now())
-  expiresAt     DateTime?
+  id                 String    @id @default(auto()) @map("_id") @db.ObjectId
+  fromId             String    @db.ObjectId
+  toId               String    @db.ObjectId
+  text               String?
+  audioUrl           String?
+  audioPublicId      String?
+  room               String // e.g., "chat:professionalUserId"
+  createdAt          DateTime  @default(now())
+  expiresAt          DateTime?
+  deletedForSender   Boolean   @default(false)
+  deletedForEveryone Boolean   @default(false)
 
   @@index([room])
 }

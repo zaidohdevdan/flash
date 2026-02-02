@@ -23,6 +23,18 @@ export const ReportController = {
         }
     },
 
+    // Advanced Stats for Analytics Page
+    advancedStats: async (req: Request, res: Response) => {
+        const userId = req.userId!;
+        const role = req.userRole!;
+        try {
+            const stats = await reportService.getAdvancedStats(userId, role);
+            return res.json(stats);
+        } catch (error) {
+            return res.status(500).json({ error: 'Erro ao buscar analytics' });
+        }
+    },
+
     // List reports for supervisor
     index: async (req: Request, res: Response) => {
         const supervisorId = req.userId!;
@@ -114,31 +126,24 @@ export const ReportController = {
     // Create a new report (imagem obrigatória + Cloudinary)
     // controllers/ReportController.ts
     create: async (req: Request, res: Response) => {
-        const { comment } = req.body;
+        const { comment, imageUrl } = req.body;
         const userId = req.userId!;
 
         console.log(`[Report] Criando reporte para usuário: ${userId}`);
 
-        if (!req.file?.buffer) {
-            console.error("[Report] Erro: Imagem não fornecida");
+        if (!imageUrl) {
+            console.error("[Report] Erro: Imagem não fornecida (URL)");
             return res.status(400).json({ error: "Imagem é obrigatória" });
         }
 
         try {
-            // 1) upload direto do buffer para Cloudinary
-            console.log("[Report] Iniciando upload para Cloudinary...");
-            const media = await mediaService.uploadFromBuffer({
-                buffer: req.file.buffer,
-                userId,
-            });
-            console.log("[Report] Upload concluído:", media.secureUrl);
+            // 1. Cria o report com a URL já hospedada
+            console.log("[Report] Salvando no banco com URL:", imageUrl);
 
-            // 2) cria o report com a URL da Cloudinary
-            console.log("[Report] Salvando no banco...");
             const report = await reportService.create({
                 comment,
                 userId,
-                imageUrl: media.secureUrl,
+                imageUrl,
             });
             console.log("[Report] Relatório salvo com ID:", report.id);
 

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Socket } from 'socket.io-client';
-import { Send, Mic, X, MessageSquare, Square, Trash2, Hourglass, Pencil, Check, Trash } from 'lucide-react';
+import { Send, Mic, X, MessageSquare, Square, Trash2, Hourglass, Pencil, Check, Trash, User } from 'lucide-react';
 import { api } from '../services/api';
 
 
@@ -35,6 +35,7 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket }: ChatWid
     const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null);
     const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
     const [editText, setEditText] = useState('');
+    const [showDeleteMenuFor, setShowDeleteMenuFor] = useState<string | null>(null);
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -221,14 +222,24 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket }: ChatWid
         }
     };
 
-    const handleDeleteMessage = async (messageId: string) => {
-        if (!window.confirm('Excluir esta mensagem?')) return;
+    const handleDeleteClick = (msgId: string) => {
+        // Toggle menu
+        if (showDeleteMenuFor === msgId) setShowDeleteMenuFor(null);
+        else setShowDeleteMenuFor(msgId);
+    };
 
+    const confirmDelete = async (messageId: string, type: 'me' | 'everyone') => {
         try {
-            await api.delete(`/chat/messages/${messageId}`);
-            socket?.emit('delete_message', { messageId, roomName: chatRoom });
+            await api.delete(`/chat/messages/${messageId}?type=${type}`);
+
+            if (type === 'everyone') {
+                socket?.emit('delete_message', { messageId, roomName: chatRoom });
+            }
+
+            // Sempre removemos visualmente para quem deletou
             setMessages(prev => prev.filter(m => m.id !== messageId));
             setSelectedMessageId(null);
+            setShowDeleteMenuFor(null);
         } catch (error) {
             console.error('Error deleting message:', error);
             alert('Falha ao excluir mensagem.');
@@ -345,19 +356,41 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket }: ChatWid
 
                                 {/* Action Buttons Overlay */}
                                 {isSelected && isMe && !isEditing && (
-                                    <div className="absolute -left-12 top-0 flex flex-col gap-1 animate-in slide-in-from-right-2 fade-in">
+                                    <div className="absolute -left-12 top-0 flex flex-col gap-1 animate-in slide-in-from-right-2 fade-in z-20">
                                         <button
                                             onClick={(e) => { e.stopPropagation(); handleStartEdit(msg); }}
                                             className="p-2 bg-white shadow-lg border rounded-full text-gray-500 hover:text-blue-600 transition"
+                                            title="Editar"
                                         >
                                             <Pencil className="w-3.5 h-3.5" />
                                         </button>
-                                        <button
-                                            onClick={(e) => { e.stopPropagation(); handleDeleteMessage(msg.id!); }}
-                                            className="p-2 bg-white shadow-lg border rounded-full text-gray-500 hover:text-red-600 transition"
-                                        >
-                                            <Trash className="w-3.5 h-3.5" />
-                                        </button>
+                                        <div className="relative">
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); handleDeleteClick(msg.id!); }}
+                                                className="p-2 bg-white shadow-lg border rounded-full text-gray-500 hover:text-red-600 transition"
+                                                title="Excluir"
+                                            >
+                                                <Trash className="w-3.5 h-3.5" />
+                                            </button>
+
+                                            {/* Delete Menu */}
+                                            {showDeleteMenuFor === msg.id && (
+                                                <div className="absolute right-full mr-2 top-0 bg-white shadow-xl rounded-xl border border-gray-100 p-1 min-w-[140px] flex flex-col z-50 animate-in zoom-in-95 duration-200">
+                                                    <button
+                                                        onClick={(e) => { e.stopPropagation(); confirmDelete(msg.id!, 'me'); }}
+                                                        className="px-3 py-2 text-left text-xs font-bold text-gray-600 hover:bg-gray-50 rounded-lg flex items-center gap-2"
+                                                    >
+                                                        <User className="w-3 h-3" /> Para mim
+                                                    </button>
+                                                    <button
+                                                        onClick={(e) => { e.stopPropagation(); confirmDelete(msg.id!, 'everyone'); }}
+                                                        className="px-3 py-2 text-left text-xs font-bold text-red-600 hover:bg-red-50 rounded-lg flex items-center gap-2"
+                                                    >
+                                                        <Trash2 className="w-3 h-3" /> Para todos
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 )}
                             </div>

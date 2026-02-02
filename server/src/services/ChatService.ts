@@ -17,8 +17,15 @@ export class ChatService {
         return this.chatRepository.save({ ...data, expiresAt });
     }
 
-    async getHistory(room: string) {
-        return this.chatRepository.findByRoom(room);
+    async getHistory(room: string, userId: string) {
+        const messages = await this.chatRepository.findByRoom(room);
+
+        // Filtrar mensagens
+        return messages.filter(msg => {
+            if (msg.deletedForEveryone) return false;
+            if (msg.fromId === userId && msg.deletedForSender) return false;
+            return true;
+        });
     }
 
     async deleteHistory(room: string) {
@@ -29,8 +36,29 @@ export class ChatService {
         return this.chatRepository.update(id, text);
     }
 
-    async deleteMessage(id: string) {
-        return this.chatRepository.deleteById(id);
+    async deleteMessage(id: string, userId: string, type: 'me' | 'everyone' = 'everyone') {
+        const message = await this.chatRepository.findById(id);
+        if (!message) throw new Error('Mensagem não encontrada.');
+
+        // Se for "para todos":
+        if (type === 'everyone') {
+            // Se tiver áudio/mídia, remover do Cloudinary
+            if (message.audioPublicId) {
+                try {
+                    await cloudinary.uploader.destroy(message.audioPublicId, { resource_type: 'video' });
+                } catch (e) {
+                    console.error('[ChatService] Error deleting from Cloudinary:', e);
+                }
+            }
+            // Chama o softDelete com tag 'everyone'
+            return this.chatRepository.softDelete(id, 'everyone');
+        }
+
+        // Se for "para mim":
+        // Apenas marca flag deletedForSender
+        if (type === 'me') {
+            return this.chatRepository.softDelete(id, 'me');
+        }
     }
 
     async getMessageById(id: string) {

@@ -40,6 +40,7 @@ routes.get('/support-network', AuthMiddleware, AuthController.listSupportNetwork
 // Listagem de relatórios (Supervisor)
 routes.get('/reports', AuthMiddleware, ReportController.index);
 routes.get('/reports/stats', AuthMiddleware, ReportController.stats);
+routes.get('/reports/analytics', AuthMiddleware, ReportController.advancedStats);
 
 // Listagem de relatórios (Gerente de Departamento)
 routes.get('/reports/department', AuthMiddleware, ReportController.indexByDepartment);
@@ -49,7 +50,7 @@ routes.get('/reports/department/stats', AuthMiddleware, ReportController.departm
 routes.get('/reports/me', AuthMiddleware, ReportController.indexByUser);
 
 // Reportes (Via Profissional -> Supervisor)
-routes.post('/reports', AuthMiddleware, upload.single('image'), ReportController.create);
+routes.post('/reports', AuthMiddleware, ReportController.create);
 
 // Interação (Via Supervisor -> Profissional)
 routes.patch('/reports/:id/status', AuthMiddleware, ReportController.updateStatus);
@@ -60,7 +61,7 @@ routes.post('/departments', AuthMiddleware, DepartmentController.store);
 
 // Perfil
 routes.get('/profile/me', AuthMiddleware, ProfileController.me);
-routes.patch('/profile', AuthMiddleware, upload.single('avatar'), ProfileController.update);
+routes.patch('/profile', AuthMiddleware, ProfileController.update);
 
 // Chat Media
 routes.post('/chat/media', AuthMiddleware, upload.single('file'), mediaController.uploadGeneric);

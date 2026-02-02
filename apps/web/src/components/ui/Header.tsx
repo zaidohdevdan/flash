@@ -1,5 +1,6 @@
 import React from 'react';
 import { LogOut, Bell } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { Avatar } from './Avatar';
 
 /**
@@ -69,11 +70,13 @@ export const Header: React.FC<HeaderProps> = ({
                         </p>
                     </div>
 
-                    <Avatar
-                        src={user?.avatarUrl}
-                        size="md"
-                        className="cursor-pointer hover:ring-4 hover:ring-blue-500/10 transition-all"
-                    />
+                    <Link to="/profile">
+                        <Avatar
+                            src={user?.avatarUrl}
+                            size="md"
+                            className="cursor-pointer hover:ring-4 hover:ring-blue-500/10 transition-all"
+                        />
+                    </Link>
 
                     {onLogout && (
                         <button

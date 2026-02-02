@@ -9,3 +9,40 @@
 body {
   @apply bg-gray-50 text-gray-900;
 }
+
+@media print {
+  @page {
+    margin: 10mm;
+    size: auto;
+  }
+
+  body {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    background-color: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  /* Reset all backgrounds to white/transparent for print */
+  * {
+    background-color: transparent !important;
+    background-image: none !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    color: #000000 !important;
+    border-color: #e5e7eb !important;
+  }
+
+  /* Exceptions for Charts - keep them colored but clean */
+  .recharts-wrapper * {
+    color: inherit !important;
+  }
+
+  /* Force GlassCard to look like specific outlined boxes */
+  .print\:break-inside-avoid {
+    border: 1px solid #d1d5db !important;
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    border-radius: 8px !important;
+  }
+}

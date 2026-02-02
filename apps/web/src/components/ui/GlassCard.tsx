@@ -13,6 +13,8 @@ export interface GlassCardProps {
     blur?: 'sm' | 'md' | 'lg';
     /** Se deve aplicar borda semi-transparente. */
     withBorder?: boolean;
+    /** Estilos inline adicionais. */
+    style?: React.CSSProperties;
 }
 
 /**
@@ -24,7 +26,8 @@ export const GlassCard: React.FC<GlassCardProps> = ({
     className = '',
     variant = 'light',
     blur = 'md',
-    withBorder = true
+    withBorder = true,
+    style
 }) => {
     const blurClasses = {
         sm: 'backdrop-blur-md',
@@ -45,8 +48,11 @@ export const GlassCard: React.FC<GlassCardProps> = ({
       ${withBorder ? 'border border-white/50 ring-1 ring-white/30' : ''} 
       rounded-[2.5rem] 
       overflow-hidden 
+      overflow-hidden 
       ${className}
-    `}>
+    `}
+            style={style}
+        >
             {children}
         </div>
     );

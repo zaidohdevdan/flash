@@ -202,12 +202,29 @@ export function CreateReport() {
         if (!image) return toast.error('Por favor, tire uma foto para o relatório.');
 
         setSending(true);
-        const formData = new FormData();
-        formData.append('image', image);
-        formData.append('comment', comment);
 
         try {
-            await api.post('/reports', formData);
+            // 1. Upload para Cloudinary
+            const cloudinaryData = new FormData();
+            cloudinaryData.append('file', image);
+            cloudinaryData.append('upload_preset', 'flash_preset');
+
+            const cloudinaryRes = await fetch('https://api.cloudinary.com/v1_1/dfr8mjlnb/image/upload', {
+                method: 'POST',
+                body: cloudinaryData
+            });
+
+            if (!cloudinaryRes.ok) throw new Error('Falha no upload da imagem');
+
+            const cloudinaryJson = await cloudinaryRes.json();
+            const imageUrl = cloudinaryJson.secure_url;
+
+            // 2. Enviar para Backend
+            await api.post('/reports', {
+                comment,
+                imageUrl
+            });
+
             setSuccess(true);
             setComment('');
             setImage(null);
@@ -215,7 +232,8 @@ export function CreateReport() {
             setView('history');
             loadHistory(1, true);
         } catch (error) {
-            toast.error('Erro ao enviar relatório.');
+            console.error(error);
+            toast.error('Erro ao enviar relatório. Verifique sua conexão.');
         } finally {
             setSending(false);
         }

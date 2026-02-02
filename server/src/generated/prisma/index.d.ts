@@ -281,7 +281,7 @@ export namespace Prisma {
 
   /**
    * Prisma Client JS version: 6.19.2
-   * Query Engine version: acc0b9dd43eb689cbd20c9470515d719db10d0b0
+   * Query Engine version: c2990dca591cba766e3b7ef5d9e8a84796e47ab7
    */
   export type PrismaVersion = {
     client: string
@@ -6899,6 +6899,8 @@ export namespace Prisma {
     room: string | null
     createdAt: Date | null
     expiresAt: Date | null
+    deletedForSender: boolean | null
+    deletedForEveryone: boolean | null
   }
 
   export type ChatMessageMaxAggregateOutputType = {
@@ -6911,6 +6913,8 @@ export namespace Prisma {
     room: string | null
     createdAt: Date | null
     expiresAt: Date | null
+    deletedForSender: boolean | null
+    deletedForEveryone: boolean | null
   }
 
   export type ChatMessageCountAggregateOutputType = {
@@ -6923,6 +6927,8 @@ export namespace Prisma {
     room: number
     createdAt: number
     expiresAt: number
+    deletedForSender: number
+    deletedForEveryone: number
     _all: number
   }
 
@@ -6937,6 +6943,8 @@ export namespace Prisma {
     room?: true
     createdAt?: true
     expiresAt?: true
+    deletedForSender?: true
+    deletedForEveryone?: true
   }
 
   export type ChatMessageMaxAggregateInputType = {
@@ -6949,6 +6957,8 @@ export namespace Prisma {
     room?: true
     createdAt?: true
     expiresAt?: true
+    deletedForSender?: true
+    deletedForEveryone?: true
   }
 
   export type ChatMessageCountAggregateInputType = {
@@ -6961,6 +6971,8 @@ export namespace Prisma {
     room?: true
     createdAt?: true
     expiresAt?: true
+    deletedForSender?: true
+    deletedForEveryone?: true
     _all?: true
   }
 
@@ -7046,6 +7058,8 @@ export namespace Prisma {
     room: string
     createdAt: Date
     expiresAt: Date | null
+    deletedForSender: boolean
+    deletedForEveryone: boolean
     _count: ChatMessageCountAggregateOutputType | null
     _min: ChatMessageMinAggregateOutputType | null
     _max: ChatMessageMaxAggregateOutputType | null
@@ -7075,6 +7089,8 @@ export namespace Prisma {
     room?: boolean
     createdAt?: boolean
     expiresAt?: boolean
+    deletedForSender?: boolean
+    deletedForEveryone?: boolean
   }, ExtArgs["result"]["chatMessage"]>
 
 
@@ -7089,9 +7105,11 @@ export namespace Prisma {
     room?: boolean
     createdAt?: boolean
     expiresAt?: boolean
+    deletedForSender?: boolean
+    deletedForEveryone?: boolean
   }
 
-  export type ChatMessageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "fromId" | "toId" | "text" | "audioUrl" | "audioPublicId" | "room" | "createdAt" | "expiresAt", ExtArgs["result"]["chatMessage"]>
+  export type ChatMessageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "fromId" | "toId" | "text" | "audioUrl" | "audioPublicId" | "room" | "createdAt" | "expiresAt" | "deletedForSender" | "deletedForEveryone", ExtArgs["result"]["chatMessage"]>
 
   export type $ChatMessagePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "ChatMessage"
@@ -7106,6 +7124,8 @@ export namespace Prisma {
       room: string
       createdAt: Date
       expiresAt: Date | null
+      deletedForSender: boolean
+      deletedForEveryone: boolean
     }, ExtArgs["result"]["chatMessage"]>
     composites: {}
   }
@@ -7507,6 +7527,8 @@ export namespace Prisma {
     readonly room: FieldRef<"ChatMessage", 'String'>
     readonly createdAt: FieldRef<"ChatMessage", 'DateTime'>
     readonly expiresAt: FieldRef<"ChatMessage", 'DateTime'>
+    readonly deletedForSender: FieldRef<"ChatMessage", 'Boolean'>
+    readonly deletedForEveryone: FieldRef<"ChatMessage", 'Boolean'>
   }
     
 
@@ -7942,7 +7964,9 @@ export namespace Prisma {
     audioPublicId: 'audioPublicId',
     room: 'room',
     createdAt: 'createdAt',
-    expiresAt: 'expiresAt'
+    expiresAt: 'expiresAt',
+    deletedForSender: 'deletedForSender',
+    deletedForEveryone: 'deletedForEveryone'
   };
 
   export type ChatMessageScalarFieldEnum = (typeof ChatMessageScalarFieldEnum)[keyof typeof ChatMessageScalarFieldEnum]
@@ -8036,6 +8060,13 @@ export namespace Prisma {
    * Reference to a field of type 'Int[]'
    */
   export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'Boolean'
+   */
+  export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
     
 
 
@@ -8468,6 +8499,8 @@ export namespace Prisma {
     room?: StringFilter<"ChatMessage"> | string
     createdAt?: DateTimeFilter<"ChatMessage"> | Date | string
     expiresAt?: DateTimeNullableFilter<"ChatMessage"> | Date | string | null
+    deletedForSender?: BoolFilter<"ChatMessage"> | boolean
+    deletedForEveryone?: BoolFilter<"ChatMessage"> | boolean
   }
 
   export type ChatMessageOrderByWithRelationInput = {
@@ -8480,6 +8513,8 @@ export namespace Prisma {
     room?: SortOrder
     createdAt?: SortOrder
     expiresAt?: SortOrder
+    deletedForSender?: SortOrder
+    deletedForEveryone?: SortOrder
   }
 
   export type ChatMessageWhereUniqueInput = Prisma.AtLeast<{
@@ -8495,6 +8530,8 @@ export namespace Prisma {
     room?: StringFilter<"ChatMessage"> | string
     createdAt?: DateTimeFilter<"ChatMessage"> | Date | string
     expiresAt?: DateTimeNullableFilter<"ChatMessage"> | Date | string | null
+    deletedForSender?: BoolFilter<"ChatMessage"> | boolean
+    deletedForEveryone?: BoolFilter<"ChatMessage"> | boolean
   }, "id">
 
   export type ChatMessageOrderByWithAggregationInput = {
@@ -8507,6 +8544,8 @@ export namespace Prisma {
     room?: SortOrder
     createdAt?: SortOrder
     expiresAt?: SortOrder
+    deletedForSender?: SortOrder
+    deletedForEveryone?: SortOrder
     _count?: ChatMessageCountOrderByAggregateInput
     _max?: ChatMessageMaxOrderByAggregateInput
     _min?: ChatMessageMinOrderByAggregateInput
@@ -8525,6 +8564,8 @@ export namespace Prisma {
     room?: StringWithAggregatesFilter<"ChatMessage"> | string
     createdAt?: DateTimeWithAggregatesFilter<"ChatMessage"> | Date | string
     expiresAt?: DateTimeNullableWithAggregatesFilter<"ChatMessage"> | Date | string | null
+    deletedForSender?: BoolWithAggregatesFilter<"ChatMessage"> | boolean
+    deletedForEveryone?: BoolWithAggregatesFilter<"ChatMessage"> | boolean
   }
 
   export type UserCreateInput = {
@@ -8951,6 +8992,8 @@ export namespace Prisma {
     room: string
     createdAt?: Date | string
     expiresAt?: Date | string | null
+    deletedForSender?: boolean
+    deletedForEveryone?: boolean
   }
 
   export type ChatMessageUncheckedCreateInput = {
@@ -8963,6 +9006,8 @@ export namespace Prisma {
     room: string
     createdAt?: Date | string
     expiresAt?: Date | string | null
+    deletedForSender?: boolean
+    deletedForEveryone?: boolean
   }
 
   export type ChatMessageUpdateInput = {
@@ -8974,6 +9019,8 @@ export namespace Prisma {
     room?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedForSender?: BoolFieldUpdateOperationsInput | boolean
+    deletedForEveryone?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type ChatMessageUncheckedUpdateInput = {
@@ -8985,6 +9032,8 @@ export namespace Prisma {
     room?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedForSender?: BoolFieldUpdateOperationsInput | boolean
+    deletedForEveryone?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type ChatMessageCreateManyInput = {
@@ -8997,6 +9046,8 @@ export namespace Prisma {
     room: string
     createdAt?: Date | string
     expiresAt?: Date | string | null
+    deletedForSender?: boolean
+    deletedForEveryone?: boolean
   }
 
   export type ChatMessageUpdateManyMutationInput = {
@@ -9008,6 +9059,8 @@ export namespace Prisma {
     room?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedForSender?: BoolFieldUpdateOperationsInput | boolean
+    deletedForEveryone?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type ChatMessageUncheckedUpdateManyInput = {
@@ -9019,6 +9072,8 @@ export namespace Prisma {
     room?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedForSender?: BoolFieldUpdateOperationsInput | boolean
+    deletedForEveryone?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type StringFilter<$PrismaModel = never> = {
@@ -9485,6 +9540,11 @@ export namespace Prisma {
     _max?: NestedIntFilter<$PrismaModel>
   }
 
+  export type BoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
   export type ChatMessageCountOrderByAggregateInput = {
     id?: SortOrder
     fromId?: SortOrder
@@ -9495,6 +9555,8 @@ export namespace Prisma {
     room?: SortOrder
     createdAt?: SortOrder
     expiresAt?: SortOrder
+    deletedForSender?: SortOrder
+    deletedForEveryone?: SortOrder
   }
 
   export type ChatMessageMaxOrderByAggregateInput = {
@@ -9507,6 +9569,8 @@ export namespace Prisma {
     room?: SortOrder
     createdAt?: SortOrder
     expiresAt?: SortOrder
+    deletedForSender?: SortOrder
+    deletedForEveryone?: SortOrder
   }
 
   export type ChatMessageMinOrderByAggregateInput = {
@@ -9519,6 +9583,16 @@ export namespace Prisma {
     room?: SortOrder
     createdAt?: SortOrder
     expiresAt?: SortOrder
+    deletedForSender?: SortOrder
+    deletedForEveryone?: SortOrder
+  }
+
+  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type UserCreateNestedOneWithoutSubordinatesInput = {
@@ -9966,6 +10040,10 @@ export namespace Prisma {
     update?: XOR<XOR<ReportUpdateToOneWithWhereWithoutMediaInput, ReportUpdateWithoutMediaInput>, ReportUncheckedUpdateWithoutMediaInput>
   }
 
+  export type BoolFieldUpdateOperationsInput = {
+    set?: boolean
+  }
+
   export type NestedStringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -10193,6 +10271,19 @@ export namespace Prisma {
     gt?: number | FloatFieldRefInput<$PrismaModel>
     gte?: number | FloatFieldRefInput<$PrismaModel>
     not?: NestedFloatFilter<$PrismaModel> | number
+  }
+
+  export type NestedBoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
+  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type UserCreateWithoutSubordinatesInput = {

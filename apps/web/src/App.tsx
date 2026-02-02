@@ -9,9 +9,12 @@ import { ManagerDashboard } from './pages/ManagerDashboard';
 import { Home } from './pages/Home';
 import { Toaster } from 'react-hot-toast';
 
+import { Analytics } from './pages/Analytics';
+import { Profile } from './pages/Profile';
+
 // Placeholders for now
 
-function PrivateRoute({ children, role }: { children: React.ReactNode, role?: string }) {
+function PrivateRoute({ children, role }: { children: React.ReactNode, role?: string | string[] }) {
   const { isAuthenticated, loading, user } = useAuth();
 
   if (loading) {
@@ -22,11 +25,14 @@ function PrivateRoute({ children, role }: { children: React.ReactNode, role?: st
     return <Navigate to="/login" />;
   }
 
-  if (role && user?.role !== role) {
-    if (user?.role === 'ADMIN') return <Navigate to="/admin-dashboard" />;
-    if (user?.role === 'SUPERVISOR') return <Navigate to="/dashboard" />;
-    if (user?.role === 'PROFESSIONAL') return <Navigate to="/create-report" />;
-    if (user?.role === 'MANAGER') return <Navigate to="/manager-dashboard" />;
+  if (role) {
+    const roles = Array.isArray(role) ? role : [role];
+    if (!roles.includes(user?.role || '')) {
+      if (user?.role === 'ADMIN') return <Navigate to="/admin-dashboard" />;
+      if (user?.role === 'SUPERVISOR') return <Navigate to="/dashboard" />;
+      if (user?.role === 'PROFESSIONAL') return <Navigate to="/create-report" />;
+      if (user?.role === 'MANAGER') return <Navigate to="/manager-dashboard" />;
+    }
   }
 
   return <>{children}</>;
@@ -73,6 +79,18 @@ function AppRoutes() {
       <Route path="/manager-dashboard" element={
         <PrivateRoute role="MANAGER">
           <ManagerDashboard />
+        </PrivateRoute>
+      } />
+
+      <Route path="/analytics" element={
+        <PrivateRoute role={['SUPERVISOR', 'MANAGER']}>
+          <Analytics />
+        </PrivateRoute>
+      } />
+
+      <Route path="/profile" element={
+        <PrivateRoute role={['SUPERVISOR', 'MANAGER', 'PROFESSIONAL', 'ADMIN']}>
+          <Profile />
         </PrivateRoute>
       } />
     </Routes>

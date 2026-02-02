@@ -26,4 +26,5 @@ export interface IReportRepository {
     findByDepartment(departmentId: string, page?: number, limit?: number, status?: ReportStatus, startDate?: Date, endDate?: Date): Promise<ReportWithUser[]>;
     findStatsBySupervisor(supervisorId: string): Promise<{ status: string, _count: number }[]>;
     findStatsByDepartment(departmentId: string): Promise<{ status: string, _count: number }[]>;
+    getAdvancedStats(userId: string, role: string): Promise<any>;
 }

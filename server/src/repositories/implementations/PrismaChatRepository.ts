@@ -50,4 +50,14 @@ export class PrismaChatRepository implements IChatRepository {
             data: { text }
         });
     }
+
+    async softDelete(id: string, type: 'me' | 'everyone'): Promise<ChatMessage> {
+        return prisma.chatMessage.update({
+            where: { id },
+            data: {
+                deletedForSender: type === 'me' ? true : undefined,
+                deletedForEveryone: type === 'everyone' ? true : undefined
+            }
+        });
+    }
 }

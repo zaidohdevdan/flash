@@ -11,6 +11,7 @@ import {
     Folder,
     MessageSquare,
     TrendingUp,
+    BarChart3,
     Search
 } from 'lucide-react';
 import { ChatWidget } from '../components/ChatWidget';
@@ -356,9 +357,19 @@ export function Dashboard() {
 
                 <div className="max-w-7xl mx-auto px-6 relative z-10">
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-10">
-                        <div>
-                            <h2 className="text-3xl font-black text-white tracking-tight uppercase">Painel de Controle</h2>
-                            <p className="text-white/90 text-sm font-medium mt-1 uppercase tracking-widest">Controle operacional em tempo real</p>
+                        <div className="flex items-center gap-6">
+                            <div>
+                                <h2 className="text-3xl font-black text-white tracking-tight uppercase">Painel de Controle</h2>
+                                <p className="text-white/90 text-sm font-medium mt-1 uppercase tracking-widest">Controle operacional em tempo real</p>
+                            </div>
+                            <Button
+                                variant="glass"
+                                className="!px-4 !py-2 !bg-blue-500/20 hover:!bg-blue-500/30 text-blue-300 border-blue-500/30 backdrop-blur-md"
+                                onClick={() => window.location.href = '/analytics'}
+                            >
+                                <BarChart3 className="w-5 h-5 mr-2" />
+                                Analytics
+                            </Button>
                         </div>
 
                         <div className="flex flex-col gap-4">

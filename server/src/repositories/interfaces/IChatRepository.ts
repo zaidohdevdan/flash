@@ -8,4 +8,5 @@ export interface IChatRepository {
     findExpired(): Promise<ChatMessage[]>;
     deleteById(id: string): Promise<void>;
     update(id: string, text: string): Promise<ChatMessage>;
+    softDelete(id: string, type: 'me' | 'everyone'): Promise<ChatMessage>;
 }

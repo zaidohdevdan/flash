@@ -13,30 +13,7 @@ const mediaService = new MediaService(mediaRepository);
 export const ProfileController = {
     async update(req: Request, res: Response) {
         const userId = req.userId!;
-        const { statusPhrase } = req.body;
-
-        let avatarUrl = undefined;
-
-        if (req.file) {
-            try {
-                // Upload avatar to Cloudinary
-                const uploadResult = await mediaService.uploadFromBuffer({
-                    buffer: req.file.buffer,
-                    userId,
-                    options: {
-                        folder: 'avatars',
-                        width: 500,
-                        height: 500,
-                        crop: 'fill',
-                        gravity: 'face'
-                    }
-                });
-                avatarUrl = uploadResult.secureUrl;
-            } catch (error) {
-                console.error("Error uploading avatar:", error);
-                return res.status(500).json({ error: "Erro ao fazer upload do avatar" });
-            }
-        }
+        const { statusPhrase, avatarUrl } = req.body;
 
         try {
             const user = await authService.updateUser(userId, {

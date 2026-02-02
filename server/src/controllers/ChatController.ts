@@ -7,7 +7,8 @@ export const ChatController = {
     async listHistory(req: Request, res: Response) {
         try {
             const { room } = req.params;
-            const history = await chatService.getHistory(room as string);
+            const userId = req.userId!;
+            const history = await chatService.getHistory(room as string, userId);
             return res.json(history);
         } catch (error) {
             console.error('Erro ao listar histórico do chat:', error);
@@ -53,7 +54,10 @@ export const ChatController = {
             if (!message) return res.status(404).json({ error: 'Mensagem não encontrada.' });
             if (message.fromId !== userId) return res.status(403).json({ error: 'Não autorizado.' });
 
-            await chatService.deleteMessage(id as string);
+            const { type } = req.query; // 'me' | 'everyone'
+            const deleteType = (type === 'me' || type === 'everyone') ? type : 'everyone';
+
+            await chatService.deleteMessage(id as string, userId, deleteType);
             return res.status(204).send();
         } catch (error) {
             console.error('Erro ao deletar mensagem:', error);

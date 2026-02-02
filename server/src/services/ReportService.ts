@@ -40,4 +40,8 @@ export class ReportService {
     async getDepartmentStats(departmentId: string) {
         return this.reportRepository.findStatsByDepartment(departmentId);
     }
+
+    async getAdvancedStats(userId: string, role: string) {
+        return this.reportRepository.getAdvancedStats(userId, role);
+    }
 }
