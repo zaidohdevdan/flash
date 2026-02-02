@@ -461,7 +461,7 @@ export function Dashboard() {
                     {reports.length === 0 ? (
                         <Card variant="glass" className="p-20 flex flex-col items-center justify-center text-gray-400">
                             <MessageSquare className="w-12 h-12 mb-4 opacity-20" />
-                            <p className="font-bold uppercase tracking-widest text-[10px] text-white/90">Nenhum reporte encontrado</p>
+                            <p className="font-bold uppercase tracking-widest text-[10px] text-gray-600">Nenhum reporte encontrado</p>
                         </Card>
                     ) : (
                         <div className="grid gap-6">

@@ -270,7 +270,7 @@ export function CreateReport() {
                                     </div>
                                     <div>
                                         <div className="flex items-center gap-2">
-                                            <p className="text-[9px] font-black text-white uppercase tracking-widest">Supervisor Direto</p>
+                                            <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest">Supervisor Direto</p>
                                             <div className={`w-1.5 h-1.5 rounded-full ${user.supervisorId && onlineUserIds.includes(user.supervisorId) ? 'bg-emerald-400 animate-pulse' : 'bg-white/30'}`} />
                                         </div>
                                         <h3 className="text-lg font-bold">{user.supervisorName || 'Responsável Técnico'}</h3>
