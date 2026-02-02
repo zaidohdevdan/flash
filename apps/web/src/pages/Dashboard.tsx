@@ -46,6 +46,16 @@ interface Subordinate {
     isOnline?: boolean;
 }
 
+interface UserContact {
+    id: string;
+    name: string;
+    role: string;
+    avatarUrl?: string | null;
+    statusPhrase?: string;
+    isOnline?: boolean;
+    departmentName?: string;
+}
+
 interface Stats {
     status: string;
     _count: number;
@@ -78,6 +88,7 @@ export function Dashboard() {
     const [reports, setReports] = useState<Report[]>([]);
     const [stats, setStats] = useState<Stats[]>([]);
     const [subordinates, setSubordinates] = useState<Subordinate[]>([]);
+    const [contacts, setContacts] = useState<UserContact[]>([]);
     const [departments, setDepartments] = useState<Department[]>([]);
 
     // Modals
@@ -92,7 +103,7 @@ export function Dashboard() {
     const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
 
     // Chat
-    const [chatTarget, setChatTarget] = useState<Subordinate | null>(null);
+    const [chatTarget, setChatTarget] = useState<Subordinate | UserContact | null>(null);
     const [unreadMessages, setUnreadMessages] = useState<Record<string, boolean>>({});
 
     const playNotificationSound = () => {
@@ -144,6 +155,18 @@ export function Dashboard() {
         }
     };
 
+    const loadContacts = async () => {
+        try {
+            const response = await api.get('/support-network');
+            const allContacts = response.data
+                .filter((c: UserContact) => c.id !== user?.id)
+                .map((c: UserContact) => ({ ...c, isOnline: false }));
+            setContacts(allContacts);
+        } catch (error) {
+            console.error('Erro ao buscar contatos:', error);
+        }
+    };
+
     const loadDepartments = async () => {
         try {
             const response = await api.get('/departments');
@@ -157,6 +180,7 @@ export function Dashboard() {
         loadReports(1, true, statusFilter);
         loadStats();
         loadSubordinates();
+        loadContacts();
         loadDepartments();
 
         const socket = io(SOCKET_URL, {
@@ -172,10 +196,17 @@ export function Dashboard() {
 
         socket.on('initial_presence_list', (ids: string[]) => {
             setSubordinates(prev => prev.map(s => ({ ...s, isOnline: ids.includes(s.id) })));
+            setContacts(prev => prev.map(c => ({ ...c, isOnline: ids.includes(c.id) })));
         });
 
-        socket.on('user_presence_changed', (data: { userId: string, status: 'online' | 'offline' }) => {
-            setSubordinates(prev => prev.map(s => s.id === data.userId ? { ...s, isOnline: data.status === 'online' } : s));
+        socket.on('user_online', ({ userId }: { userId: string }) => {
+            setSubordinates(prev => prev.map(s => s.id === userId ? { ...s, isOnline: true } : s));
+            setContacts(prev => prev.map(c => c.id === userId ? { ...c, isOnline: true } : c));
+        });
+
+        socket.on('user_offline', ({ userId }: { userId: string }) => {
+            setSubordinates(prev => prev.map(s => s.id === userId ? { ...s, isOnline: false } : s));
+            setContacts(prev => prev.map(c => c.id === userId ? { ...c, isOnline: false } : c));
         });
 
         socket.on('report_status_updated_for_supervisor', (data: Report) => {
@@ -438,9 +469,9 @@ export function Dashboard() {
                     )}
                 </div>
 
-                {/* Sidebar */}
-                <aside className="w-full lg:w-80 shrink-0">
+                <aside className="w-full lg:w-80 shrink-0 flex flex-col gap-6">
                     <TeamSidebar
+                        title="Equipe Operacional"
                         members={subordinates.map(s => ({
                             id: s.id,
                             name: s.name,
@@ -455,6 +486,26 @@ export function Dashboard() {
                             setUnreadMessages(prev => ({ ...prev, [member.id]: false }));
                         }}
                     />
+
+                    {contacts.length > 0 && (
+                        <TeamSidebar
+                            title="Rede de Apoio"
+                            members={contacts.map(c => ({
+                                id: c.id,
+                                name: c.name,
+                                role: c.role,
+                                departmentName: c.departmentName,
+                                avatarUrl: c.avatarUrl,
+                                isOnline: !!c.isOnline,
+                                statusPhrase: c.statusPhrase,
+                                hasUnread: !!unreadMessages[c.id]
+                            }))}
+                            onMemberClick={(member) => {
+                                setChatTarget(member);
+                                setUnreadMessages(prev => ({ ...prev, [member.id]: false }));
+                            }}
+                        />
+                    )}
                 </aside>
             </main>
 

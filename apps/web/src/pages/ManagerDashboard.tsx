@@ -69,7 +69,7 @@ interface Department {
 }
 
 export function ManagerDashboard() {
-    const { user, signOut, updateUser } = useAuth();
+    const { user, signOut } = useAuth();
     const [reports, setReports] = useState<Report[]>([]);
     const [stats, setStats] = useState<Stats[]>([]);
     const [contacts, setContacts] = useState<UserContact[]>([]);
