@@ -146,19 +146,25 @@ export function ManagerDashboard() {
     useEffect(() => {
         loadReports(1, true, statusFilter);
         loadStats();
+    }, [statusFilter, selectedDeptId]);
+
+    useEffect(() => {
         loadContacts();
         loadDepartments();
+    }, []);
+
+    // Socket Connection Lifecycle
+    useEffect(() => {
+        if (!user?.id) return;
 
         const newSocket = io(SOCKET_URL, {
-            query: { userId: user?.id, role: user?.role, userName: user?.name }
+            query: { userId: user.id, role: user.role, userName: user.name }
         });
         setSocket(newSocket);
 
         newSocket.on('report_status_updated_for_supervisor', (data: Report) => {
-            // Para o gerente, o isolamento já é feito via sala de setor no servidor
             setReports(prev => {
                 const exists = prev.find(r => r.id === data.id);
-                // Se o reporte mudou de setor ou foi finalizado, ele pode sumir se não bater mais com o filtro ou status
                 if (String((data as any).departmentId) !== String(user?.departmentId)) {
                     return prev.filter(r => r.id !== data.id);
                 }
@@ -170,7 +176,6 @@ export function ManagerDashboard() {
         });
 
         newSocket.on('report_forwarded_to_department', (data: Report) => {
-            // Isolado via sala dept-id
             setReports(prev => {
                 const exists = prev.find(r => r.id === data.id);
                 if (exists) return prev;
@@ -192,9 +197,19 @@ export function ManagerDashboard() {
             setContacts(prev => prev.map(s => s.id === userId ? { ...s, isOnline: false } : s));
         });
 
+        return () => {
+            newSocket.disconnect();
+            setSocket(null);
+        };
+    }, [user?.id, user?.name, user?.role, user?.departmentId]);
+
+    // Chat Notifications Listener
+    useEffect(() => {
+        if (!socket) return;
+
         const chatTargetId = chatTarget?.id;
 
-        newSocket.on('new_chat_notification', (data: { from: string, fromName?: string, text: string }) => {
+        const handleNotification = (data: { from: string, fromName?: string, text: string }) => {
             if (chatTargetId !== data.from) {
                 setUnreadMessages(prev => ({ ...prev, [data.from]: true }));
                 playNotificationSound();
@@ -210,11 +225,14 @@ export function ManagerDashboard() {
                     }
                 });
             }
-        });
+        };
 
-        return () => { newSocket.disconnect(); };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [user?.id, user?.name, user?.role, user?.departmentId, statusFilter, chatTarget?.id]);
+        socket.on('new_chat_notification', handleNotification);
+
+        return () => {
+            socket.off('new_chat_notification', handleNotification);
+        };
+    }, [socket, chatTarget?.id]);
 
     async function handleProcessAnalysis() {
         if (!analyzingReport) return;

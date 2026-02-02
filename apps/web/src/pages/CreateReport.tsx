@@ -76,7 +76,9 @@ export function CreateReport() {
 
     useEffect(() => {
         loadHistory(1, true, statusFilter);
+    }, [statusFilter]);
 
+    useEffect(() => {
         const handleVisibilityChange = () => {
             if (document.visibilityState === 'visible') {
                 loadHistory(1, true, statusFilter);
@@ -84,9 +86,15 @@ export function CreateReport() {
             }
         };
         document.addEventListener('visibilitychange', handleVisibilityChange);
+        return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+    }, [statusFilter]);
+
+    // Socket Connection Lifecycle
+    useEffect(() => {
+        if (!user?.id) return;
 
         const newSocket = io(SOCKET_URL, {
-            query: { userId: user?.id, role: user?.role, userName: user?.name },
+            query: { userId: user.id, role: user.role, userName: user.name },
             transports: ['websocket', 'polling']
         });
         setSocket(newSocket);
@@ -107,7 +115,17 @@ export function CreateReport() {
             });
         });
 
-        newSocket.on('new_chat_notification', (data: { from: string, fromName?: string, text: string }) => {
+        return () => {
+            newSocket.disconnect();
+            setSocket(null);
+        };
+    }, [user?.id, user?.name, user?.role]);
+
+    // Chat Notifications Listener
+    useEffect(() => {
+        if (!socket) return;
+
+        const handleNotification = (data: { from: string, fromName?: string, text: string }) => {
             if (!isChatOpenRef.current) {
                 setHasUnread(true);
                 playNotificationSound();
@@ -116,13 +134,14 @@ export function CreateReport() {
                     duration: 4000
                 });
             }
-        });
+        };
+
+        socket.on('new_chat_notification', handleNotification);
 
         return () => {
-            newSocket.disconnect();
-            document.removeEventListener('visibilitychange', handleVisibilityChange);
+            socket.off('new_chat_notification', handleNotification);
         };
-    }, [statusFilter]);
+    }, [socket]);
 
     async function loadHistory(pageNum: number = 1, reset: boolean = false, status?: string) {
         setLoadingHistory(pageNum === 1);

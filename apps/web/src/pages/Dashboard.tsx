@@ -180,12 +180,20 @@ export function Dashboard() {
     useEffect(() => {
         loadReports(1, true, statusFilter);
         loadStats();
+    }, [statusFilter, startDate, endDate]);
+
+    useEffect(() => {
         loadSubordinates();
         loadContacts();
         loadDepartments();
+    }, []);
+
+    // Socket Connection Lifecycle
+    useEffect(() => {
+        if (!user?.id) return;
 
         const newSocket = io(SOCKET_URL, {
-            query: { userId: user?.id, role: user?.role, userName: user?.name }
+            query: { userId: user.id, role: user.role, userName: user.name }
         });
         setSocket(newSocket);
 
@@ -223,9 +231,19 @@ export function Dashboard() {
             loadStats();
         });
 
+        return () => {
+            newSocket.disconnect();
+            setSocket(null);
+        };
+    }, [user?.id, user?.name, user?.role]);
+
+    // Chat Notifications Listener
+    useEffect(() => {
+        if (!socket) return;
+
         const chatTargetId = chatTarget?.id;
 
-        newSocket.on('new_chat_notification', (data: { from: string, fromName?: string, text: string }) => {
+        const handleNotification = (data: { from: string, fromName?: string, text: string }) => {
             if (chatTargetId !== data.from) {
                 setUnreadMessages(prev => ({ ...prev, [data.from]: true }));
                 playNotificationSound();
@@ -241,11 +259,14 @@ export function Dashboard() {
                     }
                 });
             }
-        });
+        };
 
-        return () => { newSocket.disconnect(); };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [user?.id, user?.name, user?.role, statusFilter, startDate, endDate, chatTarget?.id]);
+        socket.on('new_chat_notification', handleNotification);
+
+        return () => {
+            socket.off('new_chat_notification', handleNotification);
+        };
+    }, [socket, chatTarget?.id]);
 
     async function handleProcessAnalysis() {
         if (!analyzingReport) return;
