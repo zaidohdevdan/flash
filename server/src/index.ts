@@ -114,9 +114,8 @@ async function bootstrap() {
                     console.error(`[Socket] Erro ao buscar dados do usuário ${userId} para entrar na sala:`, err);
                 }
 
-                io.emit('user_presence_changed', {
+                io.emit('user_online', {
                     userId: roomName,
-                    status: 'online',
                 });
             } else {
                 console.warn(
@@ -201,9 +200,8 @@ async function bootstrap() {
                     const roomName = String(userIdFromQuery);
                     onlineUsers.delete(roomName);
 
-                    io.emit('user_presence_changed', {
+                    io.emit('user_offline', {
                         userId: roomName,
-                        status: 'offline',
                     });
 
 

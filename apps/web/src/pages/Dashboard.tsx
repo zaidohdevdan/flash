@@ -104,6 +104,7 @@ export function Dashboard() {
 
     // Chat
     const [chatTarget, setChatTarget] = useState<Subordinate | UserContact | null>(null);
+    const [socket, setSocket] = useState<any>(null);
     const [unreadMessages, setUnreadMessages] = useState<Record<string, boolean>>({});
 
     const playNotificationSound = () => {
@@ -183,33 +184,34 @@ export function Dashboard() {
         loadContacts();
         loadDepartments();
 
-        const socket = io(SOCKET_URL, {
+        const newSocket = io(SOCKET_URL, {
             query: { userId: user?.id, role: user?.role, userName: user?.name }
         });
+        setSocket(newSocket);
 
-        socket.on('new_report_to_review', (data: { data: Report }) => {
+        newSocket.on('new_report_to_review', (data: { data: Report }) => {
             if (!statusFilter || statusFilter === 'SENT') {
                 setReports(prev => [data.data, ...prev]);
             }
             loadStats();
         });
 
-        socket.on('initial_presence_list', (ids: string[]) => {
+        newSocket.on('initial_presence_list', (ids: string[]) => {
             setSubordinates(prev => prev.map(s => ({ ...s, isOnline: ids.includes(s.id) })));
             setContacts(prev => prev.map(c => ({ ...c, isOnline: ids.includes(c.id) })));
         });
 
-        socket.on('user_online', ({ userId }: { userId: string }) => {
+        newSocket.on('user_online', ({ userId }: { userId: string }) => {
             setSubordinates(prev => prev.map(s => s.id === userId ? { ...s, isOnline: true } : s));
             setContacts(prev => prev.map(c => c.id === userId ? { ...c, isOnline: true } : c));
         });
 
-        socket.on('user_offline', ({ userId }: { userId: string }) => {
+        newSocket.on('user_offline', ({ userId }: { userId: string }) => {
             setSubordinates(prev => prev.map(s => s.id === userId ? { ...s, isOnline: false } : s));
             setContacts(prev => prev.map(c => c.id === userId ? { ...c, isOnline: false } : c));
         });
 
-        socket.on('report_status_updated_for_supervisor', (data: Report) => {
+        newSocket.on('report_status_updated_for_supervisor', (data: Report) => {
             setReports(prev => {
                 if (statusFilter && statusFilter !== data.status) return prev.filter(r => r.id !== data.id);
                 const exists = prev.find(r => r.id === data.id);
@@ -223,7 +225,7 @@ export function Dashboard() {
 
         const chatTargetId = chatTarget?.id;
 
-        socket.on('new_chat_notification', (data: { from: string, fromName?: string, text: string }) => {
+        newSocket.on('new_chat_notification', (data: { from: string, fromName?: string, text: string }) => {
             if (chatTargetId !== data.from) {
                 setUnreadMessages(prev => ({ ...prev, [data.from]: true }));
                 playNotificationSound();
@@ -241,7 +243,7 @@ export function Dashboard() {
             }
         });
 
-        return () => { socket.disconnect(); };
+        return () => { newSocket.disconnect(); };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user?.id, user?.name, user?.role, statusFilter, startDate, endDate, chatTarget?.id]);
 
@@ -666,6 +668,7 @@ export function Dashboard() {
                     currentUser={{ id: user.id || '', name: user.name || '', role: user.role || '' }}
                     targetUser={{ id: chatTarget.id || '', name: chatTarget.name || '', role: chatTarget.role || 'PROFESSIONAL' }}
                     onClose={() => setChatTarget(null)}
+                    socket={socket}
                 />
             )}
         </div >

@@ -82,6 +82,7 @@ export function ManagerDashboard() {
 
     // Chat
     const [chatTarget, setChatTarget] = useState<UserContact | null>(null);
+    const [socket, setSocket] = useState<any>(null);
     const [unreadMessages, setUnreadMessages] = useState<Record<string, boolean>>({});
 
     const playNotificationSound = () => {
@@ -148,11 +149,12 @@ export function ManagerDashboard() {
         loadContacts();
         loadDepartments();
 
-        const socket = io(SOCKET_URL, {
+        const newSocket = io(SOCKET_URL, {
             query: { userId: user?.id, role: user?.role, userName: user?.name }
         });
+        setSocket(newSocket);
 
-        socket.on('report_status_updated_for_supervisor', (data: Report) => {
+        newSocket.on('report_status_updated_for_supervisor', (data: Report) => {
             // Para o gerente, o isolamento já é feito via sala de setor no servidor
             setReports(prev => {
                 const exists = prev.find(r => r.id === data.id);
@@ -167,7 +169,7 @@ export function ManagerDashboard() {
             loadStats();
         });
 
-        socket.on('report_forwarded_to_department', (data: Report) => {
+        newSocket.on('report_forwarded_to_department', (data: Report) => {
             // Isolado via sala dept-id
             setReports(prev => {
                 const exists = prev.find(r => r.id === data.id);
@@ -178,17 +180,21 @@ export function ManagerDashboard() {
             toast.success(`Novo reporte encaminhado para seu departamento!`);
         });
 
-        socket.on('initial_presence_list', (ids: string[]) => {
+        newSocket.on('initial_presence_list', (ids: string[]) => {
             setContacts(prev => prev.map(s => ({ ...s, isOnline: ids.includes(s.id) })));
         });
 
-        socket.on('user_presence_changed', (data: { userId: string, status: 'online' | 'offline' }) => {
-            setContacts(prev => prev.map(s => s.id === data.userId ? { ...s, isOnline: data.status === 'online' } : s));
+        newSocket.on('user_online', ({ userId }: { userId: string }) => {
+            setContacts(prev => prev.map(s => s.id === userId ? { ...s, isOnline: true } : s));
+        });
+
+        newSocket.on('user_offline', ({ userId }: { userId: string }) => {
+            setContacts(prev => prev.map(s => s.id === userId ? { ...s, isOnline: false } : s));
         });
 
         const chatTargetId = chatTarget?.id;
 
-        socket.on('new_chat_notification', (data: { from: string, fromName?: string, text: string }) => {
+        newSocket.on('new_chat_notification', (data: { from: string, fromName?: string, text: string }) => {
             if (chatTargetId !== data.from) {
                 setUnreadMessages(prev => ({ ...prev, [data.from]: true }));
                 playNotificationSound();
@@ -206,7 +212,7 @@ export function ManagerDashboard() {
             }
         });
 
-        return () => { socket.disconnect(); };
+        return () => { newSocket.disconnect(); };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user?.id, user?.name, user?.role, user?.departmentId, statusFilter, chatTarget?.id]);
 
@@ -480,8 +486,9 @@ export function ManagerDashboard() {
             {chatTarget && user && (
                 <ChatWidget
                     currentUser={{ id: user.id || '', name: user.name || '', role: user.role || '' }}
-                    targetUser={{ id: chatTarget.id || '', name: chatTarget.name || '', role: chatTarget.role }}
+                    targetUser={chatTarget}
                     onClose={() => setChatTarget(null)}
+                    socket={socket}
                 />
             )}
         </div>

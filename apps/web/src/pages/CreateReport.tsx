@@ -54,6 +54,7 @@ export function CreateReport() {
     const LIMIT = 10;
 
     const [hasUnread, setHasUnread] = useState(false);
+    const [socket, setSocket] = useState<any>(null);
     const [loadingHistory, setLoadingHistory] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const isChatOpenRef = useRef(isChatOpen);
@@ -84,15 +85,16 @@ export function CreateReport() {
         };
         document.addEventListener('visibilitychange', handleVisibilityChange);
 
-        const socket = io(SOCKET_URL, {
+        const newSocket = io(SOCKET_URL, {
             query: { userId: user?.id, role: user?.role, userName: user?.name },
             transports: ['websocket', 'polling']
         });
+        setSocket(newSocket);
 
-        socket.on('connect', () => setIsConnected(true));
-        socket.on('disconnect', () => setIsConnected(false));
+        newSocket.on('connect', () => setIsConnected(true));
+        newSocket.on('disconnect', () => setIsConnected(false));
 
-        socket.on('report_status_updated', (data: { reportId: string, newStatus: any, feedback?: string, feedbackAt?: string }) => {
+        newSocket.on('report_status_updated', (data: { reportId: string, newStatus: any, feedback?: string, feedbackAt?: string }) => {
             setHistory(prev => {
                 if (statusFilter && statusFilter !== data.newStatus) {
                     return prev.filter(item => item.id !== data.reportId);
@@ -105,7 +107,7 @@ export function CreateReport() {
             });
         });
 
-        socket.on('new_chat_notification', (data: { from: string, fromName?: string, text: string }) => {
+        newSocket.on('new_chat_notification', (data: { from: string, fromName?: string, text: string }) => {
             if (!isChatOpenRef.current) {
                 setHasUnread(true);
                 playNotificationSound();
@@ -117,7 +119,7 @@ export function CreateReport() {
         });
 
         return () => {
-            socket.disconnect();
+            newSocket.disconnect();
             document.removeEventListener('visibilitychange', handleVisibilityChange);
         };
     }, [statusFilter]);
@@ -384,6 +386,7 @@ export function CreateReport() {
                         role: 'SUPERVISOR'
                     }}
                     onClose={() => setIsChatOpen(false)}
+                    socket={socket}
                 />
             )}
         </div>

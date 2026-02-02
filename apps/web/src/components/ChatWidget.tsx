@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
-import { io, Socket } from 'socket.io-client';
+import { Socket } from 'socket.io-client';
 import { Send, Mic, X, MessageSquare, Square, Trash2, Hourglass, Pencil, Check, Trash } from 'lucide-react';
 import { api } from '../services/api';
 
-const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
 
 const getRoomName = (id1: string, id2: string) => {
     return `private-${[id1, id2].map(id => id.trim().toLowerCase()).sort().join('-')}`;
@@ -23,13 +23,13 @@ interface ChatWidgetProps {
     currentUser: { id: string; role: string; name: string };
     targetUser: { id: string; name: string; role?: string }; // Who we are talking to
     onClose: () => void;
+    socket: Socket | null;
 }
 
-export function ChatWidget({ currentUser, targetUser, onClose }: ChatWidgetProps) {
+export function ChatWidget({ currentUser, targetUser, onClose, socket }: ChatWidgetProps) {
     const [messages, setMessages] = useState<Message[]>([]);
     const [inputText, setInputText] = useState('');
     const [isRecording, setIsRecording] = useState(false);
-    const [socket, setSocket] = useState<Socket | null>(null);
     const [recordingTime, setRecordingTime] = useState(0);
     const [now, setNow] = useState(Date.now());
     const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null);
@@ -45,7 +45,7 @@ export function ChatWidget({ currentUser, targetUser, onClose }: ChatWidgetProps
     const chatRoom = currentUser?.id && targetUser?.id ? getRoomName(currentUser.id, targetUser.id) : '';
 
     useEffect(() => {
-        if (!chatRoom) return;
+        if (!chatRoom || !socket) return;
         let isMounted = true;
 
         async function fetchHistory() {
@@ -62,18 +62,7 @@ export function ChatWidget({ currentUser, targetUser, onClose }: ChatWidgetProps
         // Initial fetch
         fetchHistory();
 
-        const newSocket = io(SOCKET_URL, {
-            query: { userId: currentUser.id, role: currentUser.role, userName: currentUser.name },
-            transports: ['websocket', 'polling']
-        });
-
-        newSocket.on('connect', () => {
-            newSocket.emit('join_private_chat', { targetUserId: targetUser.id });
-            // After joining, fetch again to ensure no messages were missed during the switch/mount
-            fetchHistory();
-        });
-
-        newSocket.on('private_message', (msg: Message) => {
+        const handlePrivateMessage = (msg: Message) => {
             if (isMounted) {
                 const senderId = msg.from || msg.fromId;
 
@@ -89,27 +78,32 @@ export function ChatWidget({ currentUser, targetUser, onClose }: ChatWidgetProps
                     audio.play().catch(e => console.error('Erro ao tocar som:', e));
                 }
             }
-        });
+        };
 
-        newSocket.on('message_edited', (data: { messageId: string, newText: string }) => {
+        const handleMessageEdited = (data: { messageId: string, newText: string }) => {
             if (isMounted) {
                 setMessages(prev => prev.map(m => m.id === data.messageId ? { ...m, text: data.newText } : m));
             }
-        });
+        };
 
-        newSocket.on('message_deleted', (data: { messageId: string }) => {
+        const handleMessageDeleted = (data: { messageId: string }) => {
             if (isMounted) {
                 setMessages(prev => prev.filter(m => m.id !== data.messageId));
             }
-        });
+        };
 
-        setSocket(newSocket);
+        socket.emit('join_private_chat', { targetUserId: targetUser.id });
+        socket.on('private_message', handlePrivateMessage);
+        socket.on('message_edited', handleMessageEdited);
+        socket.on('message_deleted', handleMessageDeleted);
 
         return () => {
             isMounted = false;
-            newSocket.disconnect();
+            socket.off('private_message', handlePrivateMessage);
+            socket.off('message_edited', handleMessageEdited);
+            socket.off('message_deleted', handleMessageDeleted);
         };
-    }, [currentUser.id, targetUser.id, chatRoom]);
+    }, [currentUser.id, targetUser.id, chatRoom, socket]);
 
     useEffect(() => {
         const interval = setInterval(() => setNow(Date.now()), 1000);
@@ -257,7 +251,12 @@ export function ChatWidget({ currentUser, targetUser, onClose }: ChatWidgetProps
                     </div>
                     <div>
                         <h3 className="font-bold text-sm">{targetUser.name}</h3>
-                        <p className="text-[10px] opacity-80 uppercase tracking-wider">{currentUser.role === 'SUPERVISOR' ? 'Subordinado' : 'Supervisor'}</p>
+                        <p className="text-[10px] opacity-80 uppercase tracking-wider">
+                            {targetUser.role === 'MANAGER' ? 'Gerente / Setor' :
+                                targetUser.role === 'SUPERVISOR' ? 'Supervisor' :
+                                    targetUser.role === 'PROFESSIONAL' ? 'Operacional' :
+                                        'Contato'}
+                        </p>
                     </div>
                 </div>
                 <div className="flex items-center gap-1">
