@@ -37,6 +37,7 @@ interface UserContact {
     id: string;
     name: string;
     role: string;
+    departmentName?: string;
     avatarUrl?: string | null;
     statusPhrase?: string;
     isOnline?: boolean;
@@ -83,6 +84,7 @@ export function ManagerDashboard() {
     // Chat
     const [chatTarget, setChatTarget] = useState<UserContact | null>(null);
     const [socket, setSocket] = useState<any>(null);
+    const [onlineUserIds, setOnlineUserIds] = useState<string[]>([]);
     const [unreadMessages, setUnreadMessages] = useState<Record<string, boolean>>({});
 
     const playNotificationSound = () => {
@@ -186,15 +188,15 @@ export function ManagerDashboard() {
         });
 
         newSocket.on('initial_presence_list', (ids: string[]) => {
-            setContacts(prev => prev.map(s => ({ ...s, isOnline: ids.includes(s.id) })));
+            setOnlineUserIds(ids);
         });
 
         newSocket.on('user_online', ({ userId }: { userId: string }) => {
-            setContacts(prev => prev.map(s => s.id === userId ? { ...s, isOnline: true } : s));
+            setOnlineUserIds(prev => prev.includes(userId) ? prev : [...prev, userId]);
         });
 
         newSocket.on('user_offline', ({ userId }: { userId: string }) => {
-            setContacts(prev => prev.map(s => s.id === userId ? { ...s, isOnline: false } : s));
+            setOnlineUserIds(prev => prev.filter(id => id !== userId));
         });
 
         return () => {
@@ -379,21 +381,21 @@ export function ManagerDashboard() {
                 </div>
 
                 {/* Sidebar com contatos hierárquicos */}
-                <aside className="w-80 shrink-0">
+                <aside className="w-full lg:w-80 shrink-0">
                     <TeamSidebar
-                        title="REDE DE APOIO"
+                        title="Rede de Apoio"
                         members={contacts.map(c => ({
                             id: c.id,
                             name: c.name,
-                            role: c.role === 'SUPERVISOR' ? 'Supervisor Operacional' : 'Gerente de Setor',
-                            departmentName: (c as any).departmentName,
+                            role: c.role,
+                            departmentName: c.departmentName,
                             avatarUrl: c.avatarUrl,
-                            isOnline: !!c.isOnline,
+                            isOnline: onlineUserIds.includes(c.id),
                             statusPhrase: c.statusPhrase,
                             hasUnread: !!unreadMessages[c.id]
                         }))}
                         onMemberClick={(member) => {
-                            setChatTarget(member as any);
+                            setChatTarget(member);
                             setUnreadMessages(prev => ({ ...prev, [member.id]: false }));
                         }}
                     />

@@ -105,6 +105,7 @@ export function Dashboard() {
     // Chat
     const [chatTarget, setChatTarget] = useState<Subordinate | UserContact | null>(null);
     const [socket, setSocket] = useState<any>(null);
+    const [onlineUserIds, setOnlineUserIds] = useState<string[]>([]);
     const [unreadMessages, setUnreadMessages] = useState<Record<string, boolean>>({});
 
     const playNotificationSound = () => {
@@ -205,18 +206,15 @@ export function Dashboard() {
         });
 
         newSocket.on('initial_presence_list', (ids: string[]) => {
-            setSubordinates(prev => prev.map(s => ({ ...s, isOnline: ids.includes(s.id) })));
-            setContacts(prev => prev.map(c => ({ ...c, isOnline: ids.includes(c.id) })));
+            setOnlineUserIds(ids);
         });
 
         newSocket.on('user_online', ({ userId }: { userId: string }) => {
-            setSubordinates(prev => prev.map(s => s.id === userId ? { ...s, isOnline: true } : s));
-            setContacts(prev => prev.map(c => c.id === userId ? { ...c, isOnline: true } : c));
+            setOnlineUserIds(prev => prev.includes(userId) ? prev : [...prev, userId]);
         });
 
         newSocket.on('user_offline', ({ userId }: { userId: string }) => {
-            setSubordinates(prev => prev.map(s => s.id === userId ? { ...s, isOnline: false } : s));
-            setContacts(prev => prev.map(c => c.id === userId ? { ...c, isOnline: false } : c));
+            setOnlineUserIds(prev => prev.filter(id => id !== userId));
         });
 
         newSocket.on('report_status_updated_for_supervisor', (data: Report) => {
@@ -500,7 +498,7 @@ export function Dashboard() {
                             name: s.name,
                             role: s.role,
                             avatarUrl: s.avatarUrl,
-                            isOnline: !!s.isOnline,
+                            isOnline: onlineUserIds.includes(s.id),
                             statusPhrase: s.statusPhrase,
                             hasUnread: !!unreadMessages[s.id]
                         }))}
@@ -519,7 +517,7 @@ export function Dashboard() {
                                 role: c.role,
                                 departmentName: c.departmentName,
                                 avatarUrl: c.avatarUrl,
-                                isOnline: !!c.isOnline,
+                                isOnline: onlineUserIds.includes(c.id),
                                 statusPhrase: c.statusPhrase,
                                 hasUnread: !!unreadMessages[c.id]
                             }))}

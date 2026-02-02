@@ -55,6 +55,7 @@ export function CreateReport() {
 
     const [hasUnread, setHasUnread] = useState(false);
     const [socket, setSocket] = useState<any>(null);
+    const [onlineUserIds, setOnlineUserIds] = useState<string[]>([]);
     const [loadingHistory, setLoadingHistory] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const isChatOpenRef = useRef(isChatOpen);
@@ -101,6 +102,18 @@ export function CreateReport() {
 
         newSocket.on('connect', () => setIsConnected(true));
         newSocket.on('disconnect', () => setIsConnected(false));
+
+        newSocket.on('initial_presence_list', (ids: string[]) => {
+            setOnlineUserIds(ids);
+        });
+
+        newSocket.on('user_online', ({ userId }: { userId: string }) => {
+            setOnlineUserIds(prev => prev.includes(userId) ? prev : [...prev, userId]);
+        });
+
+        newSocket.on('user_offline', ({ userId }: { userId: string }) => {
+            setOnlineUserIds(prev => prev.filter(id => id !== userId));
+        });
 
         newSocket.on('report_status_updated', (data: { reportId: string, newStatus: any, feedback?: string, feedbackAt?: string }) => {
             setHistory(prev => {
@@ -254,7 +267,10 @@ export function CreateReport() {
                                         <MessageSquare className="w-6 h-6" />
                                     </div>
                                     <div>
-                                        <p className="text-[9px] font-black text-white/60 uppercase tracking-widest">Supervisor Direto</p>
+                                        <div className="flex items-center gap-2">
+                                            <p className="text-[9px] font-black text-white/60 uppercase tracking-widest">Supervisor Direto</p>
+                                            <div className={`w-1.5 h-1.5 rounded-full ${user.supervisorId && onlineUserIds.includes(user.supervisorId) ? 'bg-emerald-400 animate-pulse' : 'bg-white/30'}`} />
+                                        </div>
                                         <h3 className="text-lg font-bold">{user.supervisorName || 'Responsável Técnico'}</h3>
                                     </div>
                                 </div>
