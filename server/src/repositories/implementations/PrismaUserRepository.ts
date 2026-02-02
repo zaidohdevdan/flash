@@ -51,6 +51,20 @@ export class PrismaUserRepository implements IUserRepository {
         });
     }
 
+    async findAllByRoles(roles: Role[]): Promise<User[]> {
+        return prisma.user.findMany({
+            where: {
+                role: { in: roles }
+            },
+            include: {
+                department: { select: { name: true } }
+            },
+            orderBy: {
+                name: 'asc'
+            }
+        });
+    }
+
     async findBySupervisor(supervisorId: string): Promise<User[]> {
         return prisma.user.findMany({
             where: { supervisorId }

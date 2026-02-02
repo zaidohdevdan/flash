@@ -32,15 +32,24 @@ export class PrismaReportRepository implements IReportRepository {
         });
     }
 
-    async findById(id: string): Promise<Report | null> {
+    async findById(id: string): Promise<ReportWithUser | null> {
         return prisma.report.findUnique({
             where: { id },
             include: {
+                user: {
+                    select: {
+                        name: true,
+                        supervisorId: true,
+                        avatarUrl: true,
+                        statusPhrase: true,
+                    },
+                },
                 history: {
-                    orderBy: { createdAt: 'desc' }
-                }
-            }
-        });
+                    orderBy: { createdAt: 'desc' },
+                },
+                department: true
+            },
+        }) as Promise<ReportWithUser | null>;
     }
 
     async updateStatus(id: string, status: ReportStatus, feedback?: string, userName?: string, departmentId?: string): Promise<Report> {

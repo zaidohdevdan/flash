@@ -14,6 +14,7 @@ export interface IUserRepository {
     findById(id: string): Promise<User | null>;
     findAll(filters?: { search?: string, role?: Role }): Promise<User[]>;
     findAllByRole(role: Role): Promise<User[]>;
+    findAllByRoles(roles: Role[]): Promise<User[]>;
     findBySupervisor(supervisorId: string): Promise<User[]>;
     create(data: CreateUserDTO): Promise<User>;
     update(id: string, data: Partial<CreateUserDTO>): Promise<User>;

@@ -28,7 +28,8 @@ export class AuthService {
                 name: user.name,
                 role: user.role,
                 supervisorId: user.supervisorId,
-                supervisorName: (user as any).supervisor?.name
+                supervisorName: (user as any).supervisor?.name,
+                departmentId: user.departmentId
             },
             secret,
             { expiresIn: '1d' }
@@ -112,8 +113,8 @@ export class AuthService {
             email: data.email,
             passwordHash,
             role: data.role,
-            supervisorId: data.supervisorId || null,
-            departmentId: data.departmentId || null
+            supervisorId: data.supervisorId || undefined,
+            departmentId: data.departmentId || undefined
         });
 
         return {
@@ -133,6 +134,18 @@ export class AuthService {
         return supervisors.map(s => ({
             id: s.id,
             name: s.name
+        }));
+    }
+
+    async listSupportNetwork() {
+        const users = await this.userRepository.findAllByRoles([Role.SUPERVISOR, Role.MANAGER]);
+        return users.map(u => ({
+            id: u.id,
+            name: u.name,
+            avatarUrl: u.avatarUrl,
+            statusPhrase: u.statusPhrase,
+            role: u.role,
+            departmentName: (u as any).department?.name
         }));
     }
 

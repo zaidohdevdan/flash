@@ -13,6 +13,7 @@ export interface TeamMember {
     isOnline: boolean;
     statusPhrase?: string;
     hasUnread?: boolean;
+    departmentName?: string;
 }
 
 /**
@@ -97,7 +98,7 @@ export const TeamSidebar: React.FC<TeamSidebarProps> = ({
                                             {member.name}
                                         </p>
                                         <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest mt-0.5 truncate">
-                                            {member.role}
+                                            {member.role} {member.departmentName ? `• ${member.departmentName}` : ''}
                                         </p>
                                         {member.statusPhrase && (
                                             <p className="text-[9px] text-blue-400 italic mt-1 truncate max-w-[120px]">

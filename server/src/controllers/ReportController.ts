@@ -164,7 +164,36 @@ export const ReportController = {
         }
 
         try {
+            const userId = req.userId!;
+            const userRole = req.userRole;
+            const userDeptId = req.userDepartmentId;
             const operatorName = req.userName;
+
+            // 1. Busca o reporte para validar posse
+            const report = await reportService.getById(String(id));
+            if (!report) {
+                return res.status(404).json({ error: 'Relatório não encontrado.' });
+            }
+
+            // 2. Valida Permissões por Role
+            if (userRole === 'SUPERVISOR') {
+                // Supervisor só edita se for dele AND não tiver no setor
+                if (report.user.supervisorId !== userId) {
+                    return res.status(403).json({ error: 'Você não tem permissão para editar este relatório (não é seu subordinado).' });
+                }
+                if (report.departmentId) {
+                    return res.status(403).json({ error: 'Este relatório já foi encaminhado para um setor e não pode mais ser editado por você.' });
+                }
+            } else if (userRole === 'MANAGER') {
+                // Gerente só edita se estiver no setor dele
+                if (report.departmentId !== userDeptId) {
+                    return res.status(403).json({ error: 'Este relatório pertence a outro departamento.' });
+                }
+            } else if (userRole !== 'ADMIN') {
+                // Outras roles (como PROFISSIONAL) nunca editam status
+                return res.status(403).json({ error: 'Apenas Supervisores e Gerentes podem atualizar o status.' });
+            }
+
             const updatedReport = await reportService.updateStatus(
                 id as string,
                 status,

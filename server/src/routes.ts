@@ -15,33 +15,18 @@ import { ChatController } from './controllers/ChatController';
 const routes = Router();
 
 // Cloudinay
-const upload = multer({
-    storage: multer.memoryStorage(),
-    limits: { fileSize: 20 * 1024 * 1024 }
-})
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 20 * 1024 * 1024 } })
 
 const mediaRepository = new PrismaMediaRepository(prisma);
 const mediaService = new MediaService(mediaRepository);
 const mediaController = new MediaController(mediaService);
 
 
-routes.post(
-    '/reports/:reportId/media', AuthMiddleware,
-    upload.single('image'),
-    mediaController.upload,
-);
+routes.post('/reports/:reportId/media', AuthMiddleware, upload.single('image'), mediaController.upload,);
 
-routes.get(
-    '/reports/:reportId/media',
-    AuthMiddleware,
-    mediaController.listByReport,
-);
+routes.get('/reports/:reportId/media', AuthMiddleware, mediaController.listByReport,);
 
-routes.delete(
-    '/media/:publicId',
-    AuthMiddleware,
-    mediaController.deleteByPublicId,
-);
+routes.delete('/media/:publicId', AuthMiddleware, mediaController.deleteByPublicId,);
 
 // Autenticação// Auth
 routes.post('/login', AuthController.login);
@@ -50,6 +35,7 @@ routes.get('/supervisors', AuthController.listSupervisors);
 routes.get('/users', AuthMiddleware, AdminMiddleware, AuthController.listAllUsers);
 routes.put('/users/:id', AuthMiddleware, AdminMiddleware, AuthController.update);
 routes.get('/subordinates', AuthMiddleware, AuthController.listSubordinates);
+routes.get('/support-network', AuthMiddleware, AuthController.listSupportNetwork);
 
 // Listagem de relatórios (Supervisor)
 routes.get('/reports', AuthMiddleware, ReportController.index);

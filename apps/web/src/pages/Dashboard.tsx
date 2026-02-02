@@ -58,6 +58,7 @@ interface Report {
     feedback?: string;
     status: 'SENT' | 'IN_REVIEW' | 'FORWARDED' | 'RESOLVED' | 'ARCHIVED';
     history: ReportHistory[];
+    departmentId?: string | null;
     department?: { name: string };
     createdAt: string;
     user: {
@@ -405,7 +406,15 @@ export function Dashboard() {
                                     actions={
                                         <div className="flex gap-2 w-full">
                                             {report.status !== 'RESOLVED' && report.status !== 'ARCHIVED' && (
-                                                <Button variant="primary" size="sm" fullWidth onClick={() => { setAnalyzingReport(report); setTargetStatus('FORWARDED'); }}>Trâmite</Button>
+                                                <Button
+                                                    variant="primary"
+                                                    size="sm"
+                                                    fullWidth
+                                                    onClick={() => { setAnalyzingReport(report); setTargetStatus('FORWARDED'); }}
+                                                    disabled={!!report.departmentId}
+                                                >
+                                                    {report.departmentId ? 'Em Setor' : 'Trâmite'}
+                                                </Button>
                                             )}
                                             {report.status === 'RESOLVED' && (
                                                 <Button variant="secondary" size="sm" fullWidth onClick={() => handleUpdateStatus(report.id, 'ARCHIVED')}>Arquivar</Button>

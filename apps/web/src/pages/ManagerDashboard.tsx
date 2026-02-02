@@ -122,17 +122,10 @@ export function ManagerDashboard() {
 
     const loadContacts = async () => {
         try {
-            // Buscamos supervisores e gerentes para o chat hierárquico
-            // Nota: Precisaremos garantir que este endpoint retorne os contatos certos para o Manager
-            const [supervisorsRes, usersRes] = await Promise.all([
-                api.get('/supervisors'),
-                api.get('/users?role=MANAGER') // Admin ou endpoint específico seria melhor
-            ]);
-
-            // Unificamos e removemos o próprio usuário
-            const allContacts = [...supervisorsRes.data, ...usersRes.data]
-                .filter(c => c.id !== user?.id)
-                .map(c => ({ ...c, isOnline: false }));
+            const response = await api.get('/support-network');
+            const allContacts = response.data
+                .filter((c: UserContact) => c.id !== user?.id)
+                .map((c: UserContact) => ({ ...c, isOnline: false }));
 
             setContacts(allContacts);
         } catch (error) {
@@ -339,8 +332,8 @@ export function ManagerDashboard() {
                                     showUser
                                     actions={
                                         <div className="flex gap-2 w-full">
-                                            {report.status !== 'RESOLVED' && (
-                                                <Button variant="primary" size="sm" fullWidth onClick={() => { setAnalyzingReport(report); }}>Resolver / Mover</Button>
+                                            {report.status !== 'RESOLVED' && report.status !== 'ARCHIVED' && (
+                                                <Button variant="primary" size="sm" fullWidth onClick={() => { setAnalyzingReport(report); setTargetStatus(report.status as any); }}>Análise</Button>
                                             )}
                                             <Button variant="ghost" size="sm" onClick={() => setSelectedReport(report)}>
                                                 <History className="w-4 h-4" />
@@ -369,13 +362,14 @@ export function ManagerDashboard() {
                             id: c.id,
                             name: c.name,
                             role: c.role === 'SUPERVISOR' ? 'Supervisor Operacional' : 'Gerente de Setor',
+                            departmentName: (c as any).departmentName,
                             avatarUrl: c.avatarUrl,
                             isOnline: !!c.isOnline,
                             statusPhrase: c.statusPhrase,
                             hasUnread: !!unreadMessages[c.id]
                         }))}
                         onMemberClick={(member) => {
-                            setChatTarget(member);
+                            setChatTarget(member as any);
                             setUnreadMessages(prev => ({ ...prev, [member.id]: false }));
                         }}
                     />

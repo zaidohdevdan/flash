@@ -13,6 +13,10 @@ export class ReportService {
         return this.reportRepository.create(data);
     }
 
+    async getById(id: string) {
+        return this.reportRepository.findById(id);
+    }
+
     async updateStatus(id: string, status: ReportStatus, feedback?: string, operatorName?: string, departmentId?: string) {
         return this.reportRepository.updateStatus(id, status, feedback, operatorName, departmentId);
     }

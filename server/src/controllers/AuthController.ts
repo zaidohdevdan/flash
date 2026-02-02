@@ -75,5 +75,14 @@ export const AuthController = {
         } catch (error) {
             return res.status(500).json({ error: 'Erro ao listar subordinados.' });
         }
+    },
+
+    async listSupportNetwork(req: Request, res: Response) {
+        try {
+            const supportNetwork = await authService.listSupportNetwork();
+            return res.json(supportNetwork);
+        } catch (error) {
+            return res.status(500).json({ error: 'Erro ao listar rede de apoio.' });
+        }
     }
 };
