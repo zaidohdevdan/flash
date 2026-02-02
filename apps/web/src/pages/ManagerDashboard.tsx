@@ -533,7 +533,7 @@ export function ManagerDashboard() {
                 isOpen={!!selectedReport}
                 onClose={() => setSelectedReport(null)}
                 title="Trilha Operacional"
-                subtitle="Histórico de Movimentações"
+                subtitle={`Protocolo: #${selectedReport?.id.slice(-6).toUpperCase()} • Trilha de Movimentações`}
                 maxWidth="lg"
             >
                 <div className="space-y-8 py-4 px-2 relative before:absolute before:left-[19px] before:top-4 before:bottom-4 before:w-[2px] before:bg-gray-100">

@@ -622,7 +622,7 @@ export function Dashboard() {
                 isOpen={!!selectedReport}
                 onClose={() => setSelectedReport(null)}
                 title="Fluxo de Resolução"
-                subtitle="Histórico Completo do Reporte"
+                subtitle={`Protocolo: #${selectedReport?.id.slice(-6).toUpperCase()} • Histórico Completo`}
                 maxWidth="lg"
             >
                 <div className="space-y-8 py-4 px-2 relative before:absolute before:left-[19px] before:top-4 before:bottom-4 before:w-[2px] before:bg-gray-100">
