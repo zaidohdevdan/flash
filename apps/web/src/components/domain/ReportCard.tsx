@@ -3,6 +3,7 @@ import { Calendar, MessageSquare } from 'lucide-react';
 import { Card, Avatar, Badge } from '../ui';
 import type { BadgeStatus } from '../ui';
 import { formatUrl } from '../../services/api';
+import { ImageZoomModal } from './ImageZoomModal';
 
 /**
  * Estrutura de dados simplificada para o Report.
@@ -43,6 +44,8 @@ export const ReportCard: React.FC<ReportCardProps> = ({
     onClick,
     actions
 }) => {
+    const [isZoomModalOpen, setIsZoomModalOpen] = React.useState(false);
+
     return (
         <Card
             onClick={onClick}
@@ -54,7 +57,11 @@ export const ReportCard: React.FC<ReportCardProps> = ({
                 <img
                     src={formatUrl(report.imageUrl)}
                     alt="Reporte"
-                    className="w-full sm:w-32 h-48 sm:h-32 rounded-[1.5rem] object-cover bg-gray-100 shadow-inner group-hover:scale-105 transition-transform duration-500"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        setIsZoomModalOpen(true);
+                    }}
+                    className="w-full sm:w-32 h-48 sm:h-32 rounded-[1.5rem] object-cover bg-gray-100 shadow-inner group-hover:scale-105 transition-transform duration-500 cursor-zoom-in"
                     onError={(e) => {
                         (e.target as HTMLImageElement).src = 'https://placehold.co/300x200?text=Imagem+N%C3%A3o+Dispon%C3%ADvel';
                     }}
@@ -63,6 +70,12 @@ export const ReportCard: React.FC<ReportCardProps> = ({
                     <Badge status={report.status} className="shadow-lg border-2 border-white/50" />
                 </div>
             </div>
+
+            <ImageZoomModal
+                isOpen={isZoomModalOpen}
+                onClose={() => setIsZoomModalOpen(false)}
+                imageUrl={formatUrl(report.imageUrl) || ''}
+            />
 
             {/* Content */}
             <div className="flex-1 flex flex-col justify-between min-w-0">
