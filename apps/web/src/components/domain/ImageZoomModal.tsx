@@ -66,38 +66,40 @@ export const ImageZoomModal: React.FC<ImageZoomModalProps> = ({ isOpen, onClose,
                 onClick={onClose}
             />
 
-            {/* Controls */}
-            <div className="absolute top-6 right-6 flex items-center gap-3 z-10">
-                <div className="flex bg-white/10 backdrop-blur-md rounded-2xl p-1.5 border border-white/20 shadow-2xl">
+            {/* Controls bar */}
+            <div className="fixed top-0 left-0 right-0 p-6 flex justify-center z-[110] pointer-events-none">
+                <div className="w-full max-w-5xl flex items-center justify-between pointer-events-auto">
+                    <div className="flex bg-white/10 backdrop-blur-md rounded-2xl p-1.5 border border-white/20 shadow-2xl">
+                        <button
+                            onClick={handleZoomOut}
+                            className="p-2.5 text-white hover:bg-white/10 rounded-xl transition-colors"
+                            title="Diminuir Zoom"
+                        >
+                            <ZoomOut className="w-5 h-5" />
+                        </button>
+                        <button
+                            onClick={handleReset}
+                            className="p-2.5 text-white hover:bg-white/10 rounded-xl transition-colors"
+                            title="Resetar"
+                        >
+                            <RotateCcw className="w-5 h-5" />
+                        </button>
+                        <button
+                            onClick={handleZoomIn}
+                            className="p-2.5 text-white hover:bg-white/10 rounded-xl transition-colors"
+                            title="Aumentar Zoom"
+                        >
+                            <ZoomIn className="w-5 h-5" />
+                        </button>
+                    </div>
+
                     <button
-                        onClick={handleZoomOut}
-                        className="p-2.5 text-white hover:bg-white/10 rounded-xl transition-colors"
-                        title="Diminuir Zoom"
+                        onClick={onClose}
+                        className="p-3 bg-red-500/80 hover:bg-red-500 text-white rounded-2xl backdrop-blur-md shadow-2xl transition-all hover:scale-110 active:scale-95 border border-red-400/50"
                     >
-                        <ZoomOut className="w-5 h-5" />
-                    </button>
-                    <button
-                        onClick={handleReset}
-                        className="p-2.5 text-white hover:bg-white/10 rounded-xl transition-colors"
-                        title="Resetar"
-                    >
-                        <RotateCcw className="w-5 h-5" />
-                    </button>
-                    <button
-                        onClick={handleZoomIn}
-                        className="p-2.5 text-white hover:bg-white/10 rounded-xl transition-colors"
-                        title="Aumentar Zoom"
-                    >
-                        <ZoomIn className="w-5 h-5" />
+                        <X className="w-6 h-6" />
                     </button>
                 </div>
-
-                <button
-                    onClick={onClose}
-                    className="p-3 bg-red-500/80 hover:bg-red-500 text-white rounded-2xl backdrop-blur-md shadow-2xl transition-all hover:scale-110 active:scale-95 border border-red-400/50"
-                >
-                    <X className="w-6 h-6" />
-                </button>
             </div>
 
             {/* Image Container */}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Calendar, MessageSquare } from 'lucide-react';
+import { Calendar, MessageSquare, Hash } from 'lucide-react';
 import { Card, Avatar, Badge } from '../ui';
 import type { BadgeStatus } from '../ui';
 import { formatUrl } from '../../services/api';
@@ -19,6 +19,9 @@ interface ReportData {
         avatarUrl?: string | null;
     };
     feedback?: string;
+    department?: {
+        name: string;
+    };
 }
 
 /**
@@ -81,9 +84,15 @@ export const ReportCard: React.FC<ReportCardProps> = ({
             <div className="flex-1 flex flex-col justify-between min-w-0">
                 <div>
                     <div className="flex justify-between items-start mb-2">
-                        <div className="flex items-center gap-2 text-[10px] text-gray-400 font-bold uppercase tracking-widest">
-                            <Calendar className="w-3 h-3" />
-                            {new Date(report.createdAt).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
+                        <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-1 text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                                <Calendar className="w-3 h-3" />
+                                {new Date(report.createdAt).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
+                            </div>
+                            <div className="flex items-center gap-1 px-2 py-0.5 bg-gray-100 rounded-md text-[9px] font-black text-gray-500 uppercase tracking-tighter shadow-sm border border-gray-200/50">
+                                <Hash className="w-2.5 h-2.5 opacity-60" />
+                                PROTOCOLO: {report.id.slice(-6).toUpperCase()}
+                            </div>
                         </div>
                         {showUser && report.user && (
                             <div className="flex items-center gap-2">
@@ -98,6 +107,15 @@ export const ReportCard: React.FC<ReportCardProps> = ({
                     <h4 className="text-sm font-bold text-gray-800 leading-snug line-clamp-2 md:line-clamp-3 mb-2">
                         {report.comment}
                     </h4>
+
+                    {report.status === 'FORWARDED' && report.department?.name && (
+                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-purple-50 rounded-full border border-purple-100 mb-3 animate-pulse">
+                            <div className="w-1.5 h-1.5 bg-purple-500 rounded-full" />
+                            <span className="text-[9px] font-black text-purple-700 uppercase tracking-widest">
+                                EM SETOR: {report.department.name}
+                            </span>
+                        </div>
+                    )}
 
                     {report.feedback && (
                         <div className="bg-blue-50/50 rounded-xl p-3 border-l-4 border-blue-400 mb-2">

@@ -9,7 +9,8 @@ import {
     ArrowLeft,
     Plus,
     History,
-    MessageSquare
+    MessageSquare,
+    Search
 } from 'lucide-react';
 import { ChatWidget } from '../components/ChatWidget';
 import {
@@ -56,6 +57,7 @@ export function CreateReport() {
     const [hasUnread, setHasUnread] = useState(false);
     const [socket, setSocket] = useState<any>(null);
     const [onlineUserIds, setOnlineUserIds] = useState<string[]>([]);
+    const [searchTerm, setSearchTerm] = useState('');
     const [loadingHistory, setLoadingHistory] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const isChatOpenRef = useRef(isChatOpen);
@@ -285,26 +287,41 @@ export function CreateReport() {
                             </Card>
                         )}
 
-                        {/* Filters */}
-                        <div className="flex gap-2 overflow-x-auto pb-4 no-scrollbar">
-                            {[
-                                { id: '', label: 'Tudo' },
-                                { id: 'SENT', label: 'Enviados' },
-                                { id: 'IN_REVIEW', label: 'Análise' },
-                                { id: 'FORWARDED', label: 'Depto' },
-                                { id: 'RESOLVED', label: 'Finalizado' },
-                            ].map(filter => (
-                                <button
-                                    key={filter.id}
-                                    onClick={() => { setStatusFilter(filter.id); setPage(1); }}
-                                    className={`px-6 py-2.5 rounded-2xl text-[10px] font-black tracking-widest uppercase transition-all border ${statusFilter === filter.id
-                                        ? 'bg-[#0f172a] text-white border-[#0f172a] shadow-lg shadow-gray-900/10'
-                                        : 'bg-white text-gray-400 border-gray-100 hover:border-gray-200'
-                                        }`}
-                                >
-                                    {filter.label}
-                                </button>
-                            ))}
+                        {/* Filter & Search */}
+                        <div className="flex flex-col gap-4">
+                            <Card variant="glass" className="p-4 border-gray-100 shadow-sm !rounded-[1.5rem] bg-white">
+                                <div className="relative group">
+                                    <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-500 opacity-60 group-focus-within:opacity-100 transition-opacity" />
+                                    <input
+                                        type="text"
+                                        placeholder="Buscar por protocolo ou descrição..."
+                                        value={searchTerm}
+                                        onChange={e => setSearchTerm(e.target.value)}
+                                        className="w-full pl-14 pr-8 py-3 bg-gray-50 border border-transparent rounded-2xl outline-none focus:bg-white focus:border-blue-500/30 transition-all text-xs font-bold text-gray-800 placeholder:text-gray-400 placeholder:font-medium placeholder:uppercase"
+                                    />
+                                </div>
+                            </Card>
+
+                            <div className="flex gap-2 overflow-x-auto pb-4 no-scrollbar">
+                                {[
+                                    { id: '', label: 'Tudo' },
+                                    { id: 'SENT', label: 'Enviados' },
+                                    { id: 'IN_REVIEW', label: 'Análise' },
+                                    { id: 'FORWARDED', label: 'Depto' },
+                                    { id: 'RESOLVED', label: 'Finalizado' },
+                                ].map(filter => (
+                                    <button
+                                        key={filter.id}
+                                        onClick={() => { setStatusFilter(filter.id); setPage(1); }}
+                                        className={`px-6 py-2.5 rounded-2xl text-[10px] font-black tracking-widest uppercase transition-all border shrink-0 ${statusFilter === filter.id
+                                            ? 'bg-[#0f172a] text-white border-[#0f172a] shadow-lg shadow-gray-900/10'
+                                            : 'bg-white text-gray-400 border-gray-100 hover:border-gray-200'
+                                            }`}
+                                    >
+                                        {filter.label}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
 
                         {loadingHistory ? (
@@ -320,7 +337,10 @@ export function CreateReport() {
                             </Card>
                         ) : (
                             <div className="grid gap-6">
-                                {history.map(item => (
+                                {history.filter(r =>
+                                    r.comment.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                    r.id.toLowerCase().includes(searchTerm.toLowerCase())
+                                ).map(item => (
                                     <ReportCard
                                         key={item.id}
                                         report={item}

@@ -1,4 +1,4 @@
-import type { Report, ReportStatus, User } from '../../generated/prisma';
+import type { Report, ReportStatus, User, ReportHistory, Department } from '../../generated/prisma';
 
 export interface CreateReportDTO {
     comment: string;
@@ -12,7 +12,9 @@ export type ReportWithUser = Report & {
         supervisorId: string | null;
         avatarUrl?: string | null;
         statusPhrase?: string | null;
-    }
+    };
+    history?: ReportHistory[];
+    department?: Department | null;
 };
 
 export interface IReportRepository {

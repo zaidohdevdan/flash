@@ -10,7 +10,8 @@ import {
     History,
     Folder,
     MessageSquare,
-    TrendingUp
+    TrendingUp,
+    Search
 } from 'lucide-react';
 import { ChatWidget } from '../components/ChatWidget';
 import {
@@ -106,6 +107,7 @@ export function Dashboard() {
     const [chatTarget, setChatTarget] = useState<Subordinate | UserContact | null>(null);
     const [socket, setSocket] = useState<any>(null);
     const [onlineUserIds, setOnlineUserIds] = useState<string[]>([]);
+    const [searchTerm, setSearchTerm] = useState('');
     const [unreadMessages, setUnreadMessages] = useState<Record<string, boolean>>({});
 
     const playNotificationSound = () => {
@@ -436,13 +438,26 @@ export function Dashboard() {
             </div>
 
             {/* Main Content */}
-            <main className="max-w-7xl mx-auto px-6 w-full -mt-16 mb-20 relative z-20 flex flex-col lg:flex-row gap-8 lg:gap-12">
+            <main className="max-w-7xl mx-auto px-6 w-full -mt-20 mb-20 relative z-20 flex flex-col lg:flex-row gap-12">
                 {/* Visual Blobs behind the glass content */}
                 <div className="absolute -z-10 top-0 left-1/4 w-[500px] h-[500px] bg-blue-400/10 rounded-full blur-[120px] pointer-events-none" />
                 <div className="absolute -z-10 bottom-0 right-1/4 w-[400px] h-[400px] bg-purple-400/10 rounded-full blur-[100px] pointer-events-none" />
 
                 {/* Reports Feed */}
                 <div className="flex-1 space-y-6">
+                    <Card variant="glass" className="p-4 border-white/10 !rounded-[2rem]">
+                        <div className="relative group">
+                            <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-400 opacity-60 group-focus-within:opacity-100 transition-opacity" />
+                            <input
+                                type="text"
+                                placeholder="Buscar por protocolo (#000000) ou palavras-chave..."
+                                value={searchTerm}
+                                onChange={e => setSearchTerm(e.target.value)}
+                                className="w-full pl-14 pr-8 py-4 bg-white/5 border border-white/5 rounded-3xl outline-none focus:bg-white/10 focus:border-blue-500/30 transition-all text-sm font-bold text-white placeholder:text-gray-500 placeholder:font-medium placeholder:uppercase placeholder:tracking-widest"
+                            />
+                        </div>
+                    </Card>
+
                     {reports.length === 0 ? (
                         <Card variant="glass" className="p-20 flex flex-col items-center justify-center text-gray-400">
                             <MessageSquare className="w-12 h-12 mb-4 opacity-20" />
@@ -450,7 +465,10 @@ export function Dashboard() {
                         </Card>
                     ) : (
                         <div className="grid gap-6">
-                            {reports.map(report => (
+                            {reports.filter(r =>
+                                r.comment.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                r.id.toLowerCase().includes(searchTerm.toLowerCase())
+                            ).map(report => (
                                 <ReportCard
                                     key={report.id}
                                     report={report}

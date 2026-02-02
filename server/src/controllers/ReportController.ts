@@ -96,13 +96,12 @@ export const ReportController = {
                 endDate ? new Date(endDate as string) : undefined,
             );
 
-            // Filter out sensitive history for professionals, but KEEP feedback
+            // Filter history for professionals: only show steps with comments (feedbacks)
             const safeReports = reports.map(r => {
                 return {
                     ...r,
-                    // Feedback is for the professional to see, so we don't hide it
                     feedback: r.feedback || undefined,
-                    history: [] // Hide internal movements history
+                    history: r.history ? (r.history as any[]).filter(h => !!h.comment) : []
                 };
             });
 
@@ -211,7 +210,7 @@ export const ReportController = {
             req.io.to(targetRoom).emit('report_status_updated', {
                 reportId: id,
                 newStatus: status,
-                feedback: isResolved ? updatedReport.feedback : undefined,
+                feedback: updatedReport.feedback, // Enviar sempre o feedback mais recente
                 feedbackAt: updatedReport.feedbackAt,
                 message: `Status atualizado: ${status}`,
             });
