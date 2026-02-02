@@ -336,7 +336,7 @@ export function ManagerDashboard() {
                                                 : filter.id === 'IN_REVIEW' ? 'bg-purple-600 text-white shadow-lg'
                                                     : filter.id === 'RESOLVED' ? 'bg-emerald-600 text-white shadow-lg'
                                                         : 'bg-white/20 text-white'
-                                            : 'text-white/80 hover:text-white hover:bg-white/10'
+                                            : 'text-gray-400 hover:text-white hover:bg-white/10'
                                             }`}
                                     >
                                         {filter.label}
