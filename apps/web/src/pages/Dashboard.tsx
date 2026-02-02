@@ -386,29 +386,29 @@ export function Dashboard() {
                                 ))}
                             </GlassCard>
 
-                            <GlassCard variant="light" blur="lg" className="flex items-center gap-2 !bg-white/5 backdrop-blur-xl p-1.5 !rounded-2xl border border-white/10">
-                                <div className="flex items-center gap-2 px-3 border-r border-white/10">
-                                    <Clock className="w-3.5 h-3.5 text-blue-400" />
+                            <GlassCard variant="light" blur="lg" className="flex items-center gap-2 bg-white/80 backdrop-blur-xl p-1.5 !rounded-2xl border border-white/20">
+                                <div className="flex items-center gap-2 px-3 border-r border-gray-200">
+                                    <Clock className="w-3.5 h-3.5 text-blue-600" />
                                     <input
                                         type="date"
                                         value={startDate}
                                         onChange={e => setStartDate(e.target.value)}
-                                        className="bg-transparent text-[9px] font-bold outline-none text-white appearance-none h-6 uppercase filter invert brightness-200"
+                                        className="bg-transparent text-[9px] font-bold outline-none text-gray-900 h-6 uppercase"
                                     />
                                 </div>
                                 <div className="flex items-center gap-2 px-3">
-                                    <Clock className="w-3.5 h-3.5 text-gray-400" />
+                                    <Clock className="w-3.5 h-3.5 text-blue-600" />
                                     <input
                                         type="date"
                                         value={endDate}
                                         onChange={e => setEndDate(e.target.value)}
-                                        className="bg-transparent text-[9px] font-bold outline-none text-white appearance-none h-6 uppercase filter invert brightness-200"
+                                        className="bg-transparent text-[9px] font-bold outline-none text-gray-900 h-6 uppercase"
                                     />
                                 </div>
                                 {(startDate || endDate) && (
                                     <button
                                         onClick={() => { setStartDate(''); setEndDate(''); }}
-                                        className="p-1 hover:bg-white/10 rounded-lg transition text-gray-400 hover:text-red-400"
+                                        className="p-1 hover:bg-red-50 rounded-lg transition text-gray-400 hover:text-red-500"
                                     >
                                         <AlertCircle className="w-3.5 h-3.5" />
                                     </button>
