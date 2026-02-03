@@ -7,8 +7,6 @@ import {
     ArrowRight,
     MessageSquare,
     CheckCircle2,
-    Mail,
-    Phone,
     Code2,
     Linkedin,
     Instagram,

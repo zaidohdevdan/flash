@@ -25,14 +25,7 @@ import { AnalysisModal } from '../components/domain/modals/AnalysisModal';
 import { ExportReportsModal } from '../components/domain/modals/ExportReportsModal';
 import type { Report, Stats, Department, UserContact } from '../types';
 
-interface Subordinate {
-    id: string;
-    name: string;
-    role: string;
-    avatarUrl?: string | null;
-    statusPhrase?: string;
-    isOnline?: boolean;
-}
+
 
 export function ManagerDashboard() {
     const navigate = useNavigate();
