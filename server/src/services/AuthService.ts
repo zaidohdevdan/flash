@@ -168,4 +168,10 @@ export class AuthService {
         const user = await this.userRepository.findById(userId);
         return user;
     }
+
+    async deleteUser(id: string) {
+        // Para uma exclusão limpa, poderíamos tratar subordinados aqui.
+        // Por hora, executamos a exclusão direta conforme o repositório.
+        await this.userRepository.delete(id);
+    }
 }

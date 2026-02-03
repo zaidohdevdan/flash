@@ -34,6 +34,12 @@ export function Profile() {
 
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (user?.role === 'ADMIN') {
+            toast.error('Administradores não podem realizar alterações no próprio perfil por normas de segurança.', { icon: '🛡️' });
+            return;
+        }
+
         setLoading(true);
 
         try {
@@ -104,7 +110,7 @@ export function Profile() {
                     {/* Coluna da Esquerda: Avatar e Status */}
                     <div className="md:col-span-1 space-y-6">
                         <GlassCard className="p-6 flex flex-col items-center text-center">
-                            <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+                            <div className={`relative group ${user?.role === 'ADMIN' ? 'cursor-not-allowed opacity-80' : 'cursor-pointer'}`} onClick={() => user?.role !== 'ADMIN' && fileInputRef.current?.click()}>
                                 <div className="w-32 h-32 rounded-full overflow-hidden ring-4 ring-blue-50 group-hover:ring-blue-200 transition-all shadow-xl">
                                     {avatarPreview ? (
                                         <img src={avatarPreview} alt="Avatar" className="w-full h-full object-cover" />
@@ -114,9 +120,11 @@ export function Profile() {
                                         </div>
                                     )}
                                 </div>
-                                <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <Camera className="w-8 h-8 text-white" />
-                                </div>
+                                {user?.role !== 'ADMIN' && (
+                                    <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <Camera className="w-8 h-8 text-white" />
+                                    </div>
+                                )}
                                 <input
                                     type="file"
                                     ref={fileInputRef}
@@ -146,10 +154,15 @@ export function Profile() {
                                         type="text"
                                         value={statusPhrase}
                                         onChange={(e) => setStatusPhrase(e.target.value)}
-                                        placeholder="O que você está pensando ou fazendo..."
-                                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all placeholder:text-gray-400 font-medium"
+                                        disabled={user?.role === 'ADMIN'}
+                                        placeholder={user?.role === 'ADMIN' ? 'Alterações desativadas para administradores' : 'O que você está pensando ou fazendo...'}
+                                        className={`w-full px-4 py-3 border rounded-xl outline-none transition-all font-medium ${user?.role === 'ADMIN' ? 'bg-gray-100 text-gray-400 border-gray-100 cursor-not-allowed' : 'bg-gray-50 border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 placeholder:text-gray-400'}`}
                                     />
-                                    <p className="text-[10px] text-gray-400 mt-2">Essa frase aparecerá abaixo do seu nome nos chats e lista de membros.</p>
+                                    <p className="text-[10px] text-gray-400 mt-2">
+                                        {user?.role === 'ADMIN'
+                                            ? 'Como Administrador, seu perfil é de sistema e não permite alterações diretas.'
+                                            : 'Essa frase aparecerá abaixo do seu nome nos chats e lista de membros.'}
+                                    </p>
                                 </div>
 
                                 <div className="pt-6 border-t border-gray-100 grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -184,9 +197,16 @@ export function Profile() {
                                 </div>
 
                                 <div className="pt-6 flex justify-end">
-                                    <Button type="submit" variant="primary" size="lg" isLoading={loading} className="px-8">
+                                    <Button
+                                        type="submit"
+                                        variant={user?.role === 'ADMIN' ? 'secondary' : 'primary'}
+                                        size="lg"
+                                        isLoading={loading}
+                                        disabled={user?.role === 'ADMIN'}
+                                        className="px-8"
+                                    >
                                         <Save className="w-4 h-4 mr-2" />
-                                        SALVAR ALTERAÇÕES
+                                        {user?.role === 'ADMIN' ? 'EDIÇÃO DESATIVADA' : 'SALVAR ALTERAÇÕES'}
                                     </Button>
                                 </div>
                             </form>

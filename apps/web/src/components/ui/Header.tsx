@@ -1,5 +1,5 @@
 import React from 'react';
-import { LogOut, Bell } from 'lucide-react';
+import { LogOut, Bell, Zap } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Avatar } from './Avatar';
 
@@ -30,6 +30,8 @@ export const Header: React.FC<HeaderProps> = ({
     onLogout,
     sticky = true
 }) => {
+    const [isAnimated, setIsAnimated] = React.useState(true);
+
     return (
         <header className={`
       ${sticky ? 'sticky top-0 z-40' : ''} 
@@ -42,9 +44,10 @@ export const Header: React.FC<HeaderProps> = ({
             {/* Logo / Brand */}
             <div className="flex items-center gap-3">
                 {logo || (
-                    <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30">
-                            <span className="text-white font-black text-xs">F</span>
+                    <div className="flex items-center gap-2 cursor-pointer select-none" onClick={() => setIsAnimated(!isAnimated)}>
+                        <div className="relative w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30 overflow-hidden transition-transform active:scale-95">
+                            <div className={`absolute inset-0 bg-white/20 rounded-xl pointer-events-none ${isAnimated ? 'animate-shiny-pulse' : ''}`}></div>
+                            <Zap className={`w-5 h-5 text-yellow-300 fill-current filter drop-shadow-[0_0_3px_rgba(253,224,71,0.8)] ${isAnimated ? 'animate-vibrate-fast' : ''}`} />
                         </div>
                         <span className="font-black text-gray-900 tracking-tighter text-lg uppercase hidden sm:block">
                             Flash

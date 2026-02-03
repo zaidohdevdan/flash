@@ -1,77 +1,41 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
-import { io } from 'socket.io-client';
 import { toast } from 'react-hot-toast';
+import { useDashboardSocket } from '../hooks/useDashboardSocket';
 import {
     Clock,
     CheckCircle,
-    MessageSquare,
     Folder,
     History,
-    Search,
-    BarChart3
+    Shield
 } from 'lucide-react';
 import { ChatWidget } from '../components/ChatWidget';
 import {
-    Badge,
     Button,
-    TextArea,
-    GlassCard,
-    Modal,
     Header,
-    Card
 } from '../components/ui';
-import { KpiCard, ReportCard, TeamSidebar } from '../components/domain';
+import { TeamSidebar, DashboardHero, ReportFeed } from '../components/domain';
+import { ReportHistoryModal } from '../components/domain/modals/ReportHistoryModal';
+import { AnalysisModal } from '../components/domain/modals/AnalysisModal';
 
-const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
-interface ReportHistory {
-    id: string;
-    status: string;
-    comment: string;
-    userName: string;
-    departmentName?: string;
-    createdAt: string;
-}
 
-interface UserContact {
+import { ExportReportsModal } from '../components/domain/modals/ExportReportsModal';
+import type { Report, Stats, Department, UserContact } from '../types';
+
+interface Subordinate {
     id: string;
     name: string;
     role: string;
-    departmentName?: string;
     avatarUrl?: string | null;
     statusPhrase?: string;
     isOnline?: boolean;
 }
 
-interface Stats {
-    status: string;
-    _count: number;
-}
-
-interface Report {
-    id: string;
-    imageUrl: string;
-    comment: string;
-    feedback?: string;
-    status: 'SENT' | 'IN_REVIEW' | 'FORWARDED' | 'RESOLVED' | 'ARCHIVED';
-    history: ReportHistory[];
-    department?: { name: string };
-    createdAt: string;
-    user: {
-        name: string;
-        avatarUrl?: string | null;
-        statusPhrase?: string;
-    };
-}
-
-interface Department {
-    id: string;
-    name: string;
-}
-
 export function ManagerDashboard() {
+    const navigate = useNavigate();
     const { user, signOut } = useAuth();
     const [reports, setReports] = useState<Report[]>([]);
     const [stats, setStats] = useState<Stats[]>([]);
@@ -82,18 +46,7 @@ export function ManagerDashboard() {
     const [selectedReport, setSelectedReport] = useState<Report | null>(null);
     const [analyzingReport, setAnalyzingReport] = useState<Report | null>(null);
     const [targetStatus, setTargetStatus] = useState<'IN_REVIEW' | 'FORWARDED' | 'RESOLVED'>('RESOLVED');
-
-    // Chat
-    const [chatTarget, setChatTarget] = useState<UserContact | null>(null);
-    const [socket, setSocket] = useState<any>(null);
-    const [onlineUserIds, setOnlineUserIds] = useState<string[]>([]);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [unreadMessages, setUnreadMessages] = useState<Record<string, boolean>>({});
-
-    const playNotificationSound = () => {
-        const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
-        audio.play().catch(e => console.error('Erro ao tocar som:', e));
-    };
+    const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
     // Form for Forwarding/Review
     const [formFeedback, setFormFeedback] = useState('');
@@ -158,16 +111,66 @@ export function ManagerDashboard() {
         loadDepartments();
     }, []);
 
-    // Socket Connection Lifecycle
+    const [searchParams, setSearchParams] = useSearchParams();
+    const activeChatId = searchParams.get('chat');
+
+    const chatTarget = useMemo(() => {
+        if (!activeChatId) return null;
+        return contacts.find(c => c.id === activeChatId) || null;
+    }, [activeChatId, contacts]);
+
+    const handleCloseChat = () => {
+        setSearchParams({}, { replace: true });
+    };
+
+    const socketUser = useMemo(() => user ? {
+        id: user.id || '',
+        name: user.name || '',
+        role: user.role || ''
+    } : null, [user?.id, user?.name, user?.role]);
+
+    const {
+        socket,
+        onlineUserIds,
+        unreadMessages,
+        markAsRead,
+        playNotificationSound
+    } = useDashboardSocket({
+        user: socketUser,
+        onNotification: (data) => {
+            if (activeChatId !== data.from) {
+                toast(`Mensagem de ${data.fromName || 'Contato'}: ${data.text}`, {
+                    icon: '💬',
+                    duration: 5000,
+                    style: {
+                        borderRadius: '1.5rem',
+                        background: '#333',
+                        color: '#fff',
+                        fontSize: '12px',
+                        fontWeight: 'bold'
+                    }
+                });
+                playNotificationSound();
+            } else {
+                markAsRead(data.from);
+            }
+        }
+    });
+
     useEffect(() => {
-        if (!user?.id) return;
+        if (activeChatId) {
+            markAsRead(activeChatId);
+        }
+    }, [activeChatId, markAsRead]);
 
-        const newSocket = io(SOCKET_URL, {
-            query: { userId: user.id, role: user.role, userName: user.name }
-        });
-        setSocket(newSocket);
 
-        newSocket.on('report_status_updated_for_supervisor', (data: Report) => {
+
+    const [searchTerm, setSearchTerm] = useState('');
+
+    useEffect(() => {
+        if (!socket) return;
+
+        socket.on('report_status_updated_for_supervisor', (data: Report) => {
             setReports(prev => {
                 const exists = prev.find(r => r.id === data.id);
                 if (String((data as any).departmentId) !== String(user?.departmentId)) {
@@ -180,7 +183,7 @@ export function ManagerDashboard() {
             loadStats();
         });
 
-        newSocket.on('report_forwarded_to_department', (data: Report) => {
+        socket.on('report_forwarded_to_department', (data: Report) => {
             setReports(prev => {
                 const exists = prev.find(r => r.id === data.id);
                 if (exists) return prev;
@@ -190,54 +193,11 @@ export function ManagerDashboard() {
             toast.success(`Novo reporte encaminhado para seu departamento!`);
         });
 
-        newSocket.on('initial_presence_list', (ids: string[]) => {
-            setOnlineUserIds(ids);
-        });
-
-        newSocket.on('user_online', ({ userId }: { userId: string }) => {
-            setOnlineUserIds(prev => prev.includes(userId) ? prev : [...prev, userId]);
-        });
-
-        newSocket.on('user_offline', ({ userId }: { userId: string }) => {
-            setOnlineUserIds(prev => prev.filter(id => id !== userId));
-        });
-
         return () => {
-            newSocket.disconnect();
-            setSocket(null);
+            socket.off('report_status_updated_for_supervisor');
+            socket.off('report_forwarded_to_department');
         };
-    }, [user?.id, user?.name, user?.role, user?.departmentId]);
-
-    // Chat Notifications Listener
-    useEffect(() => {
-        if (!socket) return;
-
-        const chatTargetId = chatTarget?.id;
-
-        const handleNotification = (data: { from: string, fromName?: string, text: string }) => {
-            if (chatTargetId !== data.from) {
-                setUnreadMessages(prev => ({ ...prev, [data.from]: true }));
-                playNotificationSound();
-                toast(`Mensagem de ${data.fromName || 'Contato'}: ${data.text}`, {
-                    icon: '💬',
-                    duration: 5000,
-                    style: {
-                        borderRadius: '1.5rem',
-                        background: '#333',
-                        color: '#fff',
-                        fontSize: '12px',
-                        fontWeight: 'bold'
-                    }
-                });
-            }
-        };
-
-        socket.on('new_chat_notification', handleNotification);
-
-        return () => {
-            socket.off('new_chat_notification', handleNotification);
-        };
-    }, [socket, chatTarget?.id]);
+    }, [socket, statusFilter, user?.departmentId]);
 
     async function handleUpdateStatus(reportId: string, status: string, feedback?: string) {
         try {
@@ -303,7 +263,7 @@ export function ManagerDashboard() {
     }
 
     return (
-        <div className="min-h-screen bg-slate-50/50 flex flex-col font-sans mb-10">
+        <div className="min-h-screen bg-slate-50/50 flex flex-col font-sans selection:bg-blue-100 selection:text-blue-900 transition-colors duration-700 overflow-x-hidden">
             <Header
                 user={{
                     name: user?.name,
@@ -313,146 +273,80 @@ export function ManagerDashboard() {
             />
 
             {/* Hero / Filter Section */}
-            <div className="bg-[#0f172a] relative overflow-hidden pb-24 pt-12">
-                <div className="max-w-7xl mx-auto px-6 relative z-10">
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-10">
-                        <div className="flex items-center gap-6">
-                            <div>
-                                <h2 className="text-3xl font-black text-white tracking-tight uppercase">Dashboard Gerencial</h2>
-                                <p className="text-white/90 text-sm font-medium mt-1 uppercase tracking-widest">Resolução de Demandas por Departamento</p>
-                            </div>
-                            <Button
-                                variant="glass"
-                                className="!px-4 !py-2 !bg-blue-500/20 hover:!bg-blue-500/30 text-blue-300 border-blue-500/30 backdrop-blur-md"
-                                onClick={() => window.location.href = '/analytics'}
-                            >
-                                <BarChart3 className="w-5 h-5 mr-2" />
-                                Analytics
-                            </Button>
-                        </div>
-
-                        <div className="flex flex-col gap-4">
-                            <GlassCard blur="lg" className="p-1 px-1.5 flex items-center gap-1 border-white/10 !rounded-2xl">
-                                {[
-                                    { id: '', label: 'Todos' },
-                                    { id: 'FORWARDED', label: 'Setor' },
-                                    { id: 'IN_REVIEW', label: 'Análise' },
-                                    { id: 'RESOLVED', label: 'Feitos' },
-                                ].map(filter => (
-                                    <button
-                                        key={filter.id}
-                                        onClick={() => { setStatusFilter(filter.id); setPage(1); }}
-                                        className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${statusFilter === filter.id
-                                            ? filter.id === 'FORWARDED' ? 'bg-blue-600 text-white shadow-lg'
-                                                : filter.id === 'IN_REVIEW' ? 'bg-purple-600 text-white shadow-lg'
-                                                    : filter.id === 'RESOLVED' ? 'bg-emerald-600 text-white shadow-lg'
-                                                        : filter.id === '' ? 'bg-gray-900 text-white shadow-lg'
-                                                            : 'bg-white/20 text-white'
-                                            : 'text-gray-400 hover:text-white hover:bg-white/10'
-                                            }`}
-                                    >
-                                        {filter.label}
-                                    </button>
-                                ))}
-                            </GlassCard>
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                        {[
-                            { label: 'Pendentes no Setor', status: 'FORWARDED', icon: Folder, color: 'blue' as const },
-                            { label: 'Em Análise', status: 'IN_REVIEW', icon: Clock, color: 'purple' as const },
-                            { label: 'Resolvidos', status: 'RESOLVED', icon: CheckCircle, color: 'emerald' as const },
-                        ].map(kpi => (
-                            <KpiCard
-                                key={kpi.status}
-                                label={kpi.label}
-                                value={stats.find(s => s.status === kpi.status)?._count || 0}
-                                icon={kpi.icon}
-                                variant={kpi.color}
-                            />
-                        ))}
-                    </div>
-                </div>
-            </div>
+            <DashboardHero
+                title="Dashboard Gerencial"
+                subtitle="Resolução de Demandas por Departamento"
+                stats={stats}
+                statusFilter={statusFilter}
+                onStatusFilterChange={(s) => { setStatusFilter(s); setPage(1); }}
+                filters={[
+                    { id: '', label: 'Todos' },
+                    { id: 'FORWARDED', label: 'Setor' },
+                    { id: 'IN_REVIEW', label: 'Análise' },
+                    { id: 'RESOLVED', label: 'Feitos' },
+                ]}
+                kpiConfigs={[
+                    { label: 'Pendentes no Setor', status: 'FORWARDED', icon: Folder, color: 'blue' },
+                    { label: 'Em Análise', status: 'IN_REVIEW', icon: Clock, color: 'purple' },
+                    { label: 'Resolvidos', status: 'RESOLVED', icon: CheckCircle, color: 'emerald' },
+                ]}
+                onAnalyticsClick={() => navigate('/analytics')}
+                onExportClick={() => setIsExportModalOpen(true)}
+            >
+                {/* Background Decorations */}
+                <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-blue-600/25 rounded-full blur-[160px] -mr-96 -mt-96 animate-pulse duration-[10s] pointer-events-none" />
+                <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-indigo-600/20 rounded-full blur-[140px] -ml-40 -mb-40 pointer-events-none" />
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.08),transparent_80%)] pointer-events-none" />
+            </DashboardHero>
 
             {/* Main Content */}
             <main className="max-w-7xl mx-auto px-6 w-full -mt-20 mb-20 relative flex flex-col lg:flex-row gap-12">
-                {/* Reports Feed */}
-                <div className="flex-1 space-y-6">
-                    <Card variant="glass" className="p-4 border-white/10 !rounded-[2rem]">
-                        <div className="relative group">
-                            <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-400 opacity-60 group-focus-within:opacity-100 transition-opacity" />
-                            <input
-                                type="text"
-                                placeholder="Buscar por protocolo (#000000) ou palavras-chave..."
-                                value={searchTerm}
-                                onChange={e => setSearchTerm(e.target.value)}
-                                className="w-full pl-14 pr-8 py-4 bg-white/5 border border-white/5 rounded-3xl outline-none focus:bg-white/10 focus:border-blue-500/30 transition-all text-sm font-bold text-white placeholder:text-gray-500 placeholder:font-medium placeholder:uppercase placeholder:tracking-widest"
-                            />
-                        </div>
-                    </Card>
-
-                    {reports.length === 0 ? (
-                        <Card variant="glass" className="p-20 flex flex-col items-center justify-center text-gray-400">
-                            <MessageSquare className="w-12 h-12 mb-4 opacity-20" />
-                            <p className="font-bold uppercase tracking-widest text-[10px] text-gray-600">Tudo em ordem no momento</p>
-                        </Card>
-                    ) : (
-                        <div className="grid gap-6">
-                            {reports.filter(r =>
-                                r.comment.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                r.id.toLowerCase().includes(searchTerm.toLowerCase())
-                            ).map(report => (
-                                <ReportCard
-                                    key={report.id}
-                                    report={report}
-                                    showUser
-                                    actions={
-                                        <div className="flex gap-2 w-full">
-                                            {report.status === 'FORWARDED' && (
-                                                <Button
-                                                    variant="primary"
-                                                    size="sm"
-                                                    fullWidth
-                                                    onClick={() => handleUpdateStatus(report.id, 'IN_REVIEW')}
-                                                >
-                                                    Iniciar Análise
-                                                </Button>
-                                            )}
-                                            {report.status === 'IN_REVIEW' && (
-                                                <Button
-                                                    variant="success"
-                                                    size="sm"
-                                                    fullWidth
-                                                    onClick={() => { setAnalyzingReport(report); setTargetStatus('RESOLVED'); }}
-                                                >
-                                                    Resolver
-                                                </Button>
-                                            )}
-                                            <Button variant="ghost" size="sm" onClick={() => setSelectedReport(report)}>
-                                                <History className="w-4 h-4" />
-                                            </Button>
-                                        </div>
-                                    }
-                                />
-                            ))}
-                        </div>
+                {/* Visual Blobs behind the glass content */}
+                <div className="absolute -z-10 top-0 left-1/4 w-[500px] h-[500px] bg-blue-400/10 rounded-full blur-[120px] pointer-events-none" />
+                <div className="absolute -z-10 bottom-0 right-1/4 w-[400px] h-[400px] bg-purple-400/10 rounded-full blur-[100px] pointer-events-none" />
+                <ReportFeed
+                    reports={reports.filter(r =>
+                        r.comment.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        r.id.toLowerCase().includes(searchTerm.toLowerCase())
                     )}
-
-                    {hasMore && reports.length > 0 && (
-                        <div className="flex justify-center pt-8">
-                            <Button variant="secondary" size="lg" onClick={handleLoadMore} className="bg-white px-10">
-                                Carregar Mais
+                    searchTerm={searchTerm}
+                    onSearchChange={setSearchTerm}
+                    hasMore={hasMore}
+                    onLoadMore={handleLoadMore}
+                    renderReportActions={(report) => (
+                        <div className="flex gap-2 w-full">
+                            {report.status === 'FORWARDED' && (
+                                <Button
+                                    variant="primary"
+                                    size="sm"
+                                    fullWidth
+                                    onClick={() => handleUpdateStatus(report.id, 'IN_REVIEW')}
+                                >
+                                    Iniciar Análise
+                                </Button>
+                            )}
+                            {report.status === 'IN_REVIEW' && (
+                                <Button
+                                    variant="success"
+                                    size="sm"
+                                    fullWidth
+                                    onClick={() => { setAnalyzingReport(report as any); setTargetStatus('RESOLVED'); }}
+                                >
+                                    Resolver
+                                </Button>
+                            )}
+                            <Button variant="ghost" size="sm" onClick={() => setSelectedReport(report as any)}>
+                                <History className="w-4 h-4" />
                             </Button>
                         </div>
                     )}
-                </div>
+                />
 
                 {/* Sidebar com contatos hierárquicos */}
                 <aside className="w-full lg:w-80 shrink-0">
                     <TeamSidebar
                         title="Rede de Apoio"
+                        icon={<Shield className="w-5 h-5 text-white" />}
                         members={contacts.map(c => ({
                             id: c.id,
                             name: c.name,
@@ -464,122 +358,48 @@ export function ManagerDashboard() {
                             hasUnread: !!unreadMessages[c.id]
                         }))}
                         onMemberClick={(member) => {
-                            setChatTarget(member);
-                            setUnreadMessages(prev => ({ ...prev, [member.id]: false }));
+                            setSearchParams({ chat: member.id }, { replace: true });
+                            markAsRead(member.id);
                         }}
                     />
                 </aside>
             </main>
 
-            {/* Analysis Modal para o Gerente */}
-            <Modal
+            <AnalysisModal
                 isOpen={!!analyzingReport}
                 onClose={() => { setAnalyzingReport(null); resetAnalysisForm(); }}
+                onConfirm={handleProcessAnalysis}
+                targetStatus={targetStatus}
+                setTargetStatus={setTargetStatus}
+                feedback={formFeedback}
+                setFeedback={setFormFeedback}
+                selectedDeptId={selectedDeptId}
+                setSelectedDeptId={setSelectedDeptId}
+                departments={departments}
                 title="Resolução Departamental"
-                subtitle="Triagem e Encerramento de Demanda"
-                maxWidth="lg"
-                footer={
-                    <>
-                        <Button variant="secondary" onClick={() => { setAnalyzingReport(null); resetAnalysisForm(); }}>
-                            Cancelar
-                        </Button>
-                        <Button
-                            variant={targetStatus === 'RESOLVED' ? 'success' : targetStatus === 'FORWARDED' ? 'primary' : 'primary'}
-                            onClick={handleProcessAnalysis}
-                        >
-                            {targetStatus === 'RESOLVED' ? 'Confirmar Resolução' :
-                                targetStatus === 'FORWARDED' ? 'Redirecionar Setor' :
-                                    'Confirmar Análise'}
-                        </Button>
-                    </>
-                }
-            >
-                <div className="space-y-6 py-2">
-                    <TextArea
-                        label="Nota de Resolução / Feedback"
-                        value={formFeedback}
-                        onChange={e => setFormFeedback(e.target.value)}
-                        placeholder="Informe as medidas tomadas pelo departamento..."
-                        rows={5}
-                    />
+            />
 
-                    <div className="space-y-4">
-                        <label className="text-[10px] font-black text-gray-700 uppercase tracking-widest ml-1">Ação Final</label>
-                        <div className="flex items-center justify-between p-1 bg-gray-100 rounded-2xl border border-gray-100">
-                            {[
-                                { id: 'RESOLVED', label: 'RESOLVER AGORA', color: 'text-emerald-600' },
-                                { id: 'FORWARDED', label: 'REENCAMINHAR SETOR', color: 'text-purple-600' },
-                                { id: 'IN_REVIEW', label: 'MANTER EM ANÁLISE', color: 'text-blue-600' }
-                            ].map(opt => (
-                                <button
-                                    key={opt.id}
-                                    onClick={() => setTargetStatus(opt.id as any)}
-                                    className={`flex-1 py-3 text-[9px] font-black tracking-widest rounded-xl transition-all ${targetStatus === opt.id ? 'bg-white shadow-xl ' + opt.color : 'text-gray-400 hover:text-gray-600'}`}
-                                >
-                                    {opt.label}
-                                </button>
-                            ))}
-                        </div>
-
-                        {targetStatus === 'FORWARDED' && (
-                            <div className="space-y-2 animate-in slide-in-from-top-4 duration-500">
-                                <label className="text-[10px] font-black text-gray-700 uppercase tracking-widest ml-1">Mover para:</label>
-                                <select
-                                    value={selectedDeptId}
-                                    onChange={e => setSelectedDeptId(e.target.value)}
-                                    className="w-full px-5 py-3.5 bg-gray-50/50 border border-gray-100 rounded-2xl outline-none focus:bg-white focus:border-purple-500/50 transition-all font-bold text-gray-700 appearance-none text-xs"
-                                >
-                                    <option value="">-- Escolha outro departamento --</option>
-                                    {departments.map(d => (
-                                        <option key={d.id} value={d.id}>{d.name}</option>
-                                    ))}
-                                </select>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </Modal>
-
-            {/* History Modal idêntico ao do Supervisor para auditoria */}
-            <Modal
+            <ReportHistoryModal
                 isOpen={!!selectedReport}
                 onClose={() => setSelectedReport(null)}
-                title="Trilha Operacional"
-                subtitle={`Protocolo: #${selectedReport?.id.slice(-6).toUpperCase()} • Trilha de Movimentações`}
-                maxWidth="lg"
-            >
-                <div className="space-y-8 py-4 px-2 relative before:absolute before:left-[19px] before:top-4 before:bottom-4 before:w-[2px] before:bg-gray-100">
-                    {selectedReport?.history?.map((step, idx) => (
-                        <div key={idx} className="relative pl-12 group">
-                            <div className={`absolute left-0 top-1 w-10 h-10 rounded-2xl border-4 border-white shadow-md flex items-center justify-center z-10 ${step.status === 'SENT' ? 'bg-yellow-400' :
-                                step.status === 'IN_REVIEW' ? 'bg-blue-500' :
-                                    step.status === 'FORWARDED' ? 'bg-purple-500' :
-                                        step.status === 'RESOLVED' ? 'bg-emerald-500' : 'bg-gray-400'
-                                }`} />
-                            <div className="bg-white p-5 rounded-[1.5rem] border border-gray-50">
-                                <div className="flex justify-between items-start mb-3">
-                                    <span className="text-[9px] font-black text-gray-400 uppercase tracking-tight">{new Date(step.createdAt).toLocaleString('pt-BR')}</span>
-                                    <Badge status={step.status as any} />
-                                </div>
-                                <p className="text-sm font-medium text-gray-600 leading-relaxed mb-4">{step.comment || 'Nenhuma observação.'}</p>
-                                <div className="flex justify-between items-center pt-3 border-t border-gray-50">
-                                    <p className="text-[9px] text-gray-400 font-black uppercase">Por: <span className="text-gray-900">{step.userName}</span></p>
-                                    {step.departmentName && <Badge status="FORWARDED" label={step.departmentName.toUpperCase()} />}
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </Modal>
+                report={selectedReport}
+            />
 
             {chatTarget && user && (
                 <ChatWidget
                     currentUser={{ id: user.id || '', name: user.name || '', role: user.role || '' }}
                     targetUser={chatTarget}
-                    onClose={() => setChatTarget(null)}
+                    onClose={handleCloseChat}
                     socket={socket}
                 />
             )}
+
+            <ExportReportsModal
+                isOpen={isExportModalOpen}
+                onClose={() => setIsExportModalOpen(false)}
+                reports={reports}
+                departments={departments}
+            />
         </div>
     );
 }

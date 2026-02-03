@@ -3,7 +3,7 @@ import { type Report, type ReportStatus, type User } from '../../generated/prism
 import type { CreateReportDTO, IReportRepository, ReportWithUser } from '../interfaces/IReportRepository';
 
 export class PrismaReportRepository implements IReportRepository {
-    async create({ comment, userId, imageUrl }: CreateReportDTO): Promise<ReportWithUser> {
+    async create({ comment, userId, imageUrl, latitude, longitude }: CreateReportDTO): Promise<ReportWithUser> {
         const user = await prisma.user.findUnique({ where: { id: userId }, select: { name: true } });
         const userName = user?.name || 'Operador';
 
@@ -12,6 +12,8 @@ export class PrismaReportRepository implements IReportRepository {
                 comment,
                 imageUrl: imageUrl || '',
                 userId,
+                latitude,
+                longitude,
                 status: 'SENT',
                 history: {
                     create: {
@@ -286,8 +288,10 @@ export class PrismaReportRepository implements IReportRepository {
         reports.forEach(report => {
             // Volume Trend (Last 30 days)
             if (report.createdAt >= thirtyDaysAgo) {
-                const dateKey = report.createdAt.toISOString().split('T')[0];
-                volumeByDate[dateKey] = (volumeByDate[dateKey] || 0) + 1;
+                const dateKey = report.createdAt.toISOString().split('T')[0] ?? '';
+                if (dateKey) {
+                    volumeByDate[dateKey] = (volumeByDate[dateKey] || 0) + 1;
+                }
             }
 
             // Sector Performance

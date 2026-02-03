@@ -39,6 +39,7 @@ model User {
   department   Department? @relation("DepartmentMembers", fields: [departmentId], references: [id])
   reports      Report[]
   media        Media[] // <- NEW: Relação com Media
+  auditLogs    AuditLog[] // <- NEW: Logs de auditoria
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
 }
@@ -50,6 +51,8 @@ model Report {
   feedback   String?
   feedbackAt DateTime?
   status     ReportStatus @default(SENT)
+  latitude   Float? // NEW: Geolocalização
+  longitude  Float? // NEW: Geolocalização
   userId     String       @db.ObjectId
   user       User         @relation(fields: [userId], references: [id])
 
@@ -121,4 +124,16 @@ model ChatMessage {
   deletedForEveryone Boolean   @default(false)
 
   @@index([room])
+}
+
+model AuditLog {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String?  @db.ObjectId
+  user      User?    @relation(fields: [userId], references: [id])
+  action    String // e.g., "DELETE_USER", "UPDATE_REPORT", "LOGIN"
+  target    String? // e.g., "User:123", "Report:456"
+  details   String? // JSON stringified details
+  ip        String?
+  userAgent String?
+  createdAt DateTime @default(now())
 }

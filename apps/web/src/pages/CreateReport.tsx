@@ -1,28 +1,29 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
-import { io } from 'socket.io-client';
 import { toast } from 'react-hot-toast';
 import {
-    Camera,
-    Send,
-    ArrowLeft,
     Plus,
     History,
-    MessageSquare,
     Search
 } from 'lucide-react';
+import { useDashboardSocket } from '../hooks/useDashboardSocket';
+import {
+    ProfessionalHeader,
+    SupervisorHighlight,
+    NewReportForm,
+    SuccessView
+} from '../components/domain/professional';
 import { ChatWidget } from '../components/ChatWidget';
 import {
     Button,
-    TextArea,
     Header,
     Card,
     ReportShimmer
 } from '../components/ui';
 import { ReportCard } from '../components/domain';
-
-const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+import { ReportHistoryModal } from '../components/domain/modals/ReportHistoryModal';
 
 interface Report {
     id: string;
@@ -41,7 +42,9 @@ interface Report {
 export function CreateReport() {
     const { user, signOut, updateUser } = useAuth();
     const [view, setView] = useState<'history' | 'form'>('history');
-    const [isChatOpen, setIsChatOpen] = useState(false);
+    const [searchParams, setSearchParams] = useSearchParams();
+    const activeChatId = searchParams.get('chat');
+    const isChatOpen = !!activeChatId;
     const [comment, setComment] = useState('');
     const [image, setImage] = useState<File | null>(null);
     const [preview, setPreview] = useState<string | null>(null);
@@ -51,25 +54,54 @@ export function CreateReport() {
     const [page, setPage] = useState(1);
     const [statusFilter, setStatusFilter] = useState<string>('');
     const [hasMore, setHasMore] = useState(true);
-    const [isConnected, setIsConnected] = useState(false);
-    const LIMIT = 10;
-
-    const [hasUnread, setHasUnread] = useState(false);
-    const [socket, setSocket] = useState<any>(null);
-    const [onlineUserIds, setOnlineUserIds] = useState<string[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [loadingHistory, setLoadingHistory] = useState(false);
-    const fileInputRef = useRef<HTMLInputElement>(null);
-    const isChatOpenRef = useRef(isChatOpen);
+    const [selectedReport, setSelectedReport] = useState<Report | null>(null);
+    const isChatOpenRef = useRef(false);
+    const LIMIT = 10;
+
+    const socketUser = useMemo(() => user ? {
+        id: user.id || '',
+        name: user.name || '',
+        role: user.role || ''
+    } : null, [user?.id, user?.name, user?.role]);
+
+    const {
+        socket,
+        onlineUserIds,
+        unreadMessages,
+        isConnected,
+        markAsRead
+    } = useDashboardSocket({
+        user: socketUser
+    });
+
+    const hasUnreadMessages = useMemo(() =>
+        Object.values(unreadMessages).some(v => v === true),
+        [unreadMessages]);
 
     useEffect(() => {
         isChatOpenRef.current = isChatOpen;
     }, [isChatOpen]);
 
-    const playNotificationSound = () => {
-        const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
-        audio.play().catch(e => console.error('Erro ao tocar som:', e));
-    };
+    useEffect(() => {
+        if (!socket) return;
+        socket.on('report_status_updated', (data: { reportId: string, newStatus: any, feedback?: string, feedbackAt?: string }) => {
+            setHistory(prev => {
+                if (statusFilter && statusFilter !== data.newStatus) {
+                    return prev.filter(item => item.id !== data.reportId);
+                }
+                return prev.map(item =>
+                    item.id === data.reportId
+                        ? { ...item, status: data.newStatus, feedback: data.feedback, feedbackAt: data.feedbackAt }
+                        : item
+                );
+            });
+        });
+        return () => {
+            socket.off('report_status_updated');
+        };
+    }, [socket, statusFilter]);
 
     useEffect(() => {
         api.get('/profile/me').then(res => {
@@ -92,72 +124,6 @@ export function CreateReport() {
         return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
     }, [statusFilter]);
 
-    // Socket Connection Lifecycle
-    useEffect(() => {
-        if (!user?.id) return;
-
-        const newSocket = io(SOCKET_URL, {
-            query: { userId: user.id, role: user.role, userName: user.name },
-            transports: ['websocket', 'polling']
-        });
-        setSocket(newSocket);
-
-        newSocket.on('connect', () => setIsConnected(true));
-        newSocket.on('disconnect', () => setIsConnected(false));
-
-        newSocket.on('initial_presence_list', (ids: string[]) => {
-            setOnlineUserIds(ids);
-        });
-
-        newSocket.on('user_online', ({ userId }: { userId: string }) => {
-            setOnlineUserIds(prev => prev.includes(userId) ? prev : [...prev, userId]);
-        });
-
-        newSocket.on('user_offline', ({ userId }: { userId: string }) => {
-            setOnlineUserIds(prev => prev.filter(id => id !== userId));
-        });
-
-        newSocket.on('report_status_updated', (data: { reportId: string, newStatus: any, feedback?: string, feedbackAt?: string }) => {
-            setHistory(prev => {
-                if (statusFilter && statusFilter !== data.newStatus) {
-                    return prev.filter(item => item.id !== data.reportId);
-                }
-                return prev.map(item =>
-                    item.id === data.reportId
-                        ? { ...item, status: data.newStatus, feedback: data.feedback, feedbackAt: data.feedbackAt }
-                        : item
-                );
-            });
-        });
-
-        return () => {
-            newSocket.disconnect();
-            setSocket(null);
-        };
-    }, [user?.id, user?.name, user?.role]);
-
-    // Chat Notifications Listener
-    useEffect(() => {
-        if (!socket) return;
-
-        const handleNotification = (data: { from: string, fromName?: string, text: string }) => {
-            if (!isChatOpenRef.current) {
-                setHasUnread(true);
-                playNotificationSound();
-                toast(`Mensagem do Supervisor: ${data.text}`, {
-                    icon: '💬',
-                    duration: 4000
-                });
-            }
-        };
-
-        socket.on('new_chat_notification', handleNotification);
-
-        return () => {
-            socket.off('new_chat_notification', handleNotification);
-        };
-    }, [socket]);
-
     async function loadHistory(pageNum: number = 1, reset: boolean = false, status?: string) {
         setLoadingHistory(pageNum === 1);
         try {
@@ -179,8 +145,12 @@ export function CreateReport() {
             toast.error('Você ainda não possui um supervisor atribuído.', { icon: '⚠️' });
             return;
         }
-        setIsChatOpen(true);
-        setHasUnread(false);
+        setSearchParams({ chat: user.supervisorId }, { replace: true });
+        markAsRead(user.supervisorId);
+    };
+
+    const handleCloseChat = () => {
+        setSearchParams({}, { replace: true });
     };
 
     function handleLoadMore() {
@@ -204,7 +174,6 @@ export function CreateReport() {
         setSending(true);
 
         try {
-            // 1. Upload para Cloudinary
             const cloudinaryData = new FormData();
             cloudinaryData.append('file', image);
             cloudinaryData.append('upload_preset', 'flash_preset');
@@ -219,11 +188,29 @@ export function CreateReport() {
             const cloudinaryJson = await cloudinaryRes.json();
             const imageUrl = cloudinaryJson.secure_url;
 
-            // 2. Enviar para Backend
-            await api.post('/reports', {
+            const reportData = {
                 comment,
-                imageUrl
-            });
+                imageUrl,
+                latitude: undefined as string | undefined,
+                longitude: undefined as string | undefined
+            };
+
+            // Captura de Geolocalização (Otimizada)
+            try {
+                const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+                    navigator.geolocation.getCurrentPosition(resolve, reject, {
+                        enableHighAccuracy: true,
+                        timeout: 20000,
+                        maximumAge: Infinity
+                    });
+                });
+                reportData.latitude = position.coords.latitude.toString();
+                reportData.longitude = position.coords.longitude.toString();
+            } catch (error) {
+                console.warn('GPS unavailable:', error);
+            }
+
+            await api.post('/reports', reportData);
 
             setSuccess(true);
             setComment('');
@@ -240,22 +227,11 @@ export function CreateReport() {
     }
 
     if (success) {
-        return (
-            <div className="min-h-screen flex flex-col items-center justify-center bg-[#0f172a] p-6 text-center">
-                <div className="bg-emerald-500/10 p-8 rounded-[3rem] border border-emerald-500/20 mb-8 animate-in zoom-in-50 duration-500">
-                    <Send className="w-20 h-20 text-emerald-500" />
-                </div>
-                <h2 className="text-3xl font-black text-white mb-2 tracking-tight uppercase">Relatório Enviado!</h2>
-                <p className="text-gray-600 mb-10 font-medium uppercase tracking-widest text-[10px]">O seu supervisor foi notificado em tempo real.</p>
-                <Button variant="success" size="lg" className="px-12" onClick={() => setSuccess(false)}>
-                    VOLTAR AO INÍCIO
-                </Button>
-            </div>
-        );
+        return <SuccessView onBack={() => setSuccess(false)} />;
     }
 
     return (
-        <div className="min-h-screen bg-white flex flex-col font-sans">
+        <div className="min-h-screen bg-slate-50/50 flex flex-col font-sans selection:bg-blue-100 selection:text-blue-900 transition-colors duration-700 overflow-x-hidden">
             <Header
                 user={{
                     name: user?.name,
@@ -264,183 +240,123 @@ export function CreateReport() {
                 onLogout={signOut}
             />
 
-            <main className="flex-1 bg-gray-50/50">
-                {view === 'history' ? (
-                    <div className="p-6 max-w-2xl mx-auto space-y-8">
-                        <header className="flex justify-between items-center">
-                            <div>
-                                <h1 className="text-3xl font-black text-gray-900 tracking-tight uppercase">Olá, {user?.name.split(' ')[0]}!</h1>
-                                <p className="text-[10px] text-gray-700 font-black uppercase tracking-widest mt-1">Seu histórico operacional</p>
-                            </div>
+            <main className="flex-1 relative overflow-hidden">
+                {/* Background Decorations */}
+                <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-600/10 rounded-full blur-[120px] animate-pulse pointer-events-none" />
+                <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-indigo-600/10 rounded-full blur-[140px] animate-pulse pointer-events-none" style={{ animationDelay: '2s' }} />
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.03),transparent_70%)] pointer-events-none" />
 
-                            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-100 rounded-full shadow-sm">
-                                <span className={`w-2 h-2 rounded-full ${isConnected ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
-                                <span className={`text-[9px] font-black uppercase ${isConnected ? 'text-emerald-600' : 'text-gray-600'}`}>{isConnected ? 'Online' : 'Offline'}</span>
-                            </div>
-                        </header>
-
-                        {/* Supervisor Info */}
-                        {user?.supervisorId && (
-                            <Card variant="blue" className="!bg-blue-600 p-6 shadow-xl shadow-blue-900/10 flex flex-col sm:flex-row items-center justify-between gap-6">
-                                <div className="flex items-center gap-4 text-white">
-                                    <div className="bg-white/20 p-3 rounded-2xl backdrop-blur-md">
-                                        <MessageSquare className="w-6 h-6" />
-                                    </div>
-                                    <div>
-                                        <div className="flex items-center gap-2">
-                                            <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest">Supervisor Direto</p>
-                                            <div className={`w-1.5 h-1.5 rounded-full ${user.supervisorId && onlineUserIds.includes(user.supervisorId) ? 'bg-emerald-400 animate-pulse' : 'bg-white/30'}`} />
-                                        </div>
-                                        <h3 className="text-lg font-bold">{user.supervisorName || 'Responsável Técnico'}</h3>
-                                    </div>
-                                </div>
-                                <Button
-                                    variant="glass"
-                                    className="!bg-white/10 !text-white !border-white/20 hover:!bg-white/20"
-                                    onClick={handleOpenChat}
-                                >
-                                    {hasUnread && <span className="w-2 h-2 bg-red-500 rounded-full mr-2" />}
-                                    ABRIR CANAL DE CHAT
-                                </Button>
-                            </Card>
-                        )}
-
-                        {/* Filter & Search */}
-                        <div className="flex flex-col gap-4">
-                            <Card variant="glass" className="p-4 border-gray-100 shadow-sm !rounded-[1.5rem] bg-white">
-                                <div className="relative group">
-                                    <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-500 opacity-60 group-focus-within:opacity-100 transition-opacity" />
-                                    <input
-                                        type="text"
-                                        placeholder="Buscar por protocolo ou descrição..."
-                                        value={searchTerm}
-                                        onChange={e => setSearchTerm(e.target.value)}
-                                        className="w-full pl-14 pr-8 py-3 bg-gray-50 border border-transparent rounded-2xl outline-none focus:bg-white focus:border-blue-500/30 transition-all text-xs font-bold text-gray-800 placeholder:text-gray-500 placeholder:font-bold placeholder:uppercase"
-                                    />
-                                </div>
-                            </Card>
-
-                            <div className="flex gap-2 overflow-x-auto pb-4 no-scrollbar">
-                                {[
-                                    { id: '', label: 'Tudo' },
-                                    { id: 'SENT', label: 'Enviados' },
-                                    { id: 'IN_REVIEW', label: 'Análise' },
-                                    { id: 'FORWARDED', label: 'Depto' },
-                                    { id: 'RESOLVED', label: 'Finalizado' },
-                                ].map(filter => (
-                                    <button
-                                        key={filter.id}
-                                        onClick={() => { setStatusFilter(filter.id); setPage(1); }}
-                                        className={`px-6 py-2.5 rounded-2xl text-[10px] font-black tracking-widest uppercase transition-all border shrink-0 ${statusFilter === filter.id
-                                            ? 'bg-[#0f172a] text-white border-[#0f172a] shadow-lg shadow-gray-900/10'
-                                            : 'bg-white text-gray-600 border-gray-100 hover:border-gray-200'
-                                            }`}
-                                    >
-                                        {filter.label}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        {loadingHistory ? (
-                            <div className="space-y-6">
-                                <ReportShimmer />
-                                <ReportShimmer />
-                                <ReportShimmer />
-                            </div>
-                        ) : history.length === 0 ? (
-                            <Card variant="glass" className="py-20 flex flex-col items-center justify-center text-gray-300">
-                                <History className="w-12 h-12 mb-4 opacity-20" />
-                                <p className="text-[10px] font-black uppercase tracking-widest text-gray-700 underline decoration-2 decoration-blue-500/30">Nenhum evento registrado</p>
-                            </Card>
-                        ) : (
-                            <div className="grid gap-6">
-                                {history.filter(r =>
-                                    r.comment.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                    r.id.toLowerCase().includes(searchTerm.toLowerCase())
-                                ).map(item => (
-                                    <ReportCard
-                                        key={item.id}
-                                        report={item}
-                                        actions={
-                                            <Button variant="ghost" size="sm" onClick={() => toast('Histórico detalhado em breve!')}>
-                                                Detalhes
-                                            </Button>
-                                        }
-                                    />
-                                ))}
-
-                                {hasMore && (
-                                    <Button variant="secondary" size="lg" fullWidth onClick={handleLoadMore} className="bg-white mt-4">
-                                        Carregar Mais Atividades
-                                    </Button>
-                                )}
-                            </div>
-                        )}
-                        <div className="h-24"></div>
-                    </div>
-                ) : (
-                    <div className="p-6 max-w-xl mx-auto space-y-8 animate-in slide-in-from-bottom-5 duration-500">
-                        <header className="flex items-center gap-4">
-                            <button onClick={() => setView('history')} className="p-2 hover:bg-white rounded-2xl border border-transparent hover:border-gray-100 transition-all">
-                                <ArrowLeft className="w-6 h-6 text-gray-400" />
-                            </button>
-                            <div>
-                                <h1 className="text-3xl font-black text-gray-900 tracking-tight uppercase">Novo Reporte</h1>
-                                <p className="text-[10px] text-gray-700 font-black uppercase tracking-widest mt-1">Sinalização de conformidade ou ocorrência</p>
-                            </div>
-                        </header>
-
-                        <form onSubmit={handleSubmit} className="space-y-8">
-                            <div
-                                onClick={() => fileInputRef.current?.click()}
-                                className="aspect-video bg-white border-2 border-dashed border-gray-200 rounded-[2.5rem] flex flex-col items-center justify-center cursor-pointer overflow-hidden relative shadow-sm hover:border-blue-400 transition-all group"
-                            >
-                                {preview ? (
-                                    <img src={preview} alt="Preview" className="w-full h-full object-cover" />
-                                ) : (
-                                    <>
-                                        <div className="bg-[#0f172a] p-6 rounded-full mb-4 shadow-xl shadow-gray-900/10 group-hover:scale-110 transition-transform">
-                                            <Camera className="w-8 h-8 text-white" />
-                                        </div>
-                                        <span className="text-[10px] font-black text-gray-600 uppercase tracking-widest">Capturar Evidência Visual</span>
-                                    </>
-                                )}
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    capture="environment"
-                                    className="hidden"
-                                    ref={fileInputRef}
-                                    onChange={handleImageChange}
-                                />
-                            </div>
-
-                            <TextArea
-                                label="Relatório de Atividade / Observação"
-                                value={comment}
-                                onChange={e => setComment(e.target.value)}
-                                placeholder="Descreva os detalhes da ocorrência ou atividade realizada..."
-                                rows={6}
-                                required
+                <div className="relative z-10 w-full h-full">
+                    {view === 'history' ? (
+                        <div className="p-6 max-w-2xl mx-auto space-y-8">
+                            <ProfessionalHeader
+                                userName={user?.name || 'Profissional'}
+                                isConnected={isConnected}
                             />
 
-                            <Button
-                                type="submit"
-                                variant="primary"
-                                size="lg"
-                                fullWidth
-                                isLoading={sending}
-                                className="!py-6 text-sm"
-                            >
-                                ENVIAR AGORA
-                            </Button>
-                        </form>
-                    </div>
-                )}
+                            {user?.supervisorId && (
+                                <SupervisorHighlight
+                                    supervisorName={user.supervisorName || 'Responsável Técnico'}
+                                    isOnline={onlineUserIds.includes(user.supervisorId)}
+                                    hasUnread={hasUnreadMessages || !!unreadMessages[user.supervisorId]}
+                                    onChatOpen={handleOpenChat}
+                                />
+                            )}
+
+                            <div className="flex flex-col gap-4">
+                                <Card variant="glass" className="p-4 border-gray-100 shadow-sm !rounded-[1.5rem] bg-white">
+                                    <div className="relative group">
+                                        <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-500 opacity-60 group-focus-within:opacity-100 transition-opacity" />
+                                        <input
+                                            type="text"
+                                            placeholder="Buscar por protocolo ou descrição..."
+                                            value={searchTerm}
+                                            onChange={e => setSearchTerm(e.target.value)}
+                                            className="w-full pl-14 pr-8 py-3 bg-gray-50 border border-transparent rounded-2xl outline-none focus:bg-white focus:border-blue-500/30 transition-all text-xs font-bold text-gray-800 placeholder:text-gray-500 placeholder:font-bold placeholder:uppercase"
+                                        />
+                                    </div>
+                                </Card>
+
+                                <div className="flex gap-2 overflow-x-auto pb-4 no-scrollbar">
+                                    {[
+                                        { id: '', label: 'Tudo' },
+                                        { id: 'SENT', label: 'Enviados' },
+                                        { id: 'IN_REVIEW', label: 'Análise' },
+                                        { id: 'FORWARDED', label: 'Depto' },
+                                        { id: 'RESOLVED', label: 'Finalizado' },
+                                    ].map(filter => (
+                                        <button
+                                            key={filter.id}
+                                            onClick={() => { setStatusFilter(filter.id); setPage(1); }}
+                                            className={`px-6 py-2.5 rounded-2xl text-[10px] font-black tracking-widest uppercase transition-all border shrink-0 ${statusFilter === filter.id
+                                                ? 'bg-[#0f172a] text-white border-[#0f172a] shadow-lg shadow-gray-900/10'
+                                                : 'bg-white text-gray-600 border-gray-100 hover:border-gray-200'
+                                                }`}
+                                        >
+                                            {filter.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {loadingHistory ? (
+                                <div className="space-y-6">
+                                    <ReportShimmer />
+                                    <ReportShimmer />
+                                    <ReportShimmer />
+                                </div>
+                            ) : history.length === 0 ? (
+                                <Card variant="glass" className="py-20 flex flex-col items-center justify-center text-gray-300">
+                                    <History className="w-12 h-12 mb-4 opacity-20" />
+                                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-700 underline decoration-2 decoration-blue-500/30">Nenhum evento registrado</p>
+                                </Card>
+                            ) : (
+                                <div className="grid gap-6">
+                                    {history.filter(r =>
+                                        r.comment.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                        r.id.toLowerCase().includes(searchTerm.toLowerCase())
+                                    ).map(item => (
+                                        <ReportCard
+                                            key={item.id}
+                                            report={item}
+                                            actions={
+                                                <Button variant="ghost" size="sm" onClick={() => setSelectedReport(item)}>
+                                                    Detalhes
+                                                </Button>
+                                            }
+                                        />
+                                    ))}
+
+                                    {hasMore && (
+                                        <Button variant="secondary" size="lg" fullWidth onClick={handleLoadMore} className="bg-white mt-4">
+                                            Carregar Mais Atividades
+                                        </Button>
+                                    )}
+                                </div>
+                            )}
+                            <div className="h-24"></div>
+                        </div>
+                    ) : (
+                        <div className="p-6 max-w-xl mx-auto space-y-12 animate-in slide-in-from-bottom-5 duration-500">
+                            <ProfessionalHeader
+                                userName={user?.name || 'Profissional'}
+                                isConnected={isConnected}
+                            />
+
+                            <NewReportForm
+                                comment={comment}
+                                onCommentChange={setComment}
+                                preview={preview}
+                                onImageChange={handleImageChange}
+                                onClearImage={() => { setImage(null); setPreview(null); }}
+                                onSubmit={handleSubmit}
+                                isSending={sending}
+                            />
+                        </div>
+                    )}
+                </div>
             </main>
 
-            {/* Float Action Button */}
             {view === 'history' && (
                 <button
                     onClick={() => setView('form')}
@@ -458,10 +374,16 @@ export function CreateReport() {
                         name: user.supervisorName || 'Supervisor',
                         role: 'SUPERVISOR'
                     }}
-                    onClose={() => setIsChatOpen(false)}
+                    onClose={handleCloseChat}
                     socket={socket}
                 />
             )}
+
+            <ReportHistoryModal
+                isOpen={!!selectedReport}
+                onClose={() => setSelectedReport(null)}
+                report={selectedReport as any}
+            />
         </div>
     );
 }

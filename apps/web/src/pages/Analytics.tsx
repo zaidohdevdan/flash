@@ -27,6 +27,7 @@ export function Analytics() {
     const navigate = useNavigate();
     const [data, setData] = useState<AnalyticsData | null>(null);
     const [loading, setLoading] = useState(true);
+    const [isReady, setIsReady] = useState(false);
 
     useEffect(() => {
         loadData();
@@ -36,6 +37,8 @@ export function Analytics() {
         try {
             const response = await api.get('/reports/analytics');
             setData(response.data);
+            // Pequeno delay para garantir que o DOM esteja pronto e com tamanhos calculados
+            setTimeout(() => setIsReady(true), 300);
         } catch (error) {
             console.error('Erro ao carregar analytics:', error);
         } finally {
@@ -54,7 +57,6 @@ export function Analytics() {
     if (!data) return null;
 
     // Calcular distribuição de status para o PieChart
-    // (Simplificado, pois setorPerformance tem 'resolved' e 'forwarded')
     const statusParams = data.sectorPerformance.reduce((acc, curr) => {
         acc[0].value += curr.resolved; // Resolvidos
         acc[1].value += curr.forwarded; // Em Setor
@@ -166,37 +168,40 @@ export function Analytics() {
                                 Volume de Reportes (30 dias)
                             </h3>
                         </div>
-                        <div className="h-[300px] w-full">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <AreaChart data={data.volume}>
-                                    <defs>
-                                        <linearGradient id="colorVolume" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
-                                            <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
-                                        </linearGradient>
-                                    </defs>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" vertical={false} />
-                                    <XAxis
-                                        dataKey="date"
-                                        stroke="#9ca3af"
-                                        fontSize={12}
-                                        tickFormatter={(date) => new Date(date).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
-                                    />
-                                    <YAxis stroke="#9ca3af" fontSize={12} />
-                                    <RechartsTooltip
-                                        contentStyle={{ backgroundColor: '#1f2937', borderColor: '#374151', color: '#fff' }}
-                                        labelStyle={{ color: '#9ca3af' }}
-                                    />
-                                    <Area
-                                        type="monotone"
-                                        dataKey="count"
-                                        stroke="#3b82f6"
-                                        strokeWidth={3}
-                                        fillOpacity={1}
-                                        fill="url(#colorVolume)"
-                                    />
-                                </AreaChart>
-                            </ResponsiveContainer>
+                        <div className="h-[300px] w-full relative">
+                            {isReady && (
+                                <ResponsiveContainer width="100%" height={300}>
+                                    <AreaChart data={data.volume}>
+                                        <defs>
+                                            <linearGradient id="colorVolume" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
+                                                <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                                            </linearGradient>
+                                        </defs>
+                                        <CartesianGrid strokeDasharray="3 3" stroke="#374151" vertical={false} />
+                                        <XAxis
+                                            dataKey="date"
+                                            stroke="#9ca3af"
+                                            fontSize={12}
+                                            tickFormatter={(date) => new Date(date).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
+                                        />
+                                        <YAxis stroke="#9ca3af" fontSize={12} />
+                                        <RechartsTooltip
+                                            contentStyle={{ backgroundColor: '#1f2937', borderColor: '#374151', color: '#fff' }}
+                                            labelStyle={{ color: '#9ca3af' }}
+                                        />
+                                        <Area
+                                            type="monotone"
+                                            dataKey="count"
+                                            stroke="#3b82f6"
+                                            strokeWidth={3}
+                                            fillOpacity={1}
+                                            fill="url(#colorVolume)"
+                                            isAnimationActive={false}
+                                        />
+                                    </AreaChart>
+                                </ResponsiveContainer>
+                            )}
                         </div>
                     </GlassCard>
 
@@ -208,27 +213,29 @@ export function Analytics() {
                                 Performance por Setor
                             </h3>
                         </div>
-                        <div className="h-[300px] w-full">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={data.sectorPerformance} layout="vertical">
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" horizontal={false} />
-                                    <XAxis type="number" stroke="#9ca3af" fontSize={12} />
-                                    <YAxis
-                                        dataKey="name"
-                                        type="category"
-                                        stroke="#9ca3af"
-                                        fontSize={12}
-                                        width={100}
-                                    />
-                                    <RechartsTooltip
-                                        cursor={{ fill: '#374151', opacity: 0.2 }}
-                                        contentStyle={{ backgroundColor: '#1f2937', borderColor: '#374151', color: '#fff' }}
-                                    />
-                                    <Legend />
-                                    <Bar dataKey="resolved" name="Resolvidos" fill="#10b981" radius={[0, 4, 4, 0]} barSize={20} />
-                                    <Bar dataKey="forwarded" name="Em Andamento" fill="#8b5cf6" radius={[0, 4, 4, 0]} barSize={20} />
-                                </BarChart>
-                            </ResponsiveContainer>
+                        <div className="h-[300px] w-full relative">
+                            {isReady && (
+                                <ResponsiveContainer width="100%" height={300}>
+                                    <BarChart data={data.sectorPerformance} layout="vertical">
+                                        <CartesianGrid strokeDasharray="3 3" stroke="#374151" horizontal={false} />
+                                        <XAxis type="number" stroke="#9ca3af" fontSize={12} />
+                                        <YAxis
+                                            dataKey="name"
+                                            type="category"
+                                            stroke="#9ca3af"
+                                            fontSize={12}
+                                            width={100}
+                                        />
+                                        <RechartsTooltip
+                                            cursor={{ fill: '#374151', opacity: 0.2 }}
+                                            contentStyle={{ backgroundColor: '#1f2937', borderColor: '#374151', color: '#fff' }}
+                                        />
+                                        <Legend />
+                                        <Bar dataKey="resolved" name="Resolvidos" fill="#10b981" radius={[0, 4, 4, 0]} barSize={20} isAnimationActive={false} />
+                                        <Bar dataKey="forwarded" name="Em Andamento" fill="#8b5cf6" radius={[0, 4, 4, 0]} barSize={20} isAnimationActive={false} />
+                                    </BarChart>
+                                </ResponsiveContainer>
+                            )}
                         </div>
                     </GlassCard>
 
@@ -240,28 +247,31 @@ export function Analytics() {
                                 Distribuição Global de Status
                             </h3>
                         </div>
-                        <div className="h-[300px] w-full flex items-center justify-center">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <PieChart>
-                                    <Pie
-                                        data={statusParams}
-                                        cx="50%"
-                                        cy="50%"
-                                        innerRadius={60}
-                                        outerRadius={100}
-                                        paddingAngle={5}
-                                        dataKey="value"
-                                    >
-                                        {statusParams.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={entry.color} />
-                                        ))}
-                                    </Pie>
-                                    <RechartsTooltip
-                                        contentStyle={{ backgroundColor: '#1f2937', borderColor: '#374151', color: '#fff' }}
-                                    />
-                                    <Legend verticalAlign="bottom" height={36} />
-                                </PieChart>
-                            </ResponsiveContainer>
+                        <div className="h-[300px] w-full relative flex items-center justify-center">
+                            {isReady && (
+                                <ResponsiveContainer width="100%" height={300}>
+                                    <PieChart>
+                                        <Pie
+                                            data={statusParams}
+                                            cx="50%"
+                                            cy="50%"
+                                            innerRadius={60}
+                                            outerRadius={100}
+                                            paddingAngle={5}
+                                            dataKey="value"
+                                            isAnimationActive={false}
+                                        >
+                                            {statusParams.map((entry, index) => (
+                                                <Cell key={`cell-${index}`} fill={entry.color} />
+                                            ))}
+                                        </Pie>
+                                        <RechartsTooltip
+                                            contentStyle={{ backgroundColor: '#1f2937', borderColor: '#374151', color: '#fff' }}
+                                        />
+                                        <Legend verticalAlign="bottom" height={36} />
+                                    </PieChart>
+                                </ResponsiveContainer>
+                            )}
                         </div>
                     </GlassCard>
                 </div>

@@ -19,4 +19,5 @@ export interface IUserRepository {
     create(data: CreateUserDTO): Promise<User>;
     update(id: string, data: Partial<CreateUserDTO>): Promise<User>;
     updateProfile(userId: string, data: { avatarUrl?: string, statusPhrase?: string }): Promise<User>;
+    delete(id: string): Promise<void>;
 }

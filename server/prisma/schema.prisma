@@ -21,46 +21,49 @@ enum ReportStatus {
   IN_REVIEW
   FORWARDED // Encaminhado ao Departamento
   RESOLVED
-  ARCHIVED  // Arquivado para histórico
+  ARCHIVED // Arquivado para histórico
 }
 
 model User {
-  id            String    @id @default(auto()) @map("_id") @db.ObjectId
-  name          String
-  email         String    @unique
-  passwordHash  String
-  avatarUrl     String?
-  statusPhrase  String?
-  role          Role      @default(PROFESSIONAL)
-  supervisorId  String?   @db.ObjectId
-  supervisor    User?     @relation("Subordinates", fields: [supervisorId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  Subordinates  User[]    @relation("Subordinates")
-  departmentId  String?   @db.ObjectId
-  department    Department? @relation("DepartmentMembers", fields: [departmentId], references: [id])
-  reports       Report[]
-  media         Media[]   // <- NEW: Relação com Media
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id           String      @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  email        String      @unique
+  passwordHash String
+  avatarUrl    String?
+  statusPhrase String?
+  role         Role        @default(PROFESSIONAL)
+  supervisorId String?     @db.ObjectId
+  supervisor   User?       @relation("Subordinates", fields: [supervisorId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  Subordinates User[]      @relation("Subordinates")
+  departmentId String?     @db.ObjectId
+  department   Department? @relation("DepartmentMembers", fields: [departmentId], references: [id])
+  reports      Report[]
+  media        Media[] // <- NEW: Relação com Media
+  auditLogs    AuditLog[] // <- NEW: Logs de auditoria
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
 }
 
 model Report {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  imageUrl    String
-  comment     String
-  feedback    String?
-  feedbackAt  DateTime?
-  status      ReportStatus @default(SENT)
-  userId      String   @db.ObjectId
-  user        User     @relation(fields: [userId], references: [id])
-  
-  departmentId String? @db.ObjectId
+  id         String       @id @default(auto()) @map("_id") @db.ObjectId
+  imageUrl   String
+  comment    String
+  feedback   String?
+  feedbackAt DateTime?
+  status     ReportStatus @default(SENT)
+  latitude   Float? // NEW: Geolocalização
+  longitude  Float? // NEW: Geolocalização
+  userId     String       @db.ObjectId
+  user       User         @relation(fields: [userId], references: [id])
+
+  departmentId String?     @db.ObjectId
   department   Department? @relation(fields: [departmentId], references: [id])
 
-  history     ReportHistory[]
-  media       Media[]  // <- NEW: Relação com Media
+  history ReportHistory[]
+  media   Media[] // <- NEW: Relação com Media
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Department {
@@ -72,35 +75,35 @@ model Department {
 }
 
 model ReportHistory {
-  id            String   @id @default(auto()) @map("_id") @db.ObjectId
-  reportId      String   @db.ObjectId
-  report        Report   @relation(fields: [reportId], references: [id])
-  status        ReportStatus
-  comment       String?  // O feedback ou observação deste passo
-  userName      String   // Nome de quem registrou o passo para histórico rápido
+  id             String       @id @default(auto()) @map("_id") @db.ObjectId
+  reportId       String       @db.ObjectId
+  report         Report       @relation(fields: [reportId], references: [id])
+  status         ReportStatus
+  comment        String? // O feedback ou observação deste passo
+  userName       String // Nome de quem registrou o passo para histórico rápido
   departmentName String? // NEW: Setor por onde passou
-  createdAt     DateTime @default(now())
+  createdAt      DateTime     @default(now())
 }
 
 model Media {
-  id            String   @id @default(auto()) @map("_id") @db.ObjectId
-  publicId      String   @unique  // @unique já cria um índice automaticamente
-  url           String
-  secureUrl     String
-  format        String
-  width         Int?
-  height        Int?
-  bytes         Int
-  resourceType  String   // 'image', 'video', 'raw', 'auto'
-  folder        String   @default("flash")
-  uploadedAt    DateTime @default(now())
-  
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  publicId     String   @unique // @unique já cria um índice automaticamente
+  url          String
+  secureUrl    String
+  format       String
+  width        Int?
+  height       Int?
+  bytes        Int
+  resourceType String // 'image', 'video', 'raw', 'auto'
+  folder       String   @default("flash")
+  uploadedAt   DateTime @default(now())
+
   // Relations
-  userId        String?  @db.ObjectId
-  user          User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  reportId      String?  @db.ObjectId
-  report        Report?  @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  userId String? @db.ObjectId
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  reportId String? @db.ObjectId
+  report   Report? @relation(fields: [reportId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([reportId])
@@ -108,17 +111,29 @@ model Media {
 }
 
 model ChatMessage {
-  id            String   @id @default(auto()) @map("_id") @db.ObjectId
-  fromId        String   @db.ObjectId
-  toId          String   @db.ObjectId
-  text          String?
-  audioUrl      String?
-  audioPublicId String?
-  room          String   // e.g., "chat:professionalUserId"
-  createdAt     DateTime @default(now())
-  expiresAt     DateTime?
-  deletedForSender Boolean @default(false)
-  deletedForEveryone Boolean @default(false)
+  id                 String    @id @default(auto()) @map("_id") @db.ObjectId
+  fromId             String    @db.ObjectId
+  toId               String    @db.ObjectId
+  text               String?
+  audioUrl           String?
+  audioPublicId      String?
+  room               String // e.g., "chat:professionalUserId"
+  createdAt          DateTime  @default(now())
+  expiresAt          DateTime?
+  deletedForSender   Boolean   @default(false)
+  deletedForEveryone Boolean   @default(false)
 
   @@index([room])
+}
+
+model AuditLog {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String?  @db.ObjectId
+  user      User?    @relation(fields: [userId], references: [id])
+  action    String // e.g., "DELETE_USER", "UPDATE_REPORT", "LOGIN"
+  target    String? // e.g., "User:123", "Report:456"
+  details   String? // JSON stringified details
+  ip        String?
+  userAgent String?
+  createdAt DateTime @default(now())
 }

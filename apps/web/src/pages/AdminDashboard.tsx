@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
+import { toast } from 'react-hot-toast';
 import {
     UserPlus,
     Shield,
@@ -8,7 +9,8 @@ import {
     Search,
     Filter,
     Edit2,
-    CheckCircle
+    CheckCircle,
+    Trash2
 } from 'lucide-react';
 import {
     Button,
@@ -142,7 +144,34 @@ export function AdminDashboard() {
         }
     }
 
+    async function handleDeleteUser(userId: string, userName: string) {
+        if (userId === user?.id) {
+            toast.error('Você não pode remover seu próprio acesso administrativo.');
+            return;
+        }
+        if (!window.confirm(`Tem certeza que deseja remover o usuário ${userName}? Esta ação não pode ser desfeita.`)) {
+            return;
+        }
+
+        try {
+            await api.delete(`/users/${userId}`);
+            setSuccess(true);
+            toast.success('Usuário removido com sucesso!'); // Caso toast esteja disponível, senão setSuccess cuida.
+            setTimeout(() => {
+                setSuccess(false);
+                fetchUsers();
+            }, 1000);
+        } catch (err: any) {
+            console.error('Erro ao deletar:', err.response?.data?.error);
+            alert(err.response?.data?.error || 'Erro ao deletar usuário.');
+        }
+    }
+
     function startEdit(u: UserSummary) {
+        if (u.id === user?.id) {
+            toast.error('Alterações no seu próprio perfil administrativo não são permitidas por segurança.');
+            return;
+        }
         setEditingUser(u);
         setName(u.name);
         setEmail(u.email);
@@ -165,7 +194,7 @@ export function AdminDashboard() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50/50 flex flex-col font-sans mb-10">
+        <div className="min-h-screen bg-slate-50/50 flex flex-col font-sans selection:bg-blue-100 selection:text-blue-900 transition-colors duration-700 overflow-x-hidden">
             <Header
                 user={{
                     name: user?.name,
@@ -174,7 +203,11 @@ export function AdminDashboard() {
                 onLogout={signOut}
             />
 
-            <main className="max-w-7xl mx-auto px-6 w-full mt-8 grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <main className="max-w-7xl mx-auto px-6 w-full mt-8 grid grid-cols-1 lg:grid-cols-4 gap-8 relative">
+                {/* Background Decorations */}
+                <div className="absolute top-[-10%] right-[-10%] w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[120px] animate-pulse pointer-events-none" />
+                <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[140px] animate-pulse pointer-events-none" style={{ animationDelay: '2s' }} />
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.03),transparent_70%)] pointer-events-none" />
                 {/* Sidebar Navigation */}
                 <aside className="lg:col-span-1">
                     <Card variant="white" className="p-2 space-y-1 shadow-xl shadow-gray-200/50 border-gray-100 !rounded-[2rem] sticky top-28">
@@ -297,14 +330,28 @@ export function AdminDashboard() {
                                                             )}
                                                         </td>
                                                         <td className="px-8 py-6 text-right">
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                onClick={() => startEdit(u)}
-                                                                className="opacity-0 group-hover:opacity-100"
-                                                            >
-                                                                <Edit2 className="w-4 h-4" />
-                                                            </Button>
+                                                            {u.id !== user?.id && (
+                                                                <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                    <Button
+                                                                        variant="ghost"
+                                                                        size="sm"
+                                                                        onClick={() => startEdit(u)}
+                                                                    >
+                                                                        <Edit2 className="w-4 h-4" />
+                                                                    </Button>
+                                                                    <Button
+                                                                        variant="ghost"
+                                                                        size="sm"
+                                                                        onClick={() => handleDeleteUser(u.id, u.name)}
+                                                                        className="hover:text-red-500 hover:bg-red-50"
+                                                                    >
+                                                                        <Trash2 className="w-4 h-4" />
+                                                                    </Button>
+                                                                </div>
+                                                            )}
+                                                            {u.id === user?.id && (
+                                                                <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-full">VOCÊ</span>
+                                                            )}
                                                         </td>
                                                     </tr>
                                                 ))
@@ -343,6 +390,7 @@ export function AdminDashboard() {
                                             onChange={e => setEmail(e.target.value)}
                                             placeholder="nome@empresa.com"
                                             required
+                                            autoComplete="email"
                                         />
                                     </div>
 
@@ -353,6 +401,7 @@ export function AdminDashboard() {
                                         onChange={e => setPassword(e.target.value)}
                                         placeholder="••••••••"
                                         required={view === 'create'}
+                                        autoComplete="new-password"
                                     />
 
                                     <div className="space-y-3">

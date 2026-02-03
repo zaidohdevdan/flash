@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express';
 import { AuthService } from '../services/AuthService';
+import { AuditService } from '../services/AuditService';
 const authService = new AuthService();
 
 export const AuthController = {
@@ -8,6 +9,14 @@ export const AuthController = {
             const { email, password } = req.body;
 
             const result = await authService.login(email, password);
+
+            // Auditoria
+            await AuditService.log({
+                userId: result.user.id,
+                action: 'LOGIN',
+                ip: req.ip,
+                userAgent: req.get('user-agent')
+            });
 
             return res.json(result);
         } catch (error: any) {
@@ -23,6 +32,17 @@ export const AuthController = {
         try {
             const { name, email, password, role, supervisorId, departmentId } = req.body;
             const result = await authService.register({ name, email, password, role, supervisorId, departmentId } as any);
+
+            // Auditoria
+            await AuditService.log({
+                userId: req.userId,
+                action: 'CREATE_USER',
+                target: `User:${result.id}`,
+                details: { name, email, role },
+                ip: req.ip,
+                userAgent: req.get('user-agent')
+            });
+
             return res.status(201).json(result);
         } catch (error: any) {
             if (error.message === 'USER_ALREADY_EXISTS') {
@@ -58,8 +78,25 @@ export const AuthController = {
     async update(req: Request, res: Response) {
         try {
             const { id } = req.params as { id: string };
+
+            // Seguridade: Admin não pode alterar a si mesmo via gestão
+            if (id === req.userId) {
+                return res.status(403).json({ error: 'Você não pode alterar seu próprio cadastro administrativo via painel de gestão.' });
+            }
+
             const data = req.body;
             const result = await authService.updateUser(id, data);
+
+            // Auditoria
+            await AuditService.log({
+                userId: req.userId,
+                action: 'UPDATE_USER',
+                target: `User:${id}`,
+                details: data,
+                ip: req.ip,
+                userAgent: req.get('user-agent')
+            });
+
             return res.json(result);
         } catch (error) {
             console.error('Erro ao editar usuário:', error);
@@ -83,6 +120,33 @@ export const AuthController = {
             return res.json(supportNetwork);
         } catch (error) {
             return res.status(500).json({ error: 'Erro ao listar rede de apoio.' });
+        }
+    },
+
+    async delete(req: Request, res: Response) {
+        try {
+            const { id } = req.params as { id: string };
+
+            // Seguridade: Admin não pode deletar a si mesmo
+            if (id === req.userId) {
+                return res.status(403).json({ error: 'Você não pode remover seu próprio acesso administrativo.' });
+            }
+
+            await authService.deleteUser(id);
+
+            // Auditoria
+            await AuditService.log({
+                userId: req.userId,
+                action: 'DELETE_USER',
+                target: `User:${id}`,
+                ip: req.ip,
+                userAgent: req.get('user-agent')
+            });
+
+            return res.status(204).send();
+        } catch (error: any) {
+            console.error('Erro ao deletar usuário:', error);
+            return res.status(500).json({ error: 'Erro ao deletar usuário. Verifique se ele possui vínculos pendentes.' });
         }
     }
 };

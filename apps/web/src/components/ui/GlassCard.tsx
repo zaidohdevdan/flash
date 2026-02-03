@@ -48,7 +48,6 @@ export const GlassCard: React.FC<GlassCardProps> = ({
       ${withBorder ? 'border border-white/50 ring-1 ring-white/30' : ''} 
       rounded-[2.5rem] 
       overflow-hidden 
-      overflow-hidden 
       ${className}
     `}
             style={style}

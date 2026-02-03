@@ -1,5 +1,5 @@
 import React from 'react';
-import { Users, User as UserIcon, MessageSquare } from 'lucide-react';
+import { Users, MessageSquare, Shield } from 'lucide-react';
 import { Avatar, GlassCard } from '../ui';
 
 /**
@@ -17,107 +17,181 @@ export interface TeamMember {
 }
 
 /**
+ * Interface para um grupo de membros.
+ */
+export interface TeamGroup {
+    id: string;
+    title: string;
+    members: TeamMember[];
+    icon?: React.ReactNode;
+}
+
+/**
  * Propriedades para o componente TeamSidebar.
  */
 export interface TeamSidebarProps {
-    members: TeamMember[];
+    /** Suporte para múltiplos grupos (com abas). */
+    groups?: TeamGroup[];
+    /** Lista única de membros (formato antigo/legado). */
+    members?: TeamMember[];
     /** Função chamada ao clicar para abrir chat com um membro. */
     onMemberClick: (member: TeamMember) => void;
-    /** Título da seção. */
+    /** Título da seção (usado para lista única). */
     title?: string;
+    /** Ícone da seção (usado para lista única). */
+    icon?: React.ReactNode;
     /** Carregando dados da equipe. */
     isLoading?: boolean;
 }
 
+// Sub-componente interno memoizado para cada item da lista
+const MemberItem = React.memo(({ member, onClick }: { member: TeamMember, onClick: (m: TeamMember) => void }) => (
+    <div
+        onClick={() => onClick(member)}
+        className="flex items-center gap-3 p-3 rounded-2xl hover:bg-white/80 transition-all cursor-pointer group/item relative border border-transparent hover:border-blue-100 hover:shadow-lg hover:shadow-blue-900/5 min-w-0"
+    >
+        <Avatar
+            src={member.avatarUrl}
+            size="md"
+            isOnline={member.isOnline}
+            className="group-hover/item:scale-105 transition-transform"
+        />
+        <div className="flex-1 min-w-0">
+            <h4 className={`text-xs font-black uppercase tracking-tighter truncate transition-colors ${member.hasUnread ? 'text-amber-600 animate-pulse-subtle font-black drop-shadow-[0_0_8px_rgba(245,158,11,0.3)]' : 'text-gray-900'}`}>
+                {member.name}
+            </h4>
+            <div className="flex items-center gap-1.5 mt-0.5">
+                <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest truncate">
+                    {member.role === 'MANAGER' ? (member.departmentName || 'Gerente') : member.role}
+                </span>
+            </div>
+            {member.statusPhrase && (
+                <p className="text-[9px] text-gray-400 font-medium italic truncate mt-0.5">
+                    "{member.statusPhrase}"
+                </p>
+            )}
+        </div>
+
+        {member.hasUnread ? (
+            <div className="absolute top-3 right-3 w-2 h-2 bg-amber-500 rounded-full border-2 border-white shadow-sm shadow-amber-500/50 animate-bounce" />
+        ) : (
+            <div className="opacity-0 group-hover/item:opacity-100 transition-opacity">
+                <MessageSquare className="w-3.5 h-3.5 text-blue-400" />
+            </div>
+        )}
+    </div>
+));
+
 /**
- * Sidebar de Equipe especializada.
- * Exibe membros, status de presença (online/offline) e notificações de mensagens não lidas.
+ * Sidebar lateral para exibição de equipe e contatos.
+ * Altamente performante através de memoização.
  */
-export const TeamSidebar: React.FC<TeamSidebarProps> = ({
+export const TeamSidebar: React.FC<TeamSidebarProps> = React.memo(({
+    groups,
     members,
     onMemberClick,
-    title = 'Equipe Operacional',
+    title = "Equipe Flash",
+    icon,
     isLoading = false
 }) => {
-    return (
-        <GlassCard
-            blur="lg"
-            className="p-6 md:p-8 flex flex-col h-full sticky top-24"
-        >
-            {/* Header */}
-            <div className="flex items-center gap-3 mb-8 pb-4 border-b border-white/60">
-                <div className="bg-blue-600 p-2.5 rounded-2xl shadow-lg shadow-blue-500/20">
-                    <Users className="w-5 h-5 text-white" />
-                </div>
-                <h2 className="text-[10px] font-black text-gray-950 uppercase tracking-widest">
-                    {title}
-                </h2>
-            </div>
+    const [activeGroupId, setActiveGroupId] = React.useState<string | null>(
+        groups && groups.length > 0 ? groups[0].id : null
+    );
 
-            {/* List */}
-            <div className="flex-1 overflow-y-auto custom-scrollbar -mx-2 px-2">
-                {isLoading ? (
-                    <div className="space-y-4">
-                        {[1, 2, 3].map(i => (
-                            <div key={i} className="flex items-center gap-4 animate-pulse">
-                                <div className="w-12 h-12 bg-gray-100 rounded-[1.25rem]" />
-                                <div className="flex-1 space-y-2">
-                                    <div className="h-2.5 bg-gray-100 rounded w-1/2" />
-                                    <div className="h-2 bg-gray-100 rounded w-1/3" />
-                                </div>
+    // Memoização da lista atual de membros
+    const currentMembers = React.useMemo(() => {
+        if (groups && groups.length > 0 && activeGroupId) {
+            return groups.find(g => g.id === activeGroupId)?.members || [];
+        }
+        return members || [];
+    }, [groups, members, activeGroupId]);
+
+    // Verificação se existe notificação em um grupo específico (memoizada)
+    const hasUnreadInGroup = React.useCallback((groupId: string) => {
+        if (!groups) return false;
+        const group = groups.find(g => g.id === groupId);
+        return group?.members.some(m => m.hasUnread) || false;
+    }, [groups]);
+
+    if (isLoading) {
+        return (
+            <GlassCard blur="lg" className="h-full flex flex-col !rounded-[3rem] border-white/40 shadow-2xl shadow-blue-900/10 p-6">
+                <div className="space-y-6">
+                    {[1, 2, 3, 4, 5].map(i => (
+                        <div key={i} className="flex gap-4 animate-pulse">
+                            <div className="w-10 h-10 bg-gray-100 rounded-2xl" />
+                            <div className="flex-1 space-y-2 py-1">
+                                <div className="h-3 bg-gray-100 rounded w-3/4" />
+                                <div className="h-2 bg-gray-50 rounded w-1/2" />
                             </div>
-                        ))}
-                    </div>
-                ) : members.length === 0 ? (
-                    <div className="text-center py-10">
-                        <UserIcon className="w-8 h-8 text-gray-200 mx-auto mb-3" />
-                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Nenhum colega</p>
+                        </div>
+                    ))}
+                </div>
+            </GlassCard>
+        );
+    }
+
+    return (
+        <GlassCard blur="lg" className="h-full flex flex-col !rounded-[3rem] border-white/40 shadow-2xl shadow-blue-900/10 overflow-hidden">
+            {/* Header / Nav */}
+            <div className="p-6 pb-2">
+                {!groups || groups.length <= 1 ? (
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/30">
+                            {icon || <Users className="w-5 h-5 text-white" />}
+                        </div>
+                        <div>
+                            <h3 className="text-xs font-black text-gray-950 uppercase tracking-[0.2em]">{title}</h3>
+                            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{currentMembers.length} Conectados</p>
+                        </div>
                     </div>
                 ) : (
-                    <div className="space-y-4 md:space-y-6">
-                        {members.map(member => (
-                            <div
-                                key={member.id}
-                                onClick={() => onMemberClick(member)}
-                                className="group flex items-center justify-between p-3 md:p-4 hover:bg-blue-50/50 rounded-2xl md:rounded-[2rem] transition-all border border-transparent hover:border-blue-100/30 cursor-pointer min-w-0"
-                            >
-                                <div className="flex items-center gap-3 md:gap-4 min-w-0">
-                                    <div className="relative shrink-0">
-                                        <Avatar
-                                            src={member.avatarUrl}
-                                            isOnline={member.isOnline}
-                                            size="lg"
-                                            className="group-hover:scale-105"
-                                        />
-                                        {member.hasUnread && (
-                                            <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-red-500 border-2 border-white rounded-full animate-pulse" />
-                                        )}
-                                    </div>
-                                    <div className="min-w-0">
-                                        <p className="text-sm font-black text-gray-900 leading-tight truncate">
-                                            {member.name}
-                                        </p>
-                                        <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest mt-0.5 truncate">
-                                            {member.role} {member.departmentName ? `• ${member.departmentName}` : ''}
-                                        </p>
-                                        {member.statusPhrase && (
-                                            <p className="text-[9px] text-blue-400 italic mt-1 truncate max-w-[120px]">
-                                                "{member.statusPhrase}"
-                                            </p>
-                                        )}
-                                    </div>
-                                </div>
+                    <div className="flex gap-2 p-1.5 bg-gray-50/80 rounded-[2rem] border border-gray-100 mb-6 h-14">
+                        {groups.map((group) => {
+                            const unread = hasUnreadInGroup(group.id);
+                            const isActive = activeGroupId === group.id;
+                            return (
+                                <button
+                                    key={group.id}
+                                    onClick={() => setActiveGroupId(group.id)}
+                                    className={`
+                                        flex-1 flex items-center justify-center gap-2 rounded-2xl transition-all relative
+                                        ${isActive
+                                            ? 'bg-white text-blue-600 shadow-md shadow-blue-900/10 border border-blue-50/50 font-black'
+                                            : 'text-gray-400 hover:text-gray-600 hover:bg-white/40 font-bold'}
+                                    `}
+                                >
+                                    {group.icon || (group.id === 'apoio' ? <Shield className="w-4 h-4" /> : <Users className="w-4 h-4" />)}
+                                    <span className="text-[10px] uppercase tracking-widest hidden sm:inline">{group.title}</span>
+                                    {unread && (
+                                        <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-amber-500 border-2 border-white rounded-full shadow-[0_0_8px_rgba(245,158,11,0.5)] animate-bounce" />
+                                    )}
+                                </button>
+                            );
+                        })}
+                    </div>
+                )}
+            </div>
 
-                                <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <div className="bg-white p-2 rounded-xl shadow-sm text-blue-600">
-                                        <MessageSquare className="w-4 h-4" />
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
+            {/* List area */}
+            <div className="flex-1 overflow-y-auto px-3 pb-8 custom-scrollbar space-y-1">
+                {currentMembers.length > 0 ? (
+                    currentMembers.map(member => (
+                        <MemberItem
+                            key={member.id}
+                            member={member}
+                            onClick={onMemberClick}
+                        />
+                    ))
+                ) : (
+                    <div className="py-20 text-center">
+                        <div className="w-16 h-16 bg-gray-50 rounded-[2rem] flex items-center justify-center mx-auto mb-4 border border-gray-100">
+                            <Users className="w-8 h-8 text-gray-200" />
+                        </div>
+                        <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest">Nenhum membro ativo</p>
                     </div>
                 )}
             </div>
         </GlassCard>
     );
-};
+});

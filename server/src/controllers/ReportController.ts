@@ -4,6 +4,7 @@ import { ReportStatus } from '../generated/prisma'
 import { prisma } from '../lib/prisma';
 import { ReportService } from '../services/ReportService';
 import { MediaService } from '../services/MediaService';
+import { AuditService } from '../services/AuditService';
 import { PrismaMediaRepository } from '../repositories/implementations/PrismaMediaRepository';
 
 // Instâncias compartilhadas
@@ -126,7 +127,7 @@ export const ReportController = {
     // Create a new report (imagem obrigatória + Cloudinary)
     // controllers/ReportController.ts
     create: async (req: Request, res: Response) => {
-        const { comment, imageUrl } = req.body;
+        const { comment, imageUrl, latitude, longitude } = req.body;
         const userId = req.userId!;
 
         console.log(`[Report] Criando reporte para usuário: ${userId}`);
@@ -144,8 +145,19 @@ export const ReportController = {
                 comment,
                 userId,
                 imageUrl,
+                latitude: latitude ? parseFloat(latitude) : undefined,
+                longitude: longitude ? parseFloat(longitude) : undefined,
             });
             console.log("[Report] Relatório salvo com ID:", report.id);
+
+            // Auditoria
+            await AuditService.log({
+                userId,
+                action: 'CREATE_REPORT',
+                target: `Report:${report.id}`,
+                ip: req.ip,
+                userAgent: req.get('user-agent')
+            });
 
             // 3) notifica supervisor (igual já está)
             if (report.user.supervisorId) {
@@ -220,6 +232,16 @@ export const ReportController = {
                 operatorName,
                 departmentId,
             );
+
+            // Auditoria
+            await AuditService.log({
+                userId: req.userId,
+                action: 'UPDATE_REPORT_STATUS',
+                target: `Report:${id}`,
+                details: { status, feedback, departmentId },
+                ip: req.ip,
+                userAgent: req.get('user-agent')
+            });
 
             const targetRoom = updatedReport.userId.toString();
 

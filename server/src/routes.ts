@@ -7,6 +7,7 @@ import { DepartmentController } from './controllers/DepartmentController';
 import { ProfileController } from './controllers/ProfileController';
 import { AuthMiddleware } from './middlewares/AuthMiddleware';
 import { AdminMiddleware } from './middlewares/AdminMiddleware';
+import { loginRateLimiter } from './middlewares/rateLimit';
 import { PrismaMediaRepository } from './repositories/implementations/PrismaMediaRepository';
 import { MediaService } from './services/MediaService';
 import { MediaController } from './controllers/MediaController';
@@ -29,11 +30,12 @@ routes.get('/reports/:reportId/media', AuthMiddleware, mediaController.listByRep
 routes.delete('/media/:publicId', AuthMiddleware, mediaController.deleteByPublicId,);
 
 // Autenticação// Auth
-routes.post('/login', AuthController.login);
+routes.post('/login', loginRateLimiter, AuthController.login);
 routes.post('/register', AuthMiddleware, AdminMiddleware, AuthController.register);
 routes.get('/supervisors', AuthController.listSupervisors);
 routes.get('/users', AuthMiddleware, AdminMiddleware, AuthController.listAllUsers);
 routes.put('/users/:id', AuthMiddleware, AdminMiddleware, AuthController.update);
+routes.delete('/users/:id', AuthMiddleware, AdminMiddleware, AuthController.delete);
 routes.get('/subordinates', AuthMiddleware, AuthController.listSubordinates);
 routes.get('/support-network', AuthMiddleware, AuthController.listSupportNetwork);
 

@@ -1,16 +1,28 @@
+import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { Login } from './pages/Login';
-import { Register } from './pages/Register';
-import { Dashboard } from './pages/Dashboard';
-import { CreateReport } from './pages/CreateReport';
-import { AdminDashboard } from './pages/AdminDashboard';
-import { ManagerDashboard } from './pages/ManagerDashboard';
-import { Home } from './pages/Home';
 import { Toaster } from 'react-hot-toast';
 
-import { Analytics } from './pages/Analytics';
-import { Profile } from './pages/Profile';
+// Lazy loaded pages
+const Login = lazy(() => import('./pages/Login').then(m => ({ default: m.Login })));
+const Register = lazy(() => import('./pages/Register').then(m => ({ default: m.Register })));
+const Dashboard = lazy(() => import('./pages/Dashboard').then(m => ({ default: m.Dashboard })));
+const CreateReport = lazy(() => import('./pages/CreateReport').then(m => ({ default: m.CreateReport })));
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard').then(m => ({ default: m.AdminDashboard })));
+const ManagerDashboard = lazy(() => import('./pages/ManagerDashboard').then(m => ({ default: m.ManagerDashboard })));
+const Home = lazy(() => import('./pages/Home').then(m => ({ default: m.Home })));
+const Analytics = lazy(() => import('./pages/Analytics').then(m => ({ default: m.Analytics })));
+const Profile = lazy(() => import('./pages/Profile').then(m => ({ default: m.Profile })));
+
+// Loading Component
+const PageLoader = () => (
+  <div className="flex h-screen w-full items-center justify-center bg-gray-50/50 backdrop-blur-sm">
+    <div className="flex flex-col items-center gap-4">
+      <div className="w-12 h-12 border-4 border-blue-600/20 border-t-blue-600 rounded-full animate-spin"></div>
+      <p className="text-[10px] font-black text-blue-600 uppercase tracking-[0.2em] animate-pulse">Carregando Flash...</p>
+    </div>
+  </div>
+);
 
 // Placeholders for now
 
@@ -102,7 +114,9 @@ function App() {
     <AuthProvider>
       <Toaster position="top-center" reverseOrder={false} />
       <BrowserRouter>
-        <AppRoutes />
+        <Suspense fallback={<PageLoader />}>
+          <AppRoutes />
+        </Suspense>
       </BrowserRouter>
     </AuthProvider>
   );

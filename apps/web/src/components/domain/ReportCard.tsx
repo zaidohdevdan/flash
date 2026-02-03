@@ -41,7 +41,7 @@ export interface ReportCardProps {
  * Card unificado para exibição de reportes.
  * Suporta estados para Supervisor e para o Histórico do Profissional.
  */
-export const ReportCard: React.FC<ReportCardProps> = ({
+export const ReportCard: React.FC<ReportCardProps> = React.memo(({
     report,
     showUser = false,
     onClick,
@@ -139,4 +139,4 @@ export const ReportCard: React.FC<ReportCardProps> = ({
             </div>
         </Card >
     );
-};
+});

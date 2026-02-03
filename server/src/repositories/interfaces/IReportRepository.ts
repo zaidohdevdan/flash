@@ -4,6 +4,8 @@ export interface CreateReportDTO {
     comment: string;
     userId: string;
     imageUrl?: string;
+    latitude?: number;
+    longitude?: number;
 }
 
 export type ReportWithUser = Report & {

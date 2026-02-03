@@ -76,7 +76,8 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket }: ChatWid
 
                 if (senderId !== currentUser.id) {
                     const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
-                    audio.play().catch(e => console.error('Erro ao tocar som:', e));
+                    // Silenciamos o erro se o usuário ainda não interagiu com a página
+                    audio.play().catch(() => { });
                 }
             }
         };
@@ -253,7 +254,7 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket }: ChatWid
     };
 
     return (
-        <div className="fixed bottom-0 right-0 sm:bottom-4 sm:right-4 w-full sm:w-96 h-[500px] max-h-[100vh] sm:max-h-[calc(100vh-2rem)] bg-white/60 backdrop-blur-[32px] rounded-t-2xl sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-white/50 ring-1 ring-white/20 z-50 animate-in slide-in-from-bottom-10 fade-in duration-300">
+        <div className="fixed inset-0 sm:top-auto sm:left-auto sm:bottom-6 sm:right-6 w-full sm:w-[400px] md:w-[440px] h-[100dvh] sm:h-[650px] sm:max-h-[calc(100vh-4rem)] bg-white/70 backdrop-blur-[32px] sm:rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden sm:border border-white/60 ring-1 ring-white/20 z-[60] animate-in slide-in-from-bottom-5 fade-in duration-500">
             {/* Header */}
             <div className="p-4 bg-blue-600/80 backdrop-blur-xl text-white flex justify-between items-center border-b border-white/10">
                 <div className="flex items-center gap-3">
@@ -285,7 +286,7 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket }: ChatWid
             </div>
 
             {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto p-4 bg-gray-50/50 space-y-4 overscroll-contain">
+            <div className="flex-1 overflow-y-auto p-4 bg-white/30 backdrop-blur-sm space-y-4 overscroll-contain">
                 {messages.length === 0 && (
                     <div className="flex flex-col items-center justify-center h-full text-gray-400 opacity-50">
                         <MessageSquare className="w-12 h-12 mb-2" />

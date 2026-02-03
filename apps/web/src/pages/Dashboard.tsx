@@ -1,43 +1,33 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
-import { io } from 'socket.io-client';
 import { toast } from 'react-hot-toast';
+import { useDashboardSocket } from '../hooks/useDashboardSocket';
 import {
     Clock,
     CheckCircle,
     AlertCircle,
     History,
     Folder,
-    MessageSquare,
-    TrendingUp,
-    BarChart3,
-    Search
+    Users,
+    Shield
 } from 'lucide-react';
 import { ChatWidget } from '../components/ChatWidget';
 import {
-    Avatar,
-    Badge,
     Button,
-    Input,
-    TextArea,
-    GlassCard,
-    Modal,
     Header,
-    Card
 } from '../components/ui';
-import { KpiCard, ReportCard, TeamSidebar } from '../components/domain';
+import { TeamSidebar, DashboardHero, ReportFeed } from '../components/domain';
+import { MapView } from '../components/domain/MapView';
+import { ReportHistoryModal } from '../components/domain/modals/ReportHistoryModal';
+import { AnalysisModal } from '../components/domain/modals/AnalysisModal';
+import { ProfileSettingsModal } from '../components/domain/modals/ProfileSettingsModal';
+import { ExportReportsModal } from '../components/domain/modals/ExportReportsModal';
 
-const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
-interface ReportHistory {
-    id: string;
-    status: string;
-    comment: string;
-    userName: string;
-    departmentName?: string;
-    createdAt: string;
-}
+
+import type { Report, Stats, Department, UserContact } from '../types';
 
 interface Subordinate {
     id: string;
@@ -48,85 +38,133 @@ interface Subordinate {
     isOnline?: boolean;
 }
 
-interface UserContact {
-    id: string;
-    name: string;
-    role: string;
-    avatarUrl?: string | null;
-    statusPhrase?: string;
-    isOnline?: boolean;
-    departmentName?: string;
-}
-
-interface Stats {
-    status: string;
-    _count: number;
-}
-
-interface Report {
-    id: string;
-    imageUrl: string;
-    comment: string;
-    feedback?: string;
-    status: 'SENT' | 'IN_REVIEW' | 'FORWARDED' | 'RESOLVED' | 'ARCHIVED';
-    history: ReportHistory[];
-    departmentId?: string | null;
-    department?: { name: string };
-    createdAt: string;
-    user: {
-        name: string;
-        avatarUrl?: string | null;
-        statusPhrase?: string;
-    };
-}
-
-interface Department {
-    id: string;
-    name: string;
-}
-
 export function Dashboard() {
+    const navigate = useNavigate();
     const { user, signOut, updateUser } = useAuth();
+
+    // Core Data State
     const [reports, setReports] = useState<Report[]>([]);
     const [stats, setStats] = useState<Stats[]>([]);
     const [subordinates, setSubordinates] = useState<Subordinate[]>([]);
     const [contacts, setContacts] = useState<UserContact[]>([]);
     const [departments, setDepartments] = useState<Department[]>([]);
 
-    // Modals
-    const [selectedReport, setSelectedReport] = useState<Report | null>(null);
-    const [analyzingReport, setAnalyzingReport] = useState<Report | null>(null);
-    const [isProfileOpen, setIsProfileOpen] = useState(false);
-    const [targetStatus, setTargetStatus] = useState<'IN_REVIEW' | 'FORWARDED' | 'RESOLVED'>('IN_REVIEW');
-
-    // Profile Form
-    const [profilePhrase, setProfilePhrase] = useState(user?.statusPhrase || '');
-    const [profileAvatar, setProfileAvatar] = useState<File | null>(null);
-    const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
-
-    // Chat
-    const [chatTarget, setChatTarget] = useState<Subordinate | UserContact | null>(null);
-    const [socket, setSocket] = useState<any>(null);
-    const [onlineUserIds, setOnlineUserIds] = useState<string[]>([]);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [unreadMessages, setUnreadMessages] = useState<Record<string, boolean>>({});
-
-    const playNotificationSound = () => {
-        const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
-        audio.play().catch(e => console.error('Erro ao tocar som:', e));
-    };
-
-    // Form for Forwarding/Review
-    const [formFeedback, setFormFeedback] = useState('');
-    const [selectedDeptId, setSelectedDeptId] = useState('');
-
+    // Filter & Pagination State
     const [page, setPage] = useState(1);
     const [statusFilter, setStatusFilter] = useState<string>('SENT');
     const [startDate, setStartDate] = useState<string>('');
     const [endDate, setEndDate] = useState<string>('');
     const [hasMore, setHasMore] = useState(true);
+    const [searchTerm, setSearchTerm] = useState('');
     const LIMIT = 6;
 
+    // Modals & UI State
+    const [selectedReport, setSelectedReport] = useState<Report | null>(null);
+    const [analyzingReport, setAnalyzingReport] = useState<Report | null>(null);
+    const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+    const [targetStatus, setTargetStatus] = useState<'IN_REVIEW' | 'FORWARDED' | 'RESOLVED'>('IN_REVIEW');
+    const [formFeedback, setFormFeedback] = useState('');
+    const [selectedDeptId, setSelectedDeptId] = useState('');
+    const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
+
+    // Profile State
+    const [profilePhrase, setProfilePhrase] = useState(user?.statusPhrase || '');
+    const [profileAvatar, setProfileAvatar] = useState<File | null>(null);
+    const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
+
+    // Chat Hooks & Derivations
+    const [searchParams, setSearchParams] = useSearchParams();
+    const activeChatId = searchParams.get('chat');
+
+    const socketUser = useMemo(() => user ? {
+        id: user.id || '',
+        name: user.name || '',
+        role: user.role || ''
+    } : null, [user?.id, user?.name, user?.role]);
+
+    const {
+        socket,
+        onlineUserIds,
+        unreadMessages,
+        markAsRead,
+        playNotificationSound
+    } = useDashboardSocket({
+        user: socketUser,
+        onNotification: (data) => {
+            if (activeChatId !== data.from) {
+                toast(`Mensagem de ${data.fromName || 'Subordinado'}: ${data.text}`, {
+                    icon: '💬',
+                    duration: 5000,
+                    style: {
+                        borderRadius: '1.5rem',
+                        background: '#333',
+                        color: '#fff',
+                        fontSize: '12px',
+                        fontWeight: 'bold'
+                    }
+                });
+                playNotificationSound();
+            } else {
+                markAsRead(data.from);
+            }
+        }
+    });
+
+    const teamGroups = useMemo(() => [
+        {
+            id: 'operacional',
+            title: 'Operacional',
+            icon: <Users className="w-3 h-3" />,
+            members: subordinates.map(s => ({
+                id: s.id,
+                name: s.name,
+                role: s.role,
+                avatarUrl: s.avatarUrl,
+                isOnline: onlineUserIds.includes(s.id),
+                statusPhrase: s.statusPhrase,
+                hasUnread: !!unreadMessages[s.id]
+            }))
+        },
+        ...(contacts.length > 0 ? [{
+            id: 'apoio',
+            title: 'Apoio',
+            icon: <Shield className="w-3 h-3" />,
+            members: contacts.map(c => ({
+                id: c.id,
+                name: c.name,
+                role: c.role,
+                departmentName: c.departmentName,
+                avatarUrl: c.avatarUrl,
+                isOnline: onlineUserIds.includes(c.id),
+                statusPhrase: c.statusPhrase,
+                hasUnread: !!unreadMessages[c.id]
+            }))
+        }] : [])
+    ], [subordinates, contacts, onlineUserIds, unreadMessages]);
+
+    const chatTarget = useMemo(() => {
+        if (!activeChatId) return null;
+        return teamGroups.flatMap(g => g.members).find(m => m.id === activeChatId) || null;
+    }, [activeChatId, teamGroups]);
+
+    useEffect(() => {
+        if (activeChatId) {
+            markAsRead(activeChatId);
+            if (window.innerWidth < 1024) {
+                document.body.style.overflow = 'hidden';
+            }
+        } else {
+            document.body.style.overflow = 'unset';
+        }
+        return () => { document.body.style.overflow = 'unset'; };
+    }, [activeChatId, markAsRead]);
+
+    const handleCloseChat = () => {
+        setSearchParams({}, { replace: true });
+    };
+
+    // Data Fetching
     const loadReports = async (pageNum: number, reset: boolean = false, status?: string) => {
         try {
             let url = `/reports?page=${pageNum}&limit=${LIMIT}`;
@@ -192,35 +230,18 @@ export function Dashboard() {
         loadDepartments();
     }, []);
 
-    // Socket Connection Lifecycle
+    // Socket Events Specific to Dashboard
     useEffect(() => {
-        if (!user?.id) return;
+        if (!socket) return;
 
-        const newSocket = io(SOCKET_URL, {
-            query: { userId: user.id, role: user.role, userName: user.name }
-        });
-        setSocket(newSocket);
-
-        newSocket.on('new_report_to_review', (data: { data: Report }) => {
+        socket.on('new_report_to_review', (data: { data: Report }) => {
             if (!statusFilter || statusFilter === 'SENT') {
                 setReports(prev => [data.data, ...prev]);
             }
             loadStats();
         });
 
-        newSocket.on('initial_presence_list', (ids: string[]) => {
-            setOnlineUserIds(ids);
-        });
-
-        newSocket.on('user_online', ({ userId }: { userId: string }) => {
-            setOnlineUserIds(prev => prev.includes(userId) ? prev : [...prev, userId]);
-        });
-
-        newSocket.on('user_offline', ({ userId }: { userId: string }) => {
-            setOnlineUserIds(prev => prev.filter(id => id !== userId));
-        });
-
-        newSocket.on('report_status_updated_for_supervisor', (data: Report) => {
+        socket.on('report_status_updated_for_supervisor', (data: Report) => {
             setReports(prev => {
                 if (statusFilter && statusFilter !== data.status) return prev.filter(r => r.id !== data.id);
                 const exists = prev.find(r => r.id === data.id);
@@ -233,41 +254,10 @@ export function Dashboard() {
         });
 
         return () => {
-            newSocket.disconnect();
-            setSocket(null);
+            socket.off('new_report_to_review');
+            socket.off('report_status_updated_for_supervisor');
         };
-    }, [user?.id, user?.name, user?.role]);
-
-    // Chat Notifications Listener
-    useEffect(() => {
-        if (!socket) return;
-
-        const chatTargetId = chatTarget?.id;
-
-        const handleNotification = (data: { from: string, fromName?: string, text: string }) => {
-            if (chatTargetId !== data.from) {
-                setUnreadMessages(prev => ({ ...prev, [data.from]: true }));
-                playNotificationSound();
-                toast(`Mensagem de ${data.fromName || 'Subordinado'}: ${data.text}`, {
-                    icon: '💬',
-                    duration: 5000,
-                    style: {
-                        borderRadius: '1.5rem',
-                        background: '#333',
-                        color: '#fff',
-                        fontSize: '12px',
-                        fontWeight: 'bold'
-                    }
-                });
-            }
-        };
-
-        socket.on('new_chat_notification', handleNotification);
-
-        return () => {
-            socket.off('new_chat_notification', handleNotification);
-        };
-    }, [socket, chatTarget?.id]);
+    }, [socket, statusFilter]);
 
     async function handleProcessAnalysis() {
         if (!analyzingReport) return;
@@ -339,8 +329,10 @@ export function Dashboard() {
         setTargetStatus('IN_REVIEW');
     }
 
+
+
     return (
-        <div className="min-h-screen bg-slate-50/50 flex flex-col font-sans selection:bg-blue-100 selection:text-blue-900 transition-colors duration-700">
+        <div className="min-h-screen bg-slate-50/50 flex flex-col font-sans selection:bg-blue-100 selection:text-blue-900 transition-colors duration-700 overflow-x-hidden">
             <Header
                 user={{
                     name: user?.name,
@@ -350,105 +342,55 @@ export function Dashboard() {
             />
 
             {/* Hero / Filter Section */}
-            <div className="bg-[#020617] relative overflow-hidden pb-24 pt-12">
-                <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-blue-600/25 rounded-full blur-[160px] -mr-96 -mt-96 animate-pulse duration-[10s]" />
-                <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-indigo-600/20 rounded-full blur-[140px] -ml-40 -mb-40" />
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.08),transparent_80%)]" />
-
-                <div className="max-w-7xl mx-auto px-6 relative z-10">
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-10">
-                        <div className="flex items-center gap-6">
-                            <div>
-                                <h2 className="text-3xl font-black text-white tracking-tight uppercase">Painel de Controle</h2>
-                                <p className="text-white/90 text-sm font-medium mt-1 uppercase tracking-widest">Controle operacional em tempo real</p>
-                            </div>
-                            <Button
-                                variant="glass"
-                                className="!px-4 !py-2 !bg-blue-500/20 hover:!bg-blue-500/30 text-blue-300 border-blue-500/30 backdrop-blur-md"
-                                onClick={() => window.location.href = '/analytics'}
-                            >
-                                <BarChart3 className="w-5 h-5 mr-2" />
-                                Analytics
-                            </Button>
-                        </div>
-
-                        <div className="flex flex-col gap-4">
-                            <GlassCard blur="lg" className="p-1 px-1.5 flex items-center gap-1 border-white/10 !rounded-2xl">
-                                {[
-                                    { id: '', label: 'Todos' },
-                                    { id: 'SENT', label: 'Recebidos' },
-                                    { id: 'IN_REVIEW', label: 'Análise' },
-                                    { id: 'FORWARDED', label: 'Tramite' },
-                                    { id: 'RESOLVED', label: 'Feitos' },
-                                ].map(filter => (
-                                    <button
-                                        key={filter.id}
-                                        onClick={() => { setStatusFilter(filter.id); setPage(1); }}
-                                        className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${statusFilter === filter.id
-                                            ? filter.id === 'SENT' ? 'bg-yellow-500 text-white shadow-lg shadow-yellow-500/30'
-                                                : filter.id === 'IN_REVIEW' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
-                                                    : filter.id === 'FORWARDED' ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/30'
-                                                        : filter.id === 'RESOLVED' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/30'
-                                                            : filter.id === '' ? 'bg-gray-900 text-white shadow-lg shadow-gray-900/10'
-                                                                : 'bg-blue-600 text-white shadow-lg'
-                                            : 'text-gray-400 hover:text-white hover:bg-white/10'
-                                            }`}
-                                    >
-                                        {filter.label}
-                                    </button>
-                                ))}
-                            </GlassCard>
-
-                            <GlassCard variant="light" blur="lg" className="flex items-center gap-2 bg-white/80 backdrop-blur-xl p-1.5 !rounded-2xl border border-white/20">
-                                <div className="flex items-center gap-2 px-3 border-r border-gray-200">
-                                    <Clock className="w-3.5 h-3.5 text-blue-600" />
-                                    <input
-                                        type="date"
-                                        value={startDate}
-                                        onChange={e => setStartDate(e.target.value)}
-                                        className="bg-transparent text-[9px] font-bold outline-none text-gray-900 h-6 uppercase"
-                                    />
-                                </div>
-                                <div className="flex items-center gap-2 px-3">
-                                    <Clock className="w-3.5 h-3.5 text-blue-600" />
-                                    <input
-                                        type="date"
-                                        value={endDate}
-                                        onChange={e => setEndDate(e.target.value)}
-                                        className="bg-transparent text-[9px] font-bold outline-none text-gray-900 h-6 uppercase"
-                                    />
-                                </div>
-                                {(startDate || endDate) && (
-                                    <button
-                                        onClick={() => { setStartDate(''); setEndDate(''); }}
-                                        className="p-1 hover:bg-red-50 rounded-lg transition text-gray-400 hover:text-red-500"
-                                    >
-                                        <AlertCircle className="w-3.5 h-3.5" />
-                                    </button>
-                                )}
-                            </GlassCard>
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        {[
-                            { label: 'Recebidos', status: 'SENT', icon: AlertCircle, color: 'blue' as const },
-                            { label: 'Em Análise', status: 'IN_REVIEW', icon: Clock, color: 'purple' as const },
-                            { label: 'Encaminhados', status: 'FORWARDED', icon: Folder, color: 'orange' as const },
-                            { label: 'Finalizados', status: 'RESOLVED', icon: CheckCircle, color: 'emerald' as const },
-                        ].map(kpi => (
-                            <KpiCard
-                                key={kpi.status}
-                                label={kpi.label}
-                                value={stats.find(s => s.status === kpi.status)?._count || 0}
-                                icon={kpi.icon}
-                                variant={kpi.color}
-                                trend={kpi.status === 'SENT' ? 'Pendentes' : undefined}
-                            />
-                        ))}
-                    </div>
+            <DashboardHero
+                title="Painel de Controle"
+                subtitle="Controle operacional em tempo real"
+                stats={stats}
+                statusFilter={statusFilter}
+                onStatusFilterChange={(s) => { setStatusFilter(s); setPage(1); }}
+                filters={[
+                    { id: '', label: 'Todos' },
+                    { id: 'SENT', label: 'Recebidos' },
+                    { id: 'IN_REVIEW', label: 'Análise' },
+                    { id: 'FORWARDED', label: 'Tramite' },
+                    { id: 'RESOLVED', label: 'Feitos' },
+                    { id: 'ARCHIVED', label: 'Arquivados' }
+                ]}
+                kpiConfigs={[
+                    { label: 'Recebidos', status: 'SENT', icon: AlertCircle, color: 'blue' },
+                    { label: 'Em Análise', status: 'IN_REVIEW', icon: Clock, color: 'purple' },
+                    { label: 'Encaminhados', status: 'FORWARDED', icon: Folder, color: 'orange' },
+                    { label: 'Finalizados', status: 'RESOLVED', icon: CheckCircle, color: 'emerald' },
+                ]}
+                showDateFilters
+                startDate={startDate}
+                endDate={endDate}
+                onStartDateChange={setStartDate}
+                onEndDateChange={setEndDate}
+                onClearDates={() => { setStartDate(''); setEndDate(''); }}
+                onAnalyticsClick={() => navigate('/analytics')}
+                onExportClick={() => setIsExportModalOpen(true)}
+            >
+                <div className="flex bg-white/10 backdrop-blur-md p-1 rounded-xl border border-white/10">
+                    <button
+                        onClick={() => setViewMode('list')}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${viewMode === 'list' ? 'bg-blue-600 text-white shadow-lg' : 'text-blue-200 hover:bg-white/10'}`}
+                    >
+                        Lista
+                    </button>
+                    <button
+                        onClick={() => setViewMode('map')}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${viewMode === 'map' ? 'bg-blue-600 text-white shadow-lg' : 'text-blue-200 hover:bg-white/10'}`}
+                    >
+                        Mapa
+                    </button>
                 </div>
-            </div>
+
+                {/* Background Decorations for Supervisor */}
+                <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-blue-600/25 rounded-full blur-[160px] -mr-96 -mt-96 animate-pulse duration-[10s] pointer-events-none" />
+                <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-indigo-600/20 rounded-full blur-[140px] -ml-40 -mb-40 pointer-events-none" />
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.08),transparent_80%)] pointer-events-none" />
+            </DashboardHero>
 
             {/* Main Content */}
             <main className="max-w-7xl mx-auto px-6 w-full -mt-20 mb-20 relative flex flex-col lg:flex-row gap-12">
@@ -456,271 +398,104 @@ export function Dashboard() {
                 <div className="absolute -z-10 top-0 left-1/4 w-[500px] h-[500px] bg-blue-400/10 rounded-full blur-[120px] pointer-events-none" />
                 <div className="absolute -z-10 bottom-0 right-1/4 w-[400px] h-[400px] bg-purple-400/10 rounded-full blur-[100px] pointer-events-none" />
 
-                {/* Reports Feed */}
-                <div className="flex-1 space-y-6">
-                    <Card variant="glass" className="p-4 border-white/10 !rounded-[2rem]">
-                        <div className="relative group">
-                            <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-400 opacity-60 group-focus-within:opacity-100 transition-opacity" />
-                            <input
-                                type="text"
-                                placeholder="Buscar por protocolo (#000000) ou palavras-chave..."
-                                value={searchTerm}
-                                onChange={e => setSearchTerm(e.target.value)}
-                                className="w-full pl-14 pr-8 py-4 bg-white/5 border border-white/5 rounded-3xl outline-none focus:bg-white/10 focus:border-blue-500/30 transition-all text-sm font-bold text-white placeholder:text-gray-500 placeholder:font-medium placeholder:uppercase placeholder:tracking-widest"
-                            />
-                        </div>
-                    </Card>
-
-                    {reports.length === 0 ? (
-                        <Card variant="glass" className="p-20 flex flex-col items-center justify-center text-gray-400">
-                            <MessageSquare className="w-12 h-12 mb-4 opacity-20" />
-                            <p className="font-bold uppercase tracking-widest text-[10px] text-gray-600">Nenhum reporte encontrado</p>
-                        </Card>
-                    ) : (
-                        <div className="grid gap-6">
-                            {reports.filter(r =>
-                                r.comment.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                r.id.toLowerCase().includes(searchTerm.toLowerCase())
-                            ).map(report => (
-                                <ReportCard
-                                    key={report.id}
-                                    report={report}
-                                    showUser
-                                    actions={
-                                        <div className="flex gap-2 w-full">
-                                            {report.status !== 'RESOLVED' && report.status !== 'ARCHIVED' && (
-                                                <Button
-                                                    variant="primary"
-                                                    size="sm"
-                                                    fullWidth
-                                                    onClick={() => { setAnalyzingReport(report); setTargetStatus('FORWARDED'); }}
-                                                    disabled={!!report.departmentId}
-                                                >
-                                                    {report.departmentId ? 'Em Setor' : 'Trâmite'}
-                                                </Button>
-                                            )}
-                                            {report.status === 'RESOLVED' && (
-                                                <Button variant="secondary" size="sm" fullWidth onClick={() => handleUpdateStatus(report.id, 'ARCHIVED')}>Arquivar</Button>
-                                            )}
-                                            <Button variant="ghost" size="sm" onClick={() => setSelectedReport(report)}>
-                                                <History className="w-4 h-4" />
-                                            </Button>
-                                        </div>
-                                    }
-                                />
-                            ))}
-                        </div>
-                    )}
-
-                    {hasMore && reports.length > 0 && (
-                        <div className="flex justify-center pt-8">
-                            <Button variant="secondary" size="lg" onClick={handleLoadMore} className="bg-white px-10">
-                                Carregar Mais
-                            </Button>
-                        </div>
-                    )}
-                </div>
-
-                <aside className="w-full lg:w-80 shrink-0 flex flex-col gap-6">
-                    <TeamSidebar
-                        title="Equipe Operacional"
-                        members={subordinates.map(s => ({
-                            id: s.id,
-                            name: s.name,
-                            role: s.role,
-                            avatarUrl: s.avatarUrl,
-                            isOnline: onlineUserIds.includes(s.id),
-                            statusPhrase: s.statusPhrase,
-                            hasUnread: !!unreadMessages[s.id]
-                        }))}
-                        onMemberClick={(member) => {
-                            setChatTarget(member);
-                            setUnreadMessages(prev => ({ ...prev, [member.id]: false }));
-                        }}
+                {viewMode === 'list' ? (
+                    <ReportFeed
+                        reports={reports.filter(r =>
+                            r.comment.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            r.id.toLowerCase().includes(searchTerm.toLowerCase())
+                        )}
+                        searchTerm={searchTerm}
+                        onSearchChange={setSearchTerm}
+                        hasMore={hasMore}
+                        onLoadMore={handleLoadMore}
+                        renderReportActions={(report) => (
+                            <div className="flex gap-2 w-full">
+                                {report.status !== 'RESOLVED' && report.status !== 'ARCHIVED' && (
+                                    <Button
+                                        variant="primary"
+                                        size="sm"
+                                        fullWidth
+                                        onClick={() => { setAnalyzingReport(report as any); setTargetStatus('FORWARDED'); }}
+                                        disabled={!!(report as any).departmentId}
+                                    >
+                                        {(report as any).departmentId ? 'Em Setor' : 'Trâmite'}
+                                    </Button>
+                                )}
+                                {report.status === 'RESOLVED' && (
+                                    <Button variant="secondary" size="sm" fullWidth onClick={() => handleUpdateStatus(report.id, 'ARCHIVED')}>Arquivar</Button>
+                                )}
+                                <Button variant="ghost" size="sm" onClick={() => setSelectedReport(report as any)}>
+                                    <History className="w-4 h-4" />
+                                </Button>
+                            </div>
+                        )}
                     />
+                ) : (
+                    <div className="w-full h-[600px]">
+                        <MapView reports={reports} onMarkerClick={(report) => {
+                            setSelectedReport(report);
+                            // Opcional: abrir modal de detalhes ou chat
+                        }} />
+                    </div>
+                )}
 
-                    {contacts.length > 0 && (
-                        <TeamSidebar
-                            title="Rede de Apoio"
-                            members={contacts.map(c => ({
-                                id: c.id,
-                                name: c.name,
-                                role: c.role,
-                                departmentName: c.departmentName,
-                                avatarUrl: c.avatarUrl,
-                                isOnline: onlineUserIds.includes(c.id),
-                                statusPhrase: c.statusPhrase,
-                                hasUnread: !!unreadMessages[c.id]
-                            }))}
-                            onMemberClick={(member) => {
-                                setChatTarget(member);
-                                setUnreadMessages(prev => ({ ...prev, [member.id]: false }));
-                            }}
-                        />
-                    )}
+                <aside className="w-full lg:w-80 shrink-0">
+                    <TeamSidebar
+                        onMemberClick={(member) => {
+                            setSearchParams({ chat: member.id }, { replace: true });
+                            markAsRead(member.id);
+                        }}
+                        groups={teamGroups}
+                    />
                 </aside>
             </main>
 
-            {/* Analysis Modal */}
-            <Modal
+            <AnalysisModal
                 isOpen={!!analyzingReport}
                 onClose={() => { setAnalyzingReport(null); resetAnalysisForm(); }}
+                onConfirm={handleProcessAnalysis}
+                targetStatus={targetStatus}
+                setTargetStatus={setTargetStatus}
+                feedback={formFeedback}
+                setFeedback={setFormFeedback}
+                selectedDeptId={selectedDeptId}
+                setSelectedDeptId={setSelectedDeptId}
+                departments={departments}
                 title={analyzingReport?.status === 'FORWARDED' ? `Resposta: ${analyzingReport?.department?.name}` : 'Análise de Fluxo'}
-                subtitle="Gestão de Operações e Feedback"
-                maxWidth="lg"
-                footer={
-                    <>
-                        <Button variant="secondary" onClick={() => { setAnalyzingReport(null); resetAnalysisForm(); }}>
-                            Cancelar
-                        </Button>
-                        <Button
-                            variant={targetStatus === 'RESOLVED' ? 'success' : targetStatus === 'FORWARDED' ? 'primary' : 'primary'}
-                            onClick={handleProcessAnalysis}
-                        >
-                            {targetStatus === 'RESOLVED' ? 'Finalizar e Resolver' : targetStatus === 'FORWARDED' ? 'Encaminhar Agora' : 'Atualizar Status'}
-                        </Button>
-                    </>
-                }
-            >
-                <div className="space-y-6 py-2">
-                    <TextArea
-                        label="Parecer Técnico / Resumo da Ação"
-                        value={formFeedback}
-                        onChange={e => setFormFeedback(e.target.value)}
-                        placeholder="Descreva as providências ou análise técnica..."
-                        rows={5}
-                    />
+            />
 
-                    <div className="space-y-4">
-                        <label className="text-[10px] font-black text-gray-700 uppercase tracking-widest ml-1">Próxima Etapa</label>
-                        <div className="flex items-center justify-between p-1 bg-blue-50/40 rounded-2xl border border-blue-50/60">
-                            {[
-                                { id: 'IN_REVIEW', label: 'ANÁLISE', color: 'text-blue-600' },
-                                { id: 'FORWARDED', label: 'DEPARTAMENTO', color: 'text-purple-600' },
-                                { id: 'RESOLVED', label: 'RESOLVIDO', color: 'text-emerald-600' }
-                            ].map(opt => (
-                                <button
-                                    key={opt.id}
-                                    onClick={() => setTargetStatus(opt.id as 'IN_REVIEW' | 'FORWARDED' | 'RESOLVED')}
-                                    className={`flex-1 py-3 text-[9px] font-black tracking-widest rounded-xl transition-all ${targetStatus === opt.id ? 'bg-white shadow-xl ' + opt.color : 'text-gray-400 hover:text-gray-600'}`}
-                                >
-                                    {opt.label}
-                                </button>
-                            ))}
-                        </div>
-
-                        {targetStatus === 'FORWARDED' && (
-                            <div className="space-y-4 animate-in slide-in-from-top-4 duration-500">
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-gray-700 uppercase tracking-widest ml-1">Destinar para:</label>
-                                    <select
-                                        value={selectedDeptId}
-                                        onChange={e => setSelectedDeptId(e.target.value)}
-                                        className="w-full px-5 py-3.5 bg-gray-50/50 border border-gray-100 rounded-2xl outline-none focus:bg-white focus:border-purple-500/50 transition-all font-bold text-gray-700 appearance-none text-xs"
-                                    >
-                                        <option value="">-- Escolha um destino --</option>
-                                        {departments.map(d => (
-                                            <option key={d.id} value={d.id}>{d.name}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </Modal>
-
-            {/* History Modal */}
-            <Modal
+            <ReportHistoryModal
                 isOpen={!!selectedReport}
                 onClose={() => setSelectedReport(null)}
-                title="Fluxo de Resolução"
-                subtitle={`Protocolo: #${selectedReport?.id.slice(-6).toUpperCase()} • Histórico Completo`}
-                maxWidth="lg"
-            >
-                <div className="space-y-8 py-4 px-2 relative before:absolute before:left-[19px] before:top-4 before:bottom-4 before:w-[2px] before:bg-gray-100">
-                    {selectedReport?.history?.map((step, idx) => (
-                        <div key={idx} className="relative pl-12 group">
-                            <div className={`absolute left-0 top-1 w-10 h-10 rounded-2xl border-4 border-white shadow-md flex items-center justify-center z-10 transition-transform group-hover:scale-110 ${step.status === 'SENT' ? 'bg-yellow-400' :
-                                step.status === 'IN_REVIEW' ? 'bg-blue-500' :
-                                    step.status === 'FORWARDED' ? 'bg-purple-500' :
-                                        step.status === 'RESOLVED' ? 'bg-emerald-500' : 'bg-gray-400'
-                                }`} />
+                report={selectedReport}
+            />
 
-                            <div className="bg-white p-5 rounded-[1.5rem] shadow-sm border border-gray-100 group-hover:shadow-md transition-all">
-                                <div className="flex justify-between items-start mb-3">
-                                    <span className="text-[9px] font-black text-gray-400 uppercase tracking-tight">{new Date(step.createdAt).toLocaleString('pt-BR')}</span>
-                                    <Badge status={step.status as
-                                        'SENT' | 'IN_REVIEW' | 'FORWARDED' | 'RESOLVED' | 'ARCHIVED'}
-                                    />
-                                </div>
-                                <p className="text-sm font-medium text-gray-600 leading-relaxed mb-4">{step.comment || 'Nenhuma observação registrada.'}</p>
-                                <div className="flex justify-between items-center pt-3 border-t border-gray-50">
-                                    <div className="flex items-center gap-2">
-                                        <p className="text-[9px] text-gray-400 font-black uppercase">Por: <span className="text-gray-900">{step.userName}</span></p>
-                                    </div>
-                                    {step.departmentName && (
-                                        <Badge status="FORWARDED" label={step.departmentName.toUpperCase()} />
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </Modal>
-
-            {/* Profile Modal */}
-            <Modal
+            <ProfileSettingsModal
                 isOpen={isProfileOpen}
                 onClose={() => setIsProfileOpen(false)}
-                title="Configurações de Perfil"
-                subtitle="Atualize suas informações"
-                footer={
-                    <Button
-                        variant="primary"
-                        fullWidth
-                        isLoading={isUpdatingProfile}
-                        onClick={handleUpdateProfile}
-                    >
-                        Salvar Alterações
-                    </Button>
-                }
-            >
-                <form className="space-y-6 py-2" onSubmit={handleUpdateProfile}>
-                    <div className="flex flex-col items-center gap-4 mb-6">
-                        <div className="relative group cursor-pointer" onClick={() => document.getElementById('avatar-input')?.click()}>
-                            <Avatar src={user?.avatarUrl} size="xl" className="ring-8 ring-blue-50" />
-                            <div className="absolute inset-0 bg-black/40 rounded-2xl md:rounded-[1.5rem] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                <TrendingUp className="text-white w-6 h-6" />
-                            </div>
-                            <input
-                                id="avatar-input"
-                                type="file"
-                                accept="image/*"
-                                className="hidden"
-                                onChange={e => setProfileAvatar(e.target.files?.[0] || null)}
-                            />
-                        </div>
-                        <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Clique para alterar foto</p>
-                    </div>
-
-                    <Input
-                        label="Frase de Status"
-                        value={profilePhrase}
-                        onChange={e => setProfilePhrase(e.target.value)}
-                        placeholder="Ex: Em campo / Operacional hoje"
-                    />
-                </form>
-            </Modal>
+                onSave={handleUpdateProfile}
+                isLoading={isUpdatingProfile}
+                profilePhrase={profilePhrase}
+                setProfilePhrase={setProfilePhrase}
+                onAvatarChange={setProfileAvatar}
+                avatarUrl={user?.avatarUrl}
+            />
 
             {chatTarget && user && (
                 <ChatWidget
                     currentUser={{ id: user.id || '', name: user.name || '', role: user.role || '' }}
                     targetUser={{ id: chatTarget.id || '', name: chatTarget.name || '', role: chatTarget.role || 'PROFESSIONAL' }}
-                    onClose={() => setChatTarget(null)}
+                    onClose={handleCloseChat}
                     socket={socket}
                 />
             )}
+
+            <ExportReportsModal
+                isOpen={isExportModalOpen}
+                onClose={() => setIsExportModalOpen(false)}
+                reports={reports}
+                departments={departments}
+            />
         </div >
     );
 }

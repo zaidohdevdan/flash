@@ -80,14 +80,14 @@ export const Modal: React.FC<ModalProps> = ({
                                 </h2>
                             )}
                             {subtitle && (
-                                <p className="text-sm text-gray-400 font-medium mt-1">
+                                <p className="text-sm text-gray-600 font-bold mt-1">
                                     {subtitle}
                                 </p>
                             )}
                         </div>
                         <button
                             onClick={onClose}
-                            className="p-2 -mr-2 text-gray-300 hover:text-gray-500 hover:bg-gray-50 rounded-full transition-all"
+                            className="p-2 -mr-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100/50 rounded-2xl transition-all"
                         >
                             <X className="w-6 h-6" />
                         </button>
