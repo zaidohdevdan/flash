@@ -14,9 +14,10 @@ interface UseDashboardSocketOptions {
     user: User | null;
     onNotification?: (data: { from: string; fromName?: string; text: string }) => void;
     onConferenceInvite?: (data: { roomId: string; hostId: string; hostRole: string }) => void;
+    onNewNotification?: (data: any) => void;
 }
 
-export const useDashboardSocket = ({ user, onNotification, onConferenceInvite }: UseDashboardSocketOptions) => {
+export const useDashboardSocket = ({ user, onNotification, onConferenceInvite, onNewNotification }: UseDashboardSocketOptions) => {
     const [socket, setSocket] = useState<Socket | null>(null);
     const [onlineUserIds, setOnlineUserIds] = useState<string[]>([]);
     const [unreadMessages, setUnreadMessages] = useState<Record<string, boolean>>({});
@@ -96,6 +97,25 @@ export const useDashboardSocket = ({ user, onNotification, onConferenceInvite }:
         newSocket.on('conference_invite', (data: { roomId: string; hostId: string; hostRole: string }) => {
             if (onConferenceInvite) {
                 onConferenceInvite(data);
+            }
+        });
+
+        newSocket.on('new_notification', (data: any) => {
+            if (onNewNotification) {
+                onNewNotification(data);
+            } else {
+                playNotificationSound();
+                toast.success(`${data.title}: ${data.message}`, {
+                    icon: '🔔',
+                    duration: 5000,
+                    style: {
+                        borderRadius: '1.5rem',
+                        background: '#3b82f6',
+                        color: '#fff',
+                        fontSize: '12px',
+                        fontWeight: 'bold'
+                    }
+                });
             }
         });
 

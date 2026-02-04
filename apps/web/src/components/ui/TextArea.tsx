@@ -44,8 +44,9 @@ export const TextArea: React.FC<TextAreaProps> = ({
           transition-all 
           font-medium 
           text-sm 
+          text-gray-900
           leading-relaxed
-          placeholder:text-gray-300
+          placeholder:text-gray-400
           ${noResize ? 'resize-none' : ''}
           ${error ? 'border-red-300 bg-red-50/50' : ''}
           ${className}

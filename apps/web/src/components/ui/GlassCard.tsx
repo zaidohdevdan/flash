@@ -8,7 +8,7 @@ export interface GlassCardProps {
     /** Classes CSS adicionais. */
     className?: string;
     /** Variante de transparência. 'light' é mais transparente, 'deep' é mais sólido. */
-    variant?: 'light' | 'deep' | 'gradient';
+    variant?: 'light' | 'deep' | 'gradient' | 'dark';
     /** Nível de desfoque (blur). */
     blur?: 'sm' | 'md' | 'lg';
     /** Se deve aplicar borda semi-transparente. */
@@ -38,7 +38,8 @@ export const GlassCard: React.FC<GlassCardProps> = ({
     const variants = {
         light: 'bg-white/95 shadow-xl shadow-blue-500/5',
         deep: 'bg-white shadow-2xl',
-        gradient: 'bg-gradient-to-br from-white to-blue-50/80 shadow-xl'
+        gradient: 'bg-gradient-to-br from-white to-blue-50/80 shadow-xl',
+        dark: 'bg-gray-900 border-gray-800 shadow-2xl'
     };
 
     return (

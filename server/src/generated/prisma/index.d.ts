@@ -48,6 +48,21 @@ export type ChatMessage = $Result.DefaultSelection<Prisma.$ChatMessagePayload>
  * 
  */
 export type AuditLog = $Result.DefaultSelection<Prisma.$AuditLogPayload>
+/**
+ * Model AgendaEvent
+ * 
+ */
+export type AgendaEvent = $Result.DefaultSelection<Prisma.$AgendaEventPayload>
+/**
+ * Model Notification
+ * 
+ */
+export type Notification = $Result.DefaultSelection<Prisma.$NotificationPayload>
+/**
+ * Model Note
+ * 
+ */
+export type Note = $Result.DefaultSelection<Prisma.$NotePayload>
 
 /**
  * Enums
@@ -73,6 +88,16 @@ export const ReportStatus: {
 
 export type ReportStatus = (typeof ReportStatus)[keyof typeof ReportStatus]
 
+
+export const AgendaEventType: {
+  CONFERENCE: 'CONFERENCE',
+  FORWARDING: 'FORWARDING',
+  TASK: 'TASK',
+  OTHER: 'OTHER'
+};
+
+export type AgendaEventType = (typeof AgendaEventType)[keyof typeof AgendaEventType]
+
 }
 
 export type Role = $Enums.Role
@@ -82,6 +107,10 @@ export const Role: typeof $Enums.Role
 export type ReportStatus = $Enums.ReportStatus
 
 export const ReportStatus: typeof $Enums.ReportStatus
+
+export type AgendaEventType = $Enums.AgendaEventType
+
+export const AgendaEventType: typeof $Enums.AgendaEventType
 
 /**
  * ##  Prisma Client ʲˢ
@@ -237,6 +266,36 @@ export class PrismaClient<
     * ```
     */
   get auditLog(): Prisma.AuditLogDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.agendaEvent`: Exposes CRUD operations for the **AgendaEvent** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more AgendaEvents
+    * const agendaEvents = await prisma.agendaEvent.findMany()
+    * ```
+    */
+  get agendaEvent(): Prisma.AgendaEventDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.notification`: Exposes CRUD operations for the **Notification** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Notifications
+    * const notifications = await prisma.notification.findMany()
+    * ```
+    */
+  get notification(): Prisma.NotificationDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.note`: Exposes CRUD operations for the **Note** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Notes
+    * const notes = await prisma.note.findMany()
+    * ```
+    */
+  get note(): Prisma.NoteDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -684,7 +743,10 @@ export namespace Prisma {
     ReportHistory: 'ReportHistory',
     Media: 'Media',
     ChatMessage: 'ChatMessage',
-    AuditLog: 'AuditLog'
+    AuditLog: 'AuditLog',
+    AgendaEvent: 'AgendaEvent',
+    Notification: 'Notification',
+    Note: 'Note'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -703,7 +765,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "report" | "department" | "reportHistory" | "media" | "chatMessage" | "auditLog"
+      modelProps: "user" | "report" | "department" | "reportHistory" | "media" | "chatMessage" | "auditLog" | "agendaEvent" | "notification" | "note"
       txIsolationLevel: never
     }
     model: {
@@ -1225,6 +1287,228 @@ export namespace Prisma {
           }
         }
       }
+      AgendaEvent: {
+        payload: Prisma.$AgendaEventPayload<ExtArgs>
+        fields: Prisma.AgendaEventFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.AgendaEventFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AgendaEventPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.AgendaEventFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AgendaEventPayload>
+          }
+          findFirst: {
+            args: Prisma.AgendaEventFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AgendaEventPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.AgendaEventFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AgendaEventPayload>
+          }
+          findMany: {
+            args: Prisma.AgendaEventFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AgendaEventPayload>[]
+          }
+          create: {
+            args: Prisma.AgendaEventCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AgendaEventPayload>
+          }
+          createMany: {
+            args: Prisma.AgendaEventCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          delete: {
+            args: Prisma.AgendaEventDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AgendaEventPayload>
+          }
+          update: {
+            args: Prisma.AgendaEventUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AgendaEventPayload>
+          }
+          deleteMany: {
+            args: Prisma.AgendaEventDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.AgendaEventUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.AgendaEventUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AgendaEventPayload>
+          }
+          aggregate: {
+            args: Prisma.AgendaEventAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateAgendaEvent>
+          }
+          groupBy: {
+            args: Prisma.AgendaEventGroupByArgs<ExtArgs>
+            result: $Utils.Optional<AgendaEventGroupByOutputType>[]
+          }
+          findRaw: {
+            args: Prisma.AgendaEventFindRawArgs<ExtArgs>
+            result: JsonObject
+          }
+          aggregateRaw: {
+            args: Prisma.AgendaEventAggregateRawArgs<ExtArgs>
+            result: JsonObject
+          }
+          count: {
+            args: Prisma.AgendaEventCountArgs<ExtArgs>
+            result: $Utils.Optional<AgendaEventCountAggregateOutputType> | number
+          }
+        }
+      }
+      Notification: {
+        payload: Prisma.$NotificationPayload<ExtArgs>
+        fields: Prisma.NotificationFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.NotificationFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.NotificationFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationPayload>
+          }
+          findFirst: {
+            args: Prisma.NotificationFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.NotificationFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationPayload>
+          }
+          findMany: {
+            args: Prisma.NotificationFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationPayload>[]
+          }
+          create: {
+            args: Prisma.NotificationCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationPayload>
+          }
+          createMany: {
+            args: Prisma.NotificationCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          delete: {
+            args: Prisma.NotificationDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationPayload>
+          }
+          update: {
+            args: Prisma.NotificationUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationPayload>
+          }
+          deleteMany: {
+            args: Prisma.NotificationDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.NotificationUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.NotificationUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationPayload>
+          }
+          aggregate: {
+            args: Prisma.NotificationAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateNotification>
+          }
+          groupBy: {
+            args: Prisma.NotificationGroupByArgs<ExtArgs>
+            result: $Utils.Optional<NotificationGroupByOutputType>[]
+          }
+          findRaw: {
+            args: Prisma.NotificationFindRawArgs<ExtArgs>
+            result: JsonObject
+          }
+          aggregateRaw: {
+            args: Prisma.NotificationAggregateRawArgs<ExtArgs>
+            result: JsonObject
+          }
+          count: {
+            args: Prisma.NotificationCountArgs<ExtArgs>
+            result: $Utils.Optional<NotificationCountAggregateOutputType> | number
+          }
+        }
+      }
+      Note: {
+        payload: Prisma.$NotePayload<ExtArgs>
+        fields: Prisma.NoteFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.NoteFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.NoteFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotePayload>
+          }
+          findFirst: {
+            args: Prisma.NoteFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.NoteFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotePayload>
+          }
+          findMany: {
+            args: Prisma.NoteFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotePayload>[]
+          }
+          create: {
+            args: Prisma.NoteCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotePayload>
+          }
+          createMany: {
+            args: Prisma.NoteCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          delete: {
+            args: Prisma.NoteDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotePayload>
+          }
+          update: {
+            args: Prisma.NoteUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotePayload>
+          }
+          deleteMany: {
+            args: Prisma.NoteDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.NoteUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.NoteUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotePayload>
+          }
+          aggregate: {
+            args: Prisma.NoteAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateNote>
+          }
+          groupBy: {
+            args: Prisma.NoteGroupByArgs<ExtArgs>
+            result: $Utils.Optional<NoteGroupByOutputType>[]
+          }
+          findRaw: {
+            args: Prisma.NoteFindRawArgs<ExtArgs>
+            result: JsonObject
+          }
+          aggregateRaw: {
+            args: Prisma.NoteAggregateRawArgs<ExtArgs>
+            result: JsonObject
+          }
+          count: {
+            args: Prisma.NoteCountArgs<ExtArgs>
+            result: $Utils.Optional<NoteCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -1311,6 +1595,9 @@ export namespace Prisma {
     media?: MediaOmit
     chatMessage?: ChatMessageOmit
     auditLog?: AuditLogOmit
+    agendaEvent?: AgendaEventOmit
+    notification?: NotificationOmit
+    note?: NoteOmit
   }
 
   /* Types for Logging */
@@ -1394,6 +1681,10 @@ export namespace Prisma {
     Subordinates: number
     reports: number
     media: number
+    notifications: number
+    createdEvents: number
+    participatingEvents: number
+    notes: number
     auditLogs: number
   }
 
@@ -1401,6 +1692,10 @@ export namespace Prisma {
     Subordinates?: boolean | UserCountOutputTypeCountSubordinatesArgs
     reports?: boolean | UserCountOutputTypeCountReportsArgs
     media?: boolean | UserCountOutputTypeCountMediaArgs
+    notifications?: boolean | UserCountOutputTypeCountNotificationsArgs
+    createdEvents?: boolean | UserCountOutputTypeCountCreatedEventsArgs
+    participatingEvents?: boolean | UserCountOutputTypeCountParticipatingEventsArgs
+    notes?: boolean | UserCountOutputTypeCountNotesArgs
     auditLogs?: boolean | UserCountOutputTypeCountAuditLogsArgs
   }
 
@@ -1439,6 +1734,34 @@ export namespace Prisma {
   /**
    * UserCountOutputType without action
    */
+  export type UserCountOutputTypeCountNotificationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: NotificationWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountCreatedEventsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AgendaEventWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountParticipatingEventsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AgendaEventWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountNotesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: NoteWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
   export type UserCountOutputTypeCountAuditLogsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: AuditLogWhereInput
   }
@@ -1451,11 +1774,13 @@ export namespace Prisma {
   export type ReportCountOutputType = {
     history: number
     media: number
+    agendaEvents: number
   }
 
   export type ReportCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     history?: boolean | ReportCountOutputTypeCountHistoryArgs
     media?: boolean | ReportCountOutputTypeCountMediaArgs
+    agendaEvents?: boolean | ReportCountOutputTypeCountAgendaEventsArgs
   }
 
   // Custom InputTypes
@@ -1481,6 +1806,13 @@ export namespace Prisma {
    */
   export type ReportCountOutputTypeCountMediaArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: MediaWhereInput
+  }
+
+  /**
+   * ReportCountOutputType without action
+   */
+  export type ReportCountOutputTypeCountAgendaEventsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AgendaEventWhereInput
   }
 
 
@@ -1520,6 +1852,37 @@ export namespace Prisma {
    * DepartmentCountOutputType without action
    */
   export type DepartmentCountOutputTypeCountMembersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: UserWhereInput
+  }
+
+
+  /**
+   * Count Type AgendaEventCountOutputType
+   */
+
+  export type AgendaEventCountOutputType = {
+    participants: number
+  }
+
+  export type AgendaEventCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    participants?: boolean | AgendaEventCountOutputTypeCountParticipantsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * AgendaEventCountOutputType without action
+   */
+  export type AgendaEventCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AgendaEventCountOutputType
+     */
+    select?: AgendaEventCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * AgendaEventCountOutputType without action
+   */
+  export type AgendaEventCountOutputTypeCountParticipantsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: UserWhereInput
   }
 
@@ -1576,6 +1939,7 @@ export namespace Prisma {
     role: number
     supervisorId: number
     departmentId: number
+    participatingEventIds: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -1620,6 +1984,7 @@ export namespace Prisma {
     role?: true
     supervisorId?: true
     departmentId?: true
+    participatingEventIds?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -1707,6 +2072,7 @@ export namespace Prisma {
     role: $Enums.Role
     supervisorId: string | null
     departmentId: string | null
+    participatingEventIds: string[]
     createdAt: Date
     updatedAt: Date
     _count: UserCountAggregateOutputType | null
@@ -1738,6 +2104,7 @@ export namespace Prisma {
     role?: boolean
     supervisorId?: boolean
     departmentId?: boolean
+    participatingEventIds?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     supervisor?: boolean | User$supervisorArgs<ExtArgs>
@@ -1745,6 +2112,10 @@ export namespace Prisma {
     department?: boolean | User$departmentArgs<ExtArgs>
     reports?: boolean | User$reportsArgs<ExtArgs>
     media?: boolean | User$mediaArgs<ExtArgs>
+    notifications?: boolean | User$notificationsArgs<ExtArgs>
+    createdEvents?: boolean | User$createdEventsArgs<ExtArgs>
+    participatingEvents?: boolean | User$participatingEventsArgs<ExtArgs>
+    notes?: boolean | User$notesArgs<ExtArgs>
     auditLogs?: boolean | User$auditLogsArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
@@ -1761,17 +2132,22 @@ export namespace Prisma {
     role?: boolean
     supervisorId?: boolean
     departmentId?: boolean
+    participatingEventIds?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "email" | "passwordHash" | "avatarUrl" | "statusPhrase" | "role" | "supervisorId" | "departmentId" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "email" | "passwordHash" | "avatarUrl" | "statusPhrase" | "role" | "supervisorId" | "departmentId" | "participatingEventIds" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     supervisor?: boolean | User$supervisorArgs<ExtArgs>
     Subordinates?: boolean | User$SubordinatesArgs<ExtArgs>
     department?: boolean | User$departmentArgs<ExtArgs>
     reports?: boolean | User$reportsArgs<ExtArgs>
     media?: boolean | User$mediaArgs<ExtArgs>
+    notifications?: boolean | User$notificationsArgs<ExtArgs>
+    createdEvents?: boolean | User$createdEventsArgs<ExtArgs>
+    participatingEvents?: boolean | User$participatingEventsArgs<ExtArgs>
+    notes?: boolean | User$notesArgs<ExtArgs>
     auditLogs?: boolean | User$auditLogsArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
@@ -1784,6 +2160,10 @@ export namespace Prisma {
       department: Prisma.$DepartmentPayload<ExtArgs> | null
       reports: Prisma.$ReportPayload<ExtArgs>[]
       media: Prisma.$MediaPayload<ExtArgs>[]
+      notifications: Prisma.$NotificationPayload<ExtArgs>[]
+      createdEvents: Prisma.$AgendaEventPayload<ExtArgs>[]
+      participatingEvents: Prisma.$AgendaEventPayload<ExtArgs>[]
+      notes: Prisma.$NotePayload<ExtArgs>[]
       auditLogs: Prisma.$AuditLogPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
@@ -1796,6 +2176,7 @@ export namespace Prisma {
       role: $Enums.Role
       supervisorId: string | null
       departmentId: string | null
+      participatingEventIds: string[]
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["user"]>
@@ -2166,6 +2547,10 @@ export namespace Prisma {
     department<T extends User$departmentArgs<ExtArgs> = {}>(args?: Subset<T, User$departmentArgs<ExtArgs>>): Prisma__DepartmentClient<$Result.GetResult<Prisma.$DepartmentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     reports<T extends User$reportsArgs<ExtArgs> = {}>(args?: Subset<T, User$reportsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ReportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     media<T extends User$mediaArgs<ExtArgs> = {}>(args?: Subset<T, User$mediaArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MediaPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    notifications<T extends User$notificationsArgs<ExtArgs> = {}>(args?: Subset<T, User$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    createdEvents<T extends User$createdEventsArgs<ExtArgs> = {}>(args?: Subset<T, User$createdEventsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AgendaEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    participatingEvents<T extends User$participatingEventsArgs<ExtArgs> = {}>(args?: Subset<T, User$participatingEventsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AgendaEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    notes<T extends User$notesArgs<ExtArgs> = {}>(args?: Subset<T, User$notesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     auditLogs<T extends User$auditLogsArgs<ExtArgs> = {}>(args?: Subset<T, User$auditLogsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -2205,6 +2590,7 @@ export namespace Prisma {
     readonly role: FieldRef<"User", 'Role'>
     readonly supervisorId: FieldRef<"User", 'String'>
     readonly departmentId: FieldRef<"User", 'String'>
+    readonly participatingEventIds: FieldRef<"User", 'String[]'>
     readonly createdAt: FieldRef<"User", 'DateTime'>
     readonly updatedAt: FieldRef<"User", 'DateTime'>
   }
@@ -2687,6 +3073,102 @@ export namespace Prisma {
   }
 
   /**
+   * User.notifications
+   */
+  export type User$notificationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Notification
+     */
+    select?: NotificationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Notification
+     */
+    omit?: NotificationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationInclude<ExtArgs> | null
+    where?: NotificationWhereInput
+    orderBy?: NotificationOrderByWithRelationInput | NotificationOrderByWithRelationInput[]
+    cursor?: NotificationWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: NotificationScalarFieldEnum | NotificationScalarFieldEnum[]
+  }
+
+  /**
+   * User.createdEvents
+   */
+  export type User$createdEventsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AgendaEvent
+     */
+    select?: AgendaEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AgendaEvent
+     */
+    omit?: AgendaEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AgendaEventInclude<ExtArgs> | null
+    where?: AgendaEventWhereInput
+    orderBy?: AgendaEventOrderByWithRelationInput | AgendaEventOrderByWithRelationInput[]
+    cursor?: AgendaEventWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: AgendaEventScalarFieldEnum | AgendaEventScalarFieldEnum[]
+  }
+
+  /**
+   * User.participatingEvents
+   */
+  export type User$participatingEventsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AgendaEvent
+     */
+    select?: AgendaEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AgendaEvent
+     */
+    omit?: AgendaEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AgendaEventInclude<ExtArgs> | null
+    where?: AgendaEventWhereInput
+    orderBy?: AgendaEventOrderByWithRelationInput | AgendaEventOrderByWithRelationInput[]
+    cursor?: AgendaEventWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: AgendaEventScalarFieldEnum | AgendaEventScalarFieldEnum[]
+  }
+
+  /**
+   * User.notes
+   */
+  export type User$notesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Note
+     */
+    select?: NoteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Note
+     */
+    omit?: NoteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NoteInclude<ExtArgs> | null
+    where?: NoteWhereInput
+    orderBy?: NoteOrderByWithRelationInput | NoteOrderByWithRelationInput[]
+    cursor?: NoteWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: NoteScalarFieldEnum | NoteScalarFieldEnum[]
+  }
+
+  /**
    * User.auditLogs
    */
   export type User$auditLogsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -2991,6 +3473,7 @@ export namespace Prisma {
     department?: boolean | Report$departmentArgs<ExtArgs>
     history?: boolean | Report$historyArgs<ExtArgs>
     media?: boolean | Report$mediaArgs<ExtArgs>
+    agendaEvents?: boolean | Report$agendaEventsArgs<ExtArgs>
     _count?: boolean | ReportCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["report"]>
 
@@ -3017,6 +3500,7 @@ export namespace Prisma {
     department?: boolean | Report$departmentArgs<ExtArgs>
     history?: boolean | Report$historyArgs<ExtArgs>
     media?: boolean | Report$mediaArgs<ExtArgs>
+    agendaEvents?: boolean | Report$agendaEventsArgs<ExtArgs>
     _count?: boolean | ReportCountOutputTypeDefaultArgs<ExtArgs>
   }
 
@@ -3027,6 +3511,7 @@ export namespace Prisma {
       department: Prisma.$DepartmentPayload<ExtArgs> | null
       history: Prisma.$ReportHistoryPayload<ExtArgs>[]
       media: Prisma.$MediaPayload<ExtArgs>[]
+      agendaEvents: Prisma.$AgendaEventPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -3408,6 +3893,7 @@ export namespace Prisma {
     department<T extends Report$departmentArgs<ExtArgs> = {}>(args?: Subset<T, Report$departmentArgs<ExtArgs>>): Prisma__DepartmentClient<$Result.GetResult<Prisma.$DepartmentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     history<T extends Report$historyArgs<ExtArgs> = {}>(args?: Subset<T, Report$historyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ReportHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     media<T extends Report$mediaArgs<ExtArgs> = {}>(args?: Subset<T, Report$mediaArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MediaPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    agendaEvents<T extends Report$agendaEventsArgs<ExtArgs> = {}>(args?: Subset<T, Report$agendaEventsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AgendaEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3883,6 +4369,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: MediaScalarFieldEnum | MediaScalarFieldEnum[]
+  }
+
+  /**
+   * Report.agendaEvents
+   */
+  export type Report$agendaEventsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AgendaEvent
+     */
+    select?: AgendaEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AgendaEvent
+     */
+    omit?: AgendaEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AgendaEventInclude<ExtArgs> | null
+    where?: AgendaEventWhereInput
+    orderBy?: AgendaEventOrderByWithRelationInput | AgendaEventOrderByWithRelationInput[]
+    cursor?: AgendaEventWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: AgendaEventScalarFieldEnum | AgendaEventScalarFieldEnum[]
   }
 
   /**
@@ -9097,6 +9607,3113 @@ export namespace Prisma {
 
 
   /**
+   * Model AgendaEvent
+   */
+
+  export type AggregateAgendaEvent = {
+    _count: AgendaEventCountAggregateOutputType | null
+    _min: AgendaEventMinAggregateOutputType | null
+    _max: AgendaEventMaxAggregateOutputType | null
+  }
+
+  export type AgendaEventMinAggregateOutputType = {
+    id: string | null
+    title: string | null
+    description: string | null
+    type: $Enums.AgendaEventType | null
+    startTime: Date | null
+    endTime: Date | null
+    createdById: string | null
+    reportId: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type AgendaEventMaxAggregateOutputType = {
+    id: string | null
+    title: string | null
+    description: string | null
+    type: $Enums.AgendaEventType | null
+    startTime: Date | null
+    endTime: Date | null
+    createdById: string | null
+    reportId: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type AgendaEventCountAggregateOutputType = {
+    id: number
+    title: number
+    description: number
+    type: number
+    startTime: number
+    endTime: number
+    createdById: number
+    participantIds: number
+    reportId: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type AgendaEventMinAggregateInputType = {
+    id?: true
+    title?: true
+    description?: true
+    type?: true
+    startTime?: true
+    endTime?: true
+    createdById?: true
+    reportId?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type AgendaEventMaxAggregateInputType = {
+    id?: true
+    title?: true
+    description?: true
+    type?: true
+    startTime?: true
+    endTime?: true
+    createdById?: true
+    reportId?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type AgendaEventCountAggregateInputType = {
+    id?: true
+    title?: true
+    description?: true
+    type?: true
+    startTime?: true
+    endTime?: true
+    createdById?: true
+    participantIds?: true
+    reportId?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type AgendaEventAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AgendaEvent to aggregate.
+     */
+    where?: AgendaEventWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AgendaEvents to fetch.
+     */
+    orderBy?: AgendaEventOrderByWithRelationInput | AgendaEventOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: AgendaEventWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AgendaEvents from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AgendaEvents.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned AgendaEvents
+    **/
+    _count?: true | AgendaEventCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: AgendaEventMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: AgendaEventMaxAggregateInputType
+  }
+
+  export type GetAgendaEventAggregateType<T extends AgendaEventAggregateArgs> = {
+        [P in keyof T & keyof AggregateAgendaEvent]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateAgendaEvent[P]>
+      : GetScalarType<T[P], AggregateAgendaEvent[P]>
+  }
+
+
+
+
+  export type AgendaEventGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AgendaEventWhereInput
+    orderBy?: AgendaEventOrderByWithAggregationInput | AgendaEventOrderByWithAggregationInput[]
+    by: AgendaEventScalarFieldEnum[] | AgendaEventScalarFieldEnum
+    having?: AgendaEventScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: AgendaEventCountAggregateInputType | true
+    _min?: AgendaEventMinAggregateInputType
+    _max?: AgendaEventMaxAggregateInputType
+  }
+
+  export type AgendaEventGroupByOutputType = {
+    id: string
+    title: string
+    description: string | null
+    type: $Enums.AgendaEventType
+    startTime: Date
+    endTime: Date | null
+    createdById: string
+    participantIds: string[]
+    reportId: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: AgendaEventCountAggregateOutputType | null
+    _min: AgendaEventMinAggregateOutputType | null
+    _max: AgendaEventMaxAggregateOutputType | null
+  }
+
+  type GetAgendaEventGroupByPayload<T extends AgendaEventGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<AgendaEventGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof AgendaEventGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], AgendaEventGroupByOutputType[P]>
+            : GetScalarType<T[P], AgendaEventGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type AgendaEventSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    title?: boolean
+    description?: boolean
+    type?: boolean
+    startTime?: boolean
+    endTime?: boolean
+    createdById?: boolean
+    participantIds?: boolean
+    reportId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    createdBy?: boolean | UserDefaultArgs<ExtArgs>
+    participants?: boolean | AgendaEvent$participantsArgs<ExtArgs>
+    report?: boolean | AgendaEvent$reportArgs<ExtArgs>
+    _count?: boolean | AgendaEventCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["agendaEvent"]>
+
+
+
+  export type AgendaEventSelectScalar = {
+    id?: boolean
+    title?: boolean
+    description?: boolean
+    type?: boolean
+    startTime?: boolean
+    endTime?: boolean
+    createdById?: boolean
+    participantIds?: boolean
+    reportId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type AgendaEventOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "description" | "type" | "startTime" | "endTime" | "createdById" | "participantIds" | "reportId" | "createdAt" | "updatedAt", ExtArgs["result"]["agendaEvent"]>
+  export type AgendaEventInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    createdBy?: boolean | UserDefaultArgs<ExtArgs>
+    participants?: boolean | AgendaEvent$participantsArgs<ExtArgs>
+    report?: boolean | AgendaEvent$reportArgs<ExtArgs>
+    _count?: boolean | AgendaEventCountOutputTypeDefaultArgs<ExtArgs>
+  }
+
+  export type $AgendaEventPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "AgendaEvent"
+    objects: {
+      createdBy: Prisma.$UserPayload<ExtArgs>
+      participants: Prisma.$UserPayload<ExtArgs>[]
+      report: Prisma.$ReportPayload<ExtArgs> | null
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      title: string
+      description: string | null
+      type: $Enums.AgendaEventType
+      startTime: Date
+      endTime: Date | null
+      createdById: string
+      participantIds: string[]
+      reportId: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["agendaEvent"]>
+    composites: {}
+  }
+
+  type AgendaEventGetPayload<S extends boolean | null | undefined | AgendaEventDefaultArgs> = $Result.GetResult<Prisma.$AgendaEventPayload, S>
+
+  type AgendaEventCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<AgendaEventFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: AgendaEventCountAggregateInputType | true
+    }
+
+  export interface AgendaEventDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['AgendaEvent'], meta: { name: 'AgendaEvent' } }
+    /**
+     * Find zero or one AgendaEvent that matches the filter.
+     * @param {AgendaEventFindUniqueArgs} args - Arguments to find a AgendaEvent
+     * @example
+     * // Get one AgendaEvent
+     * const agendaEvent = await prisma.agendaEvent.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends AgendaEventFindUniqueArgs>(args: SelectSubset<T, AgendaEventFindUniqueArgs<ExtArgs>>): Prisma__AgendaEventClient<$Result.GetResult<Prisma.$AgendaEventPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one AgendaEvent that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {AgendaEventFindUniqueOrThrowArgs} args - Arguments to find a AgendaEvent
+     * @example
+     * // Get one AgendaEvent
+     * const agendaEvent = await prisma.agendaEvent.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends AgendaEventFindUniqueOrThrowArgs>(args: SelectSubset<T, AgendaEventFindUniqueOrThrowArgs<ExtArgs>>): Prisma__AgendaEventClient<$Result.GetResult<Prisma.$AgendaEventPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AgendaEvent that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AgendaEventFindFirstArgs} args - Arguments to find a AgendaEvent
+     * @example
+     * // Get one AgendaEvent
+     * const agendaEvent = await prisma.agendaEvent.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends AgendaEventFindFirstArgs>(args?: SelectSubset<T, AgendaEventFindFirstArgs<ExtArgs>>): Prisma__AgendaEventClient<$Result.GetResult<Prisma.$AgendaEventPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AgendaEvent that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AgendaEventFindFirstOrThrowArgs} args - Arguments to find a AgendaEvent
+     * @example
+     * // Get one AgendaEvent
+     * const agendaEvent = await prisma.agendaEvent.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends AgendaEventFindFirstOrThrowArgs>(args?: SelectSubset<T, AgendaEventFindFirstOrThrowArgs<ExtArgs>>): Prisma__AgendaEventClient<$Result.GetResult<Prisma.$AgendaEventPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more AgendaEvents that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AgendaEventFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all AgendaEvents
+     * const agendaEvents = await prisma.agendaEvent.findMany()
+     * 
+     * // Get first 10 AgendaEvents
+     * const agendaEvents = await prisma.agendaEvent.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const agendaEventWithIdOnly = await prisma.agendaEvent.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends AgendaEventFindManyArgs>(args?: SelectSubset<T, AgendaEventFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AgendaEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a AgendaEvent.
+     * @param {AgendaEventCreateArgs} args - Arguments to create a AgendaEvent.
+     * @example
+     * // Create one AgendaEvent
+     * const AgendaEvent = await prisma.agendaEvent.create({
+     *   data: {
+     *     // ... data to create a AgendaEvent
+     *   }
+     * })
+     * 
+     */
+    create<T extends AgendaEventCreateArgs>(args: SelectSubset<T, AgendaEventCreateArgs<ExtArgs>>): Prisma__AgendaEventClient<$Result.GetResult<Prisma.$AgendaEventPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many AgendaEvents.
+     * @param {AgendaEventCreateManyArgs} args - Arguments to create many AgendaEvents.
+     * @example
+     * // Create many AgendaEvents
+     * const agendaEvent = await prisma.agendaEvent.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends AgendaEventCreateManyArgs>(args?: SelectSubset<T, AgendaEventCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Delete a AgendaEvent.
+     * @param {AgendaEventDeleteArgs} args - Arguments to delete one AgendaEvent.
+     * @example
+     * // Delete one AgendaEvent
+     * const AgendaEvent = await prisma.agendaEvent.delete({
+     *   where: {
+     *     // ... filter to delete one AgendaEvent
+     *   }
+     * })
+     * 
+     */
+    delete<T extends AgendaEventDeleteArgs>(args: SelectSubset<T, AgendaEventDeleteArgs<ExtArgs>>): Prisma__AgendaEventClient<$Result.GetResult<Prisma.$AgendaEventPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one AgendaEvent.
+     * @param {AgendaEventUpdateArgs} args - Arguments to update one AgendaEvent.
+     * @example
+     * // Update one AgendaEvent
+     * const agendaEvent = await prisma.agendaEvent.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends AgendaEventUpdateArgs>(args: SelectSubset<T, AgendaEventUpdateArgs<ExtArgs>>): Prisma__AgendaEventClient<$Result.GetResult<Prisma.$AgendaEventPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more AgendaEvents.
+     * @param {AgendaEventDeleteManyArgs} args - Arguments to filter AgendaEvents to delete.
+     * @example
+     * // Delete a few AgendaEvents
+     * const { count } = await prisma.agendaEvent.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends AgendaEventDeleteManyArgs>(args?: SelectSubset<T, AgendaEventDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AgendaEvents.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AgendaEventUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many AgendaEvents
+     * const agendaEvent = await prisma.agendaEvent.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends AgendaEventUpdateManyArgs>(args: SelectSubset<T, AgendaEventUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one AgendaEvent.
+     * @param {AgendaEventUpsertArgs} args - Arguments to update or create a AgendaEvent.
+     * @example
+     * // Update or create a AgendaEvent
+     * const agendaEvent = await prisma.agendaEvent.upsert({
+     *   create: {
+     *     // ... data to create a AgendaEvent
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the AgendaEvent we want to update
+     *   }
+     * })
+     */
+    upsert<T extends AgendaEventUpsertArgs>(args: SelectSubset<T, AgendaEventUpsertArgs<ExtArgs>>): Prisma__AgendaEventClient<$Result.GetResult<Prisma.$AgendaEventPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more AgendaEvents that matches the filter.
+     * @param {AgendaEventFindRawArgs} args - Select which filters you would like to apply.
+     * @example
+     * const agendaEvent = await prisma.agendaEvent.findRaw({
+     *   filter: { age: { $gt: 25 } }
+     * })
+     */
+    findRaw(args?: AgendaEventFindRawArgs): Prisma.PrismaPromise<JsonObject>
+
+    /**
+     * Perform aggregation operations on a AgendaEvent.
+     * @param {AgendaEventAggregateRawArgs} args - Select which aggregations you would like to apply.
+     * @example
+     * const agendaEvent = await prisma.agendaEvent.aggregateRaw({
+     *   pipeline: [
+     *     { $match: { status: "registered" } },
+     *     { $group: { _id: "$country", total: { $sum: 1 } } }
+     *   ]
+     * })
+     */
+    aggregateRaw(args?: AgendaEventAggregateRawArgs): Prisma.PrismaPromise<JsonObject>
+
+
+    /**
+     * Count the number of AgendaEvents.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AgendaEventCountArgs} args - Arguments to filter AgendaEvents to count.
+     * @example
+     * // Count the number of AgendaEvents
+     * const count = await prisma.agendaEvent.count({
+     *   where: {
+     *     // ... the filter for the AgendaEvents we want to count
+     *   }
+     * })
+    **/
+    count<T extends AgendaEventCountArgs>(
+      args?: Subset<T, AgendaEventCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], AgendaEventCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a AgendaEvent.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AgendaEventAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends AgendaEventAggregateArgs>(args: Subset<T, AgendaEventAggregateArgs>): Prisma.PrismaPromise<GetAgendaEventAggregateType<T>>
+
+    /**
+     * Group by AgendaEvent.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AgendaEventGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends AgendaEventGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: AgendaEventGroupByArgs['orderBy'] }
+        : { orderBy?: AgendaEventGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, AgendaEventGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetAgendaEventGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the AgendaEvent model
+   */
+  readonly fields: AgendaEventFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for AgendaEvent.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__AgendaEventClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    createdBy<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    participants<T extends AgendaEvent$participantsArgs<ExtArgs> = {}>(args?: Subset<T, AgendaEvent$participantsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    report<T extends AgendaEvent$reportArgs<ExtArgs> = {}>(args?: Subset<T, AgendaEvent$reportArgs<ExtArgs>>): Prisma__ReportClient<$Result.GetResult<Prisma.$ReportPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the AgendaEvent model
+   */
+  interface AgendaEventFieldRefs {
+    readonly id: FieldRef<"AgendaEvent", 'String'>
+    readonly title: FieldRef<"AgendaEvent", 'String'>
+    readonly description: FieldRef<"AgendaEvent", 'String'>
+    readonly type: FieldRef<"AgendaEvent", 'AgendaEventType'>
+    readonly startTime: FieldRef<"AgendaEvent", 'DateTime'>
+    readonly endTime: FieldRef<"AgendaEvent", 'DateTime'>
+    readonly createdById: FieldRef<"AgendaEvent", 'String'>
+    readonly participantIds: FieldRef<"AgendaEvent", 'String[]'>
+    readonly reportId: FieldRef<"AgendaEvent", 'String'>
+    readonly createdAt: FieldRef<"AgendaEvent", 'DateTime'>
+    readonly updatedAt: FieldRef<"AgendaEvent", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * AgendaEvent findUnique
+   */
+  export type AgendaEventFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AgendaEvent
+     */
+    select?: AgendaEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AgendaEvent
+     */
+    omit?: AgendaEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AgendaEventInclude<ExtArgs> | null
+    /**
+     * Filter, which AgendaEvent to fetch.
+     */
+    where: AgendaEventWhereUniqueInput
+  }
+
+  /**
+   * AgendaEvent findUniqueOrThrow
+   */
+  export type AgendaEventFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AgendaEvent
+     */
+    select?: AgendaEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AgendaEvent
+     */
+    omit?: AgendaEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AgendaEventInclude<ExtArgs> | null
+    /**
+     * Filter, which AgendaEvent to fetch.
+     */
+    where: AgendaEventWhereUniqueInput
+  }
+
+  /**
+   * AgendaEvent findFirst
+   */
+  export type AgendaEventFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AgendaEvent
+     */
+    select?: AgendaEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AgendaEvent
+     */
+    omit?: AgendaEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AgendaEventInclude<ExtArgs> | null
+    /**
+     * Filter, which AgendaEvent to fetch.
+     */
+    where?: AgendaEventWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AgendaEvents to fetch.
+     */
+    orderBy?: AgendaEventOrderByWithRelationInput | AgendaEventOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for AgendaEvents.
+     */
+    cursor?: AgendaEventWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AgendaEvents from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AgendaEvents.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AgendaEvents.
+     */
+    distinct?: AgendaEventScalarFieldEnum | AgendaEventScalarFieldEnum[]
+  }
+
+  /**
+   * AgendaEvent findFirstOrThrow
+   */
+  export type AgendaEventFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AgendaEvent
+     */
+    select?: AgendaEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AgendaEvent
+     */
+    omit?: AgendaEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AgendaEventInclude<ExtArgs> | null
+    /**
+     * Filter, which AgendaEvent to fetch.
+     */
+    where?: AgendaEventWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AgendaEvents to fetch.
+     */
+    orderBy?: AgendaEventOrderByWithRelationInput | AgendaEventOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for AgendaEvents.
+     */
+    cursor?: AgendaEventWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AgendaEvents from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AgendaEvents.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AgendaEvents.
+     */
+    distinct?: AgendaEventScalarFieldEnum | AgendaEventScalarFieldEnum[]
+  }
+
+  /**
+   * AgendaEvent findMany
+   */
+  export type AgendaEventFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AgendaEvent
+     */
+    select?: AgendaEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AgendaEvent
+     */
+    omit?: AgendaEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AgendaEventInclude<ExtArgs> | null
+    /**
+     * Filter, which AgendaEvents to fetch.
+     */
+    where?: AgendaEventWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AgendaEvents to fetch.
+     */
+    orderBy?: AgendaEventOrderByWithRelationInput | AgendaEventOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing AgendaEvents.
+     */
+    cursor?: AgendaEventWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AgendaEvents from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AgendaEvents.
+     */
+    skip?: number
+    distinct?: AgendaEventScalarFieldEnum | AgendaEventScalarFieldEnum[]
+  }
+
+  /**
+   * AgendaEvent create
+   */
+  export type AgendaEventCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AgendaEvent
+     */
+    select?: AgendaEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AgendaEvent
+     */
+    omit?: AgendaEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AgendaEventInclude<ExtArgs> | null
+    /**
+     * The data needed to create a AgendaEvent.
+     */
+    data: XOR<AgendaEventCreateInput, AgendaEventUncheckedCreateInput>
+  }
+
+  /**
+   * AgendaEvent createMany
+   */
+  export type AgendaEventCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many AgendaEvents.
+     */
+    data: AgendaEventCreateManyInput | AgendaEventCreateManyInput[]
+  }
+
+  /**
+   * AgendaEvent update
+   */
+  export type AgendaEventUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AgendaEvent
+     */
+    select?: AgendaEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AgendaEvent
+     */
+    omit?: AgendaEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AgendaEventInclude<ExtArgs> | null
+    /**
+     * The data needed to update a AgendaEvent.
+     */
+    data: XOR<AgendaEventUpdateInput, AgendaEventUncheckedUpdateInput>
+    /**
+     * Choose, which AgendaEvent to update.
+     */
+    where: AgendaEventWhereUniqueInput
+  }
+
+  /**
+   * AgendaEvent updateMany
+   */
+  export type AgendaEventUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update AgendaEvents.
+     */
+    data: XOR<AgendaEventUpdateManyMutationInput, AgendaEventUncheckedUpdateManyInput>
+    /**
+     * Filter which AgendaEvents to update
+     */
+    where?: AgendaEventWhereInput
+    /**
+     * Limit how many AgendaEvents to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * AgendaEvent upsert
+   */
+  export type AgendaEventUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AgendaEvent
+     */
+    select?: AgendaEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AgendaEvent
+     */
+    omit?: AgendaEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AgendaEventInclude<ExtArgs> | null
+    /**
+     * The filter to search for the AgendaEvent to update in case it exists.
+     */
+    where: AgendaEventWhereUniqueInput
+    /**
+     * In case the AgendaEvent found by the `where` argument doesn't exist, create a new AgendaEvent with this data.
+     */
+    create: XOR<AgendaEventCreateInput, AgendaEventUncheckedCreateInput>
+    /**
+     * In case the AgendaEvent was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<AgendaEventUpdateInput, AgendaEventUncheckedUpdateInput>
+  }
+
+  /**
+   * AgendaEvent delete
+   */
+  export type AgendaEventDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AgendaEvent
+     */
+    select?: AgendaEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AgendaEvent
+     */
+    omit?: AgendaEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AgendaEventInclude<ExtArgs> | null
+    /**
+     * Filter which AgendaEvent to delete.
+     */
+    where: AgendaEventWhereUniqueInput
+  }
+
+  /**
+   * AgendaEvent deleteMany
+   */
+  export type AgendaEventDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AgendaEvents to delete
+     */
+    where?: AgendaEventWhereInput
+    /**
+     * Limit how many AgendaEvents to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * AgendaEvent findRaw
+   */
+  export type AgendaEventFindRawArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The query predicate filter. If unspecified, then all documents in the collection will match the predicate. ${@link https://docs.mongodb.com/manual/reference/operator/query MongoDB Docs}.
+     */
+    filter?: InputJsonValue
+    /**
+     * Additional options to pass to the `find` command ${@link https://docs.mongodb.com/manual/reference/command/find/#command-fields MongoDB Docs}.
+     */
+    options?: InputJsonValue
+  }
+
+  /**
+   * AgendaEvent aggregateRaw
+   */
+  export type AgendaEventAggregateRawArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * An array of aggregation stages to process and transform the document stream via the aggregation pipeline. ${@link https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline MongoDB Docs}.
+     */
+    pipeline?: InputJsonValue[]
+    /**
+     * Additional options to pass to the `aggregate` command ${@link https://docs.mongodb.com/manual/reference/command/aggregate/#command-fields MongoDB Docs}.
+     */
+    options?: InputJsonValue
+  }
+
+  /**
+   * AgendaEvent.participants
+   */
+  export type AgendaEvent$participantsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    where?: UserWhereInput
+    orderBy?: UserOrderByWithRelationInput | UserOrderByWithRelationInput[]
+    cursor?: UserWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: UserScalarFieldEnum | UserScalarFieldEnum[]
+  }
+
+  /**
+   * AgendaEvent.report
+   */
+  export type AgendaEvent$reportArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Report
+     */
+    select?: ReportSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Report
+     */
+    omit?: ReportOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ReportInclude<ExtArgs> | null
+    where?: ReportWhereInput
+  }
+
+  /**
+   * AgendaEvent without action
+   */
+  export type AgendaEventDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AgendaEvent
+     */
+    select?: AgendaEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AgendaEvent
+     */
+    omit?: AgendaEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AgendaEventInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model Notification
+   */
+
+  export type AggregateNotification = {
+    _count: NotificationCountAggregateOutputType | null
+    _min: NotificationMinAggregateOutputType | null
+    _max: NotificationMaxAggregateOutputType | null
+  }
+
+  export type NotificationMinAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    fromId: string | null
+    type: string | null
+    title: string | null
+    message: string | null
+    read: boolean | null
+    link: string | null
+    scheduledFor: Date | null
+    createdAt: Date | null
+  }
+
+  export type NotificationMaxAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    fromId: string | null
+    type: string | null
+    title: string | null
+    message: string | null
+    read: boolean | null
+    link: string | null
+    scheduledFor: Date | null
+    createdAt: Date | null
+  }
+
+  export type NotificationCountAggregateOutputType = {
+    id: number
+    userId: number
+    fromId: number
+    type: number
+    title: number
+    message: number
+    read: number
+    link: number
+    scheduledFor: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type NotificationMinAggregateInputType = {
+    id?: true
+    userId?: true
+    fromId?: true
+    type?: true
+    title?: true
+    message?: true
+    read?: true
+    link?: true
+    scheduledFor?: true
+    createdAt?: true
+  }
+
+  export type NotificationMaxAggregateInputType = {
+    id?: true
+    userId?: true
+    fromId?: true
+    type?: true
+    title?: true
+    message?: true
+    read?: true
+    link?: true
+    scheduledFor?: true
+    createdAt?: true
+  }
+
+  export type NotificationCountAggregateInputType = {
+    id?: true
+    userId?: true
+    fromId?: true
+    type?: true
+    title?: true
+    message?: true
+    read?: true
+    link?: true
+    scheduledFor?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type NotificationAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Notification to aggregate.
+     */
+    where?: NotificationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Notifications to fetch.
+     */
+    orderBy?: NotificationOrderByWithRelationInput | NotificationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: NotificationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Notifications from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Notifications.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Notifications
+    **/
+    _count?: true | NotificationCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: NotificationMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: NotificationMaxAggregateInputType
+  }
+
+  export type GetNotificationAggregateType<T extends NotificationAggregateArgs> = {
+        [P in keyof T & keyof AggregateNotification]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateNotification[P]>
+      : GetScalarType<T[P], AggregateNotification[P]>
+  }
+
+
+
+
+  export type NotificationGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: NotificationWhereInput
+    orderBy?: NotificationOrderByWithAggregationInput | NotificationOrderByWithAggregationInput[]
+    by: NotificationScalarFieldEnum[] | NotificationScalarFieldEnum
+    having?: NotificationScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: NotificationCountAggregateInputType | true
+    _min?: NotificationMinAggregateInputType
+    _max?: NotificationMaxAggregateInputType
+  }
+
+  export type NotificationGroupByOutputType = {
+    id: string
+    userId: string
+    fromId: string | null
+    type: string
+    title: string
+    message: string
+    read: boolean
+    link: string | null
+    scheduledFor: Date | null
+    createdAt: Date
+    _count: NotificationCountAggregateOutputType | null
+    _min: NotificationMinAggregateOutputType | null
+    _max: NotificationMaxAggregateOutputType | null
+  }
+
+  type GetNotificationGroupByPayload<T extends NotificationGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<NotificationGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof NotificationGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], NotificationGroupByOutputType[P]>
+            : GetScalarType<T[P], NotificationGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type NotificationSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    fromId?: boolean
+    type?: boolean
+    title?: boolean
+    message?: boolean
+    read?: boolean
+    link?: boolean
+    scheduledFor?: boolean
+    createdAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["notification"]>
+
+
+
+  export type NotificationSelectScalar = {
+    id?: boolean
+    userId?: boolean
+    fromId?: boolean
+    type?: boolean
+    title?: boolean
+    message?: boolean
+    read?: boolean
+    link?: boolean
+    scheduledFor?: boolean
+    createdAt?: boolean
+  }
+
+  export type NotificationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "fromId" | "type" | "title" | "message" | "read" | "link" | "scheduledFor" | "createdAt", ExtArgs["result"]["notification"]>
+  export type NotificationInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+
+  export type $NotificationPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Notification"
+    objects: {
+      user: Prisma.$UserPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      userId: string
+      fromId: string | null
+      type: string
+      title: string
+      message: string
+      read: boolean
+      link: string | null
+      scheduledFor: Date | null
+      createdAt: Date
+    }, ExtArgs["result"]["notification"]>
+    composites: {}
+  }
+
+  type NotificationGetPayload<S extends boolean | null | undefined | NotificationDefaultArgs> = $Result.GetResult<Prisma.$NotificationPayload, S>
+
+  type NotificationCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<NotificationFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: NotificationCountAggregateInputType | true
+    }
+
+  export interface NotificationDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Notification'], meta: { name: 'Notification' } }
+    /**
+     * Find zero or one Notification that matches the filter.
+     * @param {NotificationFindUniqueArgs} args - Arguments to find a Notification
+     * @example
+     * // Get one Notification
+     * const notification = await prisma.notification.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends NotificationFindUniqueArgs>(args: SelectSubset<T, NotificationFindUniqueArgs<ExtArgs>>): Prisma__NotificationClient<$Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Notification that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {NotificationFindUniqueOrThrowArgs} args - Arguments to find a Notification
+     * @example
+     * // Get one Notification
+     * const notification = await prisma.notification.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends NotificationFindUniqueOrThrowArgs>(args: SelectSubset<T, NotificationFindUniqueOrThrowArgs<ExtArgs>>): Prisma__NotificationClient<$Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Notification that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NotificationFindFirstArgs} args - Arguments to find a Notification
+     * @example
+     * // Get one Notification
+     * const notification = await prisma.notification.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends NotificationFindFirstArgs>(args?: SelectSubset<T, NotificationFindFirstArgs<ExtArgs>>): Prisma__NotificationClient<$Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Notification that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NotificationFindFirstOrThrowArgs} args - Arguments to find a Notification
+     * @example
+     * // Get one Notification
+     * const notification = await prisma.notification.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends NotificationFindFirstOrThrowArgs>(args?: SelectSubset<T, NotificationFindFirstOrThrowArgs<ExtArgs>>): Prisma__NotificationClient<$Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Notifications that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NotificationFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Notifications
+     * const notifications = await prisma.notification.findMany()
+     * 
+     * // Get first 10 Notifications
+     * const notifications = await prisma.notification.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const notificationWithIdOnly = await prisma.notification.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends NotificationFindManyArgs>(args?: SelectSubset<T, NotificationFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Notification.
+     * @param {NotificationCreateArgs} args - Arguments to create a Notification.
+     * @example
+     * // Create one Notification
+     * const Notification = await prisma.notification.create({
+     *   data: {
+     *     // ... data to create a Notification
+     *   }
+     * })
+     * 
+     */
+    create<T extends NotificationCreateArgs>(args: SelectSubset<T, NotificationCreateArgs<ExtArgs>>): Prisma__NotificationClient<$Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Notifications.
+     * @param {NotificationCreateManyArgs} args - Arguments to create many Notifications.
+     * @example
+     * // Create many Notifications
+     * const notification = await prisma.notification.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends NotificationCreateManyArgs>(args?: SelectSubset<T, NotificationCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Delete a Notification.
+     * @param {NotificationDeleteArgs} args - Arguments to delete one Notification.
+     * @example
+     * // Delete one Notification
+     * const Notification = await prisma.notification.delete({
+     *   where: {
+     *     // ... filter to delete one Notification
+     *   }
+     * })
+     * 
+     */
+    delete<T extends NotificationDeleteArgs>(args: SelectSubset<T, NotificationDeleteArgs<ExtArgs>>): Prisma__NotificationClient<$Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Notification.
+     * @param {NotificationUpdateArgs} args - Arguments to update one Notification.
+     * @example
+     * // Update one Notification
+     * const notification = await prisma.notification.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends NotificationUpdateArgs>(args: SelectSubset<T, NotificationUpdateArgs<ExtArgs>>): Prisma__NotificationClient<$Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Notifications.
+     * @param {NotificationDeleteManyArgs} args - Arguments to filter Notifications to delete.
+     * @example
+     * // Delete a few Notifications
+     * const { count } = await prisma.notification.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends NotificationDeleteManyArgs>(args?: SelectSubset<T, NotificationDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Notifications.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NotificationUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Notifications
+     * const notification = await prisma.notification.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends NotificationUpdateManyArgs>(args: SelectSubset<T, NotificationUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one Notification.
+     * @param {NotificationUpsertArgs} args - Arguments to update or create a Notification.
+     * @example
+     * // Update or create a Notification
+     * const notification = await prisma.notification.upsert({
+     *   create: {
+     *     // ... data to create a Notification
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Notification we want to update
+     *   }
+     * })
+     */
+    upsert<T extends NotificationUpsertArgs>(args: SelectSubset<T, NotificationUpsertArgs<ExtArgs>>): Prisma__NotificationClient<$Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Notifications that matches the filter.
+     * @param {NotificationFindRawArgs} args - Select which filters you would like to apply.
+     * @example
+     * const notification = await prisma.notification.findRaw({
+     *   filter: { age: { $gt: 25 } }
+     * })
+     */
+    findRaw(args?: NotificationFindRawArgs): Prisma.PrismaPromise<JsonObject>
+
+    /**
+     * Perform aggregation operations on a Notification.
+     * @param {NotificationAggregateRawArgs} args - Select which aggregations you would like to apply.
+     * @example
+     * const notification = await prisma.notification.aggregateRaw({
+     *   pipeline: [
+     *     { $match: { status: "registered" } },
+     *     { $group: { _id: "$country", total: { $sum: 1 } } }
+     *   ]
+     * })
+     */
+    aggregateRaw(args?: NotificationAggregateRawArgs): Prisma.PrismaPromise<JsonObject>
+
+
+    /**
+     * Count the number of Notifications.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NotificationCountArgs} args - Arguments to filter Notifications to count.
+     * @example
+     * // Count the number of Notifications
+     * const count = await prisma.notification.count({
+     *   where: {
+     *     // ... the filter for the Notifications we want to count
+     *   }
+     * })
+    **/
+    count<T extends NotificationCountArgs>(
+      args?: Subset<T, NotificationCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], NotificationCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Notification.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NotificationAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends NotificationAggregateArgs>(args: Subset<T, NotificationAggregateArgs>): Prisma.PrismaPromise<GetNotificationAggregateType<T>>
+
+    /**
+     * Group by Notification.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NotificationGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends NotificationGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: NotificationGroupByArgs['orderBy'] }
+        : { orderBy?: NotificationGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, NotificationGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetNotificationGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Notification model
+   */
+  readonly fields: NotificationFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Notification.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__NotificationClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Notification model
+   */
+  interface NotificationFieldRefs {
+    readonly id: FieldRef<"Notification", 'String'>
+    readonly userId: FieldRef<"Notification", 'String'>
+    readonly fromId: FieldRef<"Notification", 'String'>
+    readonly type: FieldRef<"Notification", 'String'>
+    readonly title: FieldRef<"Notification", 'String'>
+    readonly message: FieldRef<"Notification", 'String'>
+    readonly read: FieldRef<"Notification", 'Boolean'>
+    readonly link: FieldRef<"Notification", 'String'>
+    readonly scheduledFor: FieldRef<"Notification", 'DateTime'>
+    readonly createdAt: FieldRef<"Notification", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Notification findUnique
+   */
+  export type NotificationFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Notification
+     */
+    select?: NotificationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Notification
+     */
+    omit?: NotificationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationInclude<ExtArgs> | null
+    /**
+     * Filter, which Notification to fetch.
+     */
+    where: NotificationWhereUniqueInput
+  }
+
+  /**
+   * Notification findUniqueOrThrow
+   */
+  export type NotificationFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Notification
+     */
+    select?: NotificationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Notification
+     */
+    omit?: NotificationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationInclude<ExtArgs> | null
+    /**
+     * Filter, which Notification to fetch.
+     */
+    where: NotificationWhereUniqueInput
+  }
+
+  /**
+   * Notification findFirst
+   */
+  export type NotificationFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Notification
+     */
+    select?: NotificationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Notification
+     */
+    omit?: NotificationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationInclude<ExtArgs> | null
+    /**
+     * Filter, which Notification to fetch.
+     */
+    where?: NotificationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Notifications to fetch.
+     */
+    orderBy?: NotificationOrderByWithRelationInput | NotificationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Notifications.
+     */
+    cursor?: NotificationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Notifications from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Notifications.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Notifications.
+     */
+    distinct?: NotificationScalarFieldEnum | NotificationScalarFieldEnum[]
+  }
+
+  /**
+   * Notification findFirstOrThrow
+   */
+  export type NotificationFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Notification
+     */
+    select?: NotificationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Notification
+     */
+    omit?: NotificationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationInclude<ExtArgs> | null
+    /**
+     * Filter, which Notification to fetch.
+     */
+    where?: NotificationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Notifications to fetch.
+     */
+    orderBy?: NotificationOrderByWithRelationInput | NotificationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Notifications.
+     */
+    cursor?: NotificationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Notifications from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Notifications.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Notifications.
+     */
+    distinct?: NotificationScalarFieldEnum | NotificationScalarFieldEnum[]
+  }
+
+  /**
+   * Notification findMany
+   */
+  export type NotificationFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Notification
+     */
+    select?: NotificationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Notification
+     */
+    omit?: NotificationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationInclude<ExtArgs> | null
+    /**
+     * Filter, which Notifications to fetch.
+     */
+    where?: NotificationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Notifications to fetch.
+     */
+    orderBy?: NotificationOrderByWithRelationInput | NotificationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Notifications.
+     */
+    cursor?: NotificationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Notifications from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Notifications.
+     */
+    skip?: number
+    distinct?: NotificationScalarFieldEnum | NotificationScalarFieldEnum[]
+  }
+
+  /**
+   * Notification create
+   */
+  export type NotificationCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Notification
+     */
+    select?: NotificationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Notification
+     */
+    omit?: NotificationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationInclude<ExtArgs> | null
+    /**
+     * The data needed to create a Notification.
+     */
+    data: XOR<NotificationCreateInput, NotificationUncheckedCreateInput>
+  }
+
+  /**
+   * Notification createMany
+   */
+  export type NotificationCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Notifications.
+     */
+    data: NotificationCreateManyInput | NotificationCreateManyInput[]
+  }
+
+  /**
+   * Notification update
+   */
+  export type NotificationUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Notification
+     */
+    select?: NotificationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Notification
+     */
+    omit?: NotificationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationInclude<ExtArgs> | null
+    /**
+     * The data needed to update a Notification.
+     */
+    data: XOR<NotificationUpdateInput, NotificationUncheckedUpdateInput>
+    /**
+     * Choose, which Notification to update.
+     */
+    where: NotificationWhereUniqueInput
+  }
+
+  /**
+   * Notification updateMany
+   */
+  export type NotificationUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Notifications.
+     */
+    data: XOR<NotificationUpdateManyMutationInput, NotificationUncheckedUpdateManyInput>
+    /**
+     * Filter which Notifications to update
+     */
+    where?: NotificationWhereInput
+    /**
+     * Limit how many Notifications to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Notification upsert
+   */
+  export type NotificationUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Notification
+     */
+    select?: NotificationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Notification
+     */
+    omit?: NotificationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationInclude<ExtArgs> | null
+    /**
+     * The filter to search for the Notification to update in case it exists.
+     */
+    where: NotificationWhereUniqueInput
+    /**
+     * In case the Notification found by the `where` argument doesn't exist, create a new Notification with this data.
+     */
+    create: XOR<NotificationCreateInput, NotificationUncheckedCreateInput>
+    /**
+     * In case the Notification was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<NotificationUpdateInput, NotificationUncheckedUpdateInput>
+  }
+
+  /**
+   * Notification delete
+   */
+  export type NotificationDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Notification
+     */
+    select?: NotificationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Notification
+     */
+    omit?: NotificationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationInclude<ExtArgs> | null
+    /**
+     * Filter which Notification to delete.
+     */
+    where: NotificationWhereUniqueInput
+  }
+
+  /**
+   * Notification deleteMany
+   */
+  export type NotificationDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Notifications to delete
+     */
+    where?: NotificationWhereInput
+    /**
+     * Limit how many Notifications to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * Notification findRaw
+   */
+  export type NotificationFindRawArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The query predicate filter. If unspecified, then all documents in the collection will match the predicate. ${@link https://docs.mongodb.com/manual/reference/operator/query MongoDB Docs}.
+     */
+    filter?: InputJsonValue
+    /**
+     * Additional options to pass to the `find` command ${@link https://docs.mongodb.com/manual/reference/command/find/#command-fields MongoDB Docs}.
+     */
+    options?: InputJsonValue
+  }
+
+  /**
+   * Notification aggregateRaw
+   */
+  export type NotificationAggregateRawArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * An array of aggregation stages to process and transform the document stream via the aggregation pipeline. ${@link https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline MongoDB Docs}.
+     */
+    pipeline?: InputJsonValue[]
+    /**
+     * Additional options to pass to the `aggregate` command ${@link https://docs.mongodb.com/manual/reference/command/aggregate/#command-fields MongoDB Docs}.
+     */
+    options?: InputJsonValue
+  }
+
+  /**
+   * Notification without action
+   */
+  export type NotificationDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Notification
+     */
+    select?: NotificationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Notification
+     */
+    omit?: NotificationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model Note
+   */
+
+  export type AggregateNote = {
+    _count: NoteCountAggregateOutputType | null
+    _min: NoteMinAggregateOutputType | null
+    _max: NoteMaxAggregateOutputType | null
+  }
+
+  export type NoteMinAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    content: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type NoteMaxAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    content: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type NoteCountAggregateOutputType = {
+    id: number
+    userId: number
+    content: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type NoteMinAggregateInputType = {
+    id?: true
+    userId?: true
+    content?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type NoteMaxAggregateInputType = {
+    id?: true
+    userId?: true
+    content?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type NoteCountAggregateInputType = {
+    id?: true
+    userId?: true
+    content?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type NoteAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Note to aggregate.
+     */
+    where?: NoteWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Notes to fetch.
+     */
+    orderBy?: NoteOrderByWithRelationInput | NoteOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: NoteWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Notes from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Notes.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Notes
+    **/
+    _count?: true | NoteCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: NoteMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: NoteMaxAggregateInputType
+  }
+
+  export type GetNoteAggregateType<T extends NoteAggregateArgs> = {
+        [P in keyof T & keyof AggregateNote]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateNote[P]>
+      : GetScalarType<T[P], AggregateNote[P]>
+  }
+
+
+
+
+  export type NoteGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: NoteWhereInput
+    orderBy?: NoteOrderByWithAggregationInput | NoteOrderByWithAggregationInput[]
+    by: NoteScalarFieldEnum[] | NoteScalarFieldEnum
+    having?: NoteScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: NoteCountAggregateInputType | true
+    _min?: NoteMinAggregateInputType
+    _max?: NoteMaxAggregateInputType
+  }
+
+  export type NoteGroupByOutputType = {
+    id: string
+    userId: string
+    content: string
+    createdAt: Date
+    updatedAt: Date
+    _count: NoteCountAggregateOutputType | null
+    _min: NoteMinAggregateOutputType | null
+    _max: NoteMaxAggregateOutputType | null
+  }
+
+  type GetNoteGroupByPayload<T extends NoteGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<NoteGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof NoteGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], NoteGroupByOutputType[P]>
+            : GetScalarType<T[P], NoteGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type NoteSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    content?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["note"]>
+
+
+
+  export type NoteSelectScalar = {
+    id?: boolean
+    userId?: boolean
+    content?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type NoteOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "content" | "createdAt" | "updatedAt", ExtArgs["result"]["note"]>
+  export type NoteInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+
+  export type $NotePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Note"
+    objects: {
+      user: Prisma.$UserPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      userId: string
+      content: string
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["note"]>
+    composites: {}
+  }
+
+  type NoteGetPayload<S extends boolean | null | undefined | NoteDefaultArgs> = $Result.GetResult<Prisma.$NotePayload, S>
+
+  type NoteCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<NoteFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: NoteCountAggregateInputType | true
+    }
+
+  export interface NoteDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Note'], meta: { name: 'Note' } }
+    /**
+     * Find zero or one Note that matches the filter.
+     * @param {NoteFindUniqueArgs} args - Arguments to find a Note
+     * @example
+     * // Get one Note
+     * const note = await prisma.note.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends NoteFindUniqueArgs>(args: SelectSubset<T, NoteFindUniqueArgs<ExtArgs>>): Prisma__NoteClient<$Result.GetResult<Prisma.$NotePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Note that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {NoteFindUniqueOrThrowArgs} args - Arguments to find a Note
+     * @example
+     * // Get one Note
+     * const note = await prisma.note.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends NoteFindUniqueOrThrowArgs>(args: SelectSubset<T, NoteFindUniqueOrThrowArgs<ExtArgs>>): Prisma__NoteClient<$Result.GetResult<Prisma.$NotePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Note that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NoteFindFirstArgs} args - Arguments to find a Note
+     * @example
+     * // Get one Note
+     * const note = await prisma.note.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends NoteFindFirstArgs>(args?: SelectSubset<T, NoteFindFirstArgs<ExtArgs>>): Prisma__NoteClient<$Result.GetResult<Prisma.$NotePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Note that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NoteFindFirstOrThrowArgs} args - Arguments to find a Note
+     * @example
+     * // Get one Note
+     * const note = await prisma.note.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends NoteFindFirstOrThrowArgs>(args?: SelectSubset<T, NoteFindFirstOrThrowArgs<ExtArgs>>): Prisma__NoteClient<$Result.GetResult<Prisma.$NotePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Notes that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NoteFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Notes
+     * const notes = await prisma.note.findMany()
+     * 
+     * // Get first 10 Notes
+     * const notes = await prisma.note.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const noteWithIdOnly = await prisma.note.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends NoteFindManyArgs>(args?: SelectSubset<T, NoteFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Note.
+     * @param {NoteCreateArgs} args - Arguments to create a Note.
+     * @example
+     * // Create one Note
+     * const Note = await prisma.note.create({
+     *   data: {
+     *     // ... data to create a Note
+     *   }
+     * })
+     * 
+     */
+    create<T extends NoteCreateArgs>(args: SelectSubset<T, NoteCreateArgs<ExtArgs>>): Prisma__NoteClient<$Result.GetResult<Prisma.$NotePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Notes.
+     * @param {NoteCreateManyArgs} args - Arguments to create many Notes.
+     * @example
+     * // Create many Notes
+     * const note = await prisma.note.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends NoteCreateManyArgs>(args?: SelectSubset<T, NoteCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Delete a Note.
+     * @param {NoteDeleteArgs} args - Arguments to delete one Note.
+     * @example
+     * // Delete one Note
+     * const Note = await prisma.note.delete({
+     *   where: {
+     *     // ... filter to delete one Note
+     *   }
+     * })
+     * 
+     */
+    delete<T extends NoteDeleteArgs>(args: SelectSubset<T, NoteDeleteArgs<ExtArgs>>): Prisma__NoteClient<$Result.GetResult<Prisma.$NotePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Note.
+     * @param {NoteUpdateArgs} args - Arguments to update one Note.
+     * @example
+     * // Update one Note
+     * const note = await prisma.note.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends NoteUpdateArgs>(args: SelectSubset<T, NoteUpdateArgs<ExtArgs>>): Prisma__NoteClient<$Result.GetResult<Prisma.$NotePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Notes.
+     * @param {NoteDeleteManyArgs} args - Arguments to filter Notes to delete.
+     * @example
+     * // Delete a few Notes
+     * const { count } = await prisma.note.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends NoteDeleteManyArgs>(args?: SelectSubset<T, NoteDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Notes.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NoteUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Notes
+     * const note = await prisma.note.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends NoteUpdateManyArgs>(args: SelectSubset<T, NoteUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one Note.
+     * @param {NoteUpsertArgs} args - Arguments to update or create a Note.
+     * @example
+     * // Update or create a Note
+     * const note = await prisma.note.upsert({
+     *   create: {
+     *     // ... data to create a Note
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Note we want to update
+     *   }
+     * })
+     */
+    upsert<T extends NoteUpsertArgs>(args: SelectSubset<T, NoteUpsertArgs<ExtArgs>>): Prisma__NoteClient<$Result.GetResult<Prisma.$NotePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Notes that matches the filter.
+     * @param {NoteFindRawArgs} args - Select which filters you would like to apply.
+     * @example
+     * const note = await prisma.note.findRaw({
+     *   filter: { age: { $gt: 25 } }
+     * })
+     */
+    findRaw(args?: NoteFindRawArgs): Prisma.PrismaPromise<JsonObject>
+
+    /**
+     * Perform aggregation operations on a Note.
+     * @param {NoteAggregateRawArgs} args - Select which aggregations you would like to apply.
+     * @example
+     * const note = await prisma.note.aggregateRaw({
+     *   pipeline: [
+     *     { $match: { status: "registered" } },
+     *     { $group: { _id: "$country", total: { $sum: 1 } } }
+     *   ]
+     * })
+     */
+    aggregateRaw(args?: NoteAggregateRawArgs): Prisma.PrismaPromise<JsonObject>
+
+
+    /**
+     * Count the number of Notes.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NoteCountArgs} args - Arguments to filter Notes to count.
+     * @example
+     * // Count the number of Notes
+     * const count = await prisma.note.count({
+     *   where: {
+     *     // ... the filter for the Notes we want to count
+     *   }
+     * })
+    **/
+    count<T extends NoteCountArgs>(
+      args?: Subset<T, NoteCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], NoteCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Note.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NoteAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends NoteAggregateArgs>(args: Subset<T, NoteAggregateArgs>): Prisma.PrismaPromise<GetNoteAggregateType<T>>
+
+    /**
+     * Group by Note.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NoteGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends NoteGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: NoteGroupByArgs['orderBy'] }
+        : { orderBy?: NoteGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, NoteGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetNoteGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Note model
+   */
+  readonly fields: NoteFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Note.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__NoteClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Note model
+   */
+  interface NoteFieldRefs {
+    readonly id: FieldRef<"Note", 'String'>
+    readonly userId: FieldRef<"Note", 'String'>
+    readonly content: FieldRef<"Note", 'String'>
+    readonly createdAt: FieldRef<"Note", 'DateTime'>
+    readonly updatedAt: FieldRef<"Note", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Note findUnique
+   */
+  export type NoteFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Note
+     */
+    select?: NoteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Note
+     */
+    omit?: NoteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NoteInclude<ExtArgs> | null
+    /**
+     * Filter, which Note to fetch.
+     */
+    where: NoteWhereUniqueInput
+  }
+
+  /**
+   * Note findUniqueOrThrow
+   */
+  export type NoteFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Note
+     */
+    select?: NoteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Note
+     */
+    omit?: NoteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NoteInclude<ExtArgs> | null
+    /**
+     * Filter, which Note to fetch.
+     */
+    where: NoteWhereUniqueInput
+  }
+
+  /**
+   * Note findFirst
+   */
+  export type NoteFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Note
+     */
+    select?: NoteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Note
+     */
+    omit?: NoteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NoteInclude<ExtArgs> | null
+    /**
+     * Filter, which Note to fetch.
+     */
+    where?: NoteWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Notes to fetch.
+     */
+    orderBy?: NoteOrderByWithRelationInput | NoteOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Notes.
+     */
+    cursor?: NoteWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Notes from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Notes.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Notes.
+     */
+    distinct?: NoteScalarFieldEnum | NoteScalarFieldEnum[]
+  }
+
+  /**
+   * Note findFirstOrThrow
+   */
+  export type NoteFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Note
+     */
+    select?: NoteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Note
+     */
+    omit?: NoteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NoteInclude<ExtArgs> | null
+    /**
+     * Filter, which Note to fetch.
+     */
+    where?: NoteWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Notes to fetch.
+     */
+    orderBy?: NoteOrderByWithRelationInput | NoteOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Notes.
+     */
+    cursor?: NoteWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Notes from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Notes.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Notes.
+     */
+    distinct?: NoteScalarFieldEnum | NoteScalarFieldEnum[]
+  }
+
+  /**
+   * Note findMany
+   */
+  export type NoteFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Note
+     */
+    select?: NoteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Note
+     */
+    omit?: NoteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NoteInclude<ExtArgs> | null
+    /**
+     * Filter, which Notes to fetch.
+     */
+    where?: NoteWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Notes to fetch.
+     */
+    orderBy?: NoteOrderByWithRelationInput | NoteOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Notes.
+     */
+    cursor?: NoteWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Notes from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Notes.
+     */
+    skip?: number
+    distinct?: NoteScalarFieldEnum | NoteScalarFieldEnum[]
+  }
+
+  /**
+   * Note create
+   */
+  export type NoteCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Note
+     */
+    select?: NoteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Note
+     */
+    omit?: NoteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NoteInclude<ExtArgs> | null
+    /**
+     * The data needed to create a Note.
+     */
+    data: XOR<NoteCreateInput, NoteUncheckedCreateInput>
+  }
+
+  /**
+   * Note createMany
+   */
+  export type NoteCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Notes.
+     */
+    data: NoteCreateManyInput | NoteCreateManyInput[]
+  }
+
+  /**
+   * Note update
+   */
+  export type NoteUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Note
+     */
+    select?: NoteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Note
+     */
+    omit?: NoteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NoteInclude<ExtArgs> | null
+    /**
+     * The data needed to update a Note.
+     */
+    data: XOR<NoteUpdateInput, NoteUncheckedUpdateInput>
+    /**
+     * Choose, which Note to update.
+     */
+    where: NoteWhereUniqueInput
+  }
+
+  /**
+   * Note updateMany
+   */
+  export type NoteUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Notes.
+     */
+    data: XOR<NoteUpdateManyMutationInput, NoteUncheckedUpdateManyInput>
+    /**
+     * Filter which Notes to update
+     */
+    where?: NoteWhereInput
+    /**
+     * Limit how many Notes to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Note upsert
+   */
+  export type NoteUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Note
+     */
+    select?: NoteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Note
+     */
+    omit?: NoteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NoteInclude<ExtArgs> | null
+    /**
+     * The filter to search for the Note to update in case it exists.
+     */
+    where: NoteWhereUniqueInput
+    /**
+     * In case the Note found by the `where` argument doesn't exist, create a new Note with this data.
+     */
+    create: XOR<NoteCreateInput, NoteUncheckedCreateInput>
+    /**
+     * In case the Note was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<NoteUpdateInput, NoteUncheckedUpdateInput>
+  }
+
+  /**
+   * Note delete
+   */
+  export type NoteDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Note
+     */
+    select?: NoteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Note
+     */
+    omit?: NoteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NoteInclude<ExtArgs> | null
+    /**
+     * Filter which Note to delete.
+     */
+    where: NoteWhereUniqueInput
+  }
+
+  /**
+   * Note deleteMany
+   */
+  export type NoteDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Notes to delete
+     */
+    where?: NoteWhereInput
+    /**
+     * Limit how many Notes to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * Note findRaw
+   */
+  export type NoteFindRawArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The query predicate filter. If unspecified, then all documents in the collection will match the predicate. ${@link https://docs.mongodb.com/manual/reference/operator/query MongoDB Docs}.
+     */
+    filter?: InputJsonValue
+    /**
+     * Additional options to pass to the `find` command ${@link https://docs.mongodb.com/manual/reference/command/find/#command-fields MongoDB Docs}.
+     */
+    options?: InputJsonValue
+  }
+
+  /**
+   * Note aggregateRaw
+   */
+  export type NoteAggregateRawArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * An array of aggregation stages to process and transform the document stream via the aggregation pipeline. ${@link https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline MongoDB Docs}.
+     */
+    pipeline?: InputJsonValue[]
+    /**
+     * Additional options to pass to the `aggregate` command ${@link https://docs.mongodb.com/manual/reference/command/aggregate/#command-fields MongoDB Docs}.
+     */
+    options?: InputJsonValue
+  }
+
+  /**
+   * Note without action
+   */
+  export type NoteDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Note
+     */
+    select?: NoteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Note
+     */
+    omit?: NoteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NoteInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -9110,6 +12727,7 @@ export namespace Prisma {
     role: 'role',
     supervisorId: 'supervisorId',
     departmentId: 'departmentId',
+    participatingEventIds: 'participatingEventIds',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -9205,6 +12823,50 @@ export namespace Prisma {
   };
 
   export type AuditLogScalarFieldEnum = (typeof AuditLogScalarFieldEnum)[keyof typeof AuditLogScalarFieldEnum]
+
+
+  export const AgendaEventScalarFieldEnum: {
+    id: 'id',
+    title: 'title',
+    description: 'description',
+    type: 'type',
+    startTime: 'startTime',
+    endTime: 'endTime',
+    createdById: 'createdById',
+    participantIds: 'participantIds',
+    reportId: 'reportId',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type AgendaEventScalarFieldEnum = (typeof AgendaEventScalarFieldEnum)[keyof typeof AgendaEventScalarFieldEnum]
+
+
+  export const NotificationScalarFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    fromId: 'fromId',
+    type: 'type',
+    title: 'title',
+    message: 'message',
+    read: 'read',
+    link: 'link',
+    scheduledFor: 'scheduledFor',
+    createdAt: 'createdAt'
+  };
+
+  export type NotificationScalarFieldEnum = (typeof NotificationScalarFieldEnum)[keyof typeof NotificationScalarFieldEnum]
+
+
+  export const NoteScalarFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    content: 'content',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type NoteScalarFieldEnum = (typeof NoteScalarFieldEnum)[keyof typeof NoteScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -9317,6 +12979,20 @@ export namespace Prisma {
    */
   export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
     
+
+
+  /**
+   * Reference to a field of type 'AgendaEventType'
+   */
+  export type EnumAgendaEventTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AgendaEventType'>
+    
+
+
+  /**
+   * Reference to a field of type 'AgendaEventType[]'
+   */
+  export type ListEnumAgendaEventTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AgendaEventType[]'>
+    
   /**
    * Deep Input Types
    */
@@ -9335,6 +13011,7 @@ export namespace Prisma {
     role?: EnumRoleFilter<"User"> | $Enums.Role
     supervisorId?: StringNullableFilter<"User"> | string | null
     departmentId?: StringNullableFilter<"User"> | string | null
+    participatingEventIds?: StringNullableListFilter<"User">
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     supervisor?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
@@ -9342,6 +13019,10 @@ export namespace Prisma {
     department?: XOR<DepartmentNullableScalarRelationFilter, DepartmentWhereInput> | null
     reports?: ReportListRelationFilter
     media?: MediaListRelationFilter
+    notifications?: NotificationListRelationFilter
+    createdEvents?: AgendaEventListRelationFilter
+    participatingEvents?: AgendaEventListRelationFilter
+    notes?: NoteListRelationFilter
     auditLogs?: AuditLogListRelationFilter
   }
 
@@ -9355,6 +13036,7 @@ export namespace Prisma {
     role?: SortOrder
     supervisorId?: SortOrder
     departmentId?: SortOrder
+    participatingEventIds?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     supervisor?: UserOrderByWithRelationInput
@@ -9362,6 +13044,10 @@ export namespace Prisma {
     department?: DepartmentOrderByWithRelationInput
     reports?: ReportOrderByRelationAggregateInput
     media?: MediaOrderByRelationAggregateInput
+    notifications?: NotificationOrderByRelationAggregateInput
+    createdEvents?: AgendaEventOrderByRelationAggregateInput
+    participatingEvents?: AgendaEventOrderByRelationAggregateInput
+    notes?: NoteOrderByRelationAggregateInput
     auditLogs?: AuditLogOrderByRelationAggregateInput
   }
 
@@ -9378,6 +13064,7 @@ export namespace Prisma {
     role?: EnumRoleFilter<"User"> | $Enums.Role
     supervisorId?: StringNullableFilter<"User"> | string | null
     departmentId?: StringNullableFilter<"User"> | string | null
+    participatingEventIds?: StringNullableListFilter<"User">
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     supervisor?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
@@ -9385,6 +13072,10 @@ export namespace Prisma {
     department?: XOR<DepartmentNullableScalarRelationFilter, DepartmentWhereInput> | null
     reports?: ReportListRelationFilter
     media?: MediaListRelationFilter
+    notifications?: NotificationListRelationFilter
+    createdEvents?: AgendaEventListRelationFilter
+    participatingEvents?: AgendaEventListRelationFilter
+    notes?: NoteListRelationFilter
     auditLogs?: AuditLogListRelationFilter
   }, "id" | "email">
 
@@ -9398,6 +13089,7 @@ export namespace Prisma {
     role?: SortOrder
     supervisorId?: SortOrder
     departmentId?: SortOrder
+    participatingEventIds?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: UserCountOrderByAggregateInput
@@ -9418,6 +13110,7 @@ export namespace Prisma {
     role?: EnumRoleWithAggregatesFilter<"User"> | $Enums.Role
     supervisorId?: StringNullableWithAggregatesFilter<"User"> | string | null
     departmentId?: StringNullableWithAggregatesFilter<"User"> | string | null
+    participatingEventIds?: StringNullableListFilter<"User">
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
   }
@@ -9442,6 +13135,7 @@ export namespace Prisma {
     department?: XOR<DepartmentNullableScalarRelationFilter, DepartmentWhereInput> | null
     history?: ReportHistoryListRelationFilter
     media?: MediaListRelationFilter
+    agendaEvents?: AgendaEventListRelationFilter
   }
 
   export type ReportOrderByWithRelationInput = {
@@ -9461,6 +13155,7 @@ export namespace Prisma {
     department?: DepartmentOrderByWithRelationInput
     history?: ReportHistoryOrderByRelationAggregateInput
     media?: MediaOrderByRelationAggregateInput
+    agendaEvents?: AgendaEventOrderByRelationAggregateInput
   }
 
   export type ReportWhereUniqueInput = Prisma.AtLeast<{
@@ -9483,6 +13178,7 @@ export namespace Prisma {
     department?: XOR<DepartmentNullableScalarRelationFilter, DepartmentWhereInput> | null
     history?: ReportHistoryListRelationFilter
     media?: MediaListRelationFilter
+    agendaEvents?: AgendaEventListRelationFilter
   }, "id">
 
   export type ReportOrderByWithAggregationInput = {
@@ -9888,6 +13584,232 @@ export namespace Prisma {
     createdAt?: DateTimeWithAggregatesFilter<"AuditLog"> | Date | string
   }
 
+  export type AgendaEventWhereInput = {
+    AND?: AgendaEventWhereInput | AgendaEventWhereInput[]
+    OR?: AgendaEventWhereInput[]
+    NOT?: AgendaEventWhereInput | AgendaEventWhereInput[]
+    id?: StringFilter<"AgendaEvent"> | string
+    title?: StringFilter<"AgendaEvent"> | string
+    description?: StringNullableFilter<"AgendaEvent"> | string | null
+    type?: EnumAgendaEventTypeFilter<"AgendaEvent"> | $Enums.AgendaEventType
+    startTime?: DateTimeFilter<"AgendaEvent"> | Date | string
+    endTime?: DateTimeNullableFilter<"AgendaEvent"> | Date | string | null
+    createdById?: StringFilter<"AgendaEvent"> | string
+    participantIds?: StringNullableListFilter<"AgendaEvent">
+    reportId?: StringNullableFilter<"AgendaEvent"> | string | null
+    createdAt?: DateTimeFilter<"AgendaEvent"> | Date | string
+    updatedAt?: DateTimeFilter<"AgendaEvent"> | Date | string
+    createdBy?: XOR<UserScalarRelationFilter, UserWhereInput>
+    participants?: UserListRelationFilter
+    report?: XOR<ReportNullableScalarRelationFilter, ReportWhereInput> | null
+  }
+
+  export type AgendaEventOrderByWithRelationInput = {
+    id?: SortOrder
+    title?: SortOrder
+    description?: SortOrder
+    type?: SortOrder
+    startTime?: SortOrder
+    endTime?: SortOrder
+    createdById?: SortOrder
+    participantIds?: SortOrder
+    reportId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    createdBy?: UserOrderByWithRelationInput
+    participants?: UserOrderByRelationAggregateInput
+    report?: ReportOrderByWithRelationInput
+  }
+
+  export type AgendaEventWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: AgendaEventWhereInput | AgendaEventWhereInput[]
+    OR?: AgendaEventWhereInput[]
+    NOT?: AgendaEventWhereInput | AgendaEventWhereInput[]
+    title?: StringFilter<"AgendaEvent"> | string
+    description?: StringNullableFilter<"AgendaEvent"> | string | null
+    type?: EnumAgendaEventTypeFilter<"AgendaEvent"> | $Enums.AgendaEventType
+    startTime?: DateTimeFilter<"AgendaEvent"> | Date | string
+    endTime?: DateTimeNullableFilter<"AgendaEvent"> | Date | string | null
+    createdById?: StringFilter<"AgendaEvent"> | string
+    participantIds?: StringNullableListFilter<"AgendaEvent">
+    reportId?: StringNullableFilter<"AgendaEvent"> | string | null
+    createdAt?: DateTimeFilter<"AgendaEvent"> | Date | string
+    updatedAt?: DateTimeFilter<"AgendaEvent"> | Date | string
+    createdBy?: XOR<UserScalarRelationFilter, UserWhereInput>
+    participants?: UserListRelationFilter
+    report?: XOR<ReportNullableScalarRelationFilter, ReportWhereInput> | null
+  }, "id">
+
+  export type AgendaEventOrderByWithAggregationInput = {
+    id?: SortOrder
+    title?: SortOrder
+    description?: SortOrder
+    type?: SortOrder
+    startTime?: SortOrder
+    endTime?: SortOrder
+    createdById?: SortOrder
+    participantIds?: SortOrder
+    reportId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: AgendaEventCountOrderByAggregateInput
+    _max?: AgendaEventMaxOrderByAggregateInput
+    _min?: AgendaEventMinOrderByAggregateInput
+  }
+
+  export type AgendaEventScalarWhereWithAggregatesInput = {
+    AND?: AgendaEventScalarWhereWithAggregatesInput | AgendaEventScalarWhereWithAggregatesInput[]
+    OR?: AgendaEventScalarWhereWithAggregatesInput[]
+    NOT?: AgendaEventScalarWhereWithAggregatesInput | AgendaEventScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"AgendaEvent"> | string
+    title?: StringWithAggregatesFilter<"AgendaEvent"> | string
+    description?: StringNullableWithAggregatesFilter<"AgendaEvent"> | string | null
+    type?: EnumAgendaEventTypeWithAggregatesFilter<"AgendaEvent"> | $Enums.AgendaEventType
+    startTime?: DateTimeWithAggregatesFilter<"AgendaEvent"> | Date | string
+    endTime?: DateTimeNullableWithAggregatesFilter<"AgendaEvent"> | Date | string | null
+    createdById?: StringWithAggregatesFilter<"AgendaEvent"> | string
+    participantIds?: StringNullableListFilter<"AgendaEvent">
+    reportId?: StringNullableWithAggregatesFilter<"AgendaEvent"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"AgendaEvent"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"AgendaEvent"> | Date | string
+  }
+
+  export type NotificationWhereInput = {
+    AND?: NotificationWhereInput | NotificationWhereInput[]
+    OR?: NotificationWhereInput[]
+    NOT?: NotificationWhereInput | NotificationWhereInput[]
+    id?: StringFilter<"Notification"> | string
+    userId?: StringFilter<"Notification"> | string
+    fromId?: StringNullableFilter<"Notification"> | string | null
+    type?: StringFilter<"Notification"> | string
+    title?: StringFilter<"Notification"> | string
+    message?: StringFilter<"Notification"> | string
+    read?: BoolFilter<"Notification"> | boolean
+    link?: StringNullableFilter<"Notification"> | string | null
+    scheduledFor?: DateTimeNullableFilter<"Notification"> | Date | string | null
+    createdAt?: DateTimeFilter<"Notification"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }
+
+  export type NotificationOrderByWithRelationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    fromId?: SortOrder
+    type?: SortOrder
+    title?: SortOrder
+    message?: SortOrder
+    read?: SortOrder
+    link?: SortOrder
+    scheduledFor?: SortOrder
+    createdAt?: SortOrder
+    user?: UserOrderByWithRelationInput
+  }
+
+  export type NotificationWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: NotificationWhereInput | NotificationWhereInput[]
+    OR?: NotificationWhereInput[]
+    NOT?: NotificationWhereInput | NotificationWhereInput[]
+    userId?: StringFilter<"Notification"> | string
+    fromId?: StringNullableFilter<"Notification"> | string | null
+    type?: StringFilter<"Notification"> | string
+    title?: StringFilter<"Notification"> | string
+    message?: StringFilter<"Notification"> | string
+    read?: BoolFilter<"Notification"> | boolean
+    link?: StringNullableFilter<"Notification"> | string | null
+    scheduledFor?: DateTimeNullableFilter<"Notification"> | Date | string | null
+    createdAt?: DateTimeFilter<"Notification"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }, "id">
+
+  export type NotificationOrderByWithAggregationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    fromId?: SortOrder
+    type?: SortOrder
+    title?: SortOrder
+    message?: SortOrder
+    read?: SortOrder
+    link?: SortOrder
+    scheduledFor?: SortOrder
+    createdAt?: SortOrder
+    _count?: NotificationCountOrderByAggregateInput
+    _max?: NotificationMaxOrderByAggregateInput
+    _min?: NotificationMinOrderByAggregateInput
+  }
+
+  export type NotificationScalarWhereWithAggregatesInput = {
+    AND?: NotificationScalarWhereWithAggregatesInput | NotificationScalarWhereWithAggregatesInput[]
+    OR?: NotificationScalarWhereWithAggregatesInput[]
+    NOT?: NotificationScalarWhereWithAggregatesInput | NotificationScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"Notification"> | string
+    userId?: StringWithAggregatesFilter<"Notification"> | string
+    fromId?: StringNullableWithAggregatesFilter<"Notification"> | string | null
+    type?: StringWithAggregatesFilter<"Notification"> | string
+    title?: StringWithAggregatesFilter<"Notification"> | string
+    message?: StringWithAggregatesFilter<"Notification"> | string
+    read?: BoolWithAggregatesFilter<"Notification"> | boolean
+    link?: StringNullableWithAggregatesFilter<"Notification"> | string | null
+    scheduledFor?: DateTimeNullableWithAggregatesFilter<"Notification"> | Date | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"Notification"> | Date | string
+  }
+
+  export type NoteWhereInput = {
+    AND?: NoteWhereInput | NoteWhereInput[]
+    OR?: NoteWhereInput[]
+    NOT?: NoteWhereInput | NoteWhereInput[]
+    id?: StringFilter<"Note"> | string
+    userId?: StringFilter<"Note"> | string
+    content?: StringFilter<"Note"> | string
+    createdAt?: DateTimeFilter<"Note"> | Date | string
+    updatedAt?: DateTimeFilter<"Note"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }
+
+  export type NoteOrderByWithRelationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    content?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    user?: UserOrderByWithRelationInput
+  }
+
+  export type NoteWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: NoteWhereInput | NoteWhereInput[]
+    OR?: NoteWhereInput[]
+    NOT?: NoteWhereInput | NoteWhereInput[]
+    userId?: StringFilter<"Note"> | string
+    content?: StringFilter<"Note"> | string
+    createdAt?: DateTimeFilter<"Note"> | Date | string
+    updatedAt?: DateTimeFilter<"Note"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }, "id">
+
+  export type NoteOrderByWithAggregationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    content?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: NoteCountOrderByAggregateInput
+    _max?: NoteMaxOrderByAggregateInput
+    _min?: NoteMinOrderByAggregateInput
+  }
+
+  export type NoteScalarWhereWithAggregatesInput = {
+    AND?: NoteScalarWhereWithAggregatesInput | NoteScalarWhereWithAggregatesInput[]
+    OR?: NoteScalarWhereWithAggregatesInput[]
+    NOT?: NoteScalarWhereWithAggregatesInput | NoteScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"Note"> | string
+    userId?: StringWithAggregatesFilter<"Note"> | string
+    content?: StringWithAggregatesFilter<"Note"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"Note"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"Note"> | Date | string
+  }
+
   export type UserCreateInput = {
     id?: string
     name: string
@@ -9903,6 +13825,10 @@ export namespace Prisma {
     department?: DepartmentCreateNestedOneWithoutMembersInput
     reports?: ReportCreateNestedManyWithoutUserInput
     media?: MediaCreateNestedManyWithoutUserInput
+    notifications?: NotificationCreateNestedManyWithoutUserInput
+    createdEvents?: AgendaEventCreateNestedManyWithoutCreatedByInput
+    participatingEvents?: AgendaEventCreateNestedManyWithoutParticipantsInput
+    notes?: NoteCreateNestedManyWithoutUserInput
     auditLogs?: AuditLogCreateNestedManyWithoutUserInput
   }
 
@@ -9916,11 +13842,16 @@ export namespace Prisma {
     role?: $Enums.Role
     supervisorId?: string | null
     departmentId?: string | null
+    participatingEventIds?: UserCreateparticipatingEventIdsInput | string[]
     createdAt?: Date | string
     updatedAt?: Date | string
     Subordinates?: UserUncheckedCreateNestedManyWithoutSupervisorInput
     reports?: ReportUncheckedCreateNestedManyWithoutUserInput
     media?: MediaUncheckedCreateNestedManyWithoutUserInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutUserInput
+    createdEvents?: AgendaEventUncheckedCreateNestedManyWithoutCreatedByInput
+    participatingEvents?: AgendaEventUncheckedCreateNestedManyWithoutParticipantsInput
+    notes?: NoteUncheckedCreateNestedManyWithoutUserInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -9938,6 +13869,10 @@ export namespace Prisma {
     department?: DepartmentUpdateOneWithoutMembersNestedInput
     reports?: ReportUpdateManyWithoutUserNestedInput
     media?: MediaUpdateManyWithoutUserNestedInput
+    notifications?: NotificationUpdateManyWithoutUserNestedInput
+    createdEvents?: AgendaEventUpdateManyWithoutCreatedByNestedInput
+    participatingEvents?: AgendaEventUpdateManyWithoutParticipantsNestedInput
+    notes?: NoteUpdateManyWithoutUserNestedInput
     auditLogs?: AuditLogUpdateManyWithoutUserNestedInput
   }
 
@@ -9950,11 +13885,16 @@ export namespace Prisma {
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     supervisorId?: NullableStringFieldUpdateOperationsInput | string | null
     departmentId?: NullableStringFieldUpdateOperationsInput | string | null
+    participatingEventIds?: UserUpdateparticipatingEventIdsInput | string[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     Subordinates?: UserUncheckedUpdateManyWithoutSupervisorNestedInput
     reports?: ReportUncheckedUpdateManyWithoutUserNestedInput
     media?: MediaUncheckedUpdateManyWithoutUserNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutUserNestedInput
+    createdEvents?: AgendaEventUncheckedUpdateManyWithoutCreatedByNestedInput
+    participatingEvents?: AgendaEventUncheckedUpdateManyWithoutParticipantsNestedInput
+    notes?: NoteUncheckedUpdateManyWithoutUserNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -9968,6 +13908,7 @@ export namespace Prisma {
     role?: $Enums.Role
     supervisorId?: string | null
     departmentId?: string | null
+    participatingEventIds?: UserCreateparticipatingEventIdsInput | string[]
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -9992,6 +13933,7 @@ export namespace Prisma {
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     supervisorId?: NullableStringFieldUpdateOperationsInput | string | null
     departmentId?: NullableStringFieldUpdateOperationsInput | string | null
+    participatingEventIds?: UserUpdateparticipatingEventIdsInput | string[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -10011,6 +13953,7 @@ export namespace Prisma {
     department?: DepartmentCreateNestedOneWithoutReportsInput
     history?: ReportHistoryCreateNestedManyWithoutReportInput
     media?: MediaCreateNestedManyWithoutReportInput
+    agendaEvents?: AgendaEventCreateNestedManyWithoutReportInput
   }
 
   export type ReportUncheckedCreateInput = {
@@ -10028,6 +13971,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     history?: ReportHistoryUncheckedCreateNestedManyWithoutReportInput
     media?: MediaUncheckedCreateNestedManyWithoutReportInput
+    agendaEvents?: AgendaEventUncheckedCreateNestedManyWithoutReportInput
   }
 
   export type ReportUpdateInput = {
@@ -10044,6 +13988,7 @@ export namespace Prisma {
     department?: DepartmentUpdateOneWithoutReportsNestedInput
     history?: ReportHistoryUpdateManyWithoutReportNestedInput
     media?: MediaUpdateManyWithoutReportNestedInput
+    agendaEvents?: AgendaEventUpdateManyWithoutReportNestedInput
   }
 
   export type ReportUncheckedUpdateInput = {
@@ -10060,6 +14005,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     history?: ReportHistoryUncheckedUpdateManyWithoutReportNestedInput
     media?: MediaUncheckedUpdateManyWithoutReportNestedInput
+    agendaEvents?: AgendaEventUncheckedUpdateManyWithoutReportNestedInput
   }
 
   export type ReportCreateManyInput = {
@@ -10486,6 +14432,236 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type AgendaEventCreateInput = {
+    id?: string
+    title: string
+    description?: string | null
+    type?: $Enums.AgendaEventType
+    startTime: Date | string
+    endTime?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    createdBy: UserCreateNestedOneWithoutCreatedEventsInput
+    participants?: UserCreateNestedManyWithoutParticipatingEventsInput
+    report?: ReportCreateNestedOneWithoutAgendaEventsInput
+  }
+
+  export type AgendaEventUncheckedCreateInput = {
+    id?: string
+    title: string
+    description?: string | null
+    type?: $Enums.AgendaEventType
+    startTime: Date | string
+    endTime?: Date | string | null
+    createdById: string
+    participantIds?: AgendaEventCreateparticipantIdsInput | string[]
+    reportId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    participants?: UserUncheckedCreateNestedManyWithoutParticipatingEventsInput
+  }
+
+  export type AgendaEventUpdateInput = {
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: EnumAgendaEventTypeFieldUpdateOperationsInput | $Enums.AgendaEventType
+    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    endTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdBy?: UserUpdateOneRequiredWithoutCreatedEventsNestedInput
+    participants?: UserUpdateManyWithoutParticipatingEventsNestedInput
+    report?: ReportUpdateOneWithoutAgendaEventsNestedInput
+  }
+
+  export type AgendaEventUncheckedUpdateInput = {
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: EnumAgendaEventTypeFieldUpdateOperationsInput | $Enums.AgendaEventType
+    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    endTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdById?: StringFieldUpdateOperationsInput | string
+    participantIds?: AgendaEventUpdateparticipantIdsInput | string[]
+    reportId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    participants?: UserUncheckedUpdateManyWithoutParticipatingEventsNestedInput
+  }
+
+  export type AgendaEventCreateManyInput = {
+    id?: string
+    title: string
+    description?: string | null
+    type?: $Enums.AgendaEventType
+    startTime: Date | string
+    endTime?: Date | string | null
+    createdById: string
+    participantIds?: AgendaEventCreateparticipantIdsInput | string[]
+    reportId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AgendaEventUpdateManyMutationInput = {
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: EnumAgendaEventTypeFieldUpdateOperationsInput | $Enums.AgendaEventType
+    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    endTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AgendaEventUncheckedUpdateManyInput = {
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: EnumAgendaEventTypeFieldUpdateOperationsInput | $Enums.AgendaEventType
+    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    endTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdById?: StringFieldUpdateOperationsInput | string
+    participantIds?: AgendaEventUpdateparticipantIdsInput | string[]
+    reportId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type NotificationCreateInput = {
+    id?: string
+    fromId?: string | null
+    type: string
+    title: string
+    message: string
+    read?: boolean
+    link?: string | null
+    scheduledFor?: Date | string | null
+    createdAt?: Date | string
+    user: UserCreateNestedOneWithoutNotificationsInput
+  }
+
+  export type NotificationUncheckedCreateInput = {
+    id?: string
+    userId: string
+    fromId?: string | null
+    type: string
+    title: string
+    message: string
+    read?: boolean
+    link?: string | null
+    scheduledFor?: Date | string | null
+    createdAt?: Date | string
+  }
+
+  export type NotificationUpdateInput = {
+    fromId?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    message?: StringFieldUpdateOperationsInput | string
+    read?: BoolFieldUpdateOperationsInput | boolean
+    link?: NullableStringFieldUpdateOperationsInput | string | null
+    scheduledFor?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutNotificationsNestedInput
+  }
+
+  export type NotificationUncheckedUpdateInput = {
+    userId?: StringFieldUpdateOperationsInput | string
+    fromId?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    message?: StringFieldUpdateOperationsInput | string
+    read?: BoolFieldUpdateOperationsInput | boolean
+    link?: NullableStringFieldUpdateOperationsInput | string | null
+    scheduledFor?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type NotificationCreateManyInput = {
+    id?: string
+    userId: string
+    fromId?: string | null
+    type: string
+    title: string
+    message: string
+    read?: boolean
+    link?: string | null
+    scheduledFor?: Date | string | null
+    createdAt?: Date | string
+  }
+
+  export type NotificationUpdateManyMutationInput = {
+    fromId?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    message?: StringFieldUpdateOperationsInput | string
+    read?: BoolFieldUpdateOperationsInput | boolean
+    link?: NullableStringFieldUpdateOperationsInput | string | null
+    scheduledFor?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type NotificationUncheckedUpdateManyInput = {
+    userId?: StringFieldUpdateOperationsInput | string
+    fromId?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    message?: StringFieldUpdateOperationsInput | string
+    read?: BoolFieldUpdateOperationsInput | boolean
+    link?: NullableStringFieldUpdateOperationsInput | string | null
+    scheduledFor?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type NoteCreateInput = {
+    id?: string
+    content: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutNotesInput
+  }
+
+  export type NoteUncheckedCreateInput = {
+    id?: string
+    userId: string
+    content: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type NoteUpdateInput = {
+    content?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutNotesNestedInput
+  }
+
+  export type NoteUncheckedUpdateInput = {
+    userId?: StringFieldUpdateOperationsInput | string
+    content?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type NoteCreateManyInput = {
+    id?: string
+    userId: string
+    content: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type NoteUpdateManyMutationInput = {
+    content?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type NoteUncheckedUpdateManyInput = {
+    userId?: StringFieldUpdateOperationsInput | string
+    content?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type StringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -10522,6 +14698,14 @@ export namespace Prisma {
     in?: $Enums.Role[] | ListEnumRoleFieldRefInput<$PrismaModel>
     notIn?: $Enums.Role[] | ListEnumRoleFieldRefInput<$PrismaModel>
     not?: NestedEnumRoleFilter<$PrismaModel> | $Enums.Role
+  }
+
+  export type StringNullableListFilter<$PrismaModel = never> = {
+    equals?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    has?: string | StringFieldRefInput<$PrismaModel> | null
+    hasEvery?: string[] | ListStringFieldRefInput<$PrismaModel>
+    hasSome?: string[] | ListStringFieldRefInput<$PrismaModel>
+    isEmpty?: boolean
   }
 
   export type DateTimeFilter<$PrismaModel = never> = {
@@ -10563,6 +14747,24 @@ export namespace Prisma {
     none?: MediaWhereInput
   }
 
+  export type NotificationListRelationFilter = {
+    every?: NotificationWhereInput
+    some?: NotificationWhereInput
+    none?: NotificationWhereInput
+  }
+
+  export type AgendaEventListRelationFilter = {
+    every?: AgendaEventWhereInput
+    some?: AgendaEventWhereInput
+    none?: AgendaEventWhereInput
+  }
+
+  export type NoteListRelationFilter = {
+    every?: NoteWhereInput
+    some?: NoteWhereInput
+    none?: NoteWhereInput
+  }
+
   export type AuditLogListRelationFilter = {
     every?: AuditLogWhereInput
     some?: AuditLogWhereInput
@@ -10581,6 +14783,18 @@ export namespace Prisma {
     _count?: SortOrder
   }
 
+  export type NotificationOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type AgendaEventOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type NoteOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
   export type AuditLogOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
@@ -10595,6 +14809,7 @@ export namespace Prisma {
     role?: SortOrder
     supervisorId?: SortOrder
     departmentId?: SortOrder
+    participatingEventIds?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -11093,6 +15308,126 @@ export namespace Prisma {
     createdAt?: SortOrder
   }
 
+  export type EnumAgendaEventTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.AgendaEventType | EnumAgendaEventTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.AgendaEventType[] | ListEnumAgendaEventTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.AgendaEventType[] | ListEnumAgendaEventTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumAgendaEventTypeFilter<$PrismaModel> | $Enums.AgendaEventType
+  }
+
+  export type AgendaEventCountOrderByAggregateInput = {
+    id?: SortOrder
+    title?: SortOrder
+    description?: SortOrder
+    type?: SortOrder
+    startTime?: SortOrder
+    endTime?: SortOrder
+    createdById?: SortOrder
+    participantIds?: SortOrder
+    reportId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AgendaEventMaxOrderByAggregateInput = {
+    id?: SortOrder
+    title?: SortOrder
+    description?: SortOrder
+    type?: SortOrder
+    startTime?: SortOrder
+    endTime?: SortOrder
+    createdById?: SortOrder
+    reportId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AgendaEventMinOrderByAggregateInput = {
+    id?: SortOrder
+    title?: SortOrder
+    description?: SortOrder
+    type?: SortOrder
+    startTime?: SortOrder
+    endTime?: SortOrder
+    createdById?: SortOrder
+    reportId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type EnumAgendaEventTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.AgendaEventType | EnumAgendaEventTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.AgendaEventType[] | ListEnumAgendaEventTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.AgendaEventType[] | ListEnumAgendaEventTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumAgendaEventTypeWithAggregatesFilter<$PrismaModel> | $Enums.AgendaEventType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumAgendaEventTypeFilter<$PrismaModel>
+    _max?: NestedEnumAgendaEventTypeFilter<$PrismaModel>
+  }
+
+  export type NotificationCountOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    fromId?: SortOrder
+    type?: SortOrder
+    title?: SortOrder
+    message?: SortOrder
+    read?: SortOrder
+    link?: SortOrder
+    scheduledFor?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type NotificationMaxOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    fromId?: SortOrder
+    type?: SortOrder
+    title?: SortOrder
+    message?: SortOrder
+    read?: SortOrder
+    link?: SortOrder
+    scheduledFor?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type NotificationMinOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    fromId?: SortOrder
+    type?: SortOrder
+    title?: SortOrder
+    message?: SortOrder
+    read?: SortOrder
+    link?: SortOrder
+    scheduledFor?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type NoteCountOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    content?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type NoteMaxOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    content?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type NoteMinOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    content?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
   export type UserCreateNestedOneWithoutSubordinatesInput = {
     create?: XOR<UserCreateWithoutSubordinatesInput, UserUncheckedCreateWithoutSubordinatesInput>
     connectOrCreate?: UserCreateOrConnectWithoutSubordinatesInput
@@ -11126,11 +15461,42 @@ export namespace Prisma {
     connect?: MediaWhereUniqueInput | MediaWhereUniqueInput[]
   }
 
+  export type NotificationCreateNestedManyWithoutUserInput = {
+    create?: XOR<NotificationCreateWithoutUserInput, NotificationUncheckedCreateWithoutUserInput> | NotificationCreateWithoutUserInput[] | NotificationUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: NotificationCreateOrConnectWithoutUserInput | NotificationCreateOrConnectWithoutUserInput[]
+    createMany?: NotificationCreateManyUserInputEnvelope
+    connect?: NotificationWhereUniqueInput | NotificationWhereUniqueInput[]
+  }
+
+  export type AgendaEventCreateNestedManyWithoutCreatedByInput = {
+    create?: XOR<AgendaEventCreateWithoutCreatedByInput, AgendaEventUncheckedCreateWithoutCreatedByInput> | AgendaEventCreateWithoutCreatedByInput[] | AgendaEventUncheckedCreateWithoutCreatedByInput[]
+    connectOrCreate?: AgendaEventCreateOrConnectWithoutCreatedByInput | AgendaEventCreateOrConnectWithoutCreatedByInput[]
+    createMany?: AgendaEventCreateManyCreatedByInputEnvelope
+    connect?: AgendaEventWhereUniqueInput | AgendaEventWhereUniqueInput[]
+  }
+
+  export type AgendaEventCreateNestedManyWithoutParticipantsInput = {
+    create?: XOR<AgendaEventCreateWithoutParticipantsInput, AgendaEventUncheckedCreateWithoutParticipantsInput> | AgendaEventCreateWithoutParticipantsInput[] | AgendaEventUncheckedCreateWithoutParticipantsInput[]
+    connectOrCreate?: AgendaEventCreateOrConnectWithoutParticipantsInput | AgendaEventCreateOrConnectWithoutParticipantsInput[]
+    connect?: AgendaEventWhereUniqueInput | AgendaEventWhereUniqueInput[]
+  }
+
+  export type NoteCreateNestedManyWithoutUserInput = {
+    create?: XOR<NoteCreateWithoutUserInput, NoteUncheckedCreateWithoutUserInput> | NoteCreateWithoutUserInput[] | NoteUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: NoteCreateOrConnectWithoutUserInput | NoteCreateOrConnectWithoutUserInput[]
+    createMany?: NoteCreateManyUserInputEnvelope
+    connect?: NoteWhereUniqueInput | NoteWhereUniqueInput[]
+  }
+
   export type AuditLogCreateNestedManyWithoutUserInput = {
     create?: XOR<AuditLogCreateWithoutUserInput, AuditLogUncheckedCreateWithoutUserInput> | AuditLogCreateWithoutUserInput[] | AuditLogUncheckedCreateWithoutUserInput[]
     connectOrCreate?: AuditLogCreateOrConnectWithoutUserInput | AuditLogCreateOrConnectWithoutUserInput[]
     createMany?: AuditLogCreateManyUserInputEnvelope
     connect?: AuditLogWhereUniqueInput | AuditLogWhereUniqueInput[]
+  }
+
+  export type UserCreateparticipatingEventIdsInput = {
+    set: string[]
   }
 
   export type UserUncheckedCreateNestedManyWithoutSupervisorInput = {
@@ -11152,6 +15518,33 @@ export namespace Prisma {
     connectOrCreate?: MediaCreateOrConnectWithoutUserInput | MediaCreateOrConnectWithoutUserInput[]
     createMany?: MediaCreateManyUserInputEnvelope
     connect?: MediaWhereUniqueInput | MediaWhereUniqueInput[]
+  }
+
+  export type NotificationUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<NotificationCreateWithoutUserInput, NotificationUncheckedCreateWithoutUserInput> | NotificationCreateWithoutUserInput[] | NotificationUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: NotificationCreateOrConnectWithoutUserInput | NotificationCreateOrConnectWithoutUserInput[]
+    createMany?: NotificationCreateManyUserInputEnvelope
+    connect?: NotificationWhereUniqueInput | NotificationWhereUniqueInput[]
+  }
+
+  export type AgendaEventUncheckedCreateNestedManyWithoutCreatedByInput = {
+    create?: XOR<AgendaEventCreateWithoutCreatedByInput, AgendaEventUncheckedCreateWithoutCreatedByInput> | AgendaEventCreateWithoutCreatedByInput[] | AgendaEventUncheckedCreateWithoutCreatedByInput[]
+    connectOrCreate?: AgendaEventCreateOrConnectWithoutCreatedByInput | AgendaEventCreateOrConnectWithoutCreatedByInput[]
+    createMany?: AgendaEventCreateManyCreatedByInputEnvelope
+    connect?: AgendaEventWhereUniqueInput | AgendaEventWhereUniqueInput[]
+  }
+
+  export type AgendaEventUncheckedCreateNestedManyWithoutParticipantsInput = {
+    create?: XOR<AgendaEventCreateWithoutParticipantsInput, AgendaEventUncheckedCreateWithoutParticipantsInput> | AgendaEventCreateWithoutParticipantsInput[] | AgendaEventUncheckedCreateWithoutParticipantsInput[]
+    connectOrCreate?: AgendaEventCreateOrConnectWithoutParticipantsInput | AgendaEventCreateOrConnectWithoutParticipantsInput[]
+    connect?: AgendaEventWhereUniqueInput | AgendaEventWhereUniqueInput[]
+  }
+
+  export type NoteUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<NoteCreateWithoutUserInput, NoteUncheckedCreateWithoutUserInput> | NoteCreateWithoutUserInput[] | NoteUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: NoteCreateOrConnectWithoutUserInput | NoteCreateOrConnectWithoutUserInput[]
+    createMany?: NoteCreateManyUserInputEnvelope
+    connect?: NoteWhereUniqueInput | NoteWhereUniqueInput[]
   }
 
   export type AuditLogUncheckedCreateNestedManyWithoutUserInput = {
@@ -11240,6 +15633,61 @@ export namespace Prisma {
     deleteMany?: MediaScalarWhereInput | MediaScalarWhereInput[]
   }
 
+  export type NotificationUpdateManyWithoutUserNestedInput = {
+    create?: XOR<NotificationCreateWithoutUserInput, NotificationUncheckedCreateWithoutUserInput> | NotificationCreateWithoutUserInput[] | NotificationUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: NotificationCreateOrConnectWithoutUserInput | NotificationCreateOrConnectWithoutUserInput[]
+    upsert?: NotificationUpsertWithWhereUniqueWithoutUserInput | NotificationUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: NotificationCreateManyUserInputEnvelope
+    set?: NotificationWhereUniqueInput | NotificationWhereUniqueInput[]
+    disconnect?: NotificationWhereUniqueInput | NotificationWhereUniqueInput[]
+    delete?: NotificationWhereUniqueInput | NotificationWhereUniqueInput[]
+    connect?: NotificationWhereUniqueInput | NotificationWhereUniqueInput[]
+    update?: NotificationUpdateWithWhereUniqueWithoutUserInput | NotificationUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: NotificationUpdateManyWithWhereWithoutUserInput | NotificationUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: NotificationScalarWhereInput | NotificationScalarWhereInput[]
+  }
+
+  export type AgendaEventUpdateManyWithoutCreatedByNestedInput = {
+    create?: XOR<AgendaEventCreateWithoutCreatedByInput, AgendaEventUncheckedCreateWithoutCreatedByInput> | AgendaEventCreateWithoutCreatedByInput[] | AgendaEventUncheckedCreateWithoutCreatedByInput[]
+    connectOrCreate?: AgendaEventCreateOrConnectWithoutCreatedByInput | AgendaEventCreateOrConnectWithoutCreatedByInput[]
+    upsert?: AgendaEventUpsertWithWhereUniqueWithoutCreatedByInput | AgendaEventUpsertWithWhereUniqueWithoutCreatedByInput[]
+    createMany?: AgendaEventCreateManyCreatedByInputEnvelope
+    set?: AgendaEventWhereUniqueInput | AgendaEventWhereUniqueInput[]
+    disconnect?: AgendaEventWhereUniqueInput | AgendaEventWhereUniqueInput[]
+    delete?: AgendaEventWhereUniqueInput | AgendaEventWhereUniqueInput[]
+    connect?: AgendaEventWhereUniqueInput | AgendaEventWhereUniqueInput[]
+    update?: AgendaEventUpdateWithWhereUniqueWithoutCreatedByInput | AgendaEventUpdateWithWhereUniqueWithoutCreatedByInput[]
+    updateMany?: AgendaEventUpdateManyWithWhereWithoutCreatedByInput | AgendaEventUpdateManyWithWhereWithoutCreatedByInput[]
+    deleteMany?: AgendaEventScalarWhereInput | AgendaEventScalarWhereInput[]
+  }
+
+  export type AgendaEventUpdateManyWithoutParticipantsNestedInput = {
+    create?: XOR<AgendaEventCreateWithoutParticipantsInput, AgendaEventUncheckedCreateWithoutParticipantsInput> | AgendaEventCreateWithoutParticipantsInput[] | AgendaEventUncheckedCreateWithoutParticipantsInput[]
+    connectOrCreate?: AgendaEventCreateOrConnectWithoutParticipantsInput | AgendaEventCreateOrConnectWithoutParticipantsInput[]
+    upsert?: AgendaEventUpsertWithWhereUniqueWithoutParticipantsInput | AgendaEventUpsertWithWhereUniqueWithoutParticipantsInput[]
+    set?: AgendaEventWhereUniqueInput | AgendaEventWhereUniqueInput[]
+    disconnect?: AgendaEventWhereUniqueInput | AgendaEventWhereUniqueInput[]
+    delete?: AgendaEventWhereUniqueInput | AgendaEventWhereUniqueInput[]
+    connect?: AgendaEventWhereUniqueInput | AgendaEventWhereUniqueInput[]
+    update?: AgendaEventUpdateWithWhereUniqueWithoutParticipantsInput | AgendaEventUpdateWithWhereUniqueWithoutParticipantsInput[]
+    updateMany?: AgendaEventUpdateManyWithWhereWithoutParticipantsInput | AgendaEventUpdateManyWithWhereWithoutParticipantsInput[]
+    deleteMany?: AgendaEventScalarWhereInput | AgendaEventScalarWhereInput[]
+  }
+
+  export type NoteUpdateManyWithoutUserNestedInput = {
+    create?: XOR<NoteCreateWithoutUserInput, NoteUncheckedCreateWithoutUserInput> | NoteCreateWithoutUserInput[] | NoteUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: NoteCreateOrConnectWithoutUserInput | NoteCreateOrConnectWithoutUserInput[]
+    upsert?: NoteUpsertWithWhereUniqueWithoutUserInput | NoteUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: NoteCreateManyUserInputEnvelope
+    set?: NoteWhereUniqueInput | NoteWhereUniqueInput[]
+    disconnect?: NoteWhereUniqueInput | NoteWhereUniqueInput[]
+    delete?: NoteWhereUniqueInput | NoteWhereUniqueInput[]
+    connect?: NoteWhereUniqueInput | NoteWhereUniqueInput[]
+    update?: NoteUpdateWithWhereUniqueWithoutUserInput | NoteUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: NoteUpdateManyWithWhereWithoutUserInput | NoteUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: NoteScalarWhereInput | NoteScalarWhereInput[]
+  }
+
   export type AuditLogUpdateManyWithoutUserNestedInput = {
     create?: XOR<AuditLogCreateWithoutUserInput, AuditLogUncheckedCreateWithoutUserInput> | AuditLogCreateWithoutUserInput[] | AuditLogUncheckedCreateWithoutUserInput[]
     connectOrCreate?: AuditLogCreateOrConnectWithoutUserInput | AuditLogCreateOrConnectWithoutUserInput[]
@@ -11252,6 +15700,11 @@ export namespace Prisma {
     update?: AuditLogUpdateWithWhereUniqueWithoutUserInput | AuditLogUpdateWithWhereUniqueWithoutUserInput[]
     updateMany?: AuditLogUpdateManyWithWhereWithoutUserInput | AuditLogUpdateManyWithWhereWithoutUserInput[]
     deleteMany?: AuditLogScalarWhereInput | AuditLogScalarWhereInput[]
+  }
+
+  export type UserUpdateparticipatingEventIdsInput = {
+    set?: string[]
+    push?: string | string[]
   }
 
   export type UserUncheckedUpdateManyWithoutSupervisorNestedInput = {
@@ -11296,6 +15749,61 @@ export namespace Prisma {
     deleteMany?: MediaScalarWhereInput | MediaScalarWhereInput[]
   }
 
+  export type NotificationUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<NotificationCreateWithoutUserInput, NotificationUncheckedCreateWithoutUserInput> | NotificationCreateWithoutUserInput[] | NotificationUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: NotificationCreateOrConnectWithoutUserInput | NotificationCreateOrConnectWithoutUserInput[]
+    upsert?: NotificationUpsertWithWhereUniqueWithoutUserInput | NotificationUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: NotificationCreateManyUserInputEnvelope
+    set?: NotificationWhereUniqueInput | NotificationWhereUniqueInput[]
+    disconnect?: NotificationWhereUniqueInput | NotificationWhereUniqueInput[]
+    delete?: NotificationWhereUniqueInput | NotificationWhereUniqueInput[]
+    connect?: NotificationWhereUniqueInput | NotificationWhereUniqueInput[]
+    update?: NotificationUpdateWithWhereUniqueWithoutUserInput | NotificationUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: NotificationUpdateManyWithWhereWithoutUserInput | NotificationUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: NotificationScalarWhereInput | NotificationScalarWhereInput[]
+  }
+
+  export type AgendaEventUncheckedUpdateManyWithoutCreatedByNestedInput = {
+    create?: XOR<AgendaEventCreateWithoutCreatedByInput, AgendaEventUncheckedCreateWithoutCreatedByInput> | AgendaEventCreateWithoutCreatedByInput[] | AgendaEventUncheckedCreateWithoutCreatedByInput[]
+    connectOrCreate?: AgendaEventCreateOrConnectWithoutCreatedByInput | AgendaEventCreateOrConnectWithoutCreatedByInput[]
+    upsert?: AgendaEventUpsertWithWhereUniqueWithoutCreatedByInput | AgendaEventUpsertWithWhereUniqueWithoutCreatedByInput[]
+    createMany?: AgendaEventCreateManyCreatedByInputEnvelope
+    set?: AgendaEventWhereUniqueInput | AgendaEventWhereUniqueInput[]
+    disconnect?: AgendaEventWhereUniqueInput | AgendaEventWhereUniqueInput[]
+    delete?: AgendaEventWhereUniqueInput | AgendaEventWhereUniqueInput[]
+    connect?: AgendaEventWhereUniqueInput | AgendaEventWhereUniqueInput[]
+    update?: AgendaEventUpdateWithWhereUniqueWithoutCreatedByInput | AgendaEventUpdateWithWhereUniqueWithoutCreatedByInput[]
+    updateMany?: AgendaEventUpdateManyWithWhereWithoutCreatedByInput | AgendaEventUpdateManyWithWhereWithoutCreatedByInput[]
+    deleteMany?: AgendaEventScalarWhereInput | AgendaEventScalarWhereInput[]
+  }
+
+  export type AgendaEventUncheckedUpdateManyWithoutParticipantsNestedInput = {
+    create?: XOR<AgendaEventCreateWithoutParticipantsInput, AgendaEventUncheckedCreateWithoutParticipantsInput> | AgendaEventCreateWithoutParticipantsInput[] | AgendaEventUncheckedCreateWithoutParticipantsInput[]
+    connectOrCreate?: AgendaEventCreateOrConnectWithoutParticipantsInput | AgendaEventCreateOrConnectWithoutParticipantsInput[]
+    upsert?: AgendaEventUpsertWithWhereUniqueWithoutParticipantsInput | AgendaEventUpsertWithWhereUniqueWithoutParticipantsInput[]
+    set?: AgendaEventWhereUniqueInput | AgendaEventWhereUniqueInput[]
+    disconnect?: AgendaEventWhereUniqueInput | AgendaEventWhereUniqueInput[]
+    delete?: AgendaEventWhereUniqueInput | AgendaEventWhereUniqueInput[]
+    connect?: AgendaEventWhereUniqueInput | AgendaEventWhereUniqueInput[]
+    update?: AgendaEventUpdateWithWhereUniqueWithoutParticipantsInput | AgendaEventUpdateWithWhereUniqueWithoutParticipantsInput[]
+    updateMany?: AgendaEventUpdateManyWithWhereWithoutParticipantsInput | AgendaEventUpdateManyWithWhereWithoutParticipantsInput[]
+    deleteMany?: AgendaEventScalarWhereInput | AgendaEventScalarWhereInput[]
+  }
+
+  export type NoteUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<NoteCreateWithoutUserInput, NoteUncheckedCreateWithoutUserInput> | NoteCreateWithoutUserInput[] | NoteUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: NoteCreateOrConnectWithoutUserInput | NoteCreateOrConnectWithoutUserInput[]
+    upsert?: NoteUpsertWithWhereUniqueWithoutUserInput | NoteUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: NoteCreateManyUserInputEnvelope
+    set?: NoteWhereUniqueInput | NoteWhereUniqueInput[]
+    disconnect?: NoteWhereUniqueInput | NoteWhereUniqueInput[]
+    delete?: NoteWhereUniqueInput | NoteWhereUniqueInput[]
+    connect?: NoteWhereUniqueInput | NoteWhereUniqueInput[]
+    update?: NoteUpdateWithWhereUniqueWithoutUserInput | NoteUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: NoteUpdateManyWithWhereWithoutUserInput | NoteUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: NoteScalarWhereInput | NoteScalarWhereInput[]
+  }
+
   export type AuditLogUncheckedUpdateManyWithoutUserNestedInput = {
     create?: XOR<AuditLogCreateWithoutUserInput, AuditLogUncheckedCreateWithoutUserInput> | AuditLogCreateWithoutUserInput[] | AuditLogUncheckedCreateWithoutUserInput[]
     connectOrCreate?: AuditLogCreateOrConnectWithoutUserInput | AuditLogCreateOrConnectWithoutUserInput[]
@@ -11336,6 +15844,13 @@ export namespace Prisma {
     connect?: MediaWhereUniqueInput | MediaWhereUniqueInput[]
   }
 
+  export type AgendaEventCreateNestedManyWithoutReportInput = {
+    create?: XOR<AgendaEventCreateWithoutReportInput, AgendaEventUncheckedCreateWithoutReportInput> | AgendaEventCreateWithoutReportInput[] | AgendaEventUncheckedCreateWithoutReportInput[]
+    connectOrCreate?: AgendaEventCreateOrConnectWithoutReportInput | AgendaEventCreateOrConnectWithoutReportInput[]
+    createMany?: AgendaEventCreateManyReportInputEnvelope
+    connect?: AgendaEventWhereUniqueInput | AgendaEventWhereUniqueInput[]
+  }
+
   export type ReportHistoryUncheckedCreateNestedManyWithoutReportInput = {
     create?: XOR<ReportHistoryCreateWithoutReportInput, ReportHistoryUncheckedCreateWithoutReportInput> | ReportHistoryCreateWithoutReportInput[] | ReportHistoryUncheckedCreateWithoutReportInput[]
     connectOrCreate?: ReportHistoryCreateOrConnectWithoutReportInput | ReportHistoryCreateOrConnectWithoutReportInput[]
@@ -11348,6 +15863,13 @@ export namespace Prisma {
     connectOrCreate?: MediaCreateOrConnectWithoutReportInput | MediaCreateOrConnectWithoutReportInput[]
     createMany?: MediaCreateManyReportInputEnvelope
     connect?: MediaWhereUniqueInput | MediaWhereUniqueInput[]
+  }
+
+  export type AgendaEventUncheckedCreateNestedManyWithoutReportInput = {
+    create?: XOR<AgendaEventCreateWithoutReportInput, AgendaEventUncheckedCreateWithoutReportInput> | AgendaEventCreateWithoutReportInput[] | AgendaEventUncheckedCreateWithoutReportInput[]
+    connectOrCreate?: AgendaEventCreateOrConnectWithoutReportInput | AgendaEventCreateOrConnectWithoutReportInput[]
+    createMany?: AgendaEventCreateManyReportInputEnvelope
+    connect?: AgendaEventWhereUniqueInput | AgendaEventWhereUniqueInput[]
   }
 
   export type NullableDateTimeFieldUpdateOperationsInput = {
@@ -11414,6 +15936,20 @@ export namespace Prisma {
     deleteMany?: MediaScalarWhereInput | MediaScalarWhereInput[]
   }
 
+  export type AgendaEventUpdateManyWithoutReportNestedInput = {
+    create?: XOR<AgendaEventCreateWithoutReportInput, AgendaEventUncheckedCreateWithoutReportInput> | AgendaEventCreateWithoutReportInput[] | AgendaEventUncheckedCreateWithoutReportInput[]
+    connectOrCreate?: AgendaEventCreateOrConnectWithoutReportInput | AgendaEventCreateOrConnectWithoutReportInput[]
+    upsert?: AgendaEventUpsertWithWhereUniqueWithoutReportInput | AgendaEventUpsertWithWhereUniqueWithoutReportInput[]
+    createMany?: AgendaEventCreateManyReportInputEnvelope
+    set?: AgendaEventWhereUniqueInput | AgendaEventWhereUniqueInput[]
+    disconnect?: AgendaEventWhereUniqueInput | AgendaEventWhereUniqueInput[]
+    delete?: AgendaEventWhereUniqueInput | AgendaEventWhereUniqueInput[]
+    connect?: AgendaEventWhereUniqueInput | AgendaEventWhereUniqueInput[]
+    update?: AgendaEventUpdateWithWhereUniqueWithoutReportInput | AgendaEventUpdateWithWhereUniqueWithoutReportInput[]
+    updateMany?: AgendaEventUpdateManyWithWhereWithoutReportInput | AgendaEventUpdateManyWithWhereWithoutReportInput[]
+    deleteMany?: AgendaEventScalarWhereInput | AgendaEventScalarWhereInput[]
+  }
+
   export type ReportHistoryUncheckedUpdateManyWithoutReportNestedInput = {
     create?: XOR<ReportHistoryCreateWithoutReportInput, ReportHistoryUncheckedCreateWithoutReportInput> | ReportHistoryCreateWithoutReportInput[] | ReportHistoryUncheckedCreateWithoutReportInput[]
     connectOrCreate?: ReportHistoryCreateOrConnectWithoutReportInput | ReportHistoryCreateOrConnectWithoutReportInput[]
@@ -11440,6 +15976,20 @@ export namespace Prisma {
     update?: MediaUpdateWithWhereUniqueWithoutReportInput | MediaUpdateWithWhereUniqueWithoutReportInput[]
     updateMany?: MediaUpdateManyWithWhereWithoutReportInput | MediaUpdateManyWithWhereWithoutReportInput[]
     deleteMany?: MediaScalarWhereInput | MediaScalarWhereInput[]
+  }
+
+  export type AgendaEventUncheckedUpdateManyWithoutReportNestedInput = {
+    create?: XOR<AgendaEventCreateWithoutReportInput, AgendaEventUncheckedCreateWithoutReportInput> | AgendaEventCreateWithoutReportInput[] | AgendaEventUncheckedCreateWithoutReportInput[]
+    connectOrCreate?: AgendaEventCreateOrConnectWithoutReportInput | AgendaEventCreateOrConnectWithoutReportInput[]
+    upsert?: AgendaEventUpsertWithWhereUniqueWithoutReportInput | AgendaEventUpsertWithWhereUniqueWithoutReportInput[]
+    createMany?: AgendaEventCreateManyReportInputEnvelope
+    set?: AgendaEventWhereUniqueInput | AgendaEventWhereUniqueInput[]
+    disconnect?: AgendaEventWhereUniqueInput | AgendaEventWhereUniqueInput[]
+    delete?: AgendaEventWhereUniqueInput | AgendaEventWhereUniqueInput[]
+    connect?: AgendaEventWhereUniqueInput | AgendaEventWhereUniqueInput[]
+    update?: AgendaEventUpdateWithWhereUniqueWithoutReportInput | AgendaEventUpdateWithWhereUniqueWithoutReportInput[]
+    updateMany?: AgendaEventUpdateManyWithWhereWithoutReportInput | AgendaEventUpdateManyWithWhereWithoutReportInput[]
+    deleteMany?: AgendaEventScalarWhereInput | AgendaEventScalarWhereInput[]
   }
 
   export type ReportCreateNestedManyWithoutDepartmentInput = {
@@ -11607,6 +16157,115 @@ export namespace Prisma {
     delete?: UserWhereInput | boolean
     connect?: UserWhereUniqueInput
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutAuditLogsInput, UserUpdateWithoutAuditLogsInput>, UserUncheckedUpdateWithoutAuditLogsInput>
+  }
+
+  export type UserCreateNestedOneWithoutCreatedEventsInput = {
+    create?: XOR<UserCreateWithoutCreatedEventsInput, UserUncheckedCreateWithoutCreatedEventsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutCreatedEventsInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type UserCreateNestedManyWithoutParticipatingEventsInput = {
+    create?: XOR<UserCreateWithoutParticipatingEventsInput, UserUncheckedCreateWithoutParticipatingEventsInput> | UserCreateWithoutParticipatingEventsInput[] | UserUncheckedCreateWithoutParticipatingEventsInput[]
+    connectOrCreate?: UserCreateOrConnectWithoutParticipatingEventsInput | UserCreateOrConnectWithoutParticipatingEventsInput[]
+    connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+  }
+
+  export type ReportCreateNestedOneWithoutAgendaEventsInput = {
+    create?: XOR<ReportCreateWithoutAgendaEventsInput, ReportUncheckedCreateWithoutAgendaEventsInput>
+    connectOrCreate?: ReportCreateOrConnectWithoutAgendaEventsInput
+    connect?: ReportWhereUniqueInput
+  }
+
+  export type AgendaEventCreateparticipantIdsInput = {
+    set: string[]
+  }
+
+  export type UserUncheckedCreateNestedManyWithoutParticipatingEventsInput = {
+    create?: XOR<UserCreateWithoutParticipatingEventsInput, UserUncheckedCreateWithoutParticipatingEventsInput> | UserCreateWithoutParticipatingEventsInput[] | UserUncheckedCreateWithoutParticipatingEventsInput[]
+    connectOrCreate?: UserCreateOrConnectWithoutParticipatingEventsInput | UserCreateOrConnectWithoutParticipatingEventsInput[]
+    connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+  }
+
+  export type EnumAgendaEventTypeFieldUpdateOperationsInput = {
+    set?: $Enums.AgendaEventType
+  }
+
+  export type UserUpdateOneRequiredWithoutCreatedEventsNestedInput = {
+    create?: XOR<UserCreateWithoutCreatedEventsInput, UserUncheckedCreateWithoutCreatedEventsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutCreatedEventsInput
+    upsert?: UserUpsertWithoutCreatedEventsInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutCreatedEventsInput, UserUpdateWithoutCreatedEventsInput>, UserUncheckedUpdateWithoutCreatedEventsInput>
+  }
+
+  export type UserUpdateManyWithoutParticipatingEventsNestedInput = {
+    create?: XOR<UserCreateWithoutParticipatingEventsInput, UserUncheckedCreateWithoutParticipatingEventsInput> | UserCreateWithoutParticipatingEventsInput[] | UserUncheckedCreateWithoutParticipatingEventsInput[]
+    connectOrCreate?: UserCreateOrConnectWithoutParticipatingEventsInput | UserCreateOrConnectWithoutParticipatingEventsInput[]
+    upsert?: UserUpsertWithWhereUniqueWithoutParticipatingEventsInput | UserUpsertWithWhereUniqueWithoutParticipatingEventsInput[]
+    set?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    disconnect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    delete?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    update?: UserUpdateWithWhereUniqueWithoutParticipatingEventsInput | UserUpdateWithWhereUniqueWithoutParticipatingEventsInput[]
+    updateMany?: UserUpdateManyWithWhereWithoutParticipatingEventsInput | UserUpdateManyWithWhereWithoutParticipatingEventsInput[]
+    deleteMany?: UserScalarWhereInput | UserScalarWhereInput[]
+  }
+
+  export type ReportUpdateOneWithoutAgendaEventsNestedInput = {
+    create?: XOR<ReportCreateWithoutAgendaEventsInput, ReportUncheckedCreateWithoutAgendaEventsInput>
+    connectOrCreate?: ReportCreateOrConnectWithoutAgendaEventsInput
+    upsert?: ReportUpsertWithoutAgendaEventsInput
+    disconnect?: boolean
+    delete?: ReportWhereInput | boolean
+    connect?: ReportWhereUniqueInput
+    update?: XOR<XOR<ReportUpdateToOneWithWhereWithoutAgendaEventsInput, ReportUpdateWithoutAgendaEventsInput>, ReportUncheckedUpdateWithoutAgendaEventsInput>
+  }
+
+  export type AgendaEventUpdateparticipantIdsInput = {
+    set?: string[]
+    push?: string | string[]
+  }
+
+  export type UserUncheckedUpdateManyWithoutParticipatingEventsNestedInput = {
+    create?: XOR<UserCreateWithoutParticipatingEventsInput, UserUncheckedCreateWithoutParticipatingEventsInput> | UserCreateWithoutParticipatingEventsInput[] | UserUncheckedCreateWithoutParticipatingEventsInput[]
+    connectOrCreate?: UserCreateOrConnectWithoutParticipatingEventsInput | UserCreateOrConnectWithoutParticipatingEventsInput[]
+    upsert?: UserUpsertWithWhereUniqueWithoutParticipatingEventsInput | UserUpsertWithWhereUniqueWithoutParticipatingEventsInput[]
+    set?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    disconnect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    delete?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    update?: UserUpdateWithWhereUniqueWithoutParticipatingEventsInput | UserUpdateWithWhereUniqueWithoutParticipatingEventsInput[]
+    updateMany?: UserUpdateManyWithWhereWithoutParticipatingEventsInput | UserUpdateManyWithWhereWithoutParticipatingEventsInput[]
+    deleteMany?: UserScalarWhereInput | UserScalarWhereInput[]
+  }
+
+  export type UserCreateNestedOneWithoutNotificationsInput = {
+    create?: XOR<UserCreateWithoutNotificationsInput, UserUncheckedCreateWithoutNotificationsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutNotificationsInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type UserUpdateOneRequiredWithoutNotificationsNestedInput = {
+    create?: XOR<UserCreateWithoutNotificationsInput, UserUncheckedCreateWithoutNotificationsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutNotificationsInput
+    upsert?: UserUpsertWithoutNotificationsInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutNotificationsInput, UserUpdateWithoutNotificationsInput>, UserUncheckedUpdateWithoutNotificationsInput>
+  }
+
+  export type UserCreateNestedOneWithoutNotesInput = {
+    create?: XOR<UserCreateWithoutNotesInput, UserUncheckedCreateWithoutNotesInput>
+    connectOrCreate?: UserCreateOrConnectWithoutNotesInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type UserUpdateOneRequiredWithoutNotesNestedInput = {
+    create?: XOR<UserCreateWithoutNotesInput, UserUncheckedCreateWithoutNotesInput>
+    connectOrCreate?: UserCreateOrConnectWithoutNotesInput
+    upsert?: UserUpsertWithoutNotesInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutNotesInput, UserUpdateWithoutNotesInput>, UserUncheckedUpdateWithoutNotesInput>
   }
 
   export type NestedStringFilter<$PrismaModel = never> = {
@@ -11868,6 +16527,23 @@ export namespace Prisma {
     _max?: NestedBoolFilter<$PrismaModel>
   }
 
+  export type NestedEnumAgendaEventTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.AgendaEventType | EnumAgendaEventTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.AgendaEventType[] | ListEnumAgendaEventTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.AgendaEventType[] | ListEnumAgendaEventTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumAgendaEventTypeFilter<$PrismaModel> | $Enums.AgendaEventType
+  }
+
+  export type NestedEnumAgendaEventTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.AgendaEventType | EnumAgendaEventTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.AgendaEventType[] | ListEnumAgendaEventTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.AgendaEventType[] | ListEnumAgendaEventTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumAgendaEventTypeWithAggregatesFilter<$PrismaModel> | $Enums.AgendaEventType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumAgendaEventTypeFilter<$PrismaModel>
+    _max?: NestedEnumAgendaEventTypeFilter<$PrismaModel>
+  }
+
   export type UserCreateWithoutSubordinatesInput = {
     id?: string
     name: string
@@ -11882,6 +16558,10 @@ export namespace Prisma {
     department?: DepartmentCreateNestedOneWithoutMembersInput
     reports?: ReportCreateNestedManyWithoutUserInput
     media?: MediaCreateNestedManyWithoutUserInput
+    notifications?: NotificationCreateNestedManyWithoutUserInput
+    createdEvents?: AgendaEventCreateNestedManyWithoutCreatedByInput
+    participatingEvents?: AgendaEventCreateNestedManyWithoutParticipantsInput
+    notes?: NoteCreateNestedManyWithoutUserInput
     auditLogs?: AuditLogCreateNestedManyWithoutUserInput
   }
 
@@ -11895,10 +16575,15 @@ export namespace Prisma {
     role?: $Enums.Role
     supervisorId?: string | null
     departmentId?: string | null
+    participatingEventIds?: UserCreateparticipatingEventIdsInput | string[]
     createdAt?: Date | string
     updatedAt?: Date | string
     reports?: ReportUncheckedCreateNestedManyWithoutUserInput
     media?: MediaUncheckedCreateNestedManyWithoutUserInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutUserInput
+    createdEvents?: AgendaEventUncheckedCreateNestedManyWithoutCreatedByInput
+    participatingEvents?: AgendaEventUncheckedCreateNestedManyWithoutParticipantsInput
+    notes?: NoteUncheckedCreateNestedManyWithoutUserInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -11921,6 +16606,10 @@ export namespace Prisma {
     department?: DepartmentCreateNestedOneWithoutMembersInput
     reports?: ReportCreateNestedManyWithoutUserInput
     media?: MediaCreateNestedManyWithoutUserInput
+    notifications?: NotificationCreateNestedManyWithoutUserInput
+    createdEvents?: AgendaEventCreateNestedManyWithoutCreatedByInput
+    participatingEvents?: AgendaEventCreateNestedManyWithoutParticipantsInput
+    notes?: NoteCreateNestedManyWithoutUserInput
     auditLogs?: AuditLogCreateNestedManyWithoutUserInput
   }
 
@@ -11933,11 +16622,16 @@ export namespace Prisma {
     statusPhrase?: string | null
     role?: $Enums.Role
     departmentId?: string | null
+    participatingEventIds?: UserCreateparticipatingEventIdsInput | string[]
     createdAt?: Date | string
     updatedAt?: Date | string
     Subordinates?: UserUncheckedCreateNestedManyWithoutSupervisorInput
     reports?: ReportUncheckedCreateNestedManyWithoutUserInput
     media?: MediaUncheckedCreateNestedManyWithoutUserInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutUserInput
+    createdEvents?: AgendaEventUncheckedCreateNestedManyWithoutCreatedByInput
+    participatingEvents?: AgendaEventUncheckedCreateNestedManyWithoutParticipantsInput
+    notes?: NoteUncheckedCreateNestedManyWithoutUserInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -11983,6 +16677,7 @@ export namespace Prisma {
     department?: DepartmentCreateNestedOneWithoutReportsInput
     history?: ReportHistoryCreateNestedManyWithoutReportInput
     media?: MediaCreateNestedManyWithoutReportInput
+    agendaEvents?: AgendaEventCreateNestedManyWithoutReportInput
   }
 
   export type ReportUncheckedCreateWithoutUserInput = {
@@ -11999,6 +16694,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     history?: ReportHistoryUncheckedCreateNestedManyWithoutReportInput
     media?: MediaUncheckedCreateNestedManyWithoutReportInput
+    agendaEvents?: AgendaEventUncheckedCreateNestedManyWithoutReportInput
   }
 
   export type ReportCreateOrConnectWithoutUserInput = {
@@ -12047,6 +16743,130 @@ export namespace Prisma {
 
   export type MediaCreateManyUserInputEnvelope = {
     data: MediaCreateManyUserInput | MediaCreateManyUserInput[]
+  }
+
+  export type NotificationCreateWithoutUserInput = {
+    id?: string
+    fromId?: string | null
+    type: string
+    title: string
+    message: string
+    read?: boolean
+    link?: string | null
+    scheduledFor?: Date | string | null
+    createdAt?: Date | string
+  }
+
+  export type NotificationUncheckedCreateWithoutUserInput = {
+    id?: string
+    fromId?: string | null
+    type: string
+    title: string
+    message: string
+    read?: boolean
+    link?: string | null
+    scheduledFor?: Date | string | null
+    createdAt?: Date | string
+  }
+
+  export type NotificationCreateOrConnectWithoutUserInput = {
+    where: NotificationWhereUniqueInput
+    create: XOR<NotificationCreateWithoutUserInput, NotificationUncheckedCreateWithoutUserInput>
+  }
+
+  export type NotificationCreateManyUserInputEnvelope = {
+    data: NotificationCreateManyUserInput | NotificationCreateManyUserInput[]
+  }
+
+  export type AgendaEventCreateWithoutCreatedByInput = {
+    id?: string
+    title: string
+    description?: string | null
+    type?: $Enums.AgendaEventType
+    startTime: Date | string
+    endTime?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    participants?: UserCreateNestedManyWithoutParticipatingEventsInput
+    report?: ReportCreateNestedOneWithoutAgendaEventsInput
+  }
+
+  export type AgendaEventUncheckedCreateWithoutCreatedByInput = {
+    id?: string
+    title: string
+    description?: string | null
+    type?: $Enums.AgendaEventType
+    startTime: Date | string
+    endTime?: Date | string | null
+    participantIds?: AgendaEventCreateparticipantIdsInput | string[]
+    reportId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    participants?: UserUncheckedCreateNestedManyWithoutParticipatingEventsInput
+  }
+
+  export type AgendaEventCreateOrConnectWithoutCreatedByInput = {
+    where: AgendaEventWhereUniqueInput
+    create: XOR<AgendaEventCreateWithoutCreatedByInput, AgendaEventUncheckedCreateWithoutCreatedByInput>
+  }
+
+  export type AgendaEventCreateManyCreatedByInputEnvelope = {
+    data: AgendaEventCreateManyCreatedByInput | AgendaEventCreateManyCreatedByInput[]
+  }
+
+  export type AgendaEventCreateWithoutParticipantsInput = {
+    id?: string
+    title: string
+    description?: string | null
+    type?: $Enums.AgendaEventType
+    startTime: Date | string
+    endTime?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    createdBy: UserCreateNestedOneWithoutCreatedEventsInput
+    report?: ReportCreateNestedOneWithoutAgendaEventsInput
+  }
+
+  export type AgendaEventUncheckedCreateWithoutParticipantsInput = {
+    id?: string
+    title: string
+    description?: string | null
+    type?: $Enums.AgendaEventType
+    startTime: Date | string
+    endTime?: Date | string | null
+    createdById: string
+    participantIds?: AgendaEventCreateparticipantIdsInput | string[]
+    reportId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AgendaEventCreateOrConnectWithoutParticipantsInput = {
+    where: AgendaEventWhereUniqueInput
+    create: XOR<AgendaEventCreateWithoutParticipantsInput, AgendaEventUncheckedCreateWithoutParticipantsInput>
+  }
+
+  export type NoteCreateWithoutUserInput = {
+    id?: string
+    content: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type NoteUncheckedCreateWithoutUserInput = {
+    id?: string
+    content: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type NoteCreateOrConnectWithoutUserInput = {
+    where: NoteWhereUniqueInput
+    create: XOR<NoteCreateWithoutUserInput, NoteUncheckedCreateWithoutUserInput>
+  }
+
+  export type NoteCreateManyUserInputEnvelope = {
+    data: NoteCreateManyUserInput | NoteCreateManyUserInput[]
   }
 
   export type AuditLogCreateWithoutUserInput = {
@@ -12102,6 +16922,10 @@ export namespace Prisma {
     department?: DepartmentUpdateOneWithoutMembersNestedInput
     reports?: ReportUpdateManyWithoutUserNestedInput
     media?: MediaUpdateManyWithoutUserNestedInput
+    notifications?: NotificationUpdateManyWithoutUserNestedInput
+    createdEvents?: AgendaEventUpdateManyWithoutCreatedByNestedInput
+    participatingEvents?: AgendaEventUpdateManyWithoutParticipantsNestedInput
+    notes?: NoteUpdateManyWithoutUserNestedInput
     auditLogs?: AuditLogUpdateManyWithoutUserNestedInput
   }
 
@@ -12114,10 +16938,15 @@ export namespace Prisma {
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     supervisorId?: NullableStringFieldUpdateOperationsInput | string | null
     departmentId?: NullableStringFieldUpdateOperationsInput | string | null
+    participatingEventIds?: UserUpdateparticipatingEventIdsInput | string[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     reports?: ReportUncheckedUpdateManyWithoutUserNestedInput
     media?: MediaUncheckedUpdateManyWithoutUserNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutUserNestedInput
+    createdEvents?: AgendaEventUncheckedUpdateManyWithoutCreatedByNestedInput
+    participatingEvents?: AgendaEventUncheckedUpdateManyWithoutParticipantsNestedInput
+    notes?: NoteUncheckedUpdateManyWithoutUserNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -12150,6 +16979,7 @@ export namespace Prisma {
     role?: EnumRoleFilter<"User"> | $Enums.Role
     supervisorId?: StringNullableFilter<"User"> | string | null
     departmentId?: StringNullableFilter<"User"> | string | null
+    participatingEventIds?: StringNullableListFilter<"User">
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
   }
@@ -12246,6 +17076,114 @@ export namespace Prisma {
     reportId?: StringNullableFilter<"Media"> | string | null
   }
 
+  export type NotificationUpsertWithWhereUniqueWithoutUserInput = {
+    where: NotificationWhereUniqueInput
+    update: XOR<NotificationUpdateWithoutUserInput, NotificationUncheckedUpdateWithoutUserInput>
+    create: XOR<NotificationCreateWithoutUserInput, NotificationUncheckedCreateWithoutUserInput>
+  }
+
+  export type NotificationUpdateWithWhereUniqueWithoutUserInput = {
+    where: NotificationWhereUniqueInput
+    data: XOR<NotificationUpdateWithoutUserInput, NotificationUncheckedUpdateWithoutUserInput>
+  }
+
+  export type NotificationUpdateManyWithWhereWithoutUserInput = {
+    where: NotificationScalarWhereInput
+    data: XOR<NotificationUpdateManyMutationInput, NotificationUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type NotificationScalarWhereInput = {
+    AND?: NotificationScalarWhereInput | NotificationScalarWhereInput[]
+    OR?: NotificationScalarWhereInput[]
+    NOT?: NotificationScalarWhereInput | NotificationScalarWhereInput[]
+    id?: StringFilter<"Notification"> | string
+    userId?: StringFilter<"Notification"> | string
+    fromId?: StringNullableFilter<"Notification"> | string | null
+    type?: StringFilter<"Notification"> | string
+    title?: StringFilter<"Notification"> | string
+    message?: StringFilter<"Notification"> | string
+    read?: BoolFilter<"Notification"> | boolean
+    link?: StringNullableFilter<"Notification"> | string | null
+    scheduledFor?: DateTimeNullableFilter<"Notification"> | Date | string | null
+    createdAt?: DateTimeFilter<"Notification"> | Date | string
+  }
+
+  export type AgendaEventUpsertWithWhereUniqueWithoutCreatedByInput = {
+    where: AgendaEventWhereUniqueInput
+    update: XOR<AgendaEventUpdateWithoutCreatedByInput, AgendaEventUncheckedUpdateWithoutCreatedByInput>
+    create: XOR<AgendaEventCreateWithoutCreatedByInput, AgendaEventUncheckedCreateWithoutCreatedByInput>
+  }
+
+  export type AgendaEventUpdateWithWhereUniqueWithoutCreatedByInput = {
+    where: AgendaEventWhereUniqueInput
+    data: XOR<AgendaEventUpdateWithoutCreatedByInput, AgendaEventUncheckedUpdateWithoutCreatedByInput>
+  }
+
+  export type AgendaEventUpdateManyWithWhereWithoutCreatedByInput = {
+    where: AgendaEventScalarWhereInput
+    data: XOR<AgendaEventUpdateManyMutationInput, AgendaEventUncheckedUpdateManyWithoutCreatedByInput>
+  }
+
+  export type AgendaEventScalarWhereInput = {
+    AND?: AgendaEventScalarWhereInput | AgendaEventScalarWhereInput[]
+    OR?: AgendaEventScalarWhereInput[]
+    NOT?: AgendaEventScalarWhereInput | AgendaEventScalarWhereInput[]
+    id?: StringFilter<"AgendaEvent"> | string
+    title?: StringFilter<"AgendaEvent"> | string
+    description?: StringNullableFilter<"AgendaEvent"> | string | null
+    type?: EnumAgendaEventTypeFilter<"AgendaEvent"> | $Enums.AgendaEventType
+    startTime?: DateTimeFilter<"AgendaEvent"> | Date | string
+    endTime?: DateTimeNullableFilter<"AgendaEvent"> | Date | string | null
+    createdById?: StringFilter<"AgendaEvent"> | string
+    participantIds?: StringNullableListFilter<"AgendaEvent">
+    reportId?: StringNullableFilter<"AgendaEvent"> | string | null
+    createdAt?: DateTimeFilter<"AgendaEvent"> | Date | string
+    updatedAt?: DateTimeFilter<"AgendaEvent"> | Date | string
+  }
+
+  export type AgendaEventUpsertWithWhereUniqueWithoutParticipantsInput = {
+    where: AgendaEventWhereUniqueInput
+    update: XOR<AgendaEventUpdateWithoutParticipantsInput, AgendaEventUncheckedUpdateWithoutParticipantsInput>
+    create: XOR<AgendaEventCreateWithoutParticipantsInput, AgendaEventUncheckedCreateWithoutParticipantsInput>
+  }
+
+  export type AgendaEventUpdateWithWhereUniqueWithoutParticipantsInput = {
+    where: AgendaEventWhereUniqueInput
+    data: XOR<AgendaEventUpdateWithoutParticipantsInput, AgendaEventUncheckedUpdateWithoutParticipantsInput>
+  }
+
+  export type AgendaEventUpdateManyWithWhereWithoutParticipantsInput = {
+    where: AgendaEventScalarWhereInput
+    data: XOR<AgendaEventUpdateManyMutationInput, AgendaEventUncheckedUpdateManyWithoutParticipantsInput>
+  }
+
+  export type NoteUpsertWithWhereUniqueWithoutUserInput = {
+    where: NoteWhereUniqueInput
+    update: XOR<NoteUpdateWithoutUserInput, NoteUncheckedUpdateWithoutUserInput>
+    create: XOR<NoteCreateWithoutUserInput, NoteUncheckedCreateWithoutUserInput>
+  }
+
+  export type NoteUpdateWithWhereUniqueWithoutUserInput = {
+    where: NoteWhereUniqueInput
+    data: XOR<NoteUpdateWithoutUserInput, NoteUncheckedUpdateWithoutUserInput>
+  }
+
+  export type NoteUpdateManyWithWhereWithoutUserInput = {
+    where: NoteScalarWhereInput
+    data: XOR<NoteUpdateManyMutationInput, NoteUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type NoteScalarWhereInput = {
+    AND?: NoteScalarWhereInput | NoteScalarWhereInput[]
+    OR?: NoteScalarWhereInput[]
+    NOT?: NoteScalarWhereInput | NoteScalarWhereInput[]
+    id?: StringFilter<"Note"> | string
+    userId?: StringFilter<"Note"> | string
+    content?: StringFilter<"Note"> | string
+    createdAt?: DateTimeFilter<"Note"> | Date | string
+    updatedAt?: DateTimeFilter<"Note"> | Date | string
+  }
+
   export type AuditLogUpsertWithWhereUniqueWithoutUserInput = {
     where: AuditLogWhereUniqueInput
     update: XOR<AuditLogUpdateWithoutUserInput, AuditLogUncheckedUpdateWithoutUserInput>
@@ -12290,6 +17228,10 @@ export namespace Prisma {
     Subordinates?: UserCreateNestedManyWithoutSupervisorInput
     department?: DepartmentCreateNestedOneWithoutMembersInput
     media?: MediaCreateNestedManyWithoutUserInput
+    notifications?: NotificationCreateNestedManyWithoutUserInput
+    createdEvents?: AgendaEventCreateNestedManyWithoutCreatedByInput
+    participatingEvents?: AgendaEventCreateNestedManyWithoutParticipantsInput
+    notes?: NoteCreateNestedManyWithoutUserInput
     auditLogs?: AuditLogCreateNestedManyWithoutUserInput
   }
 
@@ -12303,10 +17245,15 @@ export namespace Prisma {
     role?: $Enums.Role
     supervisorId?: string | null
     departmentId?: string | null
+    participatingEventIds?: UserCreateparticipatingEventIdsInput | string[]
     createdAt?: Date | string
     updatedAt?: Date | string
     Subordinates?: UserUncheckedCreateNestedManyWithoutSupervisorInput
     media?: MediaUncheckedCreateNestedManyWithoutUserInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutUserInput
+    createdEvents?: AgendaEventUncheckedCreateNestedManyWithoutCreatedByInput
+    participatingEvents?: AgendaEventUncheckedCreateNestedManyWithoutParticipantsInput
+    notes?: NoteUncheckedCreateNestedManyWithoutUserInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -12400,6 +17347,42 @@ export namespace Prisma {
     data: MediaCreateManyReportInput | MediaCreateManyReportInput[]
   }
 
+  export type AgendaEventCreateWithoutReportInput = {
+    id?: string
+    title: string
+    description?: string | null
+    type?: $Enums.AgendaEventType
+    startTime: Date | string
+    endTime?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    createdBy: UserCreateNestedOneWithoutCreatedEventsInput
+    participants?: UserCreateNestedManyWithoutParticipatingEventsInput
+  }
+
+  export type AgendaEventUncheckedCreateWithoutReportInput = {
+    id?: string
+    title: string
+    description?: string | null
+    type?: $Enums.AgendaEventType
+    startTime: Date | string
+    endTime?: Date | string | null
+    createdById: string
+    participantIds?: AgendaEventCreateparticipantIdsInput | string[]
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    participants?: UserUncheckedCreateNestedManyWithoutParticipatingEventsInput
+  }
+
+  export type AgendaEventCreateOrConnectWithoutReportInput = {
+    where: AgendaEventWhereUniqueInput
+    create: XOR<AgendaEventCreateWithoutReportInput, AgendaEventUncheckedCreateWithoutReportInput>
+  }
+
+  export type AgendaEventCreateManyReportInputEnvelope = {
+    data: AgendaEventCreateManyReportInput | AgendaEventCreateManyReportInput[]
+  }
+
   export type UserUpsertWithoutReportsInput = {
     update: XOR<UserUpdateWithoutReportsInput, UserUncheckedUpdateWithoutReportsInput>
     create: XOR<UserCreateWithoutReportsInput, UserUncheckedCreateWithoutReportsInput>
@@ -12424,6 +17407,10 @@ export namespace Prisma {
     Subordinates?: UserUpdateManyWithoutSupervisorNestedInput
     department?: DepartmentUpdateOneWithoutMembersNestedInput
     media?: MediaUpdateManyWithoutUserNestedInput
+    notifications?: NotificationUpdateManyWithoutUserNestedInput
+    createdEvents?: AgendaEventUpdateManyWithoutCreatedByNestedInput
+    participatingEvents?: AgendaEventUpdateManyWithoutParticipantsNestedInput
+    notes?: NoteUpdateManyWithoutUserNestedInput
     auditLogs?: AuditLogUpdateManyWithoutUserNestedInput
   }
 
@@ -12436,10 +17423,15 @@ export namespace Prisma {
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     supervisorId?: NullableStringFieldUpdateOperationsInput | string | null
     departmentId?: NullableStringFieldUpdateOperationsInput | string | null
+    participatingEventIds?: UserUpdateparticipatingEventIdsInput | string[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     Subordinates?: UserUncheckedUpdateManyWithoutSupervisorNestedInput
     media?: MediaUncheckedUpdateManyWithoutUserNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutUserNestedInput
+    createdEvents?: AgendaEventUncheckedUpdateManyWithoutCreatedByNestedInput
+    participatingEvents?: AgendaEventUncheckedUpdateManyWithoutParticipantsNestedInput
+    notes?: NoteUncheckedUpdateManyWithoutUserNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -12511,6 +17503,22 @@ export namespace Prisma {
     data: XOR<MediaUpdateManyMutationInput, MediaUncheckedUpdateManyWithoutReportInput>
   }
 
+  export type AgendaEventUpsertWithWhereUniqueWithoutReportInput = {
+    where: AgendaEventWhereUniqueInput
+    update: XOR<AgendaEventUpdateWithoutReportInput, AgendaEventUncheckedUpdateWithoutReportInput>
+    create: XOR<AgendaEventCreateWithoutReportInput, AgendaEventUncheckedCreateWithoutReportInput>
+  }
+
+  export type AgendaEventUpdateWithWhereUniqueWithoutReportInput = {
+    where: AgendaEventWhereUniqueInput
+    data: XOR<AgendaEventUpdateWithoutReportInput, AgendaEventUncheckedUpdateWithoutReportInput>
+  }
+
+  export type AgendaEventUpdateManyWithWhereWithoutReportInput = {
+    where: AgendaEventScalarWhereInput
+    data: XOR<AgendaEventUpdateManyMutationInput, AgendaEventUncheckedUpdateManyWithoutReportInput>
+  }
+
   export type ReportCreateWithoutDepartmentInput = {
     id?: string
     imageUrl: string
@@ -12525,6 +17533,7 @@ export namespace Prisma {
     user: UserCreateNestedOneWithoutReportsInput
     history?: ReportHistoryCreateNestedManyWithoutReportInput
     media?: MediaCreateNestedManyWithoutReportInput
+    agendaEvents?: AgendaEventCreateNestedManyWithoutReportInput
   }
 
   export type ReportUncheckedCreateWithoutDepartmentInput = {
@@ -12541,6 +17550,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     history?: ReportHistoryUncheckedCreateNestedManyWithoutReportInput
     media?: MediaUncheckedCreateNestedManyWithoutReportInput
+    agendaEvents?: AgendaEventUncheckedCreateNestedManyWithoutReportInput
   }
 
   export type ReportCreateOrConnectWithoutDepartmentInput = {
@@ -12566,6 +17576,10 @@ export namespace Prisma {
     Subordinates?: UserCreateNestedManyWithoutSupervisorInput
     reports?: ReportCreateNestedManyWithoutUserInput
     media?: MediaCreateNestedManyWithoutUserInput
+    notifications?: NotificationCreateNestedManyWithoutUserInput
+    createdEvents?: AgendaEventCreateNestedManyWithoutCreatedByInput
+    participatingEvents?: AgendaEventCreateNestedManyWithoutParticipantsInput
+    notes?: NoteCreateNestedManyWithoutUserInput
     auditLogs?: AuditLogCreateNestedManyWithoutUserInput
   }
 
@@ -12578,11 +17592,16 @@ export namespace Prisma {
     statusPhrase?: string | null
     role?: $Enums.Role
     supervisorId?: string | null
+    participatingEventIds?: UserCreateparticipatingEventIdsInput | string[]
     createdAt?: Date | string
     updatedAt?: Date | string
     Subordinates?: UserUncheckedCreateNestedManyWithoutSupervisorInput
     reports?: ReportUncheckedCreateNestedManyWithoutUserInput
     media?: MediaUncheckedCreateNestedManyWithoutUserInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutUserInput
+    createdEvents?: AgendaEventUncheckedCreateNestedManyWithoutCreatedByInput
+    participatingEvents?: AgendaEventUncheckedCreateNestedManyWithoutParticipantsInput
+    notes?: NoteUncheckedCreateNestedManyWithoutUserInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -12641,6 +17660,7 @@ export namespace Prisma {
     user: UserCreateNestedOneWithoutReportsInput
     department?: DepartmentCreateNestedOneWithoutReportsInput
     media?: MediaCreateNestedManyWithoutReportInput
+    agendaEvents?: AgendaEventCreateNestedManyWithoutReportInput
   }
 
   export type ReportUncheckedCreateWithoutHistoryInput = {
@@ -12657,6 +17677,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     media?: MediaUncheckedCreateNestedManyWithoutReportInput
+    agendaEvents?: AgendaEventUncheckedCreateNestedManyWithoutReportInput
   }
 
   export type ReportCreateOrConnectWithoutHistoryInput = {
@@ -12688,6 +17709,7 @@ export namespace Prisma {
     user?: UserUpdateOneRequiredWithoutReportsNestedInput
     department?: DepartmentUpdateOneWithoutReportsNestedInput
     media?: MediaUpdateManyWithoutReportNestedInput
+    agendaEvents?: AgendaEventUpdateManyWithoutReportNestedInput
   }
 
   export type ReportUncheckedUpdateWithoutHistoryInput = {
@@ -12703,6 +17725,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     media?: MediaUncheckedUpdateManyWithoutReportNestedInput
+    agendaEvents?: AgendaEventUncheckedUpdateManyWithoutReportNestedInput
   }
 
   export type UserCreateWithoutMediaInput = {
@@ -12719,6 +17742,10 @@ export namespace Prisma {
     Subordinates?: UserCreateNestedManyWithoutSupervisorInput
     department?: DepartmentCreateNestedOneWithoutMembersInput
     reports?: ReportCreateNestedManyWithoutUserInput
+    notifications?: NotificationCreateNestedManyWithoutUserInput
+    createdEvents?: AgendaEventCreateNestedManyWithoutCreatedByInput
+    participatingEvents?: AgendaEventCreateNestedManyWithoutParticipantsInput
+    notes?: NoteCreateNestedManyWithoutUserInput
     auditLogs?: AuditLogCreateNestedManyWithoutUserInput
   }
 
@@ -12732,10 +17759,15 @@ export namespace Prisma {
     role?: $Enums.Role
     supervisorId?: string | null
     departmentId?: string | null
+    participatingEventIds?: UserCreateparticipatingEventIdsInput | string[]
     createdAt?: Date | string
     updatedAt?: Date | string
     Subordinates?: UserUncheckedCreateNestedManyWithoutSupervisorInput
     reports?: ReportUncheckedCreateNestedManyWithoutUserInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutUserInput
+    createdEvents?: AgendaEventUncheckedCreateNestedManyWithoutCreatedByInput
+    participatingEvents?: AgendaEventUncheckedCreateNestedManyWithoutParticipantsInput
+    notes?: NoteUncheckedCreateNestedManyWithoutUserInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -12758,6 +17790,7 @@ export namespace Prisma {
     user: UserCreateNestedOneWithoutReportsInput
     department?: DepartmentCreateNestedOneWithoutReportsInput
     history?: ReportHistoryCreateNestedManyWithoutReportInput
+    agendaEvents?: AgendaEventCreateNestedManyWithoutReportInput
   }
 
   export type ReportUncheckedCreateWithoutMediaInput = {
@@ -12774,6 +17807,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     history?: ReportHistoryUncheckedCreateNestedManyWithoutReportInput
+    agendaEvents?: AgendaEventUncheckedCreateNestedManyWithoutReportInput
   }
 
   export type ReportCreateOrConnectWithoutMediaInput = {
@@ -12805,6 +17839,10 @@ export namespace Prisma {
     Subordinates?: UserUpdateManyWithoutSupervisorNestedInput
     department?: DepartmentUpdateOneWithoutMembersNestedInput
     reports?: ReportUpdateManyWithoutUserNestedInput
+    notifications?: NotificationUpdateManyWithoutUserNestedInput
+    createdEvents?: AgendaEventUpdateManyWithoutCreatedByNestedInput
+    participatingEvents?: AgendaEventUpdateManyWithoutParticipantsNestedInput
+    notes?: NoteUpdateManyWithoutUserNestedInput
     auditLogs?: AuditLogUpdateManyWithoutUserNestedInput
   }
 
@@ -12817,10 +17855,15 @@ export namespace Prisma {
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     supervisorId?: NullableStringFieldUpdateOperationsInput | string | null
     departmentId?: NullableStringFieldUpdateOperationsInput | string | null
+    participatingEventIds?: UserUpdateparticipatingEventIdsInput | string[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     Subordinates?: UserUncheckedUpdateManyWithoutSupervisorNestedInput
     reports?: ReportUncheckedUpdateManyWithoutUserNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutUserNestedInput
+    createdEvents?: AgendaEventUncheckedUpdateManyWithoutCreatedByNestedInput
+    participatingEvents?: AgendaEventUncheckedUpdateManyWithoutParticipantsNestedInput
+    notes?: NoteUncheckedUpdateManyWithoutUserNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -12848,6 +17891,7 @@ export namespace Prisma {
     user?: UserUpdateOneRequiredWithoutReportsNestedInput
     department?: DepartmentUpdateOneWithoutReportsNestedInput
     history?: ReportHistoryUpdateManyWithoutReportNestedInput
+    agendaEvents?: AgendaEventUpdateManyWithoutReportNestedInput
   }
 
   export type ReportUncheckedUpdateWithoutMediaInput = {
@@ -12863,6 +17907,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     history?: ReportHistoryUncheckedUpdateManyWithoutReportNestedInput
+    agendaEvents?: AgendaEventUncheckedUpdateManyWithoutReportNestedInput
   }
 
   export type UserCreateWithoutAuditLogsInput = {
@@ -12880,6 +17925,10 @@ export namespace Prisma {
     department?: DepartmentCreateNestedOneWithoutMembersInput
     reports?: ReportCreateNestedManyWithoutUserInput
     media?: MediaCreateNestedManyWithoutUserInput
+    notifications?: NotificationCreateNestedManyWithoutUserInput
+    createdEvents?: AgendaEventCreateNestedManyWithoutCreatedByInput
+    participatingEvents?: AgendaEventCreateNestedManyWithoutParticipantsInput
+    notes?: NoteCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutAuditLogsInput = {
@@ -12892,11 +17941,16 @@ export namespace Prisma {
     role?: $Enums.Role
     supervisorId?: string | null
     departmentId?: string | null
+    participatingEventIds?: UserCreateparticipatingEventIdsInput | string[]
     createdAt?: Date | string
     updatedAt?: Date | string
     Subordinates?: UserUncheckedCreateNestedManyWithoutSupervisorInput
     reports?: ReportUncheckedCreateNestedManyWithoutUserInput
     media?: MediaUncheckedCreateNestedManyWithoutUserInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutUserInput
+    createdEvents?: AgendaEventUncheckedCreateNestedManyWithoutCreatedByInput
+    participatingEvents?: AgendaEventUncheckedCreateNestedManyWithoutParticipantsInput
+    notes?: NoteUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutAuditLogsInput = {
@@ -12929,6 +17983,10 @@ export namespace Prisma {
     department?: DepartmentUpdateOneWithoutMembersNestedInput
     reports?: ReportUpdateManyWithoutUserNestedInput
     media?: MediaUpdateManyWithoutUserNestedInput
+    notifications?: NotificationUpdateManyWithoutUserNestedInput
+    createdEvents?: AgendaEventUpdateManyWithoutCreatedByNestedInput
+    participatingEvents?: AgendaEventUpdateManyWithoutParticipantsNestedInput
+    notes?: NoteUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutAuditLogsInput = {
@@ -12940,11 +17998,462 @@ export namespace Prisma {
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     supervisorId?: NullableStringFieldUpdateOperationsInput | string | null
     departmentId?: NullableStringFieldUpdateOperationsInput | string | null
+    participatingEventIds?: UserUpdateparticipatingEventIdsInput | string[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     Subordinates?: UserUncheckedUpdateManyWithoutSupervisorNestedInput
     reports?: ReportUncheckedUpdateManyWithoutUserNestedInput
     media?: MediaUncheckedUpdateManyWithoutUserNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutUserNestedInput
+    createdEvents?: AgendaEventUncheckedUpdateManyWithoutCreatedByNestedInput
+    participatingEvents?: AgendaEventUncheckedUpdateManyWithoutParticipantsNestedInput
+    notes?: NoteUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserCreateWithoutCreatedEventsInput = {
+    id?: string
+    name: string
+    email: string
+    passwordHash: string
+    avatarUrl?: string | null
+    statusPhrase?: string | null
+    role?: $Enums.Role
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    supervisor?: UserCreateNestedOneWithoutSubordinatesInput
+    Subordinates?: UserCreateNestedManyWithoutSupervisorInput
+    department?: DepartmentCreateNestedOneWithoutMembersInput
+    reports?: ReportCreateNestedManyWithoutUserInput
+    media?: MediaCreateNestedManyWithoutUserInput
+    notifications?: NotificationCreateNestedManyWithoutUserInput
+    participatingEvents?: AgendaEventCreateNestedManyWithoutParticipantsInput
+    notes?: NoteCreateNestedManyWithoutUserInput
+    auditLogs?: AuditLogCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutCreatedEventsInput = {
+    id?: string
+    name: string
+    email: string
+    passwordHash: string
+    avatarUrl?: string | null
+    statusPhrase?: string | null
+    role?: $Enums.Role
+    supervisorId?: string | null
+    departmentId?: string | null
+    participatingEventIds?: UserCreateparticipatingEventIdsInput | string[]
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    Subordinates?: UserUncheckedCreateNestedManyWithoutSupervisorInput
+    reports?: ReportUncheckedCreateNestedManyWithoutUserInput
+    media?: MediaUncheckedCreateNestedManyWithoutUserInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutUserInput
+    participatingEvents?: AgendaEventUncheckedCreateNestedManyWithoutParticipantsInput
+    notes?: NoteUncheckedCreateNestedManyWithoutUserInput
+    auditLogs?: AuditLogUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutCreatedEventsInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutCreatedEventsInput, UserUncheckedCreateWithoutCreatedEventsInput>
+  }
+
+  export type UserCreateWithoutParticipatingEventsInput = {
+    id?: string
+    name: string
+    email: string
+    passwordHash: string
+    avatarUrl?: string | null
+    statusPhrase?: string | null
+    role?: $Enums.Role
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    supervisor?: UserCreateNestedOneWithoutSubordinatesInput
+    Subordinates?: UserCreateNestedManyWithoutSupervisorInput
+    department?: DepartmentCreateNestedOneWithoutMembersInput
+    reports?: ReportCreateNestedManyWithoutUserInput
+    media?: MediaCreateNestedManyWithoutUserInput
+    notifications?: NotificationCreateNestedManyWithoutUserInput
+    createdEvents?: AgendaEventCreateNestedManyWithoutCreatedByInput
+    notes?: NoteCreateNestedManyWithoutUserInput
+    auditLogs?: AuditLogCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutParticipatingEventsInput = {
+    id?: string
+    name: string
+    email: string
+    passwordHash: string
+    avatarUrl?: string | null
+    statusPhrase?: string | null
+    role?: $Enums.Role
+    supervisorId?: string | null
+    departmentId?: string | null
+    participatingEventIds?: UserCreateparticipatingEventIdsInput | string[]
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    Subordinates?: UserUncheckedCreateNestedManyWithoutSupervisorInput
+    reports?: ReportUncheckedCreateNestedManyWithoutUserInput
+    media?: MediaUncheckedCreateNestedManyWithoutUserInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutUserInput
+    createdEvents?: AgendaEventUncheckedCreateNestedManyWithoutCreatedByInput
+    notes?: NoteUncheckedCreateNestedManyWithoutUserInput
+    auditLogs?: AuditLogUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutParticipatingEventsInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutParticipatingEventsInput, UserUncheckedCreateWithoutParticipatingEventsInput>
+  }
+
+  export type ReportCreateWithoutAgendaEventsInput = {
+    id?: string
+    imageUrl: string
+    comment: string
+    feedback?: string | null
+    feedbackAt?: Date | string | null
+    status?: $Enums.ReportStatus
+    latitude?: number | null
+    longitude?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutReportsInput
+    department?: DepartmentCreateNestedOneWithoutReportsInput
+    history?: ReportHistoryCreateNestedManyWithoutReportInput
+    media?: MediaCreateNestedManyWithoutReportInput
+  }
+
+  export type ReportUncheckedCreateWithoutAgendaEventsInput = {
+    id?: string
+    imageUrl: string
+    comment: string
+    feedback?: string | null
+    feedbackAt?: Date | string | null
+    status?: $Enums.ReportStatus
+    latitude?: number | null
+    longitude?: number | null
+    userId: string
+    departmentId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    history?: ReportHistoryUncheckedCreateNestedManyWithoutReportInput
+    media?: MediaUncheckedCreateNestedManyWithoutReportInput
+  }
+
+  export type ReportCreateOrConnectWithoutAgendaEventsInput = {
+    where: ReportWhereUniqueInput
+    create: XOR<ReportCreateWithoutAgendaEventsInput, ReportUncheckedCreateWithoutAgendaEventsInput>
+  }
+
+  export type UserUpsertWithoutCreatedEventsInput = {
+    update: XOR<UserUpdateWithoutCreatedEventsInput, UserUncheckedUpdateWithoutCreatedEventsInput>
+    create: XOR<UserCreateWithoutCreatedEventsInput, UserUncheckedCreateWithoutCreatedEventsInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutCreatedEventsInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutCreatedEventsInput, UserUncheckedUpdateWithoutCreatedEventsInput>
+  }
+
+  export type UserUpdateWithoutCreatedEventsInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    statusPhrase?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    supervisor?: UserUpdateOneWithoutSubordinatesNestedInput
+    Subordinates?: UserUpdateManyWithoutSupervisorNestedInput
+    department?: DepartmentUpdateOneWithoutMembersNestedInput
+    reports?: ReportUpdateManyWithoutUserNestedInput
+    media?: MediaUpdateManyWithoutUserNestedInput
+    notifications?: NotificationUpdateManyWithoutUserNestedInput
+    participatingEvents?: AgendaEventUpdateManyWithoutParticipantsNestedInput
+    notes?: NoteUpdateManyWithoutUserNestedInput
+    auditLogs?: AuditLogUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutCreatedEventsInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    statusPhrase?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    supervisorId?: NullableStringFieldUpdateOperationsInput | string | null
+    departmentId?: NullableStringFieldUpdateOperationsInput | string | null
+    participatingEventIds?: UserUpdateparticipatingEventIdsInput | string[]
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    Subordinates?: UserUncheckedUpdateManyWithoutSupervisorNestedInput
+    reports?: ReportUncheckedUpdateManyWithoutUserNestedInput
+    media?: MediaUncheckedUpdateManyWithoutUserNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutUserNestedInput
+    participatingEvents?: AgendaEventUncheckedUpdateManyWithoutParticipantsNestedInput
+    notes?: NoteUncheckedUpdateManyWithoutUserNestedInput
+    auditLogs?: AuditLogUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUpsertWithWhereUniqueWithoutParticipatingEventsInput = {
+    where: UserWhereUniqueInput
+    update: XOR<UserUpdateWithoutParticipatingEventsInput, UserUncheckedUpdateWithoutParticipatingEventsInput>
+    create: XOR<UserCreateWithoutParticipatingEventsInput, UserUncheckedCreateWithoutParticipatingEventsInput>
+  }
+
+  export type UserUpdateWithWhereUniqueWithoutParticipatingEventsInput = {
+    where: UserWhereUniqueInput
+    data: XOR<UserUpdateWithoutParticipatingEventsInput, UserUncheckedUpdateWithoutParticipatingEventsInput>
+  }
+
+  export type UserUpdateManyWithWhereWithoutParticipatingEventsInput = {
+    where: UserScalarWhereInput
+    data: XOR<UserUpdateManyMutationInput, UserUncheckedUpdateManyWithoutParticipatingEventsInput>
+  }
+
+  export type ReportUpsertWithoutAgendaEventsInput = {
+    update: XOR<ReportUpdateWithoutAgendaEventsInput, ReportUncheckedUpdateWithoutAgendaEventsInput>
+    create: XOR<ReportCreateWithoutAgendaEventsInput, ReportUncheckedCreateWithoutAgendaEventsInput>
+    where?: ReportWhereInput
+  }
+
+  export type ReportUpdateToOneWithWhereWithoutAgendaEventsInput = {
+    where?: ReportWhereInput
+    data: XOR<ReportUpdateWithoutAgendaEventsInput, ReportUncheckedUpdateWithoutAgendaEventsInput>
+  }
+
+  export type ReportUpdateWithoutAgendaEventsInput = {
+    imageUrl?: StringFieldUpdateOperationsInput | string
+    comment?: StringFieldUpdateOperationsInput | string
+    feedback?: NullableStringFieldUpdateOperationsInput | string | null
+    feedbackAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: EnumReportStatusFieldUpdateOperationsInput | $Enums.ReportStatus
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutReportsNestedInput
+    department?: DepartmentUpdateOneWithoutReportsNestedInput
+    history?: ReportHistoryUpdateManyWithoutReportNestedInput
+    media?: MediaUpdateManyWithoutReportNestedInput
+  }
+
+  export type ReportUncheckedUpdateWithoutAgendaEventsInput = {
+    imageUrl?: StringFieldUpdateOperationsInput | string
+    comment?: StringFieldUpdateOperationsInput | string
+    feedback?: NullableStringFieldUpdateOperationsInput | string | null
+    feedbackAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: EnumReportStatusFieldUpdateOperationsInput | $Enums.ReportStatus
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    userId?: StringFieldUpdateOperationsInput | string
+    departmentId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    history?: ReportHistoryUncheckedUpdateManyWithoutReportNestedInput
+    media?: MediaUncheckedUpdateManyWithoutReportNestedInput
+  }
+
+  export type UserCreateWithoutNotificationsInput = {
+    id?: string
+    name: string
+    email: string
+    passwordHash: string
+    avatarUrl?: string | null
+    statusPhrase?: string | null
+    role?: $Enums.Role
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    supervisor?: UserCreateNestedOneWithoutSubordinatesInput
+    Subordinates?: UserCreateNestedManyWithoutSupervisorInput
+    department?: DepartmentCreateNestedOneWithoutMembersInput
+    reports?: ReportCreateNestedManyWithoutUserInput
+    media?: MediaCreateNestedManyWithoutUserInput
+    createdEvents?: AgendaEventCreateNestedManyWithoutCreatedByInput
+    participatingEvents?: AgendaEventCreateNestedManyWithoutParticipantsInput
+    notes?: NoteCreateNestedManyWithoutUserInput
+    auditLogs?: AuditLogCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutNotificationsInput = {
+    id?: string
+    name: string
+    email: string
+    passwordHash: string
+    avatarUrl?: string | null
+    statusPhrase?: string | null
+    role?: $Enums.Role
+    supervisorId?: string | null
+    departmentId?: string | null
+    participatingEventIds?: UserCreateparticipatingEventIdsInput | string[]
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    Subordinates?: UserUncheckedCreateNestedManyWithoutSupervisorInput
+    reports?: ReportUncheckedCreateNestedManyWithoutUserInput
+    media?: MediaUncheckedCreateNestedManyWithoutUserInput
+    createdEvents?: AgendaEventUncheckedCreateNestedManyWithoutCreatedByInput
+    participatingEvents?: AgendaEventUncheckedCreateNestedManyWithoutParticipantsInput
+    notes?: NoteUncheckedCreateNestedManyWithoutUserInput
+    auditLogs?: AuditLogUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutNotificationsInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutNotificationsInput, UserUncheckedCreateWithoutNotificationsInput>
+  }
+
+  export type UserUpsertWithoutNotificationsInput = {
+    update: XOR<UserUpdateWithoutNotificationsInput, UserUncheckedUpdateWithoutNotificationsInput>
+    create: XOR<UserCreateWithoutNotificationsInput, UserUncheckedCreateWithoutNotificationsInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutNotificationsInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutNotificationsInput, UserUncheckedUpdateWithoutNotificationsInput>
+  }
+
+  export type UserUpdateWithoutNotificationsInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    statusPhrase?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    supervisor?: UserUpdateOneWithoutSubordinatesNestedInput
+    Subordinates?: UserUpdateManyWithoutSupervisorNestedInput
+    department?: DepartmentUpdateOneWithoutMembersNestedInput
+    reports?: ReportUpdateManyWithoutUserNestedInput
+    media?: MediaUpdateManyWithoutUserNestedInput
+    createdEvents?: AgendaEventUpdateManyWithoutCreatedByNestedInput
+    participatingEvents?: AgendaEventUpdateManyWithoutParticipantsNestedInput
+    notes?: NoteUpdateManyWithoutUserNestedInput
+    auditLogs?: AuditLogUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutNotificationsInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    statusPhrase?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    supervisorId?: NullableStringFieldUpdateOperationsInput | string | null
+    departmentId?: NullableStringFieldUpdateOperationsInput | string | null
+    participatingEventIds?: UserUpdateparticipatingEventIdsInput | string[]
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    Subordinates?: UserUncheckedUpdateManyWithoutSupervisorNestedInput
+    reports?: ReportUncheckedUpdateManyWithoutUserNestedInput
+    media?: MediaUncheckedUpdateManyWithoutUserNestedInput
+    createdEvents?: AgendaEventUncheckedUpdateManyWithoutCreatedByNestedInput
+    participatingEvents?: AgendaEventUncheckedUpdateManyWithoutParticipantsNestedInput
+    notes?: NoteUncheckedUpdateManyWithoutUserNestedInput
+    auditLogs?: AuditLogUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserCreateWithoutNotesInput = {
+    id?: string
+    name: string
+    email: string
+    passwordHash: string
+    avatarUrl?: string | null
+    statusPhrase?: string | null
+    role?: $Enums.Role
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    supervisor?: UserCreateNestedOneWithoutSubordinatesInput
+    Subordinates?: UserCreateNestedManyWithoutSupervisorInput
+    department?: DepartmentCreateNestedOneWithoutMembersInput
+    reports?: ReportCreateNestedManyWithoutUserInput
+    media?: MediaCreateNestedManyWithoutUserInput
+    notifications?: NotificationCreateNestedManyWithoutUserInput
+    createdEvents?: AgendaEventCreateNestedManyWithoutCreatedByInput
+    participatingEvents?: AgendaEventCreateNestedManyWithoutParticipantsInput
+    auditLogs?: AuditLogCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutNotesInput = {
+    id?: string
+    name: string
+    email: string
+    passwordHash: string
+    avatarUrl?: string | null
+    statusPhrase?: string | null
+    role?: $Enums.Role
+    supervisorId?: string | null
+    departmentId?: string | null
+    participatingEventIds?: UserCreateparticipatingEventIdsInput | string[]
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    Subordinates?: UserUncheckedCreateNestedManyWithoutSupervisorInput
+    reports?: ReportUncheckedCreateNestedManyWithoutUserInput
+    media?: MediaUncheckedCreateNestedManyWithoutUserInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutUserInput
+    createdEvents?: AgendaEventUncheckedCreateNestedManyWithoutCreatedByInput
+    participatingEvents?: AgendaEventUncheckedCreateNestedManyWithoutParticipantsInput
+    auditLogs?: AuditLogUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutNotesInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutNotesInput, UserUncheckedCreateWithoutNotesInput>
+  }
+
+  export type UserUpsertWithoutNotesInput = {
+    update: XOR<UserUpdateWithoutNotesInput, UserUncheckedUpdateWithoutNotesInput>
+    create: XOR<UserCreateWithoutNotesInput, UserUncheckedCreateWithoutNotesInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutNotesInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutNotesInput, UserUncheckedUpdateWithoutNotesInput>
+  }
+
+  export type UserUpdateWithoutNotesInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    statusPhrase?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    supervisor?: UserUpdateOneWithoutSubordinatesNestedInput
+    Subordinates?: UserUpdateManyWithoutSupervisorNestedInput
+    department?: DepartmentUpdateOneWithoutMembersNestedInput
+    reports?: ReportUpdateManyWithoutUserNestedInput
+    media?: MediaUpdateManyWithoutUserNestedInput
+    notifications?: NotificationUpdateManyWithoutUserNestedInput
+    createdEvents?: AgendaEventUpdateManyWithoutCreatedByNestedInput
+    participatingEvents?: AgendaEventUpdateManyWithoutParticipantsNestedInput
+    auditLogs?: AuditLogUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutNotesInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    statusPhrase?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    supervisorId?: NullableStringFieldUpdateOperationsInput | string | null
+    departmentId?: NullableStringFieldUpdateOperationsInput | string | null
+    participatingEventIds?: UserUpdateparticipatingEventIdsInput | string[]
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    Subordinates?: UserUncheckedUpdateManyWithoutSupervisorNestedInput
+    reports?: ReportUncheckedUpdateManyWithoutUserNestedInput
+    media?: MediaUncheckedUpdateManyWithoutUserNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutUserNestedInput
+    createdEvents?: AgendaEventUncheckedUpdateManyWithoutCreatedByNestedInput
+    participatingEvents?: AgendaEventUncheckedUpdateManyWithoutParticipantsNestedInput
+    auditLogs?: AuditLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateManySupervisorInput = {
@@ -12956,6 +18465,7 @@ export namespace Prisma {
     statusPhrase?: string | null
     role?: $Enums.Role
     departmentId?: string | null
+    participatingEventIds?: UserCreateparticipatingEventIdsInput | string[]
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -12989,6 +18499,38 @@ export namespace Prisma {
     reportId?: string | null
   }
 
+  export type NotificationCreateManyUserInput = {
+    id?: string
+    fromId?: string | null
+    type: string
+    title: string
+    message: string
+    read?: boolean
+    link?: string | null
+    scheduledFor?: Date | string | null
+    createdAt?: Date | string
+  }
+
+  export type AgendaEventCreateManyCreatedByInput = {
+    id?: string
+    title: string
+    description?: string | null
+    type?: $Enums.AgendaEventType
+    startTime: Date | string
+    endTime?: Date | string | null
+    participantIds?: AgendaEventCreateparticipantIdsInput | string[]
+    reportId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type NoteCreateManyUserInput = {
+    id?: string
+    content: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
   export type AuditLogCreateManyUserInput = {
     id?: string
     action: string
@@ -13012,6 +18554,10 @@ export namespace Prisma {
     department?: DepartmentUpdateOneWithoutMembersNestedInput
     reports?: ReportUpdateManyWithoutUserNestedInput
     media?: MediaUpdateManyWithoutUserNestedInput
+    notifications?: NotificationUpdateManyWithoutUserNestedInput
+    createdEvents?: AgendaEventUpdateManyWithoutCreatedByNestedInput
+    participatingEvents?: AgendaEventUpdateManyWithoutParticipantsNestedInput
+    notes?: NoteUpdateManyWithoutUserNestedInput
     auditLogs?: AuditLogUpdateManyWithoutUserNestedInput
   }
 
@@ -13023,11 +18569,16 @@ export namespace Prisma {
     statusPhrase?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     departmentId?: NullableStringFieldUpdateOperationsInput | string | null
+    participatingEventIds?: UserUpdateparticipatingEventIdsInput | string[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     Subordinates?: UserUncheckedUpdateManyWithoutSupervisorNestedInput
     reports?: ReportUncheckedUpdateManyWithoutUserNestedInput
     media?: MediaUncheckedUpdateManyWithoutUserNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutUserNestedInput
+    createdEvents?: AgendaEventUncheckedUpdateManyWithoutCreatedByNestedInput
+    participatingEvents?: AgendaEventUncheckedUpdateManyWithoutParticipantsNestedInput
+    notes?: NoteUncheckedUpdateManyWithoutUserNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -13039,6 +18590,7 @@ export namespace Prisma {
     statusPhrase?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     departmentId?: NullableStringFieldUpdateOperationsInput | string | null
+    participatingEventIds?: UserUpdateparticipatingEventIdsInput | string[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -13056,6 +18608,7 @@ export namespace Prisma {
     department?: DepartmentUpdateOneWithoutReportsNestedInput
     history?: ReportHistoryUpdateManyWithoutReportNestedInput
     media?: MediaUpdateManyWithoutReportNestedInput
+    agendaEvents?: AgendaEventUpdateManyWithoutReportNestedInput
   }
 
   export type ReportUncheckedUpdateWithoutUserInput = {
@@ -13071,6 +18624,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     history?: ReportHistoryUncheckedUpdateManyWithoutReportNestedInput
     media?: MediaUncheckedUpdateManyWithoutReportNestedInput
+    agendaEvents?: AgendaEventUncheckedUpdateManyWithoutReportNestedInput
   }
 
   export type ReportUncheckedUpdateManyWithoutUserInput = {
@@ -13128,6 +18682,132 @@ export namespace Prisma {
     reportId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
+  export type NotificationUpdateWithoutUserInput = {
+    fromId?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    message?: StringFieldUpdateOperationsInput | string
+    read?: BoolFieldUpdateOperationsInput | boolean
+    link?: NullableStringFieldUpdateOperationsInput | string | null
+    scheduledFor?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type NotificationUncheckedUpdateWithoutUserInput = {
+    fromId?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    message?: StringFieldUpdateOperationsInput | string
+    read?: BoolFieldUpdateOperationsInput | boolean
+    link?: NullableStringFieldUpdateOperationsInput | string | null
+    scheduledFor?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type NotificationUncheckedUpdateManyWithoutUserInput = {
+    fromId?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    message?: StringFieldUpdateOperationsInput | string
+    read?: BoolFieldUpdateOperationsInput | boolean
+    link?: NullableStringFieldUpdateOperationsInput | string | null
+    scheduledFor?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AgendaEventUpdateWithoutCreatedByInput = {
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: EnumAgendaEventTypeFieldUpdateOperationsInput | $Enums.AgendaEventType
+    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    endTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    participants?: UserUpdateManyWithoutParticipatingEventsNestedInput
+    report?: ReportUpdateOneWithoutAgendaEventsNestedInput
+  }
+
+  export type AgendaEventUncheckedUpdateWithoutCreatedByInput = {
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: EnumAgendaEventTypeFieldUpdateOperationsInput | $Enums.AgendaEventType
+    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    endTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    participantIds?: AgendaEventUpdateparticipantIdsInput | string[]
+    reportId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    participants?: UserUncheckedUpdateManyWithoutParticipatingEventsNestedInput
+  }
+
+  export type AgendaEventUncheckedUpdateManyWithoutCreatedByInput = {
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: EnumAgendaEventTypeFieldUpdateOperationsInput | $Enums.AgendaEventType
+    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    endTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    participantIds?: AgendaEventUpdateparticipantIdsInput | string[]
+    reportId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AgendaEventUpdateWithoutParticipantsInput = {
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: EnumAgendaEventTypeFieldUpdateOperationsInput | $Enums.AgendaEventType
+    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    endTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdBy?: UserUpdateOneRequiredWithoutCreatedEventsNestedInput
+    report?: ReportUpdateOneWithoutAgendaEventsNestedInput
+  }
+
+  export type AgendaEventUncheckedUpdateWithoutParticipantsInput = {
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: EnumAgendaEventTypeFieldUpdateOperationsInput | $Enums.AgendaEventType
+    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    endTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdById?: StringFieldUpdateOperationsInput | string
+    participantIds?: AgendaEventUpdateparticipantIdsInput | string[]
+    reportId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AgendaEventUncheckedUpdateManyWithoutParticipantsInput = {
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: EnumAgendaEventTypeFieldUpdateOperationsInput | $Enums.AgendaEventType
+    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    endTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdById?: StringFieldUpdateOperationsInput | string
+    participantIds?: AgendaEventUpdateparticipantIdsInput | string[]
+    reportId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type NoteUpdateWithoutUserInput = {
+    content?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type NoteUncheckedUpdateWithoutUserInput = {
+    content?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type NoteUncheckedUpdateManyWithoutUserInput = {
+    content?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type AuditLogUpdateWithoutUserInput = {
     action?: StringFieldUpdateOperationsInput | string
     target?: NullableStringFieldUpdateOperationsInput | string | null
@@ -13177,6 +18857,19 @@ export namespace Prisma {
     folder?: string
     uploadedAt?: Date | string
     userId?: string | null
+  }
+
+  export type AgendaEventCreateManyReportInput = {
+    id?: string
+    title: string
+    description?: string | null
+    type?: $Enums.AgendaEventType
+    startTime: Date | string
+    endTime?: Date | string | null
+    createdById: string
+    participantIds?: AgendaEventCreateparticipantIdsInput | string[]
+    createdAt?: Date | string
+    updatedAt?: Date | string
   }
 
   export type ReportHistoryUpdateWithoutReportInput = {
@@ -13245,6 +18938,43 @@ export namespace Prisma {
     userId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
+  export type AgendaEventUpdateWithoutReportInput = {
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: EnumAgendaEventTypeFieldUpdateOperationsInput | $Enums.AgendaEventType
+    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    endTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdBy?: UserUpdateOneRequiredWithoutCreatedEventsNestedInput
+    participants?: UserUpdateManyWithoutParticipatingEventsNestedInput
+  }
+
+  export type AgendaEventUncheckedUpdateWithoutReportInput = {
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: EnumAgendaEventTypeFieldUpdateOperationsInput | $Enums.AgendaEventType
+    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    endTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdById?: StringFieldUpdateOperationsInput | string
+    participantIds?: AgendaEventUpdateparticipantIdsInput | string[]
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    participants?: UserUncheckedUpdateManyWithoutParticipatingEventsNestedInput
+  }
+
+  export type AgendaEventUncheckedUpdateManyWithoutReportInput = {
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: EnumAgendaEventTypeFieldUpdateOperationsInput | $Enums.AgendaEventType
+    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    endTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdById?: StringFieldUpdateOperationsInput | string
+    participantIds?: AgendaEventUpdateparticipantIdsInput | string[]
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type ReportCreateManyDepartmentInput = {
     id?: string
     imageUrl: string
@@ -13268,6 +18998,7 @@ export namespace Prisma {
     statusPhrase?: string | null
     role?: $Enums.Role
     supervisorId?: string | null
+    participatingEventIds?: UserCreateparticipatingEventIdsInput | string[]
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -13285,6 +19016,7 @@ export namespace Prisma {
     user?: UserUpdateOneRequiredWithoutReportsNestedInput
     history?: ReportHistoryUpdateManyWithoutReportNestedInput
     media?: MediaUpdateManyWithoutReportNestedInput
+    agendaEvents?: AgendaEventUpdateManyWithoutReportNestedInput
   }
 
   export type ReportUncheckedUpdateWithoutDepartmentInput = {
@@ -13300,6 +19032,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     history?: ReportHistoryUncheckedUpdateManyWithoutReportNestedInput
     media?: MediaUncheckedUpdateManyWithoutReportNestedInput
+    agendaEvents?: AgendaEventUncheckedUpdateManyWithoutReportNestedInput
   }
 
   export type ReportUncheckedUpdateManyWithoutDepartmentInput = {
@@ -13328,6 +19061,10 @@ export namespace Prisma {
     Subordinates?: UserUpdateManyWithoutSupervisorNestedInput
     reports?: ReportUpdateManyWithoutUserNestedInput
     media?: MediaUpdateManyWithoutUserNestedInput
+    notifications?: NotificationUpdateManyWithoutUserNestedInput
+    createdEvents?: AgendaEventUpdateManyWithoutCreatedByNestedInput
+    participatingEvents?: AgendaEventUpdateManyWithoutParticipantsNestedInput
+    notes?: NoteUpdateManyWithoutUserNestedInput
     auditLogs?: AuditLogUpdateManyWithoutUserNestedInput
   }
 
@@ -13339,11 +19076,16 @@ export namespace Prisma {
     statusPhrase?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     supervisorId?: NullableStringFieldUpdateOperationsInput | string | null
+    participatingEventIds?: UserUpdateparticipatingEventIdsInput | string[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     Subordinates?: UserUncheckedUpdateManyWithoutSupervisorNestedInput
     reports?: ReportUncheckedUpdateManyWithoutUserNestedInput
     media?: MediaUncheckedUpdateManyWithoutUserNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutUserNestedInput
+    createdEvents?: AgendaEventUncheckedUpdateManyWithoutCreatedByNestedInput
+    participatingEvents?: AgendaEventUncheckedUpdateManyWithoutParticipantsNestedInput
+    notes?: NoteUncheckedUpdateManyWithoutUserNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -13355,6 +19097,62 @@ export namespace Prisma {
     statusPhrase?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     supervisorId?: NullableStringFieldUpdateOperationsInput | string | null
+    participatingEventIds?: UserUpdateparticipatingEventIdsInput | string[]
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type UserUpdateWithoutParticipatingEventsInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    statusPhrase?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    supervisor?: UserUpdateOneWithoutSubordinatesNestedInput
+    Subordinates?: UserUpdateManyWithoutSupervisorNestedInput
+    department?: DepartmentUpdateOneWithoutMembersNestedInput
+    reports?: ReportUpdateManyWithoutUserNestedInput
+    media?: MediaUpdateManyWithoutUserNestedInput
+    notifications?: NotificationUpdateManyWithoutUserNestedInput
+    createdEvents?: AgendaEventUpdateManyWithoutCreatedByNestedInput
+    notes?: NoteUpdateManyWithoutUserNestedInput
+    auditLogs?: AuditLogUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutParticipatingEventsInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    statusPhrase?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    supervisorId?: NullableStringFieldUpdateOperationsInput | string | null
+    departmentId?: NullableStringFieldUpdateOperationsInput | string | null
+    participatingEventIds?: UserUpdateparticipatingEventIdsInput | string[]
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    Subordinates?: UserUncheckedUpdateManyWithoutSupervisorNestedInput
+    reports?: ReportUncheckedUpdateManyWithoutUserNestedInput
+    media?: MediaUncheckedUpdateManyWithoutUserNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutUserNestedInput
+    createdEvents?: AgendaEventUncheckedUpdateManyWithoutCreatedByNestedInput
+    notes?: NoteUncheckedUpdateManyWithoutUserNestedInput
+    auditLogs?: AuditLogUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateManyWithoutParticipatingEventsInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    statusPhrase?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    supervisorId?: NullableStringFieldUpdateOperationsInput | string | null
+    departmentId?: NullableStringFieldUpdateOperationsInput | string | null
+    participatingEventIds?: UserUpdateparticipatingEventIdsInput | string[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }

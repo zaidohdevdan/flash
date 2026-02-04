@@ -25,9 +25,11 @@ import { AnalysisModal } from '../components/domain/modals/AnalysisModal';
 import { ProfileSettingsModal } from '../components/domain/modals/ProfileSettingsModal';
 import { ExportReportsModal } from '../components/domain/modals/ExportReportsModal';
 import { ConferenceModal } from '../components/domain/modals/ConferenceModal';
+import { AgendaModal } from '../components/domain/modals/AgendaModal';
+import { NotificationDrawer } from '../components/ui/NotificationDrawer';
 import { ConferenceInviteNotification } from '../components/ui/ConferenceInviteNotification';
 
-import type { Report, Stats, Department, UserContact } from '../types';
+import type { Report, Stats, Department, UserContact, Notification } from '../types';
 
 interface Subordinate {
     id: string;
@@ -97,6 +99,9 @@ export function Dashboard() {
     const [formFeedback, setFormFeedback] = useState('');
     const [selectedDeptId, setSelectedDeptId] = useState('');
     const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
+    const [isAgendaOpen, setIsAgendaOpen] = useState(false);
+    const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+    const [notifications, setNotifications] = useState<Notification[]>([]);
 
     // Restoration of missing states
     const [pendingInvite, setPendingInvite] = useState<{ roomId: string; hostId: string; hostName: string } | null>(null);
@@ -145,6 +150,9 @@ export function Dashboard() {
                 hostName: host?.name || (data.hostRole === 'SUPERVISOR' ? 'Supervisor' : 'Alguém')
             });
             playNotificationSound();
+        },
+        onNewNotification: (notif) => {
+            setNotifications(prev => [notif, ...prev]);
         }
     });
 
@@ -208,6 +216,7 @@ export function Dashboard() {
         loadSubordinates();
         loadContacts();
         loadDepartments();
+        fetchNotifications();
     }, []);
 
     useEffect(() => {
@@ -220,6 +229,33 @@ export function Dashboard() {
         const next = page + 1;
         setPage(next);
         loadReports(next);
+    };
+    const fetchNotifications = async () => {
+        try {
+            const res = await api.get('/notifications');
+            setNotifications(res.data);
+        } catch (error) {
+            console.error('Erro ao buscar notificações');
+        }
+    };
+
+    const handleMarkAsRead = async (id: string) => {
+        try {
+            await api.patch(`/notifications/${id}/read`);
+            setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+        } catch (error) {
+            toast.error('Erro ao marcar como lida');
+        }
+    };
+
+    const handleMarkAllAsRead = async () => {
+        try {
+            await api.post('/notifications/read-all');
+            setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+            toast.success('Todas as notificações marcadas como lidas');
+        } catch (error) {
+            toast.error('Erro ao marcar todas como lidas');
+        }
     };
 
 
@@ -347,6 +383,8 @@ export function Dashboard() {
             <Header
                 user={{ name: user?.name, avatarUrl: user?.avatarUrl }}
                 onLogout={signOut}
+                unreadCount={notifications.filter(n => !n.read).length}
+                onNotificationsClick={() => setIsNotificationsOpen(true)}
             />
 
             <DashboardHero
@@ -366,6 +404,7 @@ export function Dashboard() {
                 onAnalyticsClick={() => navigate('/analytics')}
                 onExportClick={() => setIsExportModalOpen(true)}
                 onConferenceClick={user?.role === 'SUPERVISOR' ? handleStartConference : undefined}
+                onAgendaClick={() => setIsAgendaOpen(true)}
             >
                 <div className="flex bg-white/10 backdrop-blur-md p-1 rounded-xl border border-white/10">
                     <button
@@ -395,7 +434,7 @@ export function Dashboard() {
                             placeholder="Filtrar por protocolo ou descrição..."
                             value={searchTerm}
                             onChange={e => setSearchTerm(e.target.value)}
-                            className="w-full pl-14 pr-8 py-4 bg-slate-900/50 border border-white/5 rounded-3xl outline-none focus:bg-slate-900/80 focus:border-blue-500/30 transition-all text-sm font-bold text-white placeholder:text-gray-500"
+                            className="w-full pl-14 pr-8 py-4 bg-slate-900/50 border border-white/5 rounded-3xl outline-none focus:bg-slate-900/80 focus:border-blue-500/30 transition-all text-sm font-black text-white placeholder:text-gray-400"
                         />
                     </div>
 
@@ -508,6 +547,19 @@ export function Dashboard() {
                     setPendingInvite(null);
                 }}
                 onDecline={() => setPendingInvite(null)}
+            />
+            {/* New Modals */}
+            <AgendaModal
+                isOpen={isAgendaOpen}
+                onClose={() => setIsAgendaOpen(false)}
+            />
+
+            <NotificationDrawer
+                isOpen={isNotificationsOpen}
+                onClose={() => setIsNotificationsOpen(false)}
+                notifications={notifications}
+                onMarkAsRead={handleMarkAsRead}
+                onMarkAllAsRead={handleMarkAllAsRead}
             />
         </div>
     );

@@ -1,4 +1,4 @@
-import { BarChart3, Clock, AlertCircle, Download, Video } from 'lucide-react';
+import { BarChart3, Clock, AlertCircle, Download, Video, Calendar } from 'lucide-react';
 import { Button, GlassCard } from '../ui';
 import { KpiCard } from './KpiCard';
 
@@ -32,6 +32,7 @@ interface DashboardHeroProps {
     onAnalyticsClick?: () => void;
     onExportClick?: () => void;
     onConferenceClick?: () => void;
+    onAgendaClick?: () => void;
     children?: React.ReactNode;
 }
 
@@ -52,6 +53,7 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
     onAnalyticsClick,
     onExportClick,
     onConferenceClick,
+    onAgendaClick,
     children
 }) => {
     return (
@@ -96,6 +98,16 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
                                 >
                                     <Video className="w-5 h-5 mr-2" />
                                     War Room
+                                </Button>
+                            )}
+                            {onAgendaClick && (
+                                <Button
+                                    variant="glass"
+                                    className="!px-4 !py-2 !bg-blue-600/20 hover:!bg-blue-600/30 text-blue-200 border-blue-500/30 backdrop-blur-md whitespace-nowrap"
+                                    onClick={onAgendaClick}
+                                >
+                                    <Calendar className="w-5 h-5 mr-2" />
+                                    Agenda
                                 </Button>
                             )}
                             {children}

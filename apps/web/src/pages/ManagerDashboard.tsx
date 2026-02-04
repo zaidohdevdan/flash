@@ -22,7 +22,8 @@ import { AnalysisModal } from '../components/domain/modals/AnalysisModal';
 import { ExportReportsModal } from '../components/domain/modals/ExportReportsModal';
 import { ConferenceModal } from '../components/domain/modals/ConferenceModal';
 import { ConferenceInviteNotification } from '../components/ui/ConferenceInviteNotification';
-import type { Report, Stats, Department, UserContact } from '../types';
+import { NotificationDrawer } from '../components/ui/NotificationDrawer';
+import type { Report, Stats, Department, UserContact, Notification } from '../types';
 
 const KPI_CONFIGS = [
     { label: 'Recebidos', status: 'SENT', icon: AlertCircle, color: 'blue' as const },
@@ -55,6 +56,8 @@ export function ManagerDashboard() {
     const [analyzingReport, setAnalyzingReport] = useState<Report | null>(null);
     const [targetStatus, setTargetStatus] = useState<'IN_REVIEW' | 'FORWARDED' | 'RESOLVED'>('RESOLVED');
     const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+    const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+    const [notifications, setNotifications] = useState<Notification[]>([]);
 
     // Conference State from URL
     const activeRoom = searchParams.get('conference');
@@ -131,6 +134,7 @@ export function ManagerDashboard() {
     useEffect(() => {
         loadContacts();
         loadDepartments();
+        fetchNotifications();
     }, []);
 
     const chatTarget = useMemo(() => {
@@ -183,6 +187,9 @@ export function ManagerDashboard() {
                 hostName: host?.name || (data.hostRole === 'SUPERVISOR' ? 'Supervisor' : 'Alguém')
             });
             playNotificationSound();
+        },
+        onNewNotification: (notif) => {
+            setNotifications(prev => [notif, ...prev]);
         }
     });
 
@@ -191,6 +198,34 @@ export function ManagerDashboard() {
             markAsRead(activeChatId);
         }
     }, [activeChatId, markAsRead]);
+
+    const fetchNotifications = async () => {
+        try {
+            const res = await api.get('/notifications');
+            setNotifications(res.data);
+        } catch (error) {
+            console.error('Erro ao buscar notificações');
+        }
+    };
+
+    const handleMarkAsRead = async (id: string) => {
+        try {
+            await api.patch(`/notifications/${id}/read`);
+            setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+        } catch (error) {
+            toast.error('Erro ao marcar como lida');
+        }
+    };
+
+    const handleMarkAllAsRead = async () => {
+        try {
+            await api.post('/notifications/read-all');
+            setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+            toast.success('Todas as notificações marcadas como lidas');
+        } catch (error) {
+            toast.error('Erro ao marcar todas como lidas');
+        }
+    };
 
     const handleProcessAnalysis = async () => {
         if (!analyzingReport) return;
@@ -222,6 +257,8 @@ export function ManagerDashboard() {
             <Header
                 user={{ name: user?.name, avatarUrl: user?.avatarUrl }}
                 onLogout={signOut}
+                unreadCount={notifications.filter(n => !n.read).length}
+                onNotificationsClick={() => setIsNotificationsOpen(true)}
             />
 
             <main className="max-w-7xl mx-auto px-6 py-8 flex flex-col lg:flex-row gap-8">
@@ -350,6 +387,14 @@ export function ManagerDashboard() {
                     setPendingInvite(null);
                 }}
                 onDecline={() => setPendingInvite(null)}
+            />
+
+            <NotificationDrawer
+                isOpen={isNotificationsOpen}
+                onClose={() => setIsNotificationsOpen(false)}
+                notifications={notifications}
+                onMarkAsRead={handleMarkAsRead}
+                onMarkAllAsRead={handleMarkAllAsRead}
             />
         </div>
     );

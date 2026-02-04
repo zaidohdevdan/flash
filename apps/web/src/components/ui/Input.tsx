@@ -51,7 +51,8 @@ export const Input: React.FC<InputProps> = ({
             transition-all 
             font-medium 
             text-sm 
-            placeholder:text-gray-300
+            text-gray-900
+            placeholder:text-gray-400
             ${error ? 'border-red-300 bg-red-50/50' : ''}
             ${className}
           `}

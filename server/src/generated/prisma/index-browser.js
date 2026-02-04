@@ -123,6 +123,7 @@ exports.Prisma.UserScalarFieldEnum = {
   role: 'role',
   supervisorId: 'supervisorId',
   departmentId: 'departmentId',
+  participatingEventIds: 'participatingEventIds',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -199,6 +200,41 @@ exports.Prisma.AuditLogScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.AgendaEventScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  type: 'type',
+  startTime: 'startTime',
+  endTime: 'endTime',
+  createdById: 'createdById',
+  participantIds: 'participantIds',
+  reportId: 'reportId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.NotificationScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  fromId: 'fromId',
+  type: 'type',
+  title: 'title',
+  message: 'message',
+  read: 'read',
+  link: 'link',
+  scheduledFor: 'scheduledFor',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.NoteScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  content: 'content',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -223,6 +259,13 @@ exports.ReportStatus = exports.$Enums.ReportStatus = {
   ARCHIVED: 'ARCHIVED'
 };
 
+exports.AgendaEventType = exports.$Enums.AgendaEventType = {
+  CONFERENCE: 'CONFERENCE',
+  FORWARDING: 'FORWARDING',
+  TASK: 'TASK',
+  OTHER: 'OTHER'
+};
+
 exports.Prisma.ModelName = {
   User: 'User',
   Report: 'Report',
@@ -230,7 +273,10 @@ exports.Prisma.ModelName = {
   ReportHistory: 'ReportHistory',
   Media: 'Media',
   ChatMessage: 'ChatMessage',
-  AuditLog: 'AuditLog'
+  AuditLog: 'AuditLog',
+  AgendaEvent: 'AgendaEvent',
+  Notification: 'Notification',
+  Note: 'Note'
 };
 
 /**

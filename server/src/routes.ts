@@ -13,6 +13,8 @@ import { MediaService } from './services/MediaService';
 import { MediaController } from './controllers/MediaController';
 import { ChatController } from './controllers/ChatController';
 import { ConferenceController } from './controllers/ConferenceController';
+import { AgendaController } from './controllers/AgendaController';
+import { NotificationController } from './controllers/NotificationController';
 
 const routes = Router();
 
@@ -78,5 +80,18 @@ routes.delete('/chat/messages/:id', AuthMiddleware, ChatController.deleteMessage
 
 // Videoconferência (War Room)
 routes.post('/conference/create', AuthMiddleware, ConferenceController.create);
+
+// Agenda
+routes.get('/agenda', AuthMiddleware, AgendaController.index);
+routes.post('/agenda', AuthMiddleware, AgendaController.create);
+routes.delete('/agenda/:id', AuthMiddleware, AgendaController.delete);
+routes.get('/agenda/contacts', AuthMiddleware, AgendaController.listContacts);
+routes.get('/agenda/note', AuthMiddleware, AgendaController.getNote);
+routes.post('/agenda/note', AuthMiddleware, AgendaController.saveNote);
+
+// Notificações
+routes.get('/notifications', AuthMiddleware, NotificationController.index);
+routes.patch('/notifications/:id/read', AuthMiddleware, NotificationController.markRead);
+routes.post('/notifications/read-all', AuthMiddleware, NotificationController.markAllRead);
 
 export { routes };

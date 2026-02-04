@@ -25,23 +25,29 @@ enum ReportStatus {
 }
 
 model User {
-  id           String      @id @default(auto()) @map("_id") @db.ObjectId
-  name         String
-  email        String      @unique
-  passwordHash String
-  avatarUrl    String?
-  statusPhrase String?
-  role         Role        @default(PROFESSIONAL)
-  supervisorId String?     @db.ObjectId
-  supervisor   User?       @relation("Subordinates", fields: [supervisorId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  Subordinates User[]      @relation("Subordinates")
-  departmentId String?     @db.ObjectId
-  department   Department? @relation("DepartmentMembers", fields: [departmentId], references: [id])
-  reports      Report[]
-  media        Media[] // <- NEW: Relação com Media
-  auditLogs    AuditLog[] // <- NEW: Logs de auditoria
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
+  id                    String         @id @default(auto()) @map("_id") @db.ObjectId
+  name                  String
+  email                 String         @unique
+  passwordHash          String
+  avatarUrl             String?
+  statusPhrase          String?
+  role                  Role           @default(PROFESSIONAL)
+  supervisorId          String?        @db.ObjectId
+  supervisor            User?          @relation("Subordinates", fields: [supervisorId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  Subordinates          User[]         @relation("Subordinates")
+  departmentId          String?        @db.ObjectId
+  department            Department?    @relation("DepartmentMembers", fields: [departmentId], references: [id])
+  reports               Report[]
+  media                 Media[] // <- NEW: Relação com Media
+  notifications         Notification[] @relation("UserNotifications")
+  createdEvents         AgendaEvent[]  @relation("CreatedEvents")
+  participatingEventIds String[]       @db.ObjectId
+  participatingEvents   AgendaEvent[]  @relation("EventParticipants", fields: [participatingEventIds], references: [id])
+  notes                 Note[]
+
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  auditLogs AuditLog[]
 }
 
 model Report {
@@ -61,6 +67,8 @@ model Report {
 
   history ReportHistory[]
   media   Media[] // <- NEW: Relação com Media
+
+  agendaEvents AgendaEvent[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -136,4 +144,61 @@ model AuditLog {
   ip        String?
   userAgent String?
   createdAt DateTime @default(now())
+}
+
+enum AgendaEventType {
+  CONFERENCE
+  FORWARDING
+  TASK
+  OTHER
+}
+
+model AgendaEvent {
+  id          String          @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  description String?
+  type        AgendaEventType @default(TASK)
+  startTime   DateTime
+  endTime     DateTime?
+
+  // Relations
+  createdById String @db.ObjectId
+  createdBy   User   @relation("CreatedEvents", fields: [createdById], references: [id])
+
+  participantIds String[] @db.ObjectId
+  participants   User[]   @relation("EventParticipants", fields: [participantIds], references: [id])
+
+  reportId String? @db.ObjectId
+  report   Report? @relation(fields: [reportId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([startTime])
+}
+
+model Notification {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  userId String @db.ObjectId
+  user   User   @relation("UserNotifications", fields: [userId], references: [id])
+
+  fromId       String?   @db.ObjectId
+  type         String // e.g., "AGENDA_REMINDER", "CONFERENCE_INVITE", "REPORT_FORWARDED"
+  title        String
+  message      String
+  read         Boolean   @default(false)
+  link         String? // Link para ação (ex: reportId ou agenda)
+  scheduledFor DateTime? // Data prevista para entrega/alerta
+
+  createdAt DateTime @default(now())
+}
+
+model Note {
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  userId  String @db.ObjectId
+  user    User   @relation(fields: [userId], references: [id])
+  content String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

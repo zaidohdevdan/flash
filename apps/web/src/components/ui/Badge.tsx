@@ -13,13 +13,15 @@ export interface BadgeProps {
     label?: string;
     /** Classes CSS adicionais. */
     className?: string;
+    /** Conteúdo personalizado. */
+    children?: React.ReactNode;
 }
 
 /**
  * Badge de status para visualização rápida no dashboard.
  * Utiliza cores suaves e tipografia técnica.
  */
-export const Badge: React.FC<BadgeProps> = ({ status, label, className = '' }) => {
+export const Badge: React.FC<BadgeProps> = ({ status, label, className = '', children }) => {
     const styles = {
         SENT: 'bg-yellow-400 text-yellow-950 border-yellow-300 shadow-sm shadow-yellow-500/20',
         IN_REVIEW: 'bg-blue-600 text-white border-blue-500 shadow-sm shadow-blue-500/20',
@@ -43,10 +45,11 @@ export const Badge: React.FC<BadgeProps> = ({ status, label, className = '' }) =
       px-2.5 py-1 
       rounded-lg border 
       text-[9px] font-black uppercase tracking-widest 
+      flex items-center gap-1.5
       ${styles[status] || styles.default} 
       ${className}
     `}>
-            {label || labels[status] || status}
+            {children || label || labels[status] || status}
         </span>
     );
 };

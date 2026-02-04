@@ -7,6 +7,7 @@ import { createServer } from 'http';
 import { Server as SocketIOServer } from 'socket.io';
 import { routes } from './routes';
 import { ChatService } from './services/ChatService';
+import { startScheduler } from './jobs/scheduler';
 
 const chatService = new ChatService();
 
@@ -220,10 +221,8 @@ async function bootstrap() {
         httpServer.listen(PORT, () => {
             console.log(`[HTTP] Server is running on port ${PORT}`);
 
-            // Background cleanup task for expired audios
-            setInterval(() => {
-                chatService.cleanupExpiredMessages().catch(e => console.error('[Cleanup] Error:', e));
-            }, 30000); // Check every 30 seconds
+            // Inicia o sistema de agendamento de tarefas
+            startScheduler(io);
         });
     } catch (error) {
         console.error('[CRITICAL]  Error connecting to the database:', error);

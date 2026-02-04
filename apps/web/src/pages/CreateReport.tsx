@@ -26,20 +26,9 @@ import { ReportCard } from '../components/domain';
 import { ReportHistoryModal } from '../components/domain/modals/ReportHistoryModal';
 import { ConferenceModal } from '../components/domain/modals/ConferenceModal';
 import { ConferenceInviteNotification } from '../components/ui/ConferenceInviteNotification';
+import { NotificationDrawer } from '../components/ui/NotificationDrawer';
 
-interface Report {
-    id: string;
-    imageUrl: string;
-    comment: string;
-    feedback?: string;
-    feedbackAt?: string;
-    status: 'SENT' | 'IN_REVIEW' | 'FORWARDED' | 'RESOLVED' | 'ARCHIVED';
-    user?: {
-        name: string;
-        avatarUrl?: string | null;
-    };
-    createdAt: string;
-}
+import type { Report, Notification } from '../types';
 
 export function CreateReport() {
     const { user, signOut, updateUser } = useAuth();
@@ -59,6 +48,8 @@ export function CreateReport() {
     const [searchTerm, setSearchTerm] = useState('');
     const [loadingHistory, setLoadingHistory] = useState(false);
     const [selectedReport, setSelectedReport] = useState<Report | null>(null);
+    const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+    const [notifications, setNotifications] = useState<Notification[]>([]);
     const isChatOpenRef = useRef(false);
     const LIMIT = 10;
 
@@ -97,7 +88,15 @@ export function CreateReport() {
                 hostId: data.hostId,
                 hostName: data.hostRole === 'SUPERVISOR' ? 'Supervisor' : 'Gerente'
             });
+            setPendingInvite({
+                roomId: data.roomId,
+                hostId: data.hostId,
+                hostName: data.hostRole === 'SUPERVISOR' ? 'Supervisor' : 'Gerente'
+            });
             playNotificationSound();
+        },
+        onNewNotification: (notif) => {
+            setNotifications(prev => [notif, ...prev]);
         }
     });
 
@@ -132,6 +131,7 @@ export function CreateReport() {
         api.get('/profile/me').then(res => {
             if (res.data) updateUser(res.data);
         }).catch(() => { });
+        fetchNotifications();
     }, []);
 
     useEffect(() => {
@@ -183,6 +183,34 @@ export function CreateReport() {
         setPage(nextPage);
         loadHistory(nextPage, false, statusFilter);
     }
+
+    const fetchNotifications = async () => {
+        try {
+            const res = await api.get('/notifications');
+            setNotifications(res.data);
+        } catch (error) {
+            console.error('Erro ao buscar notificações');
+        }
+    };
+
+    const handleMarkAsRead = async (id: string) => {
+        try {
+            await api.patch(`/notifications/${id}/read`);
+            setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+        } catch (error) {
+            toast.error('Erro ao marcar como lida');
+        }
+    };
+
+    const handleMarkAllAsRead = async () => {
+        try {
+            await api.post('/notifications/read-all');
+            setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+            toast.success('Todas as notificações marcadas como lidas');
+        } catch (error) {
+            toast.error('Erro ao marcar todas como lidas');
+        }
+    };
 
     function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
         const file = e.target.files?.[0];
@@ -263,6 +291,8 @@ export function CreateReport() {
                     avatarUrl: user?.avatarUrl
                 }}
                 onLogout={signOut}
+                unreadCount={notifications.filter(n => !n.read).length}
+                onNotificationsClick={() => setIsNotificationsOpen(true)}
             />
 
             <main className="flex-1 relative overflow-hidden">
@@ -425,6 +455,14 @@ export function CreateReport() {
                     setPendingInvite(null);
                 }}
                 onDecline={() => setPendingInvite(null)}
+            />
+
+            <NotificationDrawer
+                isOpen={isNotificationsOpen}
+                onClose={() => setIsNotificationsOpen(false)}
+                notifications={notifications}
+                onMarkAsRead={handleMarkAsRead}
+                onMarkAllAsRead={handleMarkAllAsRead}
             />
         </div>
     );

@@ -47,3 +47,30 @@ export interface Stats {
     status: string;
     _count: number;
 }
+
+export type AgendaEventType = 'CONFERENCE' | 'FORWARDING' | 'TASK' | 'OTHER';
+
+export interface AgendaEvent {
+    id: string;
+    title: string;
+    description?: string;
+    type: AgendaEventType;
+    startTime: string;
+    endTime?: string;
+    createdById: string;
+    participantIds: string[];
+    participants: { id: string; name: string; avatarUrl?: string | null }[];
+    reportId?: string;
+    report?: { id: string; comment: string; status: string };
+    createdAt: string;
+}
+
+export interface Notification {
+    id: string;
+    type: string;
+    title: string;
+    message: string;
+    read: boolean;
+    link?: string;
+    createdAt: string;
+}
