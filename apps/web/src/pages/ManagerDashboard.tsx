@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
 import { toast } from 'react-hot-toast';
@@ -7,9 +7,9 @@ import { useDashboardSocket } from '../hooks/useDashboardSocket';
 import {
     Clock,
     CheckCircle,
+    AlertCircle,
     Folder,
-    History,
-    Shield
+    Search
 } from 'lucide-react';
 import { ChatWidget } from '../components/ChatWidget';
 import {
@@ -19,17 +19,32 @@ import {
 import { TeamSidebar, DashboardHero, ReportFeed } from '../components/domain';
 import { ReportHistoryModal } from '../components/domain/modals/ReportHistoryModal';
 import { AnalysisModal } from '../components/domain/modals/AnalysisModal';
-
-
-
 import { ExportReportsModal } from '../components/domain/modals/ExportReportsModal';
+import { ConferenceModal } from '../components/domain/modals/ConferenceModal';
+import { ConferenceInviteNotification } from '../components/ui/ConferenceInviteNotification';
 import type { Report, Stats, Department, UserContact } from '../types';
 
+const KPI_CONFIGS = [
+    { label: 'Recebidos', status: 'SENT', icon: AlertCircle, color: 'blue' as const },
+    { label: 'Em Análise', status: 'IN_REVIEW', icon: Clock, color: 'purple' as const },
+    { label: 'Encaminhados', status: 'FORWARDED', icon: Folder, color: 'orange' as const },
+    { label: 'Finalizados', status: 'RESOLVED', icon: CheckCircle, color: 'emerald' as const },
+];
 
+const FILTER_OPTIONS = [
+    { id: '', label: 'Todos' },
+    { id: 'SENT', label: 'Recebidos' },
+    { id: 'IN_REVIEW', label: 'Análise' },
+    { id: 'FORWARDED', label: 'Tramite' },
+    { id: 'RESOLVED', label: 'Feitos' },
+    { id: 'ARCHIVED', label: 'Arquivados' }
+];
 
 export function ManagerDashboard() {
-    const navigate = useNavigate();
     const { user, signOut } = useAuth();
+    const [searchParams, setSearchParams] = useSearchParams();
+    const activeChatId = searchParams.get('chat');
+
     const [reports, setReports] = useState<Report[]>([]);
     const [stats, setStats] = useState<Stats[]>([]);
     const [contacts, setContacts] = useState<UserContact[]>([]);
@@ -41,12 +56,26 @@ export function ManagerDashboard() {
     const [targetStatus, setTargetStatus] = useState<'IN_REVIEW' | 'FORWARDED' | 'RESOLVED'>('RESOLVED');
     const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
+    // Conference State from URL
+    const activeRoom = searchParams.get('conference');
+    const setActiveRoom = (roomId: string | null) => {
+        const newParams = new URLSearchParams(searchParams);
+        if (roomId) {
+            newParams.set('conference', roomId);
+        } else {
+            newParams.delete('conference');
+        }
+        setSearchParams(newParams, { replace: true });
+    };
+    const [pendingInvite, setPendingInvite] = useState<{ roomId: string; hostId: string; hostName: string } | null>(null);
+
     // Form for Forwarding/Review
     const [formFeedback, setFormFeedback] = useState('');
     const [selectedDeptId, setSelectedDeptId] = useState('');
 
     const [page, setPage] = useState(1);
     const [statusFilter, setStatusFilter] = useState<string>('FORWARDED');
+    const [searchTerm, setSearchTerm] = useState('');
     const [hasMore, setHasMore] = useState(true);
     const LIMIT = 6;
 
@@ -104,9 +133,6 @@ export function ManagerDashboard() {
         loadDepartments();
     }, []);
 
-    const [searchParams, setSearchParams] = useSearchParams();
-    const activeChatId = searchParams.get('chat');
-
     const chatTarget = useMemo(() => {
         if (!activeChatId) return null;
         return contacts.find(c => c.id === activeChatId) || null;
@@ -147,6 +173,16 @@ export function ManagerDashboard() {
             } else {
                 markAsRead(data.from);
             }
+        },
+        onConferenceInvite: (data) => {
+            if (activeRoom) return;
+            const host = contacts.find(c => c.id === data.hostId);
+            setPendingInvite({
+                roomId: data.roomId,
+                hostId: data.hostId,
+                hostName: host?.name || (data.hostRole === 'SUPERVISOR' ? 'Supervisor' : 'Alguém')
+            });
+            playNotificationSound();
         }
     });
 
@@ -156,200 +192,105 @@ export function ManagerDashboard() {
         }
     }, [activeChatId, markAsRead]);
 
-
-
-    const [searchTerm, setSearchTerm] = useState('');
-
-    useEffect(() => {
-        if (!socket) return;
-
-        socket.on('report_status_updated_for_supervisor', (data: Report) => {
-            setReports(prev => {
-                const exists = prev.find(r => r.id === data.id);
-                if (String((data as any).departmentId) !== String(user?.departmentId)) {
-                    return prev.filter(r => r.id !== data.id);
-                }
-                if (exists) return prev.map(r => r.id === data.id ? data : r);
-                if (statusFilter === data.status || !statusFilter) return [data, ...prev];
-                return prev;
-            });
-            loadStats();
-        });
-
-        socket.on('report_forwarded_to_department', (data: Report) => {
-            setReports(prev => {
-                const exists = prev.find(r => r.id === data.id);
-                if (exists) return prev;
-                return [data, ...prev];
-            });
-            loadStats();
-            toast.success(`Novo reporte encaminhado para seu departamento!`);
-        });
-
-        return () => {
-            socket.off('report_status_updated_for_supervisor');
-            socket.off('report_forwarded_to_department');
-        };
-    }, [socket, statusFilter, user?.departmentId]);
-
-    async function handleUpdateStatus(reportId: string, status: string, feedback?: string) {
-        try {
-            const response = await api.patch(`/reports/${reportId}/status`, {
-                status,
-                feedback
-            });
-
-            toast.success(`Status atualizado para ${status === 'IN_REVIEW' ? 'Análise' : 'concluído'}!`);
-
-            setReports(prev => {
-                if (statusFilter && statusFilter !== status) {
-                    return prev.filter(r => r.id !== reportId);
-                }
-                return prev.map(r => r.id === reportId ? response.data : r);
-            });
-
-            loadStats();
-        } catch (error: any) {
-            toast.error('Erro ao atualizar status.');
-        }
-    }
-
-    async function handleProcessAnalysis() {
+    const handleProcessAnalysis = async () => {
         if (!analyzingReport) return;
-
         try {
-            const response = await api.patch(`/reports/${analyzingReport.id}/status`, {
+            await api.patch(`/reports/${analyzingReport.id}/status`, {
                 status: targetStatus,
                 feedback: formFeedback,
                 departmentId: targetStatus === 'FORWARDED' ? selectedDeptId : undefined
             });
 
-            toast.success('Reporte atualizado com sucesso!');
-
-            setReports(prev => {
-                if (statusFilter && statusFilter !== targetStatus) {
-                    return prev.filter(r => r.id !== analyzingReport.id);
-                }
-                return prev.map(r => r.id === analyzingReport.id ? response.data : r);
-            });
-
+            toast.success('Relatório processado com sucesso!');
             setAnalyzingReport(null);
             resetAnalysisForm();
+            loadReports(1, true, statusFilter);
             loadStats();
-        } catch (error: any) {
-            const apiError = error as { response?: { data?: { error?: string } } };
-            toast.error(apiError.response?.data?.error || 'Erro ao processar análise.');
+        } catch (error) {
+            toast.error('Erro ao processar relatório.');
         }
-    }
+    };
 
-
-    function handleLoadMore() {
-        const nextPage = page + 1;
-        setPage(nextPage);
-        loadReports(nextPage, false, statusFilter);
-    }
-
-    function resetAnalysisForm() {
+    const resetAnalysisForm = () => {
         setFormFeedback('');
         setSelectedDeptId('');
         setTargetStatus('RESOLVED');
-    }
+    };
 
     return (
-        <div className="min-h-screen bg-slate-50/50 flex flex-col font-sans selection:bg-blue-100 selection:text-blue-900 transition-colors duration-700 overflow-x-hidden">
+        <div className="min-h-screen bg-[#020617] text-slate-200 font-sans selection:bg-blue-500/30">
             <Header
-                user={{
-                    name: user?.name,
-                    avatarUrl: user?.avatarUrl
-                }}
+                user={{ name: user?.name, avatarUrl: user?.avatarUrl }}
                 onLogout={signOut}
             />
 
-            {/* Hero / Filter Section */}
-            <DashboardHero
-                title="Dashboard Gerencial"
-                subtitle="Resolução de Demandas por Departamento"
-                stats={stats}
-                statusFilter={statusFilter}
-                onStatusFilterChange={(s) => { setStatusFilter(s); setPage(1); }}
-                filters={[
-                    { id: '', label: 'Todos' },
-                    { id: 'FORWARDED', label: 'Setor' },
-                    { id: 'IN_REVIEW', label: 'Análise' },
-                    { id: 'RESOLVED', label: 'Feitos' },
-                ]}
-                kpiConfigs={[
-                    { label: 'Pendentes no Setor', status: 'FORWARDED', icon: Folder, color: 'blue' },
-                    { label: 'Em Análise', status: 'IN_REVIEW', icon: Clock, color: 'purple' },
-                    { label: 'Resolvidos', status: 'RESOLVED', icon: CheckCircle, color: 'emerald' },
-                ]}
-                onAnalyticsClick={() => navigate('/analytics')}
-                onExportClick={() => setIsExportModalOpen(true)}
-            >
-                {/* Background Decorations */}
-                <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-blue-600/25 rounded-full blur-[160px] -mr-96 -mt-96 animate-pulse duration-[10s] pointer-events-none" />
-                <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-indigo-600/20 rounded-full blur-[140px] -ml-40 -mb-40 pointer-events-none" />
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.08),transparent_80%)] pointer-events-none" />
-            </DashboardHero>
+            <main className="max-w-7xl mx-auto px-6 py-8 flex flex-col lg:flex-row gap-8">
+                <div className="flex-1 space-y-8">
+                    <DashboardHero
+                        title="Módulo Gerencial"
+                        subtitle="Gestão de demandas e resoluções operacionais."
+                        stats={stats}
+                        kpiConfigs={KPI_CONFIGS}
+                        statusFilter={statusFilter}
+                        onStatusFilterChange={(s) => { setStatusFilter(s); setPage(1); }}
+                        filters={FILTER_OPTIONS}
+                        onExportClick={() => setIsExportModalOpen(true)}
+                    />
 
-            {/* Main Content */}
-            <main className="max-w-7xl mx-auto px-6 w-full -mt-20 mb-20 relative flex flex-col lg:flex-row gap-12">
-                {/* Visual Blobs behind the glass content */}
-                <div className="absolute -z-10 top-0 left-1/4 w-[500px] h-[500px] bg-blue-400/10 rounded-full blur-[120px] pointer-events-none" />
-                <div className="absolute -z-10 bottom-0 right-1/4 w-[400px] h-[400px] bg-purple-400/10 rounded-full blur-[100px] pointer-events-none" />
-                <ReportFeed
-                    reports={reports.filter(r =>
-                        r.comment.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                        r.id.toLowerCase().includes(searchTerm.toLowerCase())
-                    )}
-                    searchTerm={searchTerm}
-                    onSearchChange={setSearchTerm}
-                    hasMore={hasMore}
-                    onLoadMore={handleLoadMore}
-                    renderReportActions={(report) => (
-                        <div className="flex gap-2 w-full">
-                            {report.status === 'FORWARDED' && (
-                                <Button
-                                    variant="primary"
-                                    size="sm"
-                                    fullWidth
-                                    onClick={() => handleUpdateStatus(report.id, 'IN_REVIEW')}
-                                >
-                                    Iniciar Análise
-                                </Button>
-                            )}
-                            {report.status === 'IN_REVIEW' && (
-                                <Button
-                                    variant="success"
-                                    size="sm"
-                                    fullWidth
-                                    onClick={() => { setAnalyzingReport(report as any); setTargetStatus('RESOLVED'); }}
-                                >
-                                    Resolver
-                                </Button>
-                            )}
-                            <Button variant="ghost" size="sm" onClick={() => setSelectedReport(report as any)}>
-                                <History className="w-4 h-4" />
+                    <div className="relative group">
+                        <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-400 opacity-60 group-focus-within:opacity-100 transition-opacity" />
+                        <input
+                            type="text"
+                            placeholder="Filtrar por protocolo ou descrição..."
+                            value={searchTerm}
+                            onChange={e => setSearchTerm(e.target.value)}
+                            className="w-full pl-14 pr-8 py-4 bg-slate-900/50 border border-white/5 rounded-3xl outline-none focus:bg-slate-900/80 focus:border-blue-500/30 transition-all text-sm font-bold text-white placeholder:text-gray-500"
+                        />
+                    </div>
+
+                    <ReportFeed
+                        reports={reports.filter(r =>
+                            r.comment.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            r.id.toLowerCase().includes(searchTerm.toLowerCase())
+                        ) as any}
+                        searchTerm={searchTerm}
+                        onSearchChange={setSearchTerm}
+                        hasMore={hasMore}
+                        onLoadMore={() => {
+                            const next = page + 1;
+                            setPage(next);
+                            loadReports(next, false, statusFilter);
+                        }}
+                        renderReportActions={(report) => (
+                            <Button
+                                variant="primary"
+                                size="sm"
+                                onClick={() => { setAnalyzingReport(report as any); }}
+                            >
+                                Analisar
                             </Button>
-                        </div>
-                    )}
-                />
+                        )}
+                    />
+                </div>
 
-                {/* Sidebar com contatos hierárquicos */}
                 <aside className="w-full lg:w-80 shrink-0">
                     <TeamSidebar
                         title="Rede de Apoio"
-                        icon={<Shield className="w-5 h-5 text-white" />}
-                        members={contacts.map(c => ({
-                            id: c.id,
-                            name: c.name,
-                            role: c.role,
-                            departmentName: c.departmentName,
-                            avatarUrl: c.avatarUrl,
-                            isOnline: onlineUserIds.includes(c.id),
-                            statusPhrase: c.statusPhrase,
-                            hasUnread: !!unreadMessages[c.id]
-                        }))}
+                        groups={[
+                            {
+                                id: 'contacts',
+                                title: 'Contatos Úteis',
+                                members: contacts.map(c => ({
+                                    id: c.id,
+                                    name: c.name,
+                                    role: c.role,
+                                    isOnline: onlineUserIds.includes(c.id),
+                                    avatarUrl: c.avatarUrl,
+                                    statusPhrase: c.statusPhrase,
+                                    hasUnread: !!unreadMessages[c.id]
+                                }))
+                            }
+                        ]}
                         onMemberClick={(member) => {
                             setSearchParams({ chat: member.id }, { replace: true });
                             markAsRead(member.id);
@@ -392,6 +333,23 @@ export function ManagerDashboard() {
                 onClose={() => setIsExportModalOpen(false)}
                 reports={reports}
                 departments={departments}
+            />
+
+            <ConferenceModal
+                isOpen={!!activeRoom}
+                onClose={() => setActiveRoom(null)}
+                roomName={activeRoom || ''}
+                userName={user?.name}
+            />
+
+            <ConferenceInviteNotification
+                isOpen={!!pendingInvite}
+                hostName={pendingInvite?.hostName || ''}
+                onAccept={() => {
+                    setActiveRoom(pendingInvite?.roomId || null);
+                    setPendingInvite(null);
+                }}
+                onDecline={() => setPendingInvite(null)}
             />
         </div>
     );

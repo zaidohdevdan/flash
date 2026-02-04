@@ -8,15 +8,15 @@ import {
     Clock,
     CheckCircle,
     AlertCircle,
-    History,
     Folder,
+    History,
     Users,
     Shield
 } from 'lucide-react';
 import { ChatWidget } from '../components/ChatWidget';
 import {
     Button,
-    Header,
+    Header
 } from '../components/ui';
 import { TeamSidebar, DashboardHero, ReportFeed } from '../components/domain';
 import { MapView } from '../components/domain/MapView';
@@ -24,8 +24,8 @@ import { ReportHistoryModal } from '../components/domain/modals/ReportHistoryMod
 import { AnalysisModal } from '../components/domain/modals/AnalysisModal';
 import { ProfileSettingsModal } from '../components/domain/modals/ProfileSettingsModal';
 import { ExportReportsModal } from '../components/domain/modals/ExportReportsModal';
-
-
+import { ConferenceModal } from '../components/domain/modals/ConferenceModal';
+import { ConferenceInviteNotification } from '../components/ui/ConferenceInviteNotification';
 
 import type { Report, Stats, Department, UserContact } from '../types';
 
@@ -38,9 +38,39 @@ interface Subordinate {
     isOnline?: boolean;
 }
 
+const KPI_CONFIGS = [
+    { label: 'Recebidos', status: 'SENT', icon: AlertCircle, color: 'blue' as const },
+    { label: 'Em Análise', status: 'IN_REVIEW', icon: Clock, color: 'purple' as const },
+    { label: 'Encaminhados', status: 'FORWARDED', icon: Folder, color: 'orange' as const },
+    { label: 'Finalizados', status: 'RESOLVED', icon: CheckCircle, color: 'emerald' as const },
+];
+
+const FILTER_OPTIONS = [
+    { id: '', label: 'Todos' },
+    { id: 'SENT', label: 'Recebidos' },
+    { id: 'IN_REVIEW', label: 'Análise' },
+    { id: 'FORWARDED', label: 'Tramite' },
+    { id: 'RESOLVED', label: 'Feitos' },
+    { id: 'ARCHIVED', label: 'Arquivados' }
+];
+
 export function Dashboard() {
     const navigate = useNavigate();
     const { user, signOut, updateUser } = useAuth();
+    const [searchParams, setSearchParams] = useSearchParams();
+    const activeChatId = searchParams.get('chat');
+
+    // Conference State from URL
+    const activeRoom = searchParams.get('conference');
+    const setActiveRoom = (roomId: string | null) => {
+        const newParams = new URLSearchParams(searchParams);
+        if (roomId) {
+            newParams.set('conference', roomId);
+        } else {
+            newParams.delete('conference');
+        }
+        setSearchParams(newParams, { replace: true });
+    };
 
     // Core Data State
     const [reports, setReports] = useState<Report[]>([]);
@@ -68,14 +98,11 @@ export function Dashboard() {
     const [selectedDeptId, setSelectedDeptId] = useState('');
     const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
 
-    // Profile State
+    // Restoration of missing states
+    const [pendingInvite, setPendingInvite] = useState<{ roomId: string; hostId: string; hostName: string } | null>(null);
     const [profilePhrase, setProfilePhrase] = useState(user?.statusPhrase || '');
     const [profileAvatar, setProfileAvatar] = useState<File | null>(null);
     const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
-
-    // Chat Hooks & Derivations
-    const [searchParams, setSearchParams] = useSearchParams();
-    const activeChatId = searchParams.get('chat');
 
     const socketUser = useMemo(() => user ? {
         id: user.id || '',
@@ -93,7 +120,7 @@ export function Dashboard() {
         user: socketUser,
         onNotification: (data) => {
             if (activeChatId !== data.from) {
-                toast(`Mensagem de ${data.fromName || 'Subordinado'}: ${data.text}`, {
+                toast(`Mensagem de ${data.fromName || 'Subordinado'}: ${data.text} `, {
                     icon: '💬',
                     duration: 5000,
                     style: {
@@ -108,69 +135,25 @@ export function Dashboard() {
             } else {
                 markAsRead(data.from);
             }
+        },
+        onConferenceInvite: (data) => {
+            if (activeRoom) return; // Se já estiver em uma sala, ignora
+            const host = contacts.find(c => c.id === data.hostId);
+            setPendingInvite({
+                roomId: data.roomId,
+                hostId: data.hostId,
+                hostName: host?.name || (data.hostRole === 'SUPERVISOR' ? 'Supervisor' : 'Alguém')
+            });
+            playNotificationSound();
         }
     });
 
-    const teamGroups = useMemo(() => [
-        {
-            id: 'operacional',
-            title: 'Operacional',
-            icon: <Users className="w-3 h-3" />,
-            members: subordinates.map(s => ({
-                id: s.id,
-                name: s.name,
-                role: s.role,
-                avatarUrl: s.avatarUrl,
-                isOnline: onlineUserIds.includes(s.id),
-                statusPhrase: s.statusPhrase,
-                hasUnread: !!unreadMessages[s.id]
-            }))
-        },
-        ...(contacts.length > 0 ? [{
-            id: 'apoio',
-            title: 'Apoio',
-            icon: <Shield className="w-3 h-3" />,
-            members: contacts.map(c => ({
-                id: c.id,
-                name: c.name,
-                role: c.role,
-                departmentName: c.departmentName,
-                avatarUrl: c.avatarUrl,
-                isOnline: onlineUserIds.includes(c.id),
-                statusPhrase: c.statusPhrase,
-                hasUnread: !!unreadMessages[c.id]
-            }))
-        }] : [])
-    ], [subordinates, contacts, onlineUserIds, unreadMessages]);
-
-    const chatTarget = useMemo(() => {
-        if (!activeChatId) return null;
-        return teamGroups.flatMap(g => g.members).find(m => m.id === activeChatId) || null;
-    }, [activeChatId, teamGroups]);
-
-    useEffect(() => {
-        if (activeChatId) {
-            markAsRead(activeChatId);
-            if (window.innerWidth < 1024) {
-                document.body.style.overflow = 'hidden';
-            }
-        } else {
-            document.body.style.overflow = 'unset';
-        }
-        return () => { document.body.style.overflow = 'unset'; };
-    }, [activeChatId, markAsRead]);
-
-    const handleCloseChat = () => {
-        setSearchParams({}, { replace: true });
-    };
-
-    // Data Fetching
-    const loadReports = async (pageNum: number, reset: boolean = false, status?: string) => {
+    const loadReports = async (pageNum: number, reset: boolean = false) => {
         try {
             let url = `/reports?page=${pageNum}&limit=${LIMIT}`;
-            if (status) url += `&status=${status}`;
-            if (startDate) url += `&startDate=${new Date(startDate).toISOString()}`;
-            if (endDate) url += `&endDate=${new Date(endDate).toISOString()}`;
+            if (statusFilter) url += `&status=${statusFilter}`;
+            if (startDate) url += `&startDate=${startDate}`;
+            if (endDate) url += `&endDate=${endDate}`;
 
             const response = await api.get(url);
             setHasMore(response.data.length === LIMIT);
@@ -192,7 +175,7 @@ export function Dashboard() {
     const loadSubordinates = async () => {
         try {
             const response = await api.get('/subordinates');
-            setSubordinates(response.data);
+            setSubordinates(response.data.filter((s: Subordinate) => s.id !== user?.id));
         } catch (error) {
             console.error('Erro ao buscar subordinados:', error);
         }
@@ -201,10 +184,7 @@ export function Dashboard() {
     const loadContacts = async () => {
         try {
             const response = await api.get('/support-network');
-            const allContacts = response.data
-                .filter((c: UserContact) => c.id !== user?.id)
-                .map((c: UserContact) => ({ ...c, isOnline: false }));
-            setContacts(allContacts);
+            setContacts(response.data.filter((c: UserContact) => c.id !== user?.id));
         } catch (error) {
             console.error('Erro ao buscar contatos:', error);
         }
@@ -220,7 +200,7 @@ export function Dashboard() {
     };
 
     useEffect(() => {
-        loadReports(1, true, statusFilter);
+        loadReports(1, true);
         loadStats();
     }, [statusFilter, startDate, endDate]);
 
@@ -230,139 +210,154 @@ export function Dashboard() {
         loadDepartments();
     }, []);
 
-    // Socket Events Specific to Dashboard
     useEffect(() => {
-        if (!socket) return;
+        if (activeChatId) {
+            markAsRead(activeChatId);
+        }
+    }, [activeChatId, markAsRead]);
 
-        socket.on('new_report_to_review', (data: { data: Report }) => {
-            if (!statusFilter || statusFilter === 'SENT') {
-                setReports(prev => [data.data, ...prev]);
-            }
-            loadStats();
-        });
+    const handleLoadMore = () => {
+        const next = page + 1;
+        setPage(next);
+        loadReports(next);
+    };
 
-        socket.on('report_status_updated_for_supervisor', (data: Report) => {
-            setReports(prev => {
-                if (statusFilter && statusFilter !== data.status) return prev.filter(r => r.id !== data.id);
-                const exists = prev.find(r => r.id === data.id);
-                if (exists) return prev.map(r => r.id === data.id ? data : r);
-                if (statusFilter === data.status || !statusFilter) return [data, ...prev];
-                return prev;
-            });
-            setSelectedReport(current => current?.id === data.id ? data : current);
-            loadStats();
-        });
 
-        return () => {
-            socket.off('new_report_to_review');
-            socket.off('report_status_updated_for_supervisor');
-        };
-    }, [socket, statusFilter]);
-
-    async function handleProcessAnalysis() {
-        if (!analyzingReport) return;
-
+    const handleUpdateProfile = async () => {
+        if (!user) return;
+        setIsUpdatingProfile(true);
         try {
+            const formData = new FormData();
+            formData.append('statusPhrase', profilePhrase);
+            if (profileAvatar) {
+                formData.append('avatar', profileAvatar);
+            }
 
-            const response = await api.patch(`/reports/${analyzingReport.id}/status`, {
+            const response = await api.put('/profile', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+
+            updateUser(response.data);
+            toast.success('Perfil atualizado!');
+            setIsProfileOpen(false);
+            setProfileAvatar(null);
+        } catch (error) {
+            toast.error('Erro ao atualizar perfil.');
+        } finally {
+            setIsUpdatingProfile(false);
+        }
+    };
+
+    const handleProcessAnalysis = async () => {
+        if (!analyzingReport) return;
+        try {
+            await api.patch(`/ reports / ${analyzingReport.id}/status`, {
                 status: targetStatus,
                 feedback: formFeedback,
                 departmentId: targetStatus === 'FORWARDED' ? selectedDeptId : undefined
             });
 
-            toast.success('Reporte atualizado com sucesso!');
-            const updatedReport = response.data;
-            setReports(prev => {
-                if (statusFilter && statusFilter !== targetStatus) return prev.filter(r => r.id !== analyzingReport.id);
-                return prev.map(r => r.id === analyzingReport.id ? updatedReport : r);
-            });
-
+            toast.success('Relatório processado com sucesso!');
             setAnalyzingReport(null);
-        } catch (error: any) {
-            const apiError = error as { response?: { data?: { error?: string } } };
-            toast.error(apiError.response?.data?.error || 'Erro ao processar análise.');
-        }
-    }
-
-    async function handleUpdateStatus(reportId: string, status: string) {
-        try {
-            await api.patch(`/reports/${reportId}/status`, { status });
-            toast.success('Status atualizado!');
-            loadReports(1, true, statusFilter);
+            resetAnalysisForm();
+            loadReports(1, true);
             loadStats();
-        } catch (error: any) {
-            const apiError = error as { response?: { data?: { error?: string } } };
-            console.error('Erro ao atualizar status:', apiError);
-            toast.error(apiError.response?.data?.error || 'Erro ao atualizar status.');
+        } catch (error) {
+            toast.error('Erro ao processar relatório.');
         }
-    }
+    };
 
-    async function handleUpdateProfile(e: React.FormEvent) {
-        e.preventDefault();
-        setIsUpdatingProfile(true);
-        const formData = new FormData();
-        formData.append('statusPhrase', profilePhrase);
-        if (profileAvatar) formData.append('avatar', profileAvatar);
-
-        try {
-            const response = await api.patch('/profile', formData);
-            updateUser(response.data);
-            toast.success('Perfil atualizado!');
-            setIsProfileOpen(false);
-        } catch (err) {
-            console.error('Erro ao atualizar perfil:', err);
-            toast.error('Erro ao atualizar perfil.');
-        } finally {
-            setIsUpdatingProfile(false);
-        }
-    }
-
-    function handleLoadMore() {
-        const nextPage = page + 1;
-        setPage(nextPage);
-        loadReports(nextPage, false, statusFilter);
-    }
-
-    function resetAnalysisForm() {
+    const resetAnalysisForm = () => {
         setFormFeedback('');
         setSelectedDeptId('');
         setTargetStatus('IN_REVIEW');
-    }
+    };
 
+    const handleStartConference = async () => {
+        try {
+            const onlineParticipants = subordinates
+                .filter(s => onlineUserIds.includes(s.id))
+                .map(s => s.id);
 
+            const onlineContacts = contacts
+                .filter(c => onlineUserIds.includes(c.id))
+                .map(c => c.id);
+
+            const allParticipants = Array.from(new Set([...onlineParticipants, ...onlineContacts]));
+
+            if (allParticipants.length === 0) {
+                toast.error('Nenhum participante online para convidar.');
+                return;
+            }
+
+            const response = await api.post('/conference/create', {
+                participants: allParticipants
+            });
+
+            toast.success('War Room iniciada! Convites enviados.');
+            setActiveRoom(response.data.roomId);
+        } catch (error) {
+            toast.error('Erro ao iniciar War Room.');
+        }
+    };
+
+    const teamGroups = useMemo(() => [
+        {
+            id: 'operacional',
+            title: 'Operacional',
+            icon: <Users className="w-3 h-3" />,
+            members: subordinates.map(s => ({
+                id: s.id,
+                name: s.name,
+                role: s.role,
+                avatarUrl: s.avatarUrl,
+                isOnline: onlineUserIds.includes(s.id),
+                statusPhrase: s.statusPhrase,
+                hasUnread: !!unreadMessages[s.id]
+            }))
+        },
+        {
+            id: 'contacts',
+            title: 'Rede de Apoio',
+            icon: <Shield className="w-3 h-3" />,
+            members: contacts.map(c => ({
+                id: c.id,
+                name: c.name,
+                role: c.role,
+                avatarUrl: c.avatarUrl,
+                isOnline: onlineUserIds.includes(c.id),
+                statusPhrase: c.statusPhrase,
+                hasUnread: !!unreadMessages[c.id]
+            }))
+        }
+    ], [subordinates, onlineUserIds, unreadMessages, contacts]);
+
+    const chatTarget = useMemo(() => {
+        if (!activeChatId) return null;
+        const all = [...subordinates, ...contacts];
+        return all.find(m => m.id === activeChatId) || null;
+    }, [activeChatId, subordinates, contacts]);
+
+    const handleCloseChat = () => {
+        setSearchParams({}, { replace: true });
+    };
 
     return (
-        <div className="min-h-screen bg-slate-50/50 flex flex-col font-sans selection:bg-blue-100 selection:text-blue-900 transition-colors duration-700 overflow-x-hidden">
+        <div className="min-h-screen bg-[#020617] text-slate-200 font-sans selection:bg-blue-500/30">
             <Header
-                user={{
-                    name: user?.name,
-                    avatarUrl: user?.avatarUrl
-                }}
+                user={{ name: user?.name, avatarUrl: user?.avatarUrl }}
                 onLogout={signOut}
             />
 
-            {/* Hero / Filter Section */}
             <DashboardHero
-                title="Painel de Controle"
-                subtitle="Controle operacional em tempo real"
+                title="Dashboard Operacional"
+                subtitle="Monitoramento em tempo real e resposta rápida."
                 stats={stats}
+                kpiConfigs={KPI_CONFIGS}
                 statusFilter={statusFilter}
                 onStatusFilterChange={(s) => { setStatusFilter(s); setPage(1); }}
-                filters={[
-                    { id: '', label: 'Todos' },
-                    { id: 'SENT', label: 'Recebidos' },
-                    { id: 'IN_REVIEW', label: 'Análise' },
-                    { id: 'FORWARDED', label: 'Tramite' },
-                    { id: 'RESOLVED', label: 'Feitos' },
-                    { id: 'ARCHIVED', label: 'Arquivados' }
-                ]}
-                kpiConfigs={[
-                    { label: 'Recebidos', status: 'SENT', icon: AlertCircle, color: 'blue' },
-                    { label: 'Em Análise', status: 'IN_REVIEW', icon: Clock, color: 'purple' },
-                    { label: 'Encaminhados', status: 'FORWARDED', icon: Folder, color: 'orange' },
-                    { label: 'Finalizados', status: 'RESOLVED', icon: CheckCircle, color: 'emerald' },
-                ]}
-                showDateFilters
+                filters={FILTER_OPTIONS}
+                showDateFilters={true}
                 startDate={startDate}
                 endDate={endDate}
                 onStartDateChange={setStartDate}
@@ -370,6 +365,7 @@ export function Dashboard() {
                 onClearDates={() => { setStartDate(''); setEndDate(''); }}
                 onAnalyticsClick={() => navigate('/analytics')}
                 onExportClick={() => setIsExportModalOpen(true)}
+                onConferenceClick={user?.role === 'SUPERVISOR' ? handleStartConference : undefined}
             >
                 <div className="flex bg-white/10 backdrop-blur-md p-1 rounded-xl border border-white/10">
                     <button
@@ -386,60 +382,60 @@ export function Dashboard() {
                     </button>
                 </div>
 
-                {/* Background Decorations for Supervisor */}
                 <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-blue-600/25 rounded-full blur-[160px] -mr-96 -mt-96 animate-pulse duration-[10s] pointer-events-none" />
                 <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-indigo-600/20 rounded-full blur-[140px] -ml-40 -mb-40 pointer-events-none" />
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.08),transparent_80%)] pointer-events-none" />
             </DashboardHero>
 
-            {/* Main Content */}
             <main className="max-w-7xl mx-auto px-6 w-full -mt-20 mb-20 relative flex flex-col lg:flex-row gap-12">
-                {/* Visual Blobs behind the glass content */}
-                <div className="absolute -z-10 top-0 left-1/4 w-[500px] h-[500px] bg-blue-400/10 rounded-full blur-[120px] pointer-events-none" />
-                <div className="absolute -z-10 bottom-0 right-1/4 w-[400px] h-[400px] bg-purple-400/10 rounded-full blur-[100px] pointer-events-none" />
-
-                {viewMode === 'list' ? (
-                    <ReportFeed
-                        reports={reports.filter(r =>
-                            r.comment.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            r.id.toLowerCase().includes(searchTerm.toLowerCase())
-                        )}
-                        searchTerm={searchTerm}
-                        onSearchChange={setSearchTerm}
-                        hasMore={hasMore}
-                        onLoadMore={handleLoadMore}
-                        renderReportActions={(report) => (
-                            <div className="flex gap-2 w-full">
-                                {report.status !== 'RESOLVED' && report.status !== 'ARCHIVED' && (
-                                    <Button
-                                        variant="primary"
-                                        size="sm"
-                                        fullWidth
-                                        onClick={() => { setAnalyzingReport(report as any); setTargetStatus('FORWARDED'); }}
-                                        disabled={!!(report as any).departmentId}
-                                    >
-                                        {(report as any).departmentId ? 'Em Setor' : 'Trâmite'}
-                                    </Button>
-                                )}
-                                {report.status === 'RESOLVED' && (
-                                    <Button variant="secondary" size="sm" fullWidth onClick={() => handleUpdateStatus(report.id, 'ARCHIVED')}>Arquivar</Button>
-                                )}
-                                <Button variant="ghost" size="sm" onClick={() => setSelectedReport(report as any)}>
-                                    <History className="w-4 h-4" />
-                                </Button>
-                            </div>
-                        )}
-                    />
-                ) : (
-                    <div className="w-full h-[600px]">
-                        <MapView reports={reports} onMarkerClick={(report) => {
-                            setSelectedReport(report);
-                            // Opcional: abrir modal de detalhes ou chat
-                        }} />
+                <div className="flex-1 space-y-12">
+                    <div className="relative group">
+                        <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-400 opacity-60 group-focus-within:opacity-100 transition-opacity" />
+                        <input
+                            type="text"
+                            placeholder="Filtrar por protocolo ou descrição..."
+                            value={searchTerm}
+                            onChange={e => setSearchTerm(e.target.value)}
+                            className="w-full pl-14 pr-8 py-4 bg-slate-900/50 border border-white/5 rounded-3xl outline-none focus:bg-slate-900/80 focus:border-blue-500/30 transition-all text-sm font-bold text-white placeholder:text-gray-500"
+                        />
                     </div>
-                )}
+
+                    {viewMode === 'list' ? (
+                        <ReportFeed
+                            reports={reports.filter(r =>
+                                r.comment.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                r.id.toLowerCase().includes(searchTerm.toLowerCase())
+                            ) as any}
+                            searchTerm={searchTerm}
+                            onSearchChange={setSearchTerm}
+                            hasMore={hasMore}
+                            onLoadMore={handleLoadMore}
+                            renderReportActions={(report) => (
+                                <div className="flex gap-2 w-full">
+                                    {report.status !== 'RESOLVED' && report.status !== 'ARCHIVED' && (
+                                        <Button
+                                            variant="primary"
+                                            size="sm"
+                                            fullWidth
+                                            onClick={() => { setAnalyzingReport(report as any); setTargetStatus('FORWARDED'); }}
+                                        >
+                                            Trâmite
+                                        </Button>
+                                    )}
+                                    <Button variant="ghost" size="sm" onClick={() => setSelectedReport(report as any)}>
+                                        <History className="w-4 h-4" />
+                                    </Button>
+                                </div>
+                            )}
+                        />
+                    ) : (
+                        <div className="w-full h-[600px]">
+                            <MapView reports={reports} onMarkerClick={setSelectedReport} />
+                        </div>
+                    )}
+                </div>
 
                 <aside className="w-full lg:w-80 shrink-0">
+
                     <TeamSidebar
                         onMemberClick={(member) => {
                             setSearchParams({ chat: member.id }, { replace: true });
@@ -461,7 +457,7 @@ export function Dashboard() {
                 selectedDeptId={selectedDeptId}
                 setSelectedDeptId={setSelectedDeptId}
                 departments={departments}
-                title={analyzingReport?.status === 'FORWARDED' ? `Resposta: ${analyzingReport?.department?.name}` : 'Análise de Fluxo'}
+                title="Análise de Fluxo"
             />
 
             <ReportHistoryModal
@@ -484,7 +480,7 @@ export function Dashboard() {
             {chatTarget && user && (
                 <ChatWidget
                     currentUser={{ id: user.id || '', name: user.name || '', role: user.role || '' }}
-                    targetUser={{ id: chatTarget.id || '', name: chatTarget.name || '', role: chatTarget.role || 'PROFESSIONAL' }}
+                    targetUser={chatTarget as any}
                     onClose={handleCloseChat}
                     socket={socket}
                 />
@@ -496,6 +492,32 @@ export function Dashboard() {
                 reports={reports}
                 departments={departments}
             />
-        </div >
+
+            <ConferenceModal
+                isOpen={!!activeRoom}
+                onClose={() => setActiveRoom(null)}
+                roomName={activeRoom || ''}
+                userName={user?.name}
+            />
+
+            <ConferenceInviteNotification
+                isOpen={!!pendingInvite}
+                hostName={pendingInvite?.hostName || ''}
+                onAccept={() => {
+                    setActiveRoom(pendingInvite?.roomId || null);
+                    setPendingInvite(null);
+                }}
+                onDecline={() => setPendingInvite(null)}
+            />
+        </div>
+    );
+}
+
+// Helper icon
+function Search({ className }: { className?: string }) {
+    return (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+            <circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" />
+        </svg>
     );
 }

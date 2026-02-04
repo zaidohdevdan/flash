@@ -24,6 +24,8 @@ import {
 } from '../components/ui';
 import { ReportCard } from '../components/domain';
 import { ReportHistoryModal } from '../components/domain/modals/ReportHistoryModal';
+import { ConferenceModal } from '../components/domain/modals/ConferenceModal';
+import { ConferenceInviteNotification } from '../components/ui/ConferenceInviteNotification';
 
 interface Report {
     id: string;
@@ -60,6 +62,19 @@ export function CreateReport() {
     const isChatOpenRef = useRef(false);
     const LIMIT = 10;
 
+    // Conference State from URL
+    const activeRoom = searchParams.get('conference');
+    const setActiveRoom = (roomId: string | null) => {
+        const newParams = new URLSearchParams(searchParams);
+        if (roomId) {
+            newParams.set('conference', roomId);
+        } else {
+            newParams.delete('conference');
+        }
+        setSearchParams(newParams, { replace: true });
+    };
+    const [pendingInvite, setPendingInvite] = useState<{ roomId: string; hostId: string; hostName: string } | null>(null);
+
     const socketUser = useMemo(() => user ? {
         id: user.id || '',
         name: user.name || '',
@@ -71,9 +86,19 @@ export function CreateReport() {
         onlineUserIds,
         unreadMessages,
         isConnected,
-        markAsRead
+        markAsRead,
+        playNotificationSound
     } = useDashboardSocket({
-        user: socketUser
+        user: socketUser,
+        onConferenceInvite: (data) => {
+            if (activeRoom) return;
+            setPendingInvite({
+                roomId: data.roomId,
+                hostId: data.hostId,
+                hostName: data.hostRole === 'SUPERVISOR' ? 'Supervisor' : 'Gerente'
+            });
+            playNotificationSound();
+        }
     });
 
     const hasUnreadMessages = useMemo(() =>
@@ -383,6 +408,23 @@ export function CreateReport() {
                 isOpen={!!selectedReport}
                 onClose={() => setSelectedReport(null)}
                 report={selectedReport as any}
+            />
+
+            <ConferenceModal
+                isOpen={!!activeRoom}
+                onClose={() => setActiveRoom(null)}
+                roomName={activeRoom || ''}
+                userName={user?.name}
+            />
+
+            <ConferenceInviteNotification
+                isOpen={!!pendingInvite}
+                hostName={pendingInvite?.hostName || ''}
+                onAccept={() => {
+                    setActiveRoom(pendingInvite?.roomId || null);
+                    setPendingInvite(null);
+                }}
+                onDecline={() => setPendingInvite(null)}
             />
         </div>
     );

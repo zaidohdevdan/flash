@@ -12,6 +12,7 @@ import { PrismaMediaRepository } from './repositories/implementations/PrismaMedi
 import { MediaService } from './services/MediaService';
 import { MediaController } from './controllers/MediaController';
 import { ChatController } from './controllers/ChatController';
+import { ConferenceController } from './controllers/ConferenceController';
 
 const routes = Router();
 
@@ -58,6 +59,7 @@ routes.post('/reports', AuthMiddleware, ReportController.create);
 routes.patch('/reports/:id/status', AuthMiddleware, ReportController.updateStatus);
 
 // Departamentos
+// controllers/DepartmentController.ts
 routes.get('/departments', AuthMiddleware, DepartmentController.index);
 routes.post('/departments', AuthMiddleware, DepartmentController.store);
 
@@ -73,5 +75,8 @@ routes.get('/chat/history/:room', AuthMiddleware, ChatController.listHistory);
 routes.delete('/chat/history/:room', AuthMiddleware, ChatController.clearHistory);
 routes.patch('/chat/messages/:id', AuthMiddleware, ChatController.updateMessage);
 routes.delete('/chat/messages/:id', AuthMiddleware, ChatController.deleteMessage);
+
+// Videoconferência (War Room)
+routes.post('/conference/create', AuthMiddleware, ConferenceController.create);
 
 export { routes };

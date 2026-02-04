@@ -1,4 +1,4 @@
-import { BarChart3, Clock, AlertCircle, Download } from 'lucide-react';
+import { BarChart3, Clock, AlertCircle, Download, Video } from 'lucide-react';
 import { Button, GlassCard } from '../ui';
 import { KpiCard } from './KpiCard';
 
@@ -31,6 +31,7 @@ interface DashboardHeroProps {
     onClearDates?: () => void;
     onAnalyticsClick?: () => void;
     onExportClick?: () => void;
+    onConferenceClick?: () => void;
     children?: React.ReactNode;
 }
 
@@ -50,6 +51,7 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
     onClearDates,
     onAnalyticsClick,
     onExportClick,
+    onConferenceClick,
     children
 }) => {
     return (
@@ -59,13 +61,13 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
             <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-indigo-600/15 rounded-full blur-[140px] -ml-40 -mb-40 pointer-events-none" />
 
             <div className="max-w-7xl mx-auto px-6 relative z-10">
-                <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6 mb-10">
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 w-full lg:w-auto">
+                <div className="flex flex-col gap-8 mb-12">
+                    <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
                         <div>
                             <h2 className="text-3xl font-black text-white tracking-tight uppercase">{title}</h2>
                             <p className="text-white/90 text-sm font-medium mt-1 uppercase tracking-widest">{subtitle}</p>
                         </div>
-                        <div className="flex flex-wrap items-center gap-4">
+                        <div className="flex flex-wrap items-center gap-3">
                             {onAnalyticsClick && (
                                 <Button
                                     variant="glass"
@@ -86,17 +88,27 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
                                     Exportar
                                 </Button>
                             )}
+                            {onConferenceClick && (
+                                <Button
+                                    variant="glass"
+                                    className="!px-4 !py-2 !bg-red-600/20 hover:!bg-red-600/30 text-red-400 border-red-500/30 backdrop-blur-md whitespace-nowrap animate-pulse hover:animate-none"
+                                    onClick={onConferenceClick}
+                                >
+                                    <Video className="w-5 h-5 mr-2" />
+                                    War Room
+                                </Button>
+                            )}
                             {children}
                         </div>
                     </div>
 
-                    <div className="flex flex-col gap-4 w-full md:w-auto">
-                        <GlassCard blur="lg" className="p-1 px-1.5 flex flex-wrap items-center gap-1 border-white/10 !rounded-2xl">
+                    <div className="flex flex-col xl:flex-row items-center justify-between gap-4 w-full">
+                        <GlassCard blur="lg" className="p-1 px-1.5 flex flex-wrap items-center gap-1 border-white/10 !rounded-[1.25rem] w-full xl:w-auto justify-center">
                             {filters.map(filter => (
                                 <button
                                     key={filter.id}
                                     onClick={() => onStatusFilterChange(filter.id)}
-                                    className={`flex-1 sm:flex-none px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${statusFilter === filter.id
+                                    className={`flex-1 sm:flex-none px-6 py-2.5 rounded-[1rem] text-[10px] font-black uppercase tracking-widest transition-all ${statusFilter === filter.id
                                         ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
                                         : 'text-gray-400 hover:text-white hover:bg-white/10'
                                         }`}
@@ -107,29 +119,29 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
                         </GlassCard>
 
                         {showDateFilters && (
-                            <GlassCard variant="light" blur="lg" className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 bg-white/80 backdrop-blur-xl p-1.5 !rounded-2xl border border-white/20">
-                                <div className="flex items-center gap-2 px-3 border-b sm:border-b-0 sm:border-r border-gray-200 py-2 sm:py-0">
+                            <GlassCard variant="light" blur="lg" className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 bg-white/80 backdrop-blur-xl p-1.5 !rounded-[1.25rem] border border-white/20 w-full xl:w-auto">
+                                <div className="flex items-center gap-2 px-4 border-b sm:border-b-0 sm:border-r border-gray-200/50 py-2 sm:py-0">
                                     <Clock className="w-3.5 h-3.5 text-blue-600" />
                                     <input
                                         type="date"
                                         value={startDate}
                                         onChange={e => onStartDateChange?.(e.target.value)}
-                                        className="bg-transparent text-[9px] font-bold outline-none text-gray-900 h-6 uppercase flex-1"
+                                        className="bg-transparent text-[10px] font-black outline-none text-gray-900 h-8 uppercase flex-1"
                                     />
                                 </div>
-                                <div className="flex items-center gap-2 px-3 py-2 sm:py-0">
+                                <div className="flex items-center gap-2 px-4 py-2 sm:py-0">
                                     <Clock className="w-3.5 h-3.5 text-blue-600" />
                                     <input
                                         type="date"
                                         value={endDate}
                                         onChange={e => onEndDateChange?.(e.target.value)}
-                                        className="bg-transparent text-[9px] font-bold outline-none text-gray-900 h-6 uppercase flex-1"
+                                        className="bg-transparent text-[10px] font-black outline-none text-gray-900 h-8 uppercase flex-1"
                                     />
                                 </div>
                                 {(startDate || endDate) && (
                                     <button
                                         onClick={onClearDates}
-                                        className="p-3 sm:p-1 hover:bg-red-50 rounded-lg transition text-gray-400 hover:text-red-500 flex justify-center"
+                                        className="p-3 sm:p-2 hover:bg-red-50 rounded-xl transition text-gray-400 hover:text-red-500 flex justify-center"
                                     >
                                         <AlertCircle className="w-3.5 h-3.5" />
                                     </button>

@@ -46,7 +46,7 @@ export const GlassCard: React.FC<GlassCardProps> = ({
       ${variants[variant]} 
       ${blurClasses[blur]} 
       ${withBorder ? 'border border-white/50 ring-1 ring-white/30' : ''} 
-      rounded-[2.5rem] 
+      rounded-[2rem] 
       overflow-hidden 
       ${className}
     `}

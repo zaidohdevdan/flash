@@ -40,7 +40,7 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket }: ChatWid
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const chunksRef = useRef<Blob[]>([]);
-    const timerRef = useRef<number | null>(null);
+    const timerRef = useRef<any>(null);
 
     // Identificador único da sala baseado em IDs ordenados
     const chatRoom = currentUser?.id && targetUser?.id ? getRoomName(currentUser.id, targetUser.id) : '';

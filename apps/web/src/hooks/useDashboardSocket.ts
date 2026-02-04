@@ -13,9 +13,10 @@ interface User {
 interface UseDashboardSocketOptions {
     user: User | null;
     onNotification?: (data: { from: string; fromName?: string; text: string }) => void;
+    onConferenceInvite?: (data: { roomId: string; hostId: string; hostRole: string }) => void;
 }
 
-export const useDashboardSocket = ({ user, onNotification }: UseDashboardSocketOptions) => {
+export const useDashboardSocket = ({ user, onNotification, onConferenceInvite }: UseDashboardSocketOptions) => {
     const [socket, setSocket] = useState<Socket | null>(null);
     const [onlineUserIds, setOnlineUserIds] = useState<string[]>([]);
     const [unreadMessages, setUnreadMessages] = useState<Record<string, boolean>>({});
@@ -91,6 +92,12 @@ export const useDashboardSocket = ({ user, onNotification }: UseDashboardSocketO
         };
 
         newSocket.on('new_chat_notification', handleChatNotification);
+
+        newSocket.on('conference_invite', (data: { roomId: string; hostId: string; hostRole: string }) => {
+            if (onConferenceInvite) {
+                onConferenceInvite(data);
+            }
+        });
 
         return () => {
             newSocket.disconnect();

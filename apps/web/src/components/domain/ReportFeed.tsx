@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, MessageSquare } from 'lucide-react';
+import { MessageSquare } from 'lucide-react';
 import { Card, Button } from '../ui';
 import { ReportCard } from './ReportCard';
 
@@ -30,8 +30,6 @@ interface ReportFeedProps {
 
 export const ReportFeed: React.FC<ReportFeedProps> = ({
     reports,
-    searchTerm,
-    onSearchChange,
     hasMore,
     onLoadMore,
     renderReportActions,
@@ -40,18 +38,7 @@ export const ReportFeed: React.FC<ReportFeedProps> = ({
 }) => {
     return (
         <div className="flex-1 space-y-6">
-            <Card variant="glass" className="p-4 border-white/10 !rounded-[2rem]">
-                <div className="relative group">
-                    <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-400 opacity-60 group-focus-within:opacity-100 transition-opacity" />
-                    <input
-                        type="text"
-                        placeholder="Buscar por protocolo (#000000) ou palavras-chave..."
-                        value={searchTerm}
-                        onChange={e => onSearchChange(e.target.value)}
-                        className="w-full pl-14 pr-8 py-4 bg-white/5 border border-white/5 rounded-3xl outline-none focus:bg-white/10 focus:border-blue-500/30 transition-all text-sm font-bold text-white placeholder:text-gray-500 placeholder:font-medium placeholder:uppercase placeholder:tracking-widest"
-                    />
-                </div>
-            </Card>
+            {/* Busca interna removida para evitar duplicidade com a busca global do Dashboard */}
 
             {reports.length === 0 && !isLoading ? (
                 <Card variant="glass" className="p-20 flex flex-col items-center justify-center text-gray-400">
