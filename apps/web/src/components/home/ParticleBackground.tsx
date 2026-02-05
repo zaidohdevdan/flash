@@ -1,9 +1,13 @@
 import { useEffect, useRef } from 'react';
+import { useReducedMotion } from 'framer-motion';
 
 export const ParticleBackground = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const shouldReduceMotion = useReducedMotion();
 
     useEffect(() => {
+        if (shouldReduceMotion) return; // Disable particles if reduced motion is on
+
         const canvas = canvasRef.current;
         if (!canvas) return;
 
@@ -119,7 +123,9 @@ export const ParticleBackground = () => {
             window.removeEventListener('mousemove', handleMouseMove);
             cancelAnimationFrame(animationFrameId);
         };
-    }, []);
+    });
+
+    if (shouldReduceMotion) return null;
 
     return (
         <canvas

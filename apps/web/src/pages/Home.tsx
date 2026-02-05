@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion';
 import {
     Send,
     ArrowRight,
@@ -53,23 +53,26 @@ export function Home() {
         setRotateY(0);
     }
 
+    const shouldReduceMotion = useReducedMotion();
+
     // Parallax & Explosive Scrollytelling Effects
-    const yHeroText = useTransform(scrollY, [0, 500], [0, 200]);
+    // If reduced motion is requested, we disable the parallax and explosion
+    const yHeroText = useTransform(scrollY, [0, 500], shouldReduceMotion ? [0, 0] : [0, 200]);
     const opacityHero = useTransform(scrollY, [0, 300], [1, 0]);
 
-    // Layer 1 (Base Map) - Flies backwards and up dramatically
-    const yLayer1 = useTransform(scrollY, [0, 500], [0, -400]);
-    const opacityLayer1 = useTransform(scrollY, [300, 600], [1, 0]); // Fade later
-    const scaleLayer1 = useTransform(scrollY, [0, 500], [1, 0.6]);
+    // Layer 1 (Base Map)
+    const yLayer1 = useTransform(scrollY, [0, 500], shouldReduceMotion ? [0, 0] : [0, -400]);
+    const opacityLayer1 = useTransform(scrollY, [300, 600], [1, 0]);
+    const scaleLayer1 = useTransform(scrollY, [0, 500], shouldReduceMotion ? [1, 1] : [1, 0.6]);
 
-    // Layer 2 (Main UI) - Deconstructs/Splits WIDE
-    const xLayer2A = useTransform(scrollY, [0, 500], [0, -500]); // Left part goes WAY left
-    const xLayer2B = useTransform(scrollY, [0, 500], [0, 500]);  // Right part goes WAY right
-    const rotateLayer2 = useTransform(scrollY, [0, 500], [0, 45]); // Rotate 45deg
-    const opacityLayer2 = useTransform(scrollY, [400, 700], [1, 0]); // Visible longer
+    // Layer 2 (Main UI)
+    const xLayer2A = useTransform(scrollY, [0, 500], shouldReduceMotion ? [0, 0] : [0, -500]);
+    const xLayer2B = useTransform(scrollY, [0, 500], shouldReduceMotion ? [0, 0] : [0, 500]);
+    const rotateLayer2 = useTransform(scrollY, [0, 500], shouldReduceMotion ? [0, 0] : [0, 45]);
+    const opacityLayer2 = useTransform(scrollY, [400, 700], [1, 0]);
 
-    // Layer 3 (Floating) - Flies towards screen (immersiveness)
-    const zLayer3 = useTransform(scrollY, [0, 500], [0, 1200]); // Huge Z-zoom
+    // Layer 3 (Floating)
+    const zLayer3 = useTransform(scrollY, [0, 500], shouldReduceMotion ? [0, 0] : [0, 1200]);
     const opacityLayer3 = useTransform(scrollY, [400, 600], [1, 0]);
 
     useEffect(() => {

@@ -3,9 +3,9 @@ import { useEffect, useState } from 'react';
 import { CheckCircle2, Siren, Zap, Activity } from 'lucide-react';
 
 const EVENTS = [
-    { text: "Operação #4029 iniciada em São Paulo", type: "info", icon: Zap },
+    { text: "Operação #4029 iniciada em Fortaleza", type: "info", icon: Zap },
     { text: "Incidente crítico resolvido em < 3min", type: "success", icon: CheckCircle2 },
-    { text: "Equipe Alpha sincronizada (Offline -> Online)", type: "sync", icon: Activity },
+    { text: "Equipe em campo sincronizada (Offline -> Online)", type: "sync", icon: Activity },
     { text: "Novo alerta de perímetro detectado", type: "alert", icon: Siren },
 ];
 
