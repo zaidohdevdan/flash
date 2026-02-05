@@ -116,7 +116,7 @@ export function Register() {
                     </div>
                 </div>
 
-                <GlassCard blur="lg" className="p-10 !rounded-[3rem] border-white/10 shadow-2xl shadow-blue-900/5 bg-slate-900/60 backdrop-blur-xl">
+                <GlassCard variant="dark" blur="lg" className="p-10 !rounded-[3rem] border-white/5 shadow-2xl shadow-blue-900/5 bg-slate-950/40 backdrop-blur-xl">
                     <div className="mb-10 text-center sm:text-left">
                         <h1 className="text-3xl font-black text-white tracking-tight uppercase mb-2"><TextScramble>Criar Conta</TextScramble></h1>
                         <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">Junte-se à maior rede de inteligência operacional.</p>

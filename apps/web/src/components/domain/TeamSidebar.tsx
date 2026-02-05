@@ -61,12 +61,12 @@ const MemberItem = React.memo(({ member, onClick }: { member: TeamMember, onClic
                 {member.name}
             </h4>
             <div className="flex items-center gap-1.5 mt-0.5">
-                <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest truncate">
+                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest truncate">
                     {member.role === 'MANAGER' ? (member.departmentName || 'Gerente') : member.role}
                 </span>
             </div>
             {member.statusPhrase && (
-                <p className="text-[9px] text-slate-500 font-medium italic truncate mt-0.5">
+                <p className="text-[9px] text-slate-400 font-medium italic truncate mt-0.5">
                     "{member.statusPhrase}"
                 </p>
             )}

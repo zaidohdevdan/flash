@@ -115,7 +115,7 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
                     </div>
 
                     <div className="flex flex-col xl:flex-row items-center justify-between gap-4 w-full">
-                        <GlassCard blur="lg" className="p-1 px-1.5 flex flex-wrap items-center gap-1 border-white/10 !rounded-[1.25rem] w-full xl:w-auto justify-center">
+                        <GlassCard variant="dark" blur="lg" className="p-1 px-1.5 flex flex-wrap items-center gap-1 border-white/5 !rounded-[1.25rem] w-full xl:w-auto justify-center bg-slate-950/40">
                             {filters.map(filter => (
                                 <button
                                     key={filter.id}
@@ -131,7 +131,7 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
                         </GlassCard>
 
                         {showDateFilters && (
-                            <GlassCard variant="dark" blur="lg" className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 bg-slate-900/50 backdrop-blur-xl p-1.5 !rounded-[1.25rem] border border-white/5 w-full xl:w-auto">
+                            <GlassCard variant="dark" blur="lg" className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 bg-slate-950/40 backdrop-blur-xl p-1.5 !rounded-[1.25rem] border border-white/5 w-full xl:w-auto">
                                 <div className="flex items-center gap-2 px-4 border-b sm:border-b-0 sm:border-r border-white/5 py-2 sm:py-0">
                                     <Clock className="w-3.5 h-3.5 text-blue-500" />
                                     <input

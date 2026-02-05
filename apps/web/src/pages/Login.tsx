@@ -65,7 +65,7 @@ export function Login() {
                     </div>
                 </div>
 
-                <GlassCard blur="lg" className="p-10 !rounded-[3rem] border-white/10 shadow-2xl shadow-blue-900/5 bg-slate-900/60 backdrop-blur-xl">
+                <GlassCard variant="dark" blur="lg" className="p-10 !rounded-[3rem] border-white/5 shadow-2xl shadow-blue-900/5 bg-slate-950/40 backdrop-blur-xl">
                     <div className="mb-8">
                         <h2 className="text-xl font-black text-white uppercase tracking-tight mb-2">Login Seguro</h2>
                         <p className="text-xs text-slate-400 font-bold uppercase tracking-widest leading-relaxed">

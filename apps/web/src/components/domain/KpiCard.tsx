@@ -38,25 +38,26 @@ export const KpiCard: React.FC<KpiCardProps> = ({
 
     return (
         <GlassCard
+            variant="dark"
             blur="lg"
-            className="p-5 flex flex-col gap-4 group hover:scale-[1.02] transition-all duration-300"
+            className="p-5 flex flex-col gap-4 group hover:scale-[1.02] transition-all duration-300 !rounded-[2rem] border-white/5 bg-slate-950/40"
         >
             <div className="flex justify-between items-start">
                 <div className={`p-3 rounded-2xl ${variants[variant]} transition-all duration-300 group-hover:scale-110`}>
                     <Icon className="w-6 h-6" />
                 </div>
                 {trend && (
-                    <span className="text-[10px] font-black text-white bg-emerald-500 px-2.5 py-1 rounded-full border border-emerald-400 shadow-lg shadow-emerald-500/20 uppercase tracking-tighter">
+                    <span className="text-[10px] font-black text-white bg-emerald-500/20 px-2.5 py-1 rounded-full border border-emerald-500/30 shadow-lg shadow-emerald-500/10 uppercase tracking-tighter">
                         {trend}
                     </span>
                 )}
             </div>
 
             <div>
-                <h3 className="text-[10px] font-black text-gray-600 uppercase tracking-widest leading-none mb-1">
+                <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">
                     {label}
                 </h3>
-                <p className="text-2xl font-black text-gray-950 tracking-tighter">
+                <p className="text-2xl font-black text-white tracking-tighter">
                     {value}
                 </p>
             </div>
