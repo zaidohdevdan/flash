@@ -23,6 +23,8 @@ import { ParticleBackground } from '../components/home/ParticleBackground';
 import { LiveActivityTicker } from '../components/home/LiveActivityTicker';
 import { FaqSection } from '../components/home/FaqSection';
 import { TextScramble } from '../components/home/TextScramble';
+import { Globe } from '../components/home/Globe';
+import { TacticalHud } from '../components/home/TacticalHud';
 
 export function Home() {
     const navigate = useNavigate();
@@ -92,6 +94,9 @@ export function Home() {
 
     return (
         <div className="min-h-screen bg-[#020617] font-sans text-slate-200 overflow-x-hidden selection:bg-blue-500/30 selection:text-blue-200 relative">
+
+            {/* Tier S+ (Mission Control): Tactical HUD */}
+            <TacticalHud />
 
             {/* Tier S: Particle Mesh Background */}
             <ParticleBackground />
@@ -317,16 +322,18 @@ export function Home() {
                             </div>
                         </div>
 
-                        {/* Real-time Mesh */}
-                        <div className="group relative bg-slate-900/50 border border-white/5 rounded-[2.5rem] p-10 overflow-hidden hover:border-emerald-500/30 transition-all">
-                            <div className="absolute top-0 left-0 w-[200px] h-[200px] bg-emerald-600/10 rounded-full blur-[60px] group-hover:bg-emerald-600/20 transition-all" />
-                            <div className="relative z-10 flex flex-col justify-between h-full">
-                                <div className="w-14 h-14 bg-emerald-500/10 rounded-2xl flex items-center justify-center border border-emerald-500/20 mb-6">
+                        {/* Real-time Mesh (Orbital) */}
+                        <div className="group relative bg-slate-900/50 border border-white/5 rounded-[2.5rem] overflow-hidden hover:border-emerald-500/30 transition-all">
+                            <div className="absolute inset-0 z-0 opacity-40 group-hover:opacity-60 transition-opacity flex items-center justify-center">
+                                <Globe className="w-full h-full" />
+                            </div>
+                            <div className="relative z-10 flex flex-col justify-end h-full p-10 pointer-events-none">
+                                <div className="w-14 h-14 bg-emerald-500/10 rounded-2xl flex items-center justify-center border border-emerald-500/20 mb-6 backdrop-blur-md">
                                     <Globe2 className="w-7 h-7 text-emerald-400" />
                                 </div>
                                 <div>
-                                    <h4 className="text-2xl font-black text-white mb-2">Real-time Mesh</h4>
-                                    <p className="text-slate-400 text-sm leading-relaxed">Socket Cluster garantindo latência zero na comunicação entre campo e base.</p>
+                                    <h4 className="text-2xl font-black text-white mb-2">Global Mesh</h4>
+                                    <p className="text-slate-400 text-sm leading-relaxed">Rede orbital ativa. Sincronização multi-região com latência &lt; 20ms.</p>
                                 </div>
                             </div>
                         </div>
