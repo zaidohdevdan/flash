@@ -109,16 +109,21 @@ function AppRoutes() {
   );
 }
 
+import { QueryClientProvider } from '@tanstack/react-query';
+import { queryClient } from './lib/queryClient';
+
 function App() {
   return (
-    <AuthProvider>
-      <Toaster position="top-center" reverseOrder={false} />
-      <BrowserRouter>
-        <Suspense fallback={<PageLoader />}>
-          <AppRoutes />
-        </Suspense>
-      </BrowserRouter>
-    </AuthProvider>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <Toaster position="top-center" reverseOrder={false} />
+        <BrowserRouter>
+          <Suspense fallback={<PageLoader />}>
+            <AppRoutes />
+          </Suspense>
+        </BrowserRouter>
+      </AuthProvider>
+    </QueryClientProvider>
   );
 }
 

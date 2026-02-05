@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
 import { toast } from 'react-hot-toast';
 import { useDashboardSocket } from '../hooks/useDashboardSocket';
+import { useReports } from '../hooks/useReports';
 import {
     Clock,
     CheckCircle,
@@ -156,21 +157,21 @@ export function Dashboard() {
         }
     });
 
-    const loadReports = async (pageNum: number, reset: boolean = false) => {
-        try {
-            let url = `/reports?page=${pageNum}&limit=${LIMIT}`;
-            if (statusFilter) url += `&status=${statusFilter}`;
-            if (startDate) url += `&startDate=${startDate}`;
-            if (endDate) url += `&endDate=${endDate}`;
+    // Data Fetching with React Query
+    const {
+        data: reportsData = [],
+        isLoading: isReportsLoading,
+        isPlaceholderData,
+        refetch: refetchReports
+    } = useReports({
+        page,
+        limit: LIMIT,
+        status: statusFilter,
+        startDate,
+        endDate
+    });
 
-            const response = await api.get(url);
-            setHasMore(response.data.length === LIMIT);
-            setReports(prev => reset ? response.data : [...prev, ...response.data]);
-        } catch (error) {
-            console.error('Erro ao buscar relatórios:', error);
-        }
-    };
-
+    // Restore auxiliary data loaders
     const loadStats = async () => {
         try {
             const response = await api.get('/reports/stats');
@@ -207,8 +208,16 @@ export function Dashboard() {
         }
     };
 
+    // Update reports state
     useEffect(() => {
-        loadReports(1, true);
+        if (reportsData) {
+            setReports(reportsData);
+            setHasMore(reportsData.length === LIMIT);
+        }
+    }, [reportsData]);
+
+    // Side Effects for aux data
+    useEffect(() => {
         loadStats();
     }, [statusFilter, startDate, endDate]);
 
@@ -226,10 +235,11 @@ export function Dashboard() {
     }, [activeChatId, markAsRead]);
 
     const handleLoadMore = () => {
-        const next = page + 1;
-        setPage(next);
-        loadReports(next);
+        if (!isPlaceholderData && hasMore) {
+            setPage(prev => prev + 1);
+        }
     };
+
     const fetchNotifications = async () => {
         try {
             const res = await api.get('/notifications');
@@ -287,7 +297,7 @@ export function Dashboard() {
     const handleProcessAnalysis = async () => {
         if (!analyzingReport) return;
         try {
-            await api.patch(`/ reports / ${analyzingReport.id}/status`, {
+            await api.patch(`/reports/${analyzingReport.id}/status`, {
                 status: targetStatus,
                 feedback: formFeedback,
                 departmentId: targetStatus === 'FORWARDED' ? selectedDeptId : undefined
@@ -296,7 +306,7 @@ export function Dashboard() {
             toast.success('Relatório processado com sucesso!');
             setAnalyzingReport(null);
             resetAnalysisForm();
-            loadReports(1, true);
+            refetchReports();
             loadStats();
         } catch (error) {
             toast.error('Erro ao processar relatório.');
@@ -448,6 +458,7 @@ export function Dashboard() {
                             onSearchChange={setSearchTerm}
                             hasMore={hasMore}
                             onLoadMore={handleLoadMore}
+                            isLoading={isReportsLoading}
                             renderReportActions={(report) => (
                                 <div className="flex gap-2 w-full">
                                     {report.status !== 'RESOLVED' && report.status !== 'ARCHIVED' && (

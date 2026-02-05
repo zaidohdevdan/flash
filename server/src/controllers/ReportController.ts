@@ -127,7 +127,7 @@ export const ReportController = {
     // Create a new report (imagem obrigatória + Cloudinary)
     // controllers/ReportController.ts
     create: async (req: Request, res: Response) => {
-        const { comment, imageUrl, latitude, longitude } = req.body;
+        const { comment, imageUrl, latitude, longitude, createdAt } = req.body;
         const userId = req.userId!;
 
         console.log(`[Report] Criando reporte para usuário: ${userId}`);
@@ -147,6 +147,7 @@ export const ReportController = {
                 imageUrl,
                 latitude: latitude ? parseFloat(latitude) : undefined,
                 longitude: longitude ? parseFloat(longitude) : undefined,
+                createdAt
             });
             console.log("[Report] Relatório salvo com ID:", report.id);
 

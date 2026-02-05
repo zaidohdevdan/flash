@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
 import { toast } from 'react-hot-toast';
@@ -42,6 +42,7 @@ const FILTER_OPTIONS = [
 ];
 
 export function ManagerDashboard() {
+    const navigate = useNavigate();
     const { user, signOut } = useAuth();
     const [searchParams, setSearchParams] = useSearchParams();
     const activeChatId = searchParams.get('chat');
@@ -271,6 +272,7 @@ export function ManagerDashboard() {
                         statusFilter={statusFilter}
                         onStatusFilterChange={(s) => { setStatusFilter(s); setPage(1); }}
                         filters={FILTER_OPTIONS}
+                        onAnalyticsClick={() => navigate('/analytics')}
                         onExportClick={() => setIsExportModalOpen(true)}
                     />
 

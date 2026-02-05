@@ -3,7 +3,7 @@ import { type Report, type ReportStatus, type User } from '../../generated/prism
 import type { CreateReportDTO, IReportRepository, ReportWithUser } from '../interfaces/IReportRepository';
 
 export class PrismaReportRepository implements IReportRepository {
-    async create({ comment, userId, imageUrl, latitude, longitude }: CreateReportDTO): Promise<ReportWithUser> {
+    async create({ comment, userId, imageUrl, latitude, longitude, createdAt }: CreateReportDTO): Promise<ReportWithUser> {
         const user = await prisma.user.findUnique({ where: { id: userId }, select: { name: true } });
         const userName = user?.name || 'Operador';
 
@@ -14,6 +14,7 @@ export class PrismaReportRepository implements IReportRepository {
                 userId,
                 latitude,
                 longitude,
+                createdAt: createdAt ? new Date(createdAt) : undefined,
                 status: 'SENT',
                 history: {
                     create: {
@@ -280,7 +281,7 @@ export class PrismaReportRepository implements IReportRepository {
         let bottleneckSum = 0;
         let bottleneckCount = 0;
         const volumeByDate: Record<string, number> = {};
-        const sectorPerf: Record<string, { resolved: number, forwarded: number }> = {};
+        const sectorPerf: Record<string, { resolved: number, forwarded: number, avgTime: number, countForAvg: number }> = {};
 
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
@@ -294,12 +295,22 @@ export class PrismaReportRepository implements IReportRepository {
                 }
             }
 
-            // Sector Performance
+            // Sector Performance & Speed
             if (report.department && report.department.name) {
                 const deptName = report.department.name;
-                if (!sectorPerf[deptName]) sectorPerf[deptName] = { resolved: 0, forwarded: 0 };
+                if (!sectorPerf[deptName]) sectorPerf[deptName] = { resolved: 0, forwarded: 0, avgTime: 0, countForAvg: 0 };
                 if (report.status === 'RESOLVED') sectorPerf[deptName].resolved++;
                 if (report.status === 'FORWARDED') sectorPerf[deptName].forwarded++;
+
+                // Track time in this specific department
+                const deptForwarded = report.history.find(h => h.status === 'FORWARDED' && h.departmentName === deptName);
+                if (deptForwarded) {
+                    const nextStatus = report.history.find(h => h.createdAt > deptForwarded.createdAt && h.status !== 'FORWARDED');
+                    const endTime = nextStatus ? nextStatus.createdAt.getTime() : new Date().getTime();
+                    const diff = (endTime - deptForwarded.createdAt.getTime()) / (1000 * 60 * 60); // hours
+                    sectorPerf[deptName].avgTime = (sectorPerf[deptName].avgTime * sectorPerf[deptName].countForAvg + diff) / (sectorPerf[deptName].countForAvg + 1);
+                    sectorPerf[deptName].countForAvg++;
+                }
             }
 
             // Efficiency (Resolved Time)
@@ -312,10 +323,9 @@ export class PrismaReportRepository implements IReportRepository {
                 }
             }
 
-            // Bottlenecks (Time in FORWARDED)
+            // Bottlenecks (Total Time in FORWARDED)
             const forwardedHistory = report.history.find(h => h.status === 'FORWARDED');
             if (forwardedHistory) {
-                // If resolved, time until resolution. If still forwarded, time until now.
                 const nextStatus = report.history.find(h => h.createdAt > forwardedHistory.createdAt && h.status !== 'FORWARDED');
                 const endTime = nextStatus ? nextStatus.createdAt.getTime() : new Date().getTime();
                 const diff = endTime - forwardedHistory.createdAt.getTime();
@@ -323,6 +333,31 @@ export class PrismaReportRepository implements IReportRepository {
                 bottleneckCount++;
             }
         });
+
+        // 3. Predictions & Advanced Metrics
+        const sortedVolume = Object.entries(volumeByDate).sort((a, b) => a[0].localeCompare(b[0]));
+        const last3Days = sortedVolume.slice(-3);
+        const predictedNextDay = last3Days.length > 0
+            ? Math.round(last3Days.reduce((acc, curr) => acc + curr[1], 0) / last3Days.length)
+            : 0;
+
+        // Trend calculation
+        let trend: 'UP' | 'DOWN' = 'DOWN';
+        if (last3Days.length > 1) {
+            const first = last3Days[0];
+            const last = last3Days[last3Days.length - 1];
+            if (first && last && last[1] > first[1]) trend = 'UP';
+        }
+
+        // Find the "Critical Sector" (Highest bottleneck time)
+        const sectorList = Object.entries(sectorPerf).map(([name, stats]) => ({
+            name,
+            resolved: stats.resolved,
+            forwarded: stats.forwarded,
+            avgHours: parseFloat(stats.avgTime.toFixed(1))
+        }));
+
+        const criticalSector = sectorList.sort((a, b) => b.avgHours - a.avgHours)[0] || null;
 
         // Médias em Horas
         const avgResolutionHours = resolvedCount > 0 ? (totalResolutionTime / resolvedCount) / (1000 * 60 * 60) : 0;
@@ -335,10 +370,15 @@ export class PrismaReportRepository implements IReportRepository {
             },
             bottlenecks: {
                 avgForwardedTime: avgBottleneckHours.toFixed(1),
-                impactedCount: bottleneckCount
+                impactedCount: bottleneckCount,
+                criticalSector
             },
-            volume: Object.entries(volumeByDate).map(([date, count]) => ({ date, count })).sort((a, b) => a.date.localeCompare(b.date)),
-            sectorPerformance: Object.entries(sectorPerf).map(([name, stats]) => ({ name, ...stats }))
+            predictions: {
+                nextDayVolume: predictedNextDay,
+                trend
+            },
+            volume: sortedVolume.map(([date, count]) => ({ date, count })),
+            sectorPerformance: sectorList
         };
     }
 }

@@ -16,9 +16,12 @@ export interface ModalProps {
     /** Conteúdo do modal. */
     children: React.ReactNode;
     /** Rodapé personalizado (opcional). */
+    /** Rodapé personalizado (opcional). */
     footer?: React.ReactNode;
     /** Tamanho máximo do modal. */
     maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '4xl' | '6xl';
+    /** Variante de estilo do modal. */
+    variant?: 'light' | 'dark';
 }
 
 /**
@@ -32,7 +35,8 @@ export const Modal: React.FC<ModalProps> = ({
     subtitle,
     children,
     footer,
-    maxWidth = 'md'
+    maxWidth = 'md',
+    variant = 'light'
 }) => {
     // Trata tecla ESC para fechar
     useEffect(() => {
@@ -55,6 +59,25 @@ export const Modal: React.FC<ModalProps> = ({
         '6xl': 'max-w-6xl'
     };
 
+    const styles = {
+        light: {
+            container: 'bg-white/60 border-white/50 ring-white/20',
+            title: 'text-gray-900',
+            subtitle: 'text-gray-600',
+            close: 'text-gray-500 hover:text-gray-900 hover:bg-gray-100/50',
+            footer: 'bg-gray-50/50 border-gray-50'
+        },
+        dark: {
+            container: 'bg-slate-900/80 border-white/10 ring-white/5',
+            title: 'text-white',
+            subtitle: 'text-slate-400',
+            close: 'text-slate-400 hover:text-white hover:bg-white/10',
+            footer: 'bg-slate-900/50 border-white/5'
+        }
+    };
+
+    const currentStyle = styles[variant];
+
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
             {/* Backdrop */}
@@ -66,29 +89,30 @@ export const Modal: React.FC<ModalProps> = ({
             {/* Modal Content */}
             <div className={`
         relative w-full ${widthClasses[maxWidth]} 
-        bg-white/60 backdrop-blur-[32px] rounded-[2.5rem] shadow-2xl 
-        border border-white/50 ring-1 ring-white/20 overflow-hidden
+        backdrop-blur-[32px] rounded-[2.5rem] shadow-2xl 
+        border ring-1 overflow-hidden
         animate-in zoom-in-95 slide-in-from-bottom-4 duration-300
         flex flex-col max-h-[90vh]
+        ${currentStyle.container}
       `}>
                 {/* Header */}
                 {(title || subtitle) && (
                     <div className="px-8 pt-8 pb-4 flex justify-between items-start">
                         <div>
                             {title && (
-                                <h2 className="text-2xl font-black text-gray-900 tracking-tight leading-tight uppercase">
+                                <h2 className={`text-2xl font-black tracking-tight leading-tight uppercase ${currentStyle.title}`}>
                                     {title}
                                 </h2>
                             )}
                             {subtitle && (
-                                <p className="text-sm text-gray-600 font-bold mt-1">
+                                <p className={`text-sm font-bold mt-1 ${currentStyle.subtitle}`}>
                                     {subtitle}
                                 </p>
                             )}
                         </div>
                         <button
                             onClick={onClose}
-                            className="p-2 -mr-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100/50 rounded-2xl transition-all"
+                            className={`p-2 -mr-2 rounded-2xl transition-all ${currentStyle.close}`}
                         >
                             <X className="w-6 h-6" />
                         </button>
@@ -102,7 +126,7 @@ export const Modal: React.FC<ModalProps> = ({
 
                 {/* Footer */}
                 {footer && (
-                    <div className="px-8 py-6 bg-gray-50/50 border-t border-gray-50 mt-2 flex gap-3 justify-end">
+                    <div className={`px-8 py-6 border-t mt-2 flex gap-3 justify-end ${currentStyle.footer}`}>
                         {footer}
                     </div>
                 )}

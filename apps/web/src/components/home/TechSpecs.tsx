@@ -48,7 +48,7 @@ const specs = [
 
 export const TechSpecs = () => {
     return (
-        <section className="py-32 bg-gray-900 relative">
+        <section className="py-32 bg-[#020617] relative">
             <div className="max-w-7xl mx-auto px-6">
                 <div className="flex flex-col lg:flex-row gap-16 items-start">
 

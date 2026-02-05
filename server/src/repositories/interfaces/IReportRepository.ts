@@ -6,6 +6,7 @@ export interface CreateReportDTO {
     imageUrl?: string;
     latitude?: number;
     longitude?: number;
+    createdAt?: string;
 }
 
 export type ReportWithUser = Report & {

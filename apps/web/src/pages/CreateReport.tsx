@@ -6,7 +6,9 @@ import { toast } from 'react-hot-toast';
 import {
     Plus,
     History,
-    Search
+    Search,
+    CloudOff,
+    RefreshCw
 } from 'lucide-react';
 import { useDashboardSocket } from '../hooks/useDashboardSocket';
 import {
@@ -27,6 +29,9 @@ import { ReportHistoryModal } from '../components/domain/modals/ReportHistoryMod
 import { ConferenceModal } from '../components/domain/modals/ConferenceModal';
 import { ConferenceInviteNotification } from '../components/ui/ConferenceInviteNotification';
 import { NotificationDrawer } from '../components/ui/NotificationDrawer';
+import { db } from '../services/db';
+import { syncPendingReports } from '../services/offlineSync';
+import { useLiveQuery } from 'dexie-react-hooks';
 
 import type { Report, Notification } from '../types';
 
@@ -52,6 +57,8 @@ export function CreateReport() {
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const isChatOpenRef = useRef(false);
     const LIMIT = 10;
+
+    const pendingReports = useLiveQuery(() => db.pendingReports.toArray());
 
     // Conference State from URL
     const activeRoom = searchParams.get('conference');
@@ -83,11 +90,6 @@ export function CreateReport() {
         user: socketUser,
         onConferenceInvite: (data) => {
             if (activeRoom) return;
-            setPendingInvite({
-                roomId: data.roomId,
-                hostId: data.hostId,
-                hostName: data.hostRole === 'SUPERVISOR' ? 'Supervisor' : 'Gerente'
-            });
             setPendingInvite({
                 roomId: data.roomId,
                 hostId: data.hostId,
@@ -136,6 +138,28 @@ export function CreateReport() {
 
     useEffect(() => {
         loadHistory(1, true, statusFilter);
+
+        // Sincronização automática inicial
+        if (navigator.onLine) {
+            syncPendingReports();
+        }
+
+        const handleOnline = () => {
+            toast.success('Conexão restabelecida! Sincronizando dados...', { icon: '🌐' });
+            syncPendingReports();
+        };
+
+        const handleOffline = () => {
+            toast.error('Você está offline. O sistema salvará as fotos localmente.', { icon: '📡' });
+        };
+
+        window.addEventListener('online', handleOnline);
+        window.addEventListener('offline', handleOffline);
+
+        return () => {
+            window.removeEventListener('online', handleOnline);
+            window.removeEventListener('offline', handleOffline);
+        };
     }, [statusFilter]);
 
     useEffect(() => {
@@ -227,6 +251,29 @@ export function CreateReport() {
         setSending(true);
 
         try {
+            // Verificação de Conexão
+            if (!navigator.onLine) {
+                // Modo Offline: Salva no Dexie
+                await db.pendingReports.add({
+                    comment,
+                    imageBlob: image,
+                    previewUrl: preview!,
+                    createdAt: Date.now(),
+                    status: 'pending'
+                });
+
+                setSuccess(true);
+                setComment('');
+                setImage(null);
+                setPreview(null);
+                setView('history');
+                toast.success('Relatório salvo localmente! Será enviado assim que houver internet.', {
+                    icon: '💾',
+                    duration: 5000
+                });
+                return;
+            }
+
             const cloudinaryData = new FormData();
             cloudinaryData.append('file', image);
             cloudinaryData.append('upload_preset', 'flash_preset');
@@ -253,8 +300,8 @@ export function CreateReport() {
                 const position = await new Promise<GeolocationPosition>((resolve, reject) => {
                     navigator.geolocation.getCurrentPosition(resolve, reject, {
                         enableHighAccuracy: true,
-                        timeout: 20000,
-                        maximumAge: Infinity
+                        timeout: 10000,
+                        maximumAge: 1000 * 60 * 5 // 5 minutes
                     });
                 });
                 reportData.latitude = position.coords.latitude.toString();
@@ -273,7 +320,7 @@ export function CreateReport() {
             loadHistory(1, true);
         } catch (error) {
             console.error(error);
-            toast.error('Erro ao enviar relatório. Verifique sua conexão.');
+            toast.error('Erro ao enviar relatório. Tentaremos novamente depois.');
         } finally {
             setSending(false);
         }
@@ -302,6 +349,44 @@ export function CreateReport() {
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.03),transparent_70%)] pointer-events-none" />
 
                 <div className="relative z-10 w-full h-full">
+                    {/* Alerta de Modo Offline */}
+                    <div className="max-w-2xl mx-auto px-6 pt-4">
+                        {pendingReports && pendingReports.length > 0 && (
+                            <Card variant="glass" className="p-4 border-amber-200 bg-amber-50/50 flex items-center justify-between animate-in slide-in-from-top-4 duration-500">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 bg-amber-100 text-amber-600 rounded-xl">
+                                        <CloudOff className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                        <h4 className="text-xs font-black text-amber-900 uppercase tracking-tight">Relatórios Pendentes</h4>
+                                        <p className="text-[10px] font-bold text-amber-700 uppercase tracking-widest">{pendingReports.length} arquivos aguardando internet</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => syncPendingReports()}
+                                        className="!text-amber-800 hover:bg-amber-100 !px-4"
+                                    >
+                                        <RefreshCw className="w-4 h-4 mr-2" />
+                                        Tentar Agora
+                                    </Button>
+                                    <button
+                                        onClick={async () => {
+                                            if (confirm('Deseja limpar todos os rascunhos offline?')) {
+                                                await db.pendingReports.clear();
+                                            }
+                                        }}
+                                        className="p-2 text-amber-400 hover:text-red-500 transition-colors"
+                                    >
+                                        <History className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            </Card>
+                        )}
+                    </div>
+
                     {view === 'history' ? (
                         <div className="p-6 max-w-2xl mx-auto space-y-8">
                             <ProfessionalHeader
