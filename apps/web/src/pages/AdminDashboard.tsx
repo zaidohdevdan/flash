@@ -216,13 +216,13 @@ export function AdminDashboard() {
                     <Card variant="dark" className="p-2 space-y-1 shadow-xl shadow-black/50 border-white/5 !rounded-[2rem] sticky top-28">
                         <button
                             onClick={() => { setView('list'); resetForm(); }}
-                            className={`w-full flex items-center gap-3 px-6 py-4 rounded-2xl font-black text-[10px] tracking-widest uppercase transition-all ${view === 'list' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:bg-white/5'}`}
+                            className={`w-full flex items-center gap-3 px-6 py-4 rounded-2xl font-black text-[10px] tracking-widest uppercase transition-all ${view === 'list' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-300 hover:bg-white/5'}`}
                         >
                             <Users className="w-5 h-5" /> GESTÃO DE USUÁRIOS
                         </button>
                         <button
                             onClick={() => { setView('create'); resetForm(); }}
-                            className={`w-full flex items-center gap-3 px-6 py-4 rounded-2xl font-black text-[10px] tracking-widest uppercase transition-all ${view === 'create' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:bg-white/5'}`}
+                            className={`w-full flex items-center gap-3 px-6 py-4 rounded-2xl font-black text-[10px] tracking-widest uppercase transition-all ${view === 'create' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-300 hover:bg-white/5'}`}
                         >
                             <UserPlus className="w-5 h-5" /> NOVO CADASTRO
                         </button>
@@ -244,21 +244,21 @@ export function AdminDashboard() {
                             {/* Filter Bar */}
                             <GlassCard variant="dark" blur="lg" className="p-3 flex flex-col md:flex-row gap-4 items-center !rounded-[2rem] border-white/10 shadow-xl shadow-black/50">
                                 <div className="relative flex-1 w-full">
-                                    <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                    <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
                                     <input
                                         type="text"
                                         placeholder="Buscar usuários..."
                                         value={searchQuery}
                                         onChange={e => setSearchQuery(e.target.value)}
-                                        className="w-full pl-12 pr-6 py-4 bg-slate-900/50 border-transparent border rounded-2xl focus:bg-slate-800 focus:border-blue-500/30 outline-none transition-all text-xs font-bold text-white uppercase tracking-wider"
+                                        className="w-full pl-12 pr-6 py-4 bg-slate-900/50 border-transparent border rounded-2xl focus:bg-slate-800 focus:border-blue-500/30 outline-none transition-all text-xs font-bold text-white uppercase tracking-wider placeholder:text-slate-400"
                                     />
                                 </div>
                                 <div className="flex items-center gap-2 bg-white/5 p-1.5 rounded-2xl w-full md:w-auto border border-white/10">
-                                    <Filter className="w-4 h-4 text-slate-400 ml-3 hidden md:block" />
+                                    <Filter className="w-4 h-4 text-slate-300 ml-3 hidden md:block" />
                                     <select
                                         value={roleFilter}
                                         onChange={e => setRoleFilter(e.target.value)}
-                                        className="bg-transparent border-none outline-none text-[10px] font-black text-slate-400 py-2.5 px-4 cursor-pointer uppercase tracking-widest"
+                                        className="bg-transparent border-none outline-none text-[10px] font-black text-slate-300 py-2.5 px-4 cursor-pointer uppercase tracking-widest"
                                     >
                                         <option value="">TODOS PAPÉIS</option>
                                         <option value="ADMIN">ADMINS</option>
@@ -274,7 +274,7 @@ export function AdminDashboard() {
                                 <div className="p-8 border-b border-white/5 flex justify-between items-center bg-white/5">
                                     <div>
                                         <h2 className="text-xl font-black text-white uppercase tracking-tight">Equipe FLASH</h2>
-                                        <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-1">Gerenciamento de acessos e permissões</p>
+                                        <p className="text-[10px] text-slate-300 font-black uppercase tracking-widest mt-1">Gerenciamento de acessos e permissões</p>
                                     </div>
                                     <Badge status="SENT" label={`${users.length} ATIVOS`} />
                                 </div>
@@ -282,7 +282,7 @@ export function AdminDashboard() {
                                 <div className="overflow-x-auto">
                                     <table className="w-full text-left border-collapse">
                                         <thead>
-                                            <tr className="bg-white/5 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-white/5">
+                                            <tr className="bg-white/5 text-[10px] font-black text-slate-300 uppercase tracking-widest border-b border-white/5">
                                                 <th className="px-8 py-5">USUÁRIO / IDENTIDADE</th>
                                                 <th className="px-8 py-5">NÍVEL / PAPEL</th>
                                                 <th className="px-8 py-5">SUPERVISÃO / DEP</th>
@@ -292,7 +292,7 @@ export function AdminDashboard() {
                                         <tbody className="divide-y divide-white/5">
                                             {users.length === 0 ? (
                                                 <tr>
-                                                    <td colSpan={4} className="px-8 py-32 text-center text-slate-500">
+                                                    <td colSpan={4} className="px-8 py-32 text-center text-slate-400">
                                                         <Users className="w-12 h-12 mx-auto mb-4 opacity-10" />
                                                         <p className="text-[10px] font-black uppercase tracking-widest">Nenhum usuário encontrado</p>
                                                     </td>
@@ -307,7 +307,7 @@ export function AdminDashboard() {
                                                                 </div>
                                                                 <div>
                                                                     <p className="font-bold text-white text-sm leading-none mb-1">{u.name}</p>
-                                                                    <p className="text-xs text-slate-400 font-medium">{u.email}</p>
+                                                                    <p className="text-xs text-slate-300 font-medium">{u.email}</p>
                                                                 </div>
                                                             </div>
                                                         </td>
@@ -428,7 +428,7 @@ export function AdminDashboard() {
 
                                     {role === 'PROFESSIONAL' && (
                                         <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
-                                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Vincular Supervisor</label>
+                                            <label className="text-[10px] font-black text-slate-300 uppercase tracking-widest ml-1">Vincular Supervisor</label>
                                             <div className="relative">
                                                 <select
                                                     value={supervisorId}
@@ -447,7 +447,7 @@ export function AdminDashboard() {
                                     {role === 'MANAGER' && (
                                         <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
                                             <div className="space-y-2">
-                                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Vincular Departamento</label>
+                                                <label className="text-[10px] font-black text-slate-300 uppercase tracking-widest ml-1">Vincular Departamento</label>
                                                 <div className="relative">
                                                     <select
                                                         value={departmentId}

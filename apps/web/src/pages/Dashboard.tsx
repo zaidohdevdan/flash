@@ -454,7 +454,7 @@ export function Dashboard() {
                                 placeholder="Filtrar por protocolo ou descrição..."
                                 value={searchTerm}
                                 onChange={e => setSearchTerm(e.target.value)}
-                                className="w-full pl-14 pr-8 py-4 bg-slate-900/50 border border-white/5 rounded-3xl outline-none focus:bg-slate-900/80 focus:border-blue-500/30 transition-all text-sm font-black text-white placeholder:text-gray-400"
+                                className="w-full pl-14 pr-8 py-4 bg-slate-900/50 border border-white/5 rounded-3xl outline-none focus:bg-slate-900/80 focus:border-blue-500/30 transition-all text-sm font-black text-white placeholder:text-slate-400"
                             />
                         </div>
 

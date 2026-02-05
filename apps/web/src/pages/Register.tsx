@@ -124,7 +124,7 @@ export function Register() {
 
                     <form onSubmit={handleSubmit} className="space-y-5">
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Nome Completo</label>
+                            <label className="text-[10px] font-black text-slate-300 uppercase tracking-widest ml-1">Nome Completo</label>
                             <div className="relative group">
                                 <div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-blue-500 transition-colors">
                                     <User className="w-4 h-4" />
@@ -134,14 +134,14 @@ export function Register() {
                                     value={name}
                                     onChange={e => setName(e.target.value)}
                                     placeholder="Ex: Carlos Oliveira"
-                                    className="w-full pl-14 pr-6 py-4 bg-slate-950/50 border border-white/5 rounded-2xl outline-none focus:bg-slate-900 focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all text-sm font-bold text-white placeholder:text-slate-600"
+                                    className="w-full pl-14 pr-6 py-4 bg-slate-950/50 border border-white/5 rounded-2xl outline-none focus:bg-slate-900 focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all text-sm font-bold text-white placeholder:text-slate-400"
                                     required
                                 />
                             </div>
                         </div>
 
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">E-mail</label>
+                            <label className="text-[10px] font-black text-slate-300 uppercase tracking-widest ml-1">E-mail</label>
                             <div className="relative group">
                                 <div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-blue-500 transition-colors">
                                     <Mail className="w-4 h-4" />
@@ -151,7 +151,7 @@ export function Register() {
                                     value={email}
                                     onChange={e => setEmail(e.target.value)}
                                     placeholder="seu@flash.com"
-                                    className="w-full pl-14 pr-6 py-4 bg-slate-950/50 border border-white/5 rounded-2xl outline-none focus:bg-slate-900 focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all text-sm font-bold text-white placeholder:text-slate-600"
+                                    className="w-full pl-14 pr-6 py-4 bg-slate-950/50 border border-white/5 rounded-2xl outline-none focus:bg-slate-900 focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all text-sm font-bold text-white placeholder:text-slate-400"
                                     required
                                     autoComplete="email"
                                 />
@@ -159,7 +159,7 @@ export function Register() {
                         </div>
 
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Senha</label>
+                            <label className="text-[10px] font-black text-slate-300 uppercase tracking-widest ml-1">Senha</label>
                             <div className="relative group">
                                 <div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-blue-500 transition-colors">
                                     <Lock className="w-4 h-4" />
@@ -169,7 +169,7 @@ export function Register() {
                                     value={password}
                                     onChange={e => setPassword(e.target.value)}
                                     placeholder="••••••••"
-                                    className="w-full pl-14 pr-6 py-4 bg-slate-950/50 border border-white/5 rounded-2xl outline-none focus:bg-slate-900 focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all text-sm font-bold text-white placeholder:text-slate-600"
+                                    className="w-full pl-14 pr-6 py-4 bg-slate-950/50 border border-white/5 rounded-2xl outline-none focus:bg-slate-900 focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all text-sm font-bold text-white placeholder:text-slate-400"
                                     required
                                     autoComplete="new-password"
                                 />
@@ -177,7 +177,7 @@ export function Register() {
                         </div>
 
                         <div className="py-4">
-                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 mb-3 block text-center sm:text-left">Tipo de Acesso</label>
+                            <label className="text-[10px] font-black text-slate-300 uppercase tracking-widest ml-1 mb-3 block text-center sm:text-left">Tipo de Acesso</label>
                             <div className="grid grid-cols-2 gap-2 p-1.5 bg-slate-950/50 rounded-2xl border border-white/5">
                                 <button
                                     type="button"
@@ -198,7 +198,7 @@ export function Register() {
 
                         {role === 'PROFESSIONAL' && (
                             <div className="space-y-1.5 animate-in slide-in-from-top-4 duration-500">
-                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Responsável Técnico</label>
+                                <label className="text-[10px] font-black text-slate-300 uppercase tracking-widest ml-1">Responsável Técnico</label>
                                 <div className="relative group">
                                     <div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-blue-500 transition-colors">
                                         <Briefcase className="w-4 h-4" />

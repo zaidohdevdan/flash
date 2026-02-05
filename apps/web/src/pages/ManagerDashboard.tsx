@@ -271,7 +271,7 @@ export function ManagerDashboard() {
                     unreadCount={notifications.filter(n => !n.read).length}
                     onNotificationsClick={() => setIsNotificationsOpen(true)}
                 />
-
+                <p className="text-[10px] text-slate-300 font-black uppercase tracking-widest">Controle de acesso à rede operacional</p>
                 <main className="max-w-7xl mx-auto px-6 py-8 flex flex-col lg:flex-row gap-8">
                     <div className="flex-1 space-y-8">
                         <DashboardHero
@@ -293,7 +293,7 @@ export function ManagerDashboard() {
                                 placeholder="Filtrar por protocolo ou descrição..."
                                 value={searchTerm}
                                 onChange={e => setSearchTerm(e.target.value)}
-                                className="w-full pl-14 pr-8 py-4 bg-slate-900/50 border border-white/5 rounded-3xl outline-none focus:bg-slate-900/80 focus:border-blue-500/30 transition-all text-sm font-bold text-white placeholder:text-gray-500"
+                                className="w-full pl-14 pr-8 py-4 bg-slate-900/50 border border-white/5 rounded-3xl outline-none focus:bg-slate-900/80 focus:border-blue-500/30 transition-all text-sm font-bold text-white placeholder:text-slate-400"
                             />
                         </div>
 

@@ -59,7 +59,7 @@ export function Login() {
                         <h1 className="text-4xl font-black text-white tracking-tighter uppercase mb-1">
                             <TextScramble>Flash</TextScramble><span className="text-blue-600">.</span>
                         </h1>
-                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] flex items-center justify-center gap-2">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] flex items-center justify-center gap-2">
                             Access Verification <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
                         </p>
                     </div>
@@ -75,7 +75,7 @@ export function Login() {
 
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div className="space-y-2">
-                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">ID / E-mail</label>
+                            <label className="text-[10px] font-black text-slate-300 uppercase tracking-widest ml-1">ID / E-mail</label>
                             <div className="relative group">
                                 <div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-blue-500 transition-colors">
                                     <Mail className="w-4 h-4" />
@@ -85,7 +85,7 @@ export function Login() {
                                     value={email}
                                     onChange={e => setEmail(e.target.value)}
                                     placeholder="agente@flash.com"
-                                    className="w-full pl-14 pr-6 py-4 bg-slate-950/50 border border-white/5 rounded-2xl outline-none focus:bg-slate-900 focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all text-xs font-bold text-white placeholder:text-slate-600"
+                                    className="w-full pl-14 pr-6 py-4 bg-slate-950/50 border border-white/5 rounded-2xl outline-none focus:bg-slate-900 focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all text-xs font-bold text-white placeholder:text-slate-400"
                                     required
                                     autoComplete="username"
                                 />
@@ -93,7 +93,7 @@ export function Login() {
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Chave de Acesso</label>
+                            <label className="text-[10px] font-black text-slate-300 uppercase tracking-widest ml-1">Chave de Acesso</label>
                             <div className="relative group">
                                 <div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-blue-500 transition-colors">
                                     <Lock className="w-4 h-4" />
@@ -103,7 +103,7 @@ export function Login() {
                                     value={password}
                                     onChange={e => setPassword(e.target.value)}
                                     placeholder="••••••••"
-                                    className="w-full pl-14 pr-6 py-4 bg-slate-950/50 border border-white/5 rounded-2xl outline-none focus:bg-slate-900 focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all text-xs font-bold text-white placeholder:text-slate-600"
+                                    className="w-full pl-14 pr-6 py-4 bg-slate-950/50 border border-white/5 rounded-2xl outline-none focus:bg-slate-900 focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all text-xs font-bold text-white placeholder:text-slate-400"
                                     required
                                     autoComplete="current-password"
                                 />
