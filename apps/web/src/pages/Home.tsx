@@ -22,6 +22,10 @@ import {
 } from 'lucide-react';
 import { ProcessTimeline } from '../components/home/ProcessTimeline';
 import { TechSpecs } from '../components/home/TechSpecs';
+import { ParticleBackground } from '../components/home/ParticleBackground';
+import { LiveActivityTicker } from '../components/home/LiveActivityTicker';
+import { FaqSection } from '../components/home/FaqSection';
+import { TextScramble } from '../components/home/TextScramble';
 
 export function Home() {
     const navigate = useNavigate();
@@ -52,9 +56,24 @@ export function Home() {
         setRotateY(0);
     }
 
-    // Parallax Effects
+    // Parallax & Explosive Scrollytelling Effects
     const yHeroText = useTransform(scrollY, [0, 500], [0, 200]);
-    const opacityHero = useTransform(scrollY, [0, 400], [1, 0]);
+    const opacityHero = useTransform(scrollY, [0, 300], [1, 0]);
+
+    // Layer 1 (Base Map) - Flies backwards and up dramatically
+    const yLayer1 = useTransform(scrollY, [0, 500], [0, -400]);
+    const opacityLayer1 = useTransform(scrollY, [300, 600], [1, 0]); // Fade later
+    const scaleLayer1 = useTransform(scrollY, [0, 500], [1, 0.6]);
+
+    // Layer 2 (Main UI) - Deconstructs/Splits WIDE
+    const xLayer2A = useTransform(scrollY, [0, 500], [0, -500]); // Left part goes WAY left
+    const xLayer2B = useTransform(scrollY, [0, 500], [0, 500]);  // Right part goes WAY right
+    const rotateLayer2 = useTransform(scrollY, [0, 500], [0, 45]); // Rotate 45deg
+    const opacityLayer2 = useTransform(scrollY, [400, 700], [1, 0]); // Visible longer
+
+    // Layer 3 (Floating) - Flies towards screen (immersiveness)
+    const zLayer3 = useTransform(scrollY, [0, 500], [0, 1200]); // Huge Z-zoom
+    const opacityLayer3 = useTransform(scrollY, [400, 600], [1, 0]);
 
     useEffect(() => {
         if (!loading && isAuthenticated && user) {
@@ -72,14 +91,21 @@ export function Home() {
     };
 
     return (
-        <div className="min-h-screen bg-[#020617] font-sans text-slate-200 overflow-x-hidden selection:bg-blue-500/30 selection:text-blue-200">
-            {/* Background Effects */}
+        <div className="min-h-screen bg-[#020617] font-sans text-slate-200 overflow-x-hidden selection:bg-blue-500/30 selection:text-blue-200 relative">
+
+            {/* Tier S: Particle Mesh Background */}
+            <ParticleBackground />
+
+            {/* Tier S: Live Activity Ticker */}
+            <LiveActivityTicker />
+
+            {/* Background Effects (Subtle Overlay) */}
             <div className="fixed inset-0 pointer-events-none">
                 <div className="absolute top-0 left-0 w-full h-[800px] bg-gradient-to-b from-blue-900/10 via-slate-900/5 to-transparent" />
                 <div className="absolute top-[-20%] right-[-10%] w-[800px] h-[800px] bg-blue-600/10 rounded-full blur-[120px] animate-pulse-slow" />
                 <div className="absolute bottom-[-20%] left-[-10%] w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[100px] animate-pulse-slow delay-1000" />
                 {/* Grid Pattern */}
-                <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000,transparent)] opacity-[0.15]" />
+                <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000,transparent)] opacity-[0.1]" />
             </div>
 
             {/* Navigation */}
@@ -125,7 +151,7 @@ export function Home() {
                                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
                                 <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
                             </span>
-                            <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest">Enterprise System v4.0</span>
+                            <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest"><TextScramble>Enterprise System v4.0</TextScramble></span>
                         </motion.div>
 
                         <motion.h1
@@ -157,12 +183,12 @@ export function Home() {
                                 onClick={() => navigate('/login')}
                                 className="w-full sm:w-auto px-8 py-5 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-500 transition-all shadow-2xl shadow-blue-500/20 flex items-center justify-center gap-3 hover:-translate-y-1 group"
                             >
-                                Iniciar Operação <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                <TextScramble>Iniciar Operação</TextScramble> <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                             </button>
                         </motion.div>
                     </motion.div>
 
-                    {/* 3D Composition Hero */}
+                    {/* 3D Composition Hero with Explosive Scrollytelling */}
                     <div
                         className="flex-1 w-full perspective-[2000px] group"
                         onMouseMove={handleMouseMove}
@@ -175,8 +201,11 @@ export function Home() {
                                 rotateY
                             }}
                         >
-                            {/* Layer 1: Base - Map/Dashboard Aesthetic */}
-                            <div className="absolute inset-0 bg-slate-900 rounded-[2.5rem] border border-white/10 shadow-2xl overflow-hidden transform-style-3d translate-z-[-50px]">
+                            {/* Layer 1: Base - Flies Backward */}
+                            <motion.div
+                                style={{ y: yLayer1, opacity: opacityLayer1, scale: scaleLayer1 }}
+                                className="absolute inset-0 bg-slate-900 rounded-[2.5rem] border border-white/10 shadow-2xl overflow-hidden transform-style-3d translate-z-[-50px]"
+                            >
                                 <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(68,68,68,.2)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%,100%_100%] animate-shine opacity-20" />
                                 <div className="p-8 opacity-30 blur-[1px]">
                                     <div className="h-64 rounded-3xl bg-slate-800/50 w-full mb-6 border border-white/5" />
@@ -185,10 +214,13 @@ export function Home() {
                                         <div className="h-32 rounded-3xl bg-slate-800/50 border border-white/5" />
                                     </div>
                                 </div>
-                            </div>
+                            </motion.div>
 
-                            {/* Layer 2: Main UI - Glass Elements */}
-                            <div className="absolute inset-4 bg-slate-900/80 backdrop-blur-xl rounded-[2rem] border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] transform-style-3d translate-z-[0px] flex flex-col overflow-hidden">
+                            {/* Layer 2: Main UI - Splits Apart */}
+                            <motion.div
+                                style={{ rotateZ: rotateLayer2, opacity: opacityLayer2 }}
+                                className="absolute inset-4 bg-slate-900/80 backdrop-blur-xl rounded-[2rem] border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] transform-style-3d translate-z-[0px] flex flex-col overflow-hidden"
+                            >
                                 {/* Header Mock */}
                                 <div className="h-16 border-b border-white/5 flex items-center justify-between px-8 bg-white/5">
                                     <div className="flex gap-2">
@@ -199,14 +231,14 @@ export function Home() {
                                     <div className="h-2 w-20 bg-slate-700 rounded-full" />
                                 </div>
                                 <div className="p-8 grid grid-cols-2 gap-6 h-full p-6">
-                                    <div className="bg-blue-500/10 border border-blue-500/20 rounded-2xl flex items-center justify-center flex-col gap-2 p-4">
+                                    <motion.div style={{ x: xLayer2A }} className="bg-blue-500/10 border border-blue-500/20 rounded-2xl flex items-center justify-center flex-col gap-2 p-4">
                                         <Brain className="w-8 h-8 text-blue-400" />
                                         <div className="h-2 w-16 bg-blue-400/20 rounded-full" />
-                                    </div>
-                                    <div className="bg-purple-500/10 border border-purple-500/20 rounded-2xl flex items-center justify-center flex-col gap-2 p-4">
+                                    </motion.div>
+                                    <motion.div style={{ x: xLayer2B }} className="bg-purple-500/10 border border-purple-500/20 rounded-2xl flex items-center justify-center flex-col gap-2 p-4">
                                         <Zap className="w-8 h-8 text-purple-400" />
                                         <div className="h-2 w-16 bg-purple-400/20 rounded-full" />
-                                    </div>
+                                    </motion.div>
                                     <div className="col-span-2 bg-slate-800/30 border border-white/5 rounded-2xl h-full p-4">
                                         <div className="flex gap-2 items-end h-full justify-around pb-2">
                                             {[40, 70, 50, 90, 60, 80].map((h, i) => (
@@ -215,13 +247,12 @@ export function Home() {
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </motion.div>
 
-                            {/* Layer 3: Floating Elements - Notifications & Badges */}
+                            {/* Layer 3: Floating Elements - Flies to Screen */}
                             <motion.div
+                                style={{ z: zLayer3, opacity: opacityLayer3 }}
                                 className="absolute top-[20%] right-[-20px] bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-2xl shadow-xl flex items-center gap-4 transform-style-3d translate-z-[60px]"
-                                animate={{ y: [0, -10, 0] }}
-                                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                             >
                                 <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center text-white shadow-lg shadow-green-500/20">
                                     <CheckCircle2 className="w-6 h-6" />
@@ -233,9 +264,8 @@ export function Home() {
                             </motion.div>
 
                             <motion.div
+                                style={{ z: zLayer3, opacity: opacityLayer3 }}
                                 className="absolute bottom-[20%] left-[-20px] bg-slate-900/90 backdrop-blur-md border border-blue-500/30 p-4 rounded-2xl shadow-xl flex items-center gap-4 transform-style-3d translate-z-[80px]"
-                                animate={{ y: [0, 10, 0] }}
-                                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
                             >
                                 <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white shadow-lg shadow-blue-500/20">
                                     <WifiOff className="w-5 h-5" />
@@ -355,6 +385,18 @@ export function Home() {
                     </div>
                 </div>
             </section>
+
+            {/* Imported Components */}
+            <div id="features">
+                <ProcessTimeline />
+            </div>
+
+            <div id="specs">
+                <TechSpecs />
+            </div>
+
+            {/* Tier S: Active FAQ Section */}
+            <FaqSection />
 
             {/* Contact Section */}
             <section id="contact" className="py-32 px-6">
