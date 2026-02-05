@@ -42,8 +42,8 @@ export const Header: React.FC<HeaderProps> = ({
         <header className={`
       ${sticky ? 'sticky top-0 z-40' : ''} 
       px-6 py-4 
-      bg-white/70 backdrop-blur-xl 
-      border-b border-white/20 
+      bg-[#020617]/80 backdrop-blur-xl 
+      border-b border-white/5 
       shadow-sm shadow-blue-900/5 
       flex justify-between items-center
     `}>
@@ -55,7 +55,7 @@ export const Header: React.FC<HeaderProps> = ({
                             <div className={`absolute inset-0 bg-white/20 rounded-xl pointer-events-none ${isAnimated ? 'animate-shiny-pulse' : ''}`}></div>
                             <Zap className={`w-5 h-5 text-yellow-300 fill-current filter drop-shadow-[0_0_3px_rgba(253,224,71,0.8)] ${isAnimated ? 'animate-vibrate-fast' : ''}`} />
                         </div>
-                        <span className="font-black text-gray-900 tracking-tighter text-lg uppercase hidden sm:block">
+                        <span className="font-black text-white tracking-tighter text-lg uppercase hidden sm:block">
                             Flash
                         </span>
                     </div>
@@ -66,20 +66,20 @@ export const Header: React.FC<HeaderProps> = ({
             <div className="flex items-center gap-3 sm:gap-6">
                 <button
                     onClick={onNotificationsClick}
-                    className="relative p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-all rounded-full group"
+                    className="relative p-2 text-slate-400 hover:text-blue-400 hover:bg-blue-500/10 transition-all rounded-full group"
                 >
                     <Bell className="w-5 h-5" />
                     {unreadCount && unreadCount > 0 ? (
-                        <span className="absolute top-2 right-2.5 w-2 h-2 bg-red-500 border-2 border-white rounded-full animate-pulse" />
+                        <span className="absolute top-2 right-2.5 w-2 h-2 bg-red-500 border-2 border-[#020617] rounded-full animate-pulse" />
                     ) : null}
                 </button>
 
-                <div className="flex items-center gap-3 pl-4 border-l border-gray-100">
+                <div className="flex items-center gap-3 pl-4 border-l border-white/5">
                     <div className="text-right hidden sm:block">
-                        <p className="text-xs font-black text-gray-900 uppercase tracking-tight">
+                        <p className="text-xs font-black text-white uppercase tracking-tight">
                             {user?.name || 'Usuário'}
                         </p>
-                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
                             Painel Web
                         </p>
                     </div>
@@ -88,14 +88,14 @@ export const Header: React.FC<HeaderProps> = ({
                         <Avatar
                             src={user?.avatarUrl}
                             size="md"
-                            className="cursor-pointer hover:ring-4 hover:ring-blue-500/10 transition-all"
+                            className="cursor-pointer hover:ring-4 hover:ring-blue-500/10 transition-all ring-2 ring-white/5"
                         />
                     </Link>
 
                     {onLogout && (
                         <button
                             onClick={onLogout}
-                            className="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 transition-all rounded-full ml-1"
+                            className="p-2 text-slate-500 hover:text-red-500 hover:bg-red-500/10 transition-all rounded-full ml-1"
                             title="Sair"
                         >
                             <LogOut className="w-5 h-5" />

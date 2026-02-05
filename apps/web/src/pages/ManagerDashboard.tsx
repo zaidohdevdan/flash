@@ -17,6 +17,7 @@ import {
     Header,
 } from '../components/ui';
 import { TeamSidebar, DashboardHero, ReportFeed } from '../components/domain';
+import { TacticalHud } from '../components/home/TacticalHud';
 import { ReportHistoryModal } from '../components/domain/modals/ReportHistoryModal';
 import { AnalysisModal } from '../components/domain/modals/AnalysisModal';
 import { ExportReportsModal } from '../components/domain/modals/ExportReportsModal';
@@ -254,150 +255,160 @@ export function ManagerDashboard() {
     };
 
     return (
-        <div className="min-h-screen bg-[#020617] text-slate-200 font-sans selection:bg-blue-500/30">
-            <Header
-                user={{ name: user?.name, avatarUrl: user?.avatarUrl }}
-                onLogout={signOut}
-                unreadCount={notifications.filter(n => !n.read).length}
-                onNotificationsClick={() => setIsNotificationsOpen(true)}
-            />
+        <div className="min-h-screen bg-[#020617] text-slate-200 font-sans selection:bg-blue-500/30 overflow-x-hidden relative">
+            {/* Mission Control Elements */}
+            <TacticalHud />
 
-            <main className="max-w-7xl mx-auto px-6 py-8 flex flex-col lg:flex-row gap-8">
-                <div className="flex-1 space-y-8">
-                    <DashboardHero
-                        title="Módulo Gerencial"
-                        subtitle="Gestão de demandas e resoluções operacionais."
-                        stats={stats}
-                        kpiConfigs={KPI_CONFIGS}
-                        statusFilter={statusFilter}
-                        onStatusFilterChange={(s) => { setStatusFilter(s); setPage(1); }}
-                        filters={FILTER_OPTIONS}
-                        onAnalyticsClick={() => navigate('/analytics')}
-                        onExportClick={() => setIsExportModalOpen(true)}
-                    />
+            {/* Background Effects */}
+            <div className="fixed inset-0 pointer-events-none z-0">
+                <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000,transparent)] opacity-[0.1]" />
+            </div>
 
-                    <div className="relative group">
-                        <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-400 opacity-60 group-focus-within:opacity-100 transition-opacity" />
-                        <input
-                            type="text"
-                            placeholder="Filtrar por protocolo ou descrição..."
-                            value={searchTerm}
-                            onChange={e => setSearchTerm(e.target.value)}
-                            className="w-full pl-14 pr-8 py-4 bg-slate-900/50 border border-white/5 rounded-3xl outline-none focus:bg-slate-900/80 focus:border-blue-500/30 transition-all text-sm font-bold text-white placeholder:text-gray-500"
+            <div className="relative z-10">
+                <Header
+                    user={{ name: user?.name, avatarUrl: user?.avatarUrl }}
+                    onLogout={signOut}
+                    unreadCount={notifications.filter(n => !n.read).length}
+                    onNotificationsClick={() => setIsNotificationsOpen(true)}
+                />
+
+                <main className="max-w-7xl mx-auto px-6 py-8 flex flex-col lg:flex-row gap-8">
+                    <div className="flex-1 space-y-8">
+                        <DashboardHero
+                            title="Módulo Gerencial"
+                            subtitle="Gestão de demandas e resoluções operacionais."
+                            stats={stats}
+                            kpiConfigs={KPI_CONFIGS}
+                            statusFilter={statusFilter}
+                            onStatusFilterChange={(s) => { setStatusFilter(s); setPage(1); }}
+                            filters={FILTER_OPTIONS}
+                            onAnalyticsClick={() => navigate('/analytics')}
+                            onExportClick={() => setIsExportModalOpen(true)}
+                        />
+
+                        <div className="relative group">
+                            <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-400 opacity-60 group-focus-within:opacity-100 transition-opacity" />
+                            <input
+                                type="text"
+                                placeholder="Filtrar por protocolo ou descrição..."
+                                value={searchTerm}
+                                onChange={e => setSearchTerm(e.target.value)}
+                                className="w-full pl-14 pr-8 py-4 bg-slate-900/50 border border-white/5 rounded-3xl outline-none focus:bg-slate-900/80 focus:border-blue-500/30 transition-all text-sm font-bold text-white placeholder:text-gray-500"
+                            />
+                        </div>
+
+                        <ReportFeed
+                            reports={reports.filter(r =>
+                                r.comment.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                r.id.toLowerCase().includes(searchTerm.toLowerCase())
+                            ) as any}
+                            searchTerm={searchTerm}
+                            onSearchChange={setSearchTerm}
+                            hasMore={hasMore}
+                            onLoadMore={() => {
+                                const next = page + 1;
+                                setPage(next);
+                                loadReports(next, false, statusFilter);
+                            }}
+                            renderReportActions={(report) => (
+                                <Button
+                                    variant="primary"
+                                    size="sm"
+                                    onClick={() => { setAnalyzingReport(report as any); }}
+                                >
+                                    Analisar
+                                </Button>
+                            )}
                         />
                     </div>
 
-                    <ReportFeed
-                        reports={reports.filter(r =>
-                            r.comment.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            r.id.toLowerCase().includes(searchTerm.toLowerCase())
-                        ) as any}
-                        searchTerm={searchTerm}
-                        onSearchChange={setSearchTerm}
-                        hasMore={hasMore}
-                        onLoadMore={() => {
-                            const next = page + 1;
-                            setPage(next);
-                            loadReports(next, false, statusFilter);
-                        }}
-                        renderReportActions={(report) => (
-                            <Button
-                                variant="primary"
-                                size="sm"
-                                onClick={() => { setAnalyzingReport(report as any); }}
-                            >
-                                Analisar
-                            </Button>
-                        )}
-                    />
-                </div>
+                    <aside className="w-full lg:w-80 shrink-0">
+                        <TeamSidebar
+                            title="Rede de Apoio"
+                            groups={[
+                                {
+                                    id: 'contacts',
+                                    title: 'Contatos Úteis',
+                                    members: contacts.map(c => ({
+                                        id: c.id,
+                                        name: c.name,
+                                        role: c.role,
+                                        isOnline: onlineUserIds.includes(c.id),
+                                        avatarUrl: c.avatarUrl,
+                                        statusPhrase: c.statusPhrase,
+                                        hasUnread: !!unreadMessages[c.id]
+                                    }))
+                                }
+                            ]}
+                            onMemberClick={(member) => {
+                                setSearchParams({ chat: member.id }, { replace: true });
+                                markAsRead(member.id);
+                            }}
+                        />
+                    </aside>
+                </main>
 
-                <aside className="w-full lg:w-80 shrink-0">
-                    <TeamSidebar
-                        title="Rede de Apoio"
-                        groups={[
-                            {
-                                id: 'contacts',
-                                title: 'Contatos Úteis',
-                                members: contacts.map(c => ({
-                                    id: c.id,
-                                    name: c.name,
-                                    role: c.role,
-                                    isOnline: onlineUserIds.includes(c.id),
-                                    avatarUrl: c.avatarUrl,
-                                    statusPhrase: c.statusPhrase,
-                                    hasUnread: !!unreadMessages[c.id]
-                                }))
-                            }
-                        ]}
-                        onMemberClick={(member) => {
-                            setSearchParams({ chat: member.id }, { replace: true });
-                            markAsRead(member.id);
-                        }}
-                    />
-                </aside>
-            </main>
-
-            <AnalysisModal
-                isOpen={!!analyzingReport}
-                onClose={() => { setAnalyzingReport(null); resetAnalysisForm(); }}
-                onConfirm={handleProcessAnalysis}
-                targetStatus={targetStatus}
-                setTargetStatus={setTargetStatus}
-                feedback={formFeedback}
-                setFeedback={setFormFeedback}
-                selectedDeptId={selectedDeptId}
-                setSelectedDeptId={setSelectedDeptId}
-                departments={departments}
-                title="Resolução Departamental"
-            />
-
-            <ReportHistoryModal
-                isOpen={!!selectedReport}
-                onClose={() => setSelectedReport(null)}
-                report={selectedReport}
-            />
-
-            {chatTarget && user && (
-                <ChatWidget
-                    currentUser={{ id: user.id || '', name: user.name || '', role: user.role || '' }}
-                    targetUser={chatTarget}
-                    onClose={handleCloseChat}
-                    socket={socket}
+                <AnalysisModal
+                    isOpen={!!analyzingReport}
+                    onClose={() => { setAnalyzingReport(null); resetAnalysisForm(); }}
+                    onConfirm={handleProcessAnalysis}
+                    targetStatus={targetStatus}
+                    setTargetStatus={setTargetStatus}
+                    feedback={formFeedback}
+                    setFeedback={setFormFeedback}
+                    selectedDeptId={selectedDeptId}
+                    setSelectedDeptId={setSelectedDeptId}
+                    departments={departments}
+                    title="Resolução Departamental"
                 />
-            )}
 
-            <ExportReportsModal
-                isOpen={isExportModalOpen}
-                onClose={() => setIsExportModalOpen(false)}
-                reports={reports}
-                departments={departments}
-            />
+                <ReportHistoryModal
+                    isOpen={!!selectedReport}
+                    onClose={() => setSelectedReport(null)}
+                    report={selectedReport}
+                />
 
-            <ConferenceModal
-                isOpen={!!activeRoom}
-                onClose={() => setActiveRoom(null)}
-                roomName={activeRoom || ''}
-                userName={user?.name}
-            />
+                {chatTarget && user && (
+                    <ChatWidget
+                        currentUser={{ id: user.id || '', name: user.name || '', role: user.role || '' }}
+                        targetUser={chatTarget}
+                        onClose={handleCloseChat}
+                        socket={socket}
+                    />
+                )}
 
-            <ConferenceInviteNotification
-                isOpen={!!pendingInvite}
-                hostName={pendingInvite?.hostName || ''}
-                onAccept={() => {
-                    setActiveRoom(pendingInvite?.roomId || null);
-                    setPendingInvite(null);
-                }}
-                onDecline={() => setPendingInvite(null)}
-            />
+                <ExportReportsModal
+                    isOpen={isExportModalOpen}
+                    onClose={() => setIsExportModalOpen(false)}
+                    reports={reports}
+                    departments={departments}
+                />
 
-            <NotificationDrawer
-                isOpen={isNotificationsOpen}
-                onClose={() => setIsNotificationsOpen(false)}
-                notifications={notifications}
-                onMarkAsRead={handleMarkAsRead}
-                onMarkAllAsRead={handleMarkAllAsRead}
-            />
+                <ConferenceModal
+                    isOpen={!!activeRoom}
+                    onClose={() => setActiveRoom(null)}
+                    roomName={activeRoom || ''}
+                    userName={user?.name}
+                />
+
+                <ConferenceInviteNotification
+                    isOpen={!!pendingInvite}
+                    hostName={pendingInvite?.hostName || ''}
+                    onAccept={() => {
+                        setActiveRoom(pendingInvite?.roomId || null);
+                        setPendingInvite(null);
+                    }}
+                    onDecline={() => setPendingInvite(null)}
+                />
+
+                <NotificationDrawer
+                    isOpen={isNotificationsOpen}
+                    onClose={() => setIsNotificationsOpen(false)}
+                    notifications={notifications}
+                    onMarkAsRead={handleMarkAsRead}
+                    onMarkAllAsRead={handleMarkAllAsRead}
+                />
+            </div>
         </div>
     );
 }

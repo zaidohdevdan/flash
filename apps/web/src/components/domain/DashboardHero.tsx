@@ -131,29 +131,29 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
                         </GlassCard>
 
                         {showDateFilters && (
-                            <GlassCard variant="light" blur="lg" className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 bg-white/80 backdrop-blur-xl p-1.5 !rounded-[1.25rem] border border-white/20 w-full xl:w-auto">
-                                <div className="flex items-center gap-2 px-4 border-b sm:border-b-0 sm:border-r border-gray-200/50 py-2 sm:py-0">
-                                    <Clock className="w-3.5 h-3.5 text-blue-600" />
+                            <GlassCard variant="dark" blur="lg" className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 bg-slate-900/50 backdrop-blur-xl p-1.5 !rounded-[1.25rem] border border-white/5 w-full xl:w-auto">
+                                <div className="flex items-center gap-2 px-4 border-b sm:border-b-0 sm:border-r border-white/5 py-2 sm:py-0">
+                                    <Clock className="w-3.5 h-3.5 text-blue-500" />
                                     <input
                                         type="date"
                                         value={startDate}
                                         onChange={e => onStartDateChange?.(e.target.value)}
-                                        className="bg-transparent text-[10px] font-black outline-none text-gray-900 h-8 uppercase flex-1"
+                                        className="bg-transparent text-[10px] font-black outline-none text-white h-8 uppercase flex-1 [color-scheme:dark]"
                                     />
                                 </div>
                                 <div className="flex items-center gap-2 px-4 py-2 sm:py-0">
-                                    <Clock className="w-3.5 h-3.5 text-blue-600" />
+                                    <Clock className="w-3.5 h-3.5 text-blue-500" />
                                     <input
                                         type="date"
                                         value={endDate}
                                         onChange={e => onEndDateChange?.(e.target.value)}
-                                        className="bg-transparent text-[10px] font-black outline-none text-gray-900 h-8 uppercase flex-1"
+                                        className="bg-transparent text-[10px] font-black outline-none text-white h-8 uppercase flex-1 [color-scheme:dark]"
                                     />
                                 </div>
                                 {(startDate || endDate) && (
                                     <button
                                         onClick={onClearDates}
-                                        className="p-3 sm:p-2 hover:bg-red-50 rounded-xl transition text-gray-400 hover:text-red-500 flex justify-center"
+                                        className="p-3 sm:p-2 hover:bg-red-500/10 rounded-xl transition text-slate-400 hover:text-red-500 flex justify-center"
                                     >
                                         <AlertCircle className="w-3.5 h-3.5" />
                                     </button>

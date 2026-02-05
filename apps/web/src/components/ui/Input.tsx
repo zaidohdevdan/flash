@@ -10,6 +10,8 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
     error?: string;
     /** Ícone para exibir à esquerda. */
     icon?: React.ReactNode;
+    /** Variante de estilo. */
+    variant?: 'light' | 'dark';
 }
 
 /**
@@ -20,12 +22,19 @@ export const Input: React.FC<InputProps> = ({
     error,
     icon,
     className = '',
+    variant = 'light',
     ...props
 }) => {
+
+    const variants = {
+        light: 'bg-gray-50/50 border-gray-100 text-gray-900 focus:bg-white focus:border-blue-500/50',
+        dark: 'bg-slate-900/50 border-white/5 text-white focus:bg-slate-900/80 focus:border-blue-500/50 placeholder:text-slate-500'
+    };
+
     return (
         <div className="space-y-1 w-full">
             {label && (
-                <label className="text-[10px] font-black text-gray-700 uppercase tracking-widest ml-1">
+                <label className={`text-[10px] font-black uppercase tracking-widest ml-1 ${variant === 'dark' ? 'text-slate-400' : 'text-gray-700'}`}>
                     {label}
                 </label>
             )}
@@ -40,19 +49,14 @@ export const Input: React.FC<InputProps> = ({
             w-full 
             ${icon ? 'pl-11' : 'px-5'} 
             py-3.5 
-            bg-gray-50/50 
-            border border-gray-100 
             rounded-2xl 
             outline-none 
-            focus:bg-white 
-            focus:border-blue-500/50 
             focus:ring-4 
             focus:ring-blue-500/5 
             transition-all 
             font-medium 
             text-sm 
-            text-gray-900
-            placeholder:text-gray-400
+            ${variants[variant]}
             ${error ? 'border-red-300 bg-red-50/50' : ''}
             ${className}
           `}
