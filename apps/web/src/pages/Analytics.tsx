@@ -130,38 +130,38 @@ export function Analytics() {
 
                 {/* KPI & Predictions Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <GlassCard variant="deep" className="p-6 border-white/5 !rounded-[2rem] bg-slate-900/40 backdrop-blur-3xl group hover:border-blue-500/30 transition-colors">
+                    <GlassCard variant="dark" className="p-6 border-white/5 !rounded-[2rem] bg-slate-950/40 backdrop-blur-3xl group hover:border-blue-500/30 transition-colors">
                         <div className="flex items-center justify-between mb-4">
                             <div className="p-3 bg-blue-500/10 rounded-2xl border border-blue-500/20">
                                 <Clock className="w-5 h-5 text-blue-400" />
                             </div>
-                            <Activity className="w-4 h-4 text-slate-600 group-hover:text-blue-400 transition-colors" />
+                            <Activity className="w-4 h-4 text-slate-400 group-hover:text-blue-400 transition-colors" />
                         </div>
-                        <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">SLA de Resolução</p>
+                        <p className="text-slate-300 text-[10px] font-black uppercase tracking-widest">SLA de Resolução</p>
                         <div className="flex items-baseline gap-2 mt-1">
-                            <h2 className="text-4xl font-black text-slate-100">{data.efficiency.avgResolutionTime}h</h2>
+                            <h2 className="text-4xl font-black text-white">{data.efficiency.avgResolutionTime}h</h2>
                         </div>
-                        <p className="text-[10px] font-bold text-slate-500 uppercase mt-2">Média de {data.efficiency.resolvedCount} casos</p>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase mt-2">Média de {data.efficiency.resolvedCount} casos</p>
                     </GlassCard>
 
-                    <GlassCard variant="deep" className="p-6 border-white/5 !rounded-[2rem] bg-slate-900/40 backdrop-blur-3xl group hover:border-purple-500/30 transition-colors">
+                    <GlassCard variant="dark" className="p-6 border-white/5 !rounded-[2rem] bg-slate-950/40 backdrop-blur-3xl group hover:border-purple-500/30 transition-colors">
                         <div className="flex items-center justify-between mb-4">
                             <div className="p-3 bg-purple-500/10 rounded-2xl border border-purple-500/20">
                                 <Zap className="w-5 h-5 text-purple-400" />
                             </div>
-                            <Target className="w-4 h-4 text-slate-600 group-hover:text-purple-400 transition-colors" />
+                            <Target className="w-4 h-4 text-slate-400 group-hover:text-purple-400 transition-colors" />
                         </div>
-                        <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">Previsão Demanda</p>
+                        <p className="text-slate-300 text-[10px] font-black uppercase tracking-widest">Previsão Demanda</p>
                         <div className="flex items-center gap-3 mt-1">
-                            <h2 className="text-4xl font-black text-slate-100">+{data.predictions.nextDayVolume}</h2>
+                            <h2 className="text-4xl font-black text-white">+{data.predictions.nextDayVolume}</h2>
                             <div className={`p-1 rounded-lg ${data.predictions.trend === 'UP' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
                                 {data.predictions.trend === 'UP' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                             </div>
                         </div>
-                        <p className="text-[10px] font-bold text-slate-500 uppercase mt-2">Estimativa para amanhã</p>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase mt-2">Estimativa para amanhã</p>
                     </GlassCard>
 
-                    <GlassCard variant="deep" className="p-6 border-white/5 !rounded-[2rem] bg-slate-900/40 backdrop-blur-3xl group hover:border-rose-500/30 transition-colors">
+                    <GlassCard variant="dark" className="p-6 border-white/5 !rounded-[2rem] bg-slate-950/40 backdrop-blur-3xl group hover:border-rose-500/30 transition-colors">
                         <div className="flex items-center justify-between mb-4">
                             <div className="p-3 bg-rose-500/10 rounded-2xl border border-rose-500/20">
                                 <AlertTriangle className="w-5 h-5 text-rose-400" />
@@ -172,8 +172,8 @@ export function Analytics() {
                                 </div>
                             </div>
                         </div>
-                        <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">Setor Crítico</p>
-                        <h2 className="text-xl font-black text-slate-100 mt-1 truncate">
+                        <p className="text-slate-300 text-[10px] font-black uppercase tracking-widest">Setor Crítico</p>
+                        <h2 className="text-xl font-black text-white mt-1 truncate">
                             {data.bottlenecks.criticalSector?.name || '---'}
                         </h2>
                         <p className="text-[10px] font-bold text-rose-400 uppercase mt-2">
@@ -181,21 +181,21 @@ export function Analytics() {
                         </p>
                     </GlassCard>
 
-                    <GlassCard variant="deep" className="p-6 border-white/5 !rounded-[2rem] bg-slate-900/40 backdrop-blur-3xl group hover:border-emerald-500/30 transition-colors">
+                    <GlassCard variant="dark" className="p-6 border-white/5 !rounded-[2rem] bg-slate-950/40 backdrop-blur-3xl group hover:border-emerald-500/30 transition-colors">
                         <div className="flex items-center justify-between mb-4">
                             <div className="p-3 bg-emerald-500/10 rounded-2xl border border-emerald-500/20">
                                 <TrendingUp className="w-5 h-5 text-emerald-400" />
                             </div>
                         </div>
-                        <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">Health Score</p>
+                        <p className="text-slate-300 text-[10px] font-black uppercase tracking-widest">Health Score</p>
                         <div className="flex items-baseline gap-2 mt-1">
-                            <h2 className="text-4xl font-black text-slate-100">
+                            <h2 className="text-4xl font-black text-white">
                                 {data.efficiency.resolvedCount > 0
                                     ? Math.round((data.efficiency.resolvedCount / (data.efficiency.resolvedCount + data.bottlenecks.impactedCount)) * 100)
                                     : 0}%
                             </h2>
                         </div>
-                        <p className="text-[10px] font-bold text-slate-500 uppercase mt-2">Taxa de resolução global</p>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase mt-2">Taxa de resolução global</p>
                     </GlassCard>
                 </div>
 
@@ -203,18 +203,18 @@ export function Analytics() {
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
                     {/* Trend Chart - Large */}
-                    <GlassCard variant="deep" className="lg:col-span-8 p-8 border-white/5 !rounded-[2.5rem] bg-slate-900/40 backdrop-blur-3xl min-h-[450px]">
+                    <GlassCard variant="dark" className="lg:col-span-8 p-8 border-white/5 !rounded-[2.5rem] bg-slate-950/40 backdrop-blur-3xl min-h-[450px]">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10">
                             <div>
-                                <h3 className="text-xl font-black text-slate-100 uppercase tracking-tight flex items-center gap-3">
+                                <h3 className="text-xl font-black text-white uppercase tracking-tight flex items-center gap-3">
                                     <Activity className="w-5 h-5 text-blue-400" />
                                     Volume & Tendência
                                 </h3>
-                                <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mt-1">Fluxo de reportes dos últimos 30 dias</p>
+                                <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mt-1">Fluxo de reportes dos últimos 30 dias</p>
                             </div>
                             <div className="flex bg-white/5 p-1 rounded-xl border border-white/10">
                                 <button className="px-4 py-1.5 rounded-lg bg-blue-600 text-[10px] font-black uppercase tracking-widest text-white shadow-lg shadow-blue-500/20">30D</button>
-                                <button className="px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-slate-200 transition-colors">90D</button>
+                                <button className="px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-white transition-colors">90D</button>
                             </div>
                         </div>
 
@@ -231,7 +231,7 @@ export function Analytics() {
                                         <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
                                         <XAxis
                                             dataKey="date"
-                                            stroke="#64748b"
+                                            stroke="#94a3b8"
                                             fontSize={10}
                                             fontWeight="900"
                                             tickFormatter={(date) => new Date(date).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
@@ -239,7 +239,7 @@ export function Analytics() {
                                             tickLine={false}
                                             dy={10}
                                         />
-                                        <YAxis stroke="#64748b" fontSize={10} fontWeight="900" axisLine={false} tickLine={false} />
+                                        <YAxis stroke="#94a3b8" fontSize={10} fontWeight="900" axisLine={false} tickLine={false} />
                                         <RechartsTooltip
                                             contentStyle={{
                                                 backgroundColor: '#0f172a',
@@ -269,13 +269,13 @@ export function Analytics() {
                     </GlassCard>
 
                     {/* Sector Performance - Vertical Bar */}
-                    <GlassCard variant="deep" className="lg:col-span-4 p-8 border-white/5 !rounded-[2.5rem] bg-slate-900/40 backdrop-blur-3xl">
+                    <GlassCard variant="dark" className="lg:col-span-4 p-8 border-white/5 !rounded-[2.5rem] bg-slate-950/40 backdrop-blur-3xl">
                         <div className="mb-10">
-                            <h3 className="text-xl font-black text-slate-100 uppercase tracking-tight flex items-center gap-3">
+                            <h3 className="text-xl font-black text-white uppercase tracking-tight flex items-center gap-3">
                                 <PieIcon className="w-5 h-5 text-purple-400" />
                                 Por Setor
                             </h3>
-                            <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mt-1">Eficiência departamental</p>
+                            <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mt-1">Eficiência departamental</p>
                         </div>
 
                         <div className="space-y-6 overflow-y-auto max-h-[350px] pr-2 custom-scrollbar">
@@ -283,12 +283,12 @@ export function Analytics() {
                                 <div key={sector.name} className="group">
                                     <div className="flex justify-between items-end mb-2">
                                         <div>
-                                            <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">{sector.name}</p>
-                                            <p className="text-[9px] font-bold text-slate-500 uppercase mt-0.5">{sector.avgHours}h avg response</p>
+                                            <p className="text-[10px] font-black text-slate-200 uppercase tracking-widest">{sector.name}</p>
+                                            <p className="text-[9px] font-bold text-slate-400 uppercase mt-0.5">{sector.avgHours}h avg response</p>
                                         </div>
                                         <div className="text-right">
-                                            <span className="text-xs font-black text-slate-200">{sector.resolved}</span>
-                                            <span className="text-[10px] font-bold text-slate-500 ml-1">/{sector.resolved + sector.forwarded}</span>
+                                            <span className="text-xs font-black text-white">{sector.resolved}</span>
+                                            <span className="text-[10px] font-bold text-slate-400 ml-1">/{sector.resolved + sector.forwarded}</span>
                                         </div>
                                     </div>
                                     <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden flex">
@@ -303,14 +303,14 @@ export function Analytics() {
                     </GlassCard>
 
                     {/* Global Analysis - Status Distribution */}
-                    <GlassCard variant="deep" className="lg:col-span-12 p-8 border-white/5 !rounded-[2.5rem] bg-slate-900/40 backdrop-blur-3xl">
+                    <GlassCard variant="dark" className="lg:col-span-12 p-8 border-white/5 !rounded-[2.5rem] bg-slate-900/40 backdrop-blur-3xl">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
                             <div>
-                                <h3 className="text-2xl font-black text-slate-100 uppercase tracking-tight mb-4 flex items-center gap-4">
+                                <h3 className="text-2xl font-black text-white uppercase tracking-tight mb-4 flex items-center gap-4">
                                     <PieIcon className="w-6 h-6 text-emerald-400" />
                                     Arquitetura de Status
                                 </h3>
-                                <p className="text-slate-400 text-sm leading-relaxed mb-8 font-medium">
+                                <p className="text-slate-300 text-sm leading-relaxed mb-8 font-medium">
                                     Análise estrutural da distribuição de demandas. O gráfico indica a relação entre resoluções e pendências atuais em todos os setores integrados.
                                 </p>
                                 <div className="grid grid-cols-2 gap-4">
@@ -318,9 +318,9 @@ export function Analytics() {
                                         <div key={p.name} className="p-4 bg-white/5 border border-white/10 rounded-2xl">
                                             <div className="flex items-center gap-2 mb-1">
                                                 <div className="w-2 h-2 rounded-full" style={{ backgroundColor: p.color }} />
-                                                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{p.name}</span>
+                                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{p.name}</span>
                                             </div>
-                                            <p className="text-2xl font-black text-slate-200">{p.value}</p>
+                                            <p className="text-2xl font-black text-white">{p.value}</p>
                                         </div>
                                     ))}
                                 </div>
@@ -357,8 +357,8 @@ export function Analytics() {
                                     </ResponsiveContainer>
                                 )}
                                 <div className="absolute flex flex-col items-center justify-center">
-                                    <span className="text-[10px] font-black text-slate-600 uppercase tracking-[0.3em]">Total</span>
-                                    <span className="text-4xl font-black text-slate-100">{statusParams.reduce((a, b) => a + b.value, 0)}</span>
+                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Total</span>
+                                    <span className="text-4xl font-black text-white">{statusParams.reduce((a, b) => a + b.value, 0)}</span>
                                 </div>
                             </div>
                         </div>
