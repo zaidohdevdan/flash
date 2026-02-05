@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import {
     Send,
     ArrowRight,
-    MessageSquare,
     CheckCircle2,
     Code2,
     Linkedin,
@@ -15,8 +14,6 @@ import {
     WifiOff,
     Zap,
     BarChart3,
-    Layers,
-    ShieldCheck,
     Globe2,
     Smartphone
 } from 'lucide-react';
