@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { motion, useReducedMotion } from 'framer-motion';
+import {useReducedMotion } from 'framer-motion';
 
 export const TacticalHud = () => {
     const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
