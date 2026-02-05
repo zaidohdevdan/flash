@@ -165,7 +165,7 @@ export function Home() {
                             transition={{ duration: 0.6, delay: 0.1 }}
                             className="text-6xl lg:text-[5.5rem] font-black tracking-tighter leading-[0.95] text-white"
                         >
-                            Gestão Tática <br />
+                            Gestão de Processos <br />
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">Em Tempo Real.</span>
                         </motion.h1>
 
