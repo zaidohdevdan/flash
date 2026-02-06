@@ -43,7 +43,7 @@ cd server && bun run build
 
 Configure as variáveis necessárias em `.env`:
 
-- `DATABASE_URL`: URL do PostgreSQL
+- `DATABASE_URL`: URL do MongoDB
 - `JWT_SECRET`: Chave secreta para JWT
 - `CLOUDINARY_*`: Credenciais do Cloudinary
 
