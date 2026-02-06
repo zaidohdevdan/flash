@@ -200,7 +200,16 @@ export function ManagerDashboard() {
             });
             playNotificationSound();
         },
-        onNewNotification: (notif) => {
+        onNewNotification: (payload) => {
+            const notif: Notification = {
+                id: (payload.id as string) || Date.now().toString(),
+                title: payload.title,
+                message: payload.message,
+                type: (payload.type as string) || 'system',
+                read: false,
+                createdAt: (payload.createdAt as string) || new Date().toISOString(),
+                link: payload.link as string | undefined
+            };
             setNotifications(prev => [notif, ...prev]);
         }
     });

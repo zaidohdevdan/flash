@@ -7,7 +7,7 @@ interface InsightData {
         criticalSector?: {
             name: string;
             avgHours: number;
-        };
+        } | null;
         impactedCount: number;
     };
     efficiency: {
