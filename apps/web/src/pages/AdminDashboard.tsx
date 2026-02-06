@@ -154,17 +154,19 @@ export function AdminDashboard() {
             return;
         }
 
+        // Optimistic Update: Remove visualmente antes da confirmação do backend para sensação de instantaneidade
+        setUsers(prev => prev.filter(u => u.id !== userId));
+
         try {
             await api.delete(`/users/${userId}`);
-            setSuccess(true);
             toast.success('Usuário removido com sucesso!');
-            setTimeout(() => {
-                setSuccess(false);
-                fetchUsers();
-            }, 1000);
+            // Recarrega dados reais em background para garantir consistência
+            fetchUsers();
         } catch (err: any) {
+            // Reverte em caso de erro (opcional, mas boa prática)
             console.error('Erro ao deletar:', err.response?.data?.error);
-            alert(err.response?.data?.error || 'Erro ao deletar usuário.');
+            toast.error('Erro ao deletar usuário. A lista será atualizada.');
+            fetchUsers(); // Restaura lista
         }
     }
 
@@ -199,17 +201,17 @@ export function AdminDashboard() {
             return;
         }
 
+        // Optimistic Update
+        setDepartments(prev => prev.filter(d => d.id !== deptId));
+
         try {
             await api.delete(`/departments/${deptId}`);
-            setSuccess(true);
             toast.success('Departamento excluído e processos reatribuídos.');
-            setTimeout(() => {
-                setSuccess(false);
-                fetchDepartments();
-            }, 1500);
+            fetchDepartments();
         } catch (err: any) {
             console.error('Erro ao deletar departamento:', err);
             toast.error('Erro ao excluir departamento.');
+            fetchDepartments();
         }
     }
 
