@@ -15,9 +15,11 @@ interface UseDashboardSocketOptions {
     onNotification?: (data: { from: string; fromName?: string; text: string }) => void;
     onConferenceInvite?: (data: { roomId: string; hostId: string; hostRole: string }) => void;
     onNewNotification?: (data: any) => void;
+    onNewReport?: () => void;
+    onReportStatusUpdate?: () => void;
 }
 
-export const useDashboardSocket = ({ user, onNotification, onConferenceInvite, onNewNotification }: UseDashboardSocketOptions) => {
+export const useDashboardSocket = ({ user, onNotification, onConferenceInvite, onNewNotification, onNewReport, onReportStatusUpdate }: UseDashboardSocketOptions) => {
     const [socket, setSocket] = useState<Socket | null>(null);
     const [onlineUserIds, setOnlineUserIds] = useState<string[]>([]);
     const [unreadMessages, setUnreadMessages] = useState<Record<string, boolean>>({});
@@ -116,6 +118,20 @@ export const useDashboardSocket = ({ user, onNotification, onConferenceInvite, o
                         fontWeight: 'bold'
                     }
                 });
+            }
+        });
+
+        // Listen for new reports
+        newSocket.on('new_report_for_supervisor', () => {
+            if (onNewReport) {
+                onNewReport();
+            }
+        });
+
+        // Listen for report status updates
+        newSocket.on('report_status_updated_for_supervisor', () => {
+            if (onReportStatusUpdate) {
+                onReportStatusUpdate();
             }
         });
 

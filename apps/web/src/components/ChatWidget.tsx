@@ -432,7 +432,7 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket }: ChatWid
                             onChange={e => setInputText(e.target.value)}
                             onKeyDown={e => e.key === 'Enter' && handleSendMessage()}
                             placeholder="Digite sua mensagem..."
-                            className="flex-1 bg-gray-100 border-none outline-none text-sm px-4 py-2.5 rounded-xl focus:ring-2 focus:ring-blue-100 transition"
+                            className="flex-1 bg-gray-100 border-none outline-none text-sm text-gray-900 placeholder:text-gray-500 px-4 py-2.5 rounded-xl focus:ring-2 focus:ring-blue-100 transition"
                         />
                         <button
                             onClick={handleSendMessage}

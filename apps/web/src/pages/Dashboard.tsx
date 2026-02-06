@@ -155,6 +155,16 @@ export function Dashboard() {
         },
         onNewNotification: (notif) => {
             setNotifications(prev => [notif, ...prev]);
+        },
+        onNewReport: () => {
+            // Novo report criado - atualizar lista
+            refetchReports();
+            loadStats();
+        },
+        onReportStatusUpdate: () => {
+            // Status de report atualizado - atualizar lista
+            refetchReports();
+            loadStats();
         }
     });
 
