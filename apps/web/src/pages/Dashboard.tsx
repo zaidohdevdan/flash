@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
@@ -54,8 +54,7 @@ const FILTER_OPTIONS = [
     { id: 'SENT', label: 'Recebidos' },
     { id: 'IN_REVIEW', label: 'Análise' },
     { id: 'FORWARDED', label: 'Tramite' },
-    { id: 'RESOLVED', label: 'Feitos' },
-    { id: 'ARCHIVED', label: 'Arquivados' }
+    { id: 'RESOLVED', label: 'Feitos' }
 ];
 
 export function Dashboard() {
@@ -115,7 +114,7 @@ export function Dashboard() {
         id: user.id || '',
         name: user.name || '',
         role: user.role || ''
-    } : null, [user?.id, user?.name, user?.role]);
+    } : null, [user]);
 
     const {
         socket,
@@ -183,41 +182,50 @@ export function Dashboard() {
     });
 
     // Restore auxiliary data loaders
-    const loadStats = async () => {
+    const loadStats = useCallback(async () => {
         try {
             const response = await api.get('/reports/stats');
             setStats(response.data);
-        } catch (error) {
-            console.error('Erro ao buscar estatísticas:', error);
+        } catch {
+            console.error('Erro ao buscar estatísticas');
         }
-    };
+    }, []);
 
-    const loadSubordinates = async () => {
+    const loadSubordinates = useCallback(async () => {
         try {
             const response = await api.get('/subordinates');
             setSubordinates(response.data.filter((s: Subordinate) => s.id !== user?.id));
-        } catch (error) {
-            console.error('Erro ao buscar subordinados:', error);
+        } catch {
+            console.error('Erro ao buscar subordinados');
         }
-    };
+    }, [user?.id]);
 
-    const loadContacts = async () => {
+    const loadContacts = useCallback(async () => {
         try {
             const response = await api.get('/support-network');
             setContacts(response.data.filter((c: UserContact) => c.id !== user?.id));
-        } catch (error) {
-            console.error('Erro ao buscar contatos:', error);
+        } catch {
+            console.error('Erro ao buscar contatos');
         }
-    };
+    }, [user?.id]);
 
-    const loadDepartments = async () => {
+    const loadDepartments = useCallback(async () => {
         try {
             const response = await api.get('/departments');
             setDepartments(response.data);
-        } catch (error) {
-            console.error('Erro ao buscar departamentos:', error);
+        } catch {
+            console.error('Erro ao buscar departamentos');
         }
-    };
+    }, []);
+
+    const fetchNotifications = useCallback(async () => {
+        try {
+            const res = await api.get('/notifications');
+            setNotifications(res.data);
+        } catch {
+            console.error('Erro ao buscar notificações');
+        }
+    }, []);
 
     // Update reports state
     useEffect(() => {
@@ -230,14 +238,14 @@ export function Dashboard() {
     // Side Effects for aux data
     useEffect(() => {
         loadStats();
-    }, [statusFilter, startDate, endDate]);
+    }, [statusFilter, startDate, endDate, loadStats]);
 
     useEffect(() => {
         loadSubordinates();
         loadContacts();
         loadDepartments();
         fetchNotifications();
-    }, []);
+    }, [loadSubordinates, loadContacts, loadDepartments, fetchNotifications]);
 
     useEffect(() => {
         if (activeChatId) {
@@ -251,20 +259,13 @@ export function Dashboard() {
         }
     };
 
-    const fetchNotifications = async () => {
-        try {
-            const res = await api.get('/notifications');
-            setNotifications(res.data);
-        } catch (error) {
-            console.error('Erro ao buscar notificações');
-        }
-    };
+
 
     const handleMarkAsRead = async (id: string) => {
         try {
             await api.patch(`/notifications/${id}/read`);
             setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
-        } catch (error) {
+        } catch {
             toast.error('Erro ao marcar como lida');
         }
     };
@@ -274,7 +275,7 @@ export function Dashboard() {
             await api.post('/notifications/read-all');
             setNotifications(prev => prev.map(n => ({ ...n, read: true })));
             toast.success('Todas as notificações marcadas como lidas');
-        } catch (error) {
+        } catch {
             toast.error('Erro ao marcar todas como lidas');
         }
     };
@@ -298,7 +299,7 @@ export function Dashboard() {
             toast.success('Perfil atualizado!');
             setIsProfileOpen(false);
             setProfileAvatar(null);
-        } catch (error) {
+        } catch {
             toast.error('Erro ao atualizar perfil.');
         } finally {
             setIsUpdatingProfile(false);
@@ -319,7 +320,7 @@ export function Dashboard() {
             resetAnalysisForm();
             refetchReports();
             loadStats();
-        } catch (error) {
+        } catch {
             toast.error('Erro ao processar relatório.');
         }
     };
@@ -353,7 +354,7 @@ export function Dashboard() {
 
             toast.success('War Room iniciada! Convites enviados.');
             setActiveRoom(response.data.roomId);
-        } catch (error) {
+        } catch {
             toast.error('Erro ao iniciar War Room.');
         }
     };
@@ -473,7 +474,7 @@ export function Dashboard() {
                                 reports={reports.filter(r =>
                                     r.comment.toLowerCase().includes(searchTerm.toLowerCase()) ||
                                     r.id.toLowerCase().includes(searchTerm.toLowerCase())
-                                ) as any}
+                                )}
                                 searchTerm={searchTerm}
                                 onSearchChange={setSearchTerm}
                                 hasMore={hasMore}
@@ -481,17 +482,17 @@ export function Dashboard() {
                                 isLoading={isReportsLoading}
                                 renderReportActions={(report) => (
                                     <div className="flex gap-2 w-full">
-                                        {report.status !== 'RESOLVED' && report.status !== 'ARCHIVED' && !report.department && (
+                                        {report.status !== 'RESOLVED' && !report.department && (
                                             <Button
                                                 variant="primary"
                                                 size="sm"
                                                 fullWidth
-                                                onClick={() => { setAnalyzingReport(report as any); setTargetStatus('FORWARDED'); }}
+                                                onClick={() => { setAnalyzingReport(report); setTargetStatus('FORWARDED'); }}
                                             >
                                                 Trâmite
                                             </Button>
                                         )}
-                                        <Button variant="ghost" size="sm" onClick={() => setSelectedReport(report as any)}>
+                                        <Button variant="ghost" size="sm" onClick={() => setSelectedReport(report)}>
                                             <History className="w-4 h-4" />
                                         </Button>
                                     </div>
@@ -550,7 +551,7 @@ export function Dashboard() {
                 {chatTarget && user && (
                     <ChatWidget
                         currentUser={{ id: user.id || '', name: user.name || '', role: user.role || '' }}
-                        targetUser={chatTarget as any}
+                        targetUser={chatTarget}
                         onClose={handleCloseChat}
                         socket={socket}
                     />

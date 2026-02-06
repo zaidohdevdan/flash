@@ -60,7 +60,10 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
                                 </div>
                             </div>
                             <button
+                                type="button"
                                 onClick={onClose}
+                                title="Fechar notificações"
+                                aria-label="Fechar notificações"
                                 className="p-2 hover:bg-gray-100 rounded-full transition-all"
                             >
                                 <X className="w-6 h-6 text-gray-400" />
@@ -71,6 +74,7 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
                         {unreadCount > 0 && (
                             <div className="px-6 py-3 bg-gray-50/50 flex justify-end items-center">
                                 <button
+                                    type="button"
                                     onClick={onMarkAllAsRead}
                                     className="flex items-center gap-1.5 text-[10px] font-black text-gray-500 hover:text-blue-600 uppercase tracking-widest transition-all"
                                 >

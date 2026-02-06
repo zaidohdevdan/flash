@@ -82,8 +82,7 @@ export const ReportStatus: {
   SENT: 'SENT',
   IN_REVIEW: 'IN_REVIEW',
   FORWARDED: 'FORWARDED',
-  RESOLVED: 'RESOLVED',
-  ARCHIVED: 'ARCHIVED'
+  RESOLVED: 'RESOLVED'
 };
 
 export type ReportStatus = (typeof ReportStatus)[keyof typeof ReportStatus]

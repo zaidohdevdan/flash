@@ -34,7 +34,7 @@ export function Register() {
         try {
             const response = await api.get('/supervisors');
             setSupervisors(response.data);
-        } catch (err) {
+        } catch {
             console.error('Erro ao buscar supervisores');
         }
     }
@@ -64,8 +64,9 @@ export function Register() {
             setTimeout(() => {
                 navigate('/');
             }, 3000);
-        } catch (err: any) {
-            toast.error(err.response?.data?.error || 'Erro ao realizar cadastro.', {
+        } catch (err: unknown) {
+            const error = err as { response?: { data?: { error?: string } } };
+            toast.error(error.response?.data?.error || 'Erro ao realizar cadastro.', {
                 style: { borderRadius: '1.5rem', background: '#0f172a', color: '#fff', fontSize: '12px', fontWeight: 'bold', border: '1px solid rgba(255,255,255,0.1)' }
             });
         } finally {
@@ -198,12 +199,13 @@ export function Register() {
 
                         {role === 'PROFESSIONAL' && (
                             <div className="space-y-1.5 animate-in slide-in-from-top-4 duration-500">
-                                <label className="text-[10px] font-black text-slate-300 uppercase tracking-widest ml-1">Responsável Técnico</label>
+                                <label htmlFor="supervisor-select" className="text-[10px] font-black text-slate-300 uppercase tracking-widest ml-1">Responsável Técnico</label>
                                 <div className="relative group">
                                     <div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-blue-500 transition-colors">
                                         <Briefcase className="w-4 h-4" />
                                     </div>
                                     <select
+                                        id="supervisor-select"
                                         value={supervisorId}
                                         onChange={e => setSupervisorId(e.target.value)}
                                         className="w-full pl-14 pr-12 py-4 bg-slate-950/50 border border-white/5 rounded-2xl outline-none focus:bg-slate-900 focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all text-sm font-black text-white appearance-none cursor-pointer"

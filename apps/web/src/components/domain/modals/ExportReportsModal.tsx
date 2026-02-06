@@ -74,15 +74,16 @@ export const ExportReportsModal: React.FC<ExportReportsModalProps> = ({
                         <label className="text-[10px] font-black text-gray-700 uppercase tracking-widest ml-1">Filtrar por Status</label>
                         <select
                             value={selectedStatus}
-                            onChange={(e) => setSelectedStatus(e.target.value as any)}
+                            onChange={(e) => setSelectedStatus(e.target.value as ReportStatus | 'ALL')}
                             className="w-full bg-gray-50/50 border border-gray-100 rounded-xl px-4 py-3 text-sm text-gray-900 focus:border-blue-500 focus:bg-white transition-all outline-none font-bold"
+                            title="Filtrar por Status"
+                            aria-label="Filtrar por Status"
                         >
                             <option value="ALL">Todos os status</option>
                             <option value="SENT">Enviado</option>
                             <option value="IN_REVIEW">Em Análise</option>
                             <option value="FORWARDED">Encaminhado</option>
                             <option value="RESOLVED">Resolvido</option>
-                            <option value="ARCHIVED">Arquivado</option>
                         </select>
                     </div>
 
@@ -92,6 +93,8 @@ export const ExportReportsModal: React.FC<ExportReportsModalProps> = ({
                             value={selectedDept}
                             onChange={(e) => setSelectedDept(e.target.value)}
                             className="w-full bg-gray-50/50 border border-gray-100 rounded-xl px-4 py-3 text-sm text-gray-900 focus:border-blue-500 focus:bg-white transition-all outline-none font-bold"
+                            title="Filtrar por Setor"
+                            aria-label="Filtrar por Setor"
                         >
                             <option value="ALL">Todos os setores</option>
                             {departments.map(dept => (
@@ -111,8 +114,9 @@ export const ExportReportsModal: React.FC<ExportReportsModalProps> = ({
                         </span>
                     </div>
                     <div className="flex gap-3">
-                        <Button variant="ghost" onClick={onClose} disabled={isGenerating}>Cancelar</Button>
+                        <Button type="button" variant="ghost" onClick={onClose} disabled={isGenerating}>Cancelar</Button>
                         <Button
+                            type="button"
                             variant="primary"
                             onClick={handleExport}
                             disabled={isGenerating}

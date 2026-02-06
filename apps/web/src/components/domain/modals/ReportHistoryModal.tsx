@@ -49,7 +49,7 @@ export const ReportHistoryModal: React.FC<ReportHistoryModalProps> = ({
                                 <span className="text-[9px] font-black text-gray-400 uppercase tracking-tight">
                                     {new Date(step.createdAt).toLocaleString('pt-BR')}
                                 </span>
-                                <Badge status={step.status as any} />
+                                <Badge status={step.status as import('../../../types').ReportStatus} />
                             </div>
                             <p className="text-sm font-medium text-gray-600 leading-relaxed mb-4">
                                 {step.comment || 'Nenhuma observação registrada.'}

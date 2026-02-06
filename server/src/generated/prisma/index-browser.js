@@ -255,8 +255,7 @@ exports.ReportStatus = exports.$Enums.ReportStatus = {
   SENT: 'SENT',
   IN_REVIEW: 'IN_REVIEW',
   FORWARDED: 'FORWARDED',
-  RESOLVED: 'RESOLVED',
-  ARCHIVED: 'ARCHIVED'
+  RESOLVED: 'RESOLVED'
 };
 
 exports.AgendaEventType = exports.$Enums.AgendaEventType = {

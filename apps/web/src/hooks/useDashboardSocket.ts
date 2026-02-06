@@ -10,11 +10,17 @@ interface User {
     role: string;
 }
 
+interface NotificationPayload {
+    title: string;
+    message: string;
+    [key: string]: unknown;
+}
+
 interface UseDashboardSocketOptions {
     user: User | null;
     onNotification?: (data: { from: string; fromName?: string; text: string }) => void;
     onConferenceInvite?: (data: { roomId: string; hostId: string; hostRole: string }) => void;
-    onNewNotification?: (data: any) => void;
+    onNewNotification?: (data: NotificationPayload) => void;
     onNewReport?: () => void;
     onReportStatusUpdate?: () => void;
 }
@@ -35,9 +41,18 @@ export const useDashboardSocket = ({ user, onNotification, onConferenceInvite, o
 
     // Use a ref for the callback to avoid re-triggering the socket connection effect
     const onNotificationRef = useRef(onNotification);
+    const onConferenceInviteRef = useRef(onConferenceInvite);
+    const onNewNotificationRef = useRef(onNewNotification);
+    const onNewReportRef = useRef(onNewReport);
+    const onReportStatusUpdateRef = useRef(onReportStatusUpdate);
+
     useEffect(() => {
         onNotificationRef.current = onNotification;
-    }, [onNotification]);
+        onConferenceInviteRef.current = onConferenceInvite;
+        onNewNotificationRef.current = onNewNotification;
+        onNewReportRef.current = onNewReport;
+        onReportStatusUpdateRef.current = onReportStatusUpdate;
+    }, [onNotification, onConferenceInvite, onNewNotification, onNewReport, onReportStatusUpdate]);
 
     useEffect(() => {
         if (!user?.id) return;
@@ -51,6 +66,7 @@ export const useDashboardSocket = ({ user, onNotification, onConferenceInvite, o
             query: { userId, role: userRole, userName }
         });
 
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setSocket(newSocket);
 
         newSocket.on('connect', () => setIsConnected(true));
@@ -97,14 +113,14 @@ export const useDashboardSocket = ({ user, onNotification, onConferenceInvite, o
         newSocket.on('new_chat_notification', handleChatNotification);
 
         newSocket.on('conference_invite', (data: { roomId: string; hostId: string; hostRole: string }) => {
-            if (onConferenceInvite) {
-                onConferenceInvite(data);
+            if (onConferenceInviteRef.current) {
+                onConferenceInviteRef.current(data);
             }
         });
 
-        newSocket.on('new_notification', (data: any) => {
-            if (onNewNotification) {
-                onNewNotification(data);
+        newSocket.on('new_notification', (data: NotificationPayload) => {
+            if (onNewNotificationRef.current) {
+                onNewNotificationRef.current(data);
             } else {
                 playNotificationSound();
                 toast.success(`${data.title}: ${data.message}`, {
@@ -123,15 +139,15 @@ export const useDashboardSocket = ({ user, onNotification, onConferenceInvite, o
 
         // Listen for new reports
         newSocket.on('new_report_to_review', () => {
-            if (onNewReport) {
-                onNewReport();
+            if (onNewReportRef.current) {
+                onNewReportRef.current();
             }
         });
 
         // Listen for report status updates
         newSocket.on('report_status_updated_for_supervisor', () => {
-            if (onReportStatusUpdate) {
-                onReportStatusUpdate();
+            if (onReportStatusUpdateRef.current) {
+                onReportStatusUpdateRef.current();
             }
         });
 

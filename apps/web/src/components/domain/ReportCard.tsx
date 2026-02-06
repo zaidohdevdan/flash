@@ -1,34 +1,19 @@
 import React from 'react';
 import { Calendar, MessageSquare, Hash } from 'lucide-react';
 import { Card, Avatar, Badge } from '../ui';
-import type { BadgeStatus } from '../ui';
 import { formatUrl } from '../../services/api';
 import { ImageZoomModal } from './ImageZoomModal';
 
 /**
  * Estrutura de dados simplificada para o Report.
  */
-interface ReportData {
-    id: string;
-    imageUrl: string;
-    comment: string;
-    status: BadgeStatus;
-    createdAt: string;
-    user?: {
-        name: string;
-        avatarUrl?: string | null;
-    };
-    feedback?: string;
-    department?: {
-        name: string;
-    };
-}
+import type { Report } from '../../types';
 
 /**
  * Propriedades para o componente ReportCard.
  */
 export interface ReportCardProps {
-    report: ReportData;
+    report: Report;
     /** Se deve exibir o cabeçalho do autor (usado no Dashboard do Supervisor). */
     showUser?: boolean;
     /** Função de clique para abrir detalhes. */

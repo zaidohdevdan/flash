@@ -128,6 +128,7 @@ export function Profile() {
                                 <input
                                     type="file"
                                     ref={fileInputRef}
+                                    title="Alterar foto de perfil"
                                     className="hidden"
                                     accept="image/*"
                                     onChange={handleAvatarChange}
@@ -146,11 +147,12 @@ export function Profile() {
                         <GlassCard className="p-8">
                             <form onSubmit={handleSave} className="space-y-6">
                                 <div>
-                                    <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2 flex items-center gap-2">
+                                    <label htmlFor="status-phrase" className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2 flex items-center gap-2">
                                         <MessageSquare className="w-4 h-4" />
                                         Frase de Status
                                     </label>
                                     <input
+                                        id="status-phrase"
                                         type="text"
                                         value={statusPhrase}
                                         onChange={(e) => setStatusPhrase(e.target.value)}

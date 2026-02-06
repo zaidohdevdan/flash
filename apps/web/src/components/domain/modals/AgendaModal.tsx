@@ -80,6 +80,7 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
             setContacts(contactsRes.data);
             setNote(noteRes.data.content || '');
         } catch (error) {
+            console.error(error);
             toast.error('Erro ao carregar dados da agenda');
         } finally {
             setIsLoading(false);
@@ -92,6 +93,7 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
             await api.post('/agenda/note', { content: note });
             toast.success('Nota salva');
         } catch (error) {
+            console.error(error);
             toast.error('Erro ao salvar nota');
         } finally {
             setIsSavingNote(false);
@@ -121,8 +123,9 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
             setEventTitle('');
             setSelectedParticipants([]);
             toast.success('Evento agendado!');
-        } catch (error: any) {
-            const msg = error.response?.data?.error || 'Erro ao criar evento';
+        } catch (error: unknown) {
+            const err = error as { response?: { data?: { error?: string } } };
+            const msg = err.response?.data?.error || 'Erro ao criar evento';
             toast.error(msg);
         }
     };
@@ -132,7 +135,7 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
             await api.delete(`/agenda/${id}`);
             setEvents(events.filter(e => e.id !== id));
             toast.success('Evento removido');
-        } catch (error) {
+        } catch {
             toast.error('Erro ao remover evento');
         }
     };
@@ -176,7 +179,7 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
                             <h3 className="text-xl font-black text-white uppercase tracking-tight">Novo Agendamento</h3>
                             <p className="text-[10px] text-blue-400 font-black uppercase tracking-widest">{format(selectedDate, "EEEE, dd 'de' MMMM", { locale: ptBR })}</p>
                         </div>
-                        <button onClick={() => setIsCreatingEvent(false)} className="p-2 hover:bg-white/10 rounded-2xl transition-all">
+                        <button type="button" onClick={() => setIsCreatingEvent(false)} className="p-2 hover:bg-white/10 rounded-2xl transition-all" title="Fechar novo agendamento" aria-label="Fechar novo agendamento">
                             <X className="w-6 h-6 text-slate-400 hover:text-red-400" />
                         </button>
                     </div>
@@ -204,6 +207,8 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
                                                 className="w-full bg-slate-900/50 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm font-black text-white focus:bg-slate-800 focus:border-blue-500/30 outline-none transition-all [color-scheme:dark]"
                                                 value={eventStartTime}
                                                 onChange={(e) => setEventStartTime(e.target.value)}
+                                                title="Horário de Início"
+                                                aria-label="Horário de Início"
                                             />
                                         </div>
                                         <div className="space-y-1">
@@ -212,6 +217,8 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
                                                 className="w-full bg-slate-900/50 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm font-black text-white focus:bg-slate-800 focus:border-blue-500/30 outline-none transition-all appearance-none cursor-pointer"
                                                 value={eventType}
                                                 onChange={(e) => setEventType(e.target.value as AgendaEventType)}
+                                                title="Tipo de Evento"
+                                                aria-label="Tipo de Evento"
                                             >
                                                 <option value="TASK" className="bg-slate-900">Tarefa Geral</option>
                                                 <option value="CONFERENCE" className="bg-slate-900">Videoconferência</option>
@@ -235,8 +242,11 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
                                                     <Avatar src={c.avatarUrl} size="sm" />
                                                     <span className="text-[11px] font-black text-slate-200">{c.name}</span>
                                                     <button
+                                                        type="button"
                                                         onClick={() => setSelectedParticipants(prev => prev.filter(x => x !== pid))}
                                                         className="ml-1 p-1 hover:bg-rose-500/20 hover:text-rose-400 rounded-lg transition-all text-slate-500"
+                                                        title="Remover participante"
+                                                        aria-label="Remover participante"
                                                     >
                                                         <X className="w-3.5 h-3.5" />
                                                     </button>
@@ -254,10 +264,11 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
                             </div>
 
                             <div className="flex gap-4 pt-4">
-                                <Button variant="glass" size="lg" className="flex-1 !rounded-2xl !bg-white/5 hover:!bg-white/10 !border-white/10" onClick={() => setIsCreatingEvent(false)}>
+                                <Button type="button" variant="glass" size="lg" className="flex-1 !rounded-2xl !bg-white/5 hover:!bg-white/10 !border-white/10" onClick={() => setIsCreatingEvent(false)}>
                                     Escolher Outra Data
                                 </Button>
                                 <Button
+                                    type="button"
                                     variant="primary"
                                     size="lg"
                                     className="flex-[2] !rounded-2xl shadow-xl shadow-blue-500/20"
@@ -294,6 +305,7 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
                                         const isSelected = selectedParticipants.includes(contact.id);
                                         return (
                                             <button
+                                                type="button"
                                                 key={contact.id}
                                                 onClick={() => {
                                                     setSelectedParticipants(prev =>
@@ -304,6 +316,8 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
                                                     w-full flex items-center justify-between p-3 rounded-2xl transition-all border-2
                                                     ${isSelected ? 'bg-blue-600 border-blue-600 text-white shadow-lg scale-[0.98]' : 'bg-white/5 border-transparent hover:border-white/10 text-slate-300'}
                                                 `}
+                                                title={`Selecionar ${contact.name}`}
+                                                aria-label={`Selecionar ${contact.name}`}
                                             >
                                                 <div className="flex items-center gap-3">
                                                     <Avatar src={contact.avatarUrl} size="md" />
@@ -336,10 +350,10 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
                                     {format(currentDate, 'MMMM yyyy', { locale: ptBR })}
                                 </h3>
                                 <div className="flex gap-1">
-                                    <button onClick={prevMonth} className="p-1.5 hover:bg-white/10 rounded-lg transition-colors text-slate-400 hover:text-white">
+                                    <button type="button" onClick={prevMonth} className="p-1.5 hover:bg-white/10 rounded-lg transition-colors text-slate-400 hover:text-white" title="Mês anterior" aria-label="Mês anterior">
                                         <ChevronLeft className="w-5 h-5" />
                                     </button>
-                                    <button onClick={nextMonth} className="p-1.5 hover:bg-white/10 rounded-lg transition-colors text-slate-400 hover:text-white">
+                                    <button type="button" onClick={nextMonth} className="p-1.5 hover:bg-white/10 rounded-lg transition-colors text-slate-400 hover:text-white" title="Próximo mês" aria-label="Próximo mês">
                                         <ChevronRight className="w-5 h-5" />
                                     </button>
                                 </div>
@@ -362,6 +376,7 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
 
                                     return (
                                         <button
+                                            type="button"
                                             key={idx}
                                             onClick={() => setSelectedDate(day)}
                                             className={`
@@ -370,6 +385,8 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
                                                 ${isSel ? 'bg-blue-600 !text-white shadow-lg shadow-blue-500/30 scale-105 z-10' : 'hover:bg-white/5'}
                                                 ${isTod && !isSel ? 'text-blue-400 !font-black' : ''}
                                             `}
+                                            title={`Selecionar ${format(day, 'dd/MM/yyyy')}`}
+                                            aria-label={`Selecionar ${format(day, 'dd/MM/yyyy')}`}
                                         >
                                             {format(day, 'd')}
                                             {hasEvents && !isSel && (
@@ -388,6 +405,7 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
                                     Compromissos • {format(selectedDate, "dd 'de' MMM", { locale: ptBR })}
                                 </h4>
                                 <button
+                                    type="button"
                                     onClick={() => setIsCreatingEvent(true)}
                                     className="flex items-center gap-1.5 text-[10px] font-black text-blue-400 hover:text-blue-300 uppercase tracking-tighter bg-blue-500/10 border border-blue-500/20 px-2 py-1 rounded-lg transition-all"
                                 >
@@ -417,8 +435,11 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
                                                 </div>
                                             </div>
                                             <button
+                                                type="button"
                                                 onClick={() => handleDeleteEvent(event.id)}
                                                 className="p-2 text-slate-500 hover:text-rose-400 transition-all opacity-0 group-hover:opacity-100"
+                                                title="Excluir evento"
+                                                aria-label="Excluir evento"
                                             >
                                                 <Trash2 className="w-4 h-4" />
                                             </button>
@@ -465,6 +486,7 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
                                 />
                                 <div className="flex justify-end mt-2">
                                     <button
+                                        type="button"
                                         onClick={handleSaveNote}
                                         disabled={isSavingNote}
                                         className="text-[10px] font-black text-yellow-500 uppercase tracking-widest hover:bg-yellow-900/20 px-3 py-1.5 rounded-lg transition-all flex items-center gap-2"

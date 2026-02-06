@@ -111,7 +111,10 @@ export const Modal: React.FC<ModalProps> = ({
                             )}
                         </div>
                         <button
+                            type="button"
                             onClick={onClose}
+                            title="Fechar"
+                            aria-label="Fechar"
                             className={`p-2 -mr-2 rounded-2xl transition-all ${currentStyle.close}`}
                         >
                             <X className="w-6 h-6" />

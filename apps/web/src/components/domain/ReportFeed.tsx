@@ -3,19 +3,7 @@ import { MessageSquare } from 'lucide-react';
 import { Card, Button } from '../ui';
 import { ReportCard } from './ReportCard';
 
-interface Report {
-    id: string;
-    imageUrl: string;
-    comment: string;
-    status: string;
-    createdAt: string;
-    user?: {
-        name: string;
-        avatarUrl?: string | null;
-    };
-    department?: { name: string };
-    history?: any[];
-}
+import type { Report } from '../../types';
 
 interface ReportFeedProps {
     reports: Report[];
@@ -50,7 +38,7 @@ export const ReportFeed: React.FC<ReportFeedProps> = ({
                     {reports.map(report => (
                         <ReportCard
                             key={report.id}
-                            report={report as any}
+                            report={report}
                             showUser
                             actions={renderReportActions(report)}
                         />

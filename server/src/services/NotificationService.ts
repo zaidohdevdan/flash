@@ -71,4 +71,7 @@ export class NotificationService {
             await this.notificationRepository.markAsSent(notification.id);
         }
     }
+    async deleteOld(days: number) {
+        return this.notificationRepository.deleteOld(days);
+    }
 }

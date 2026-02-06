@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
@@ -55,7 +55,7 @@ export function CreateReport() {
     const [selectedReport, setSelectedReport] = useState<Report | null>(null);
     const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
     const [notifications, setNotifications] = useState<Notification[]>([]);
-    const isChatOpenRef = useRef(false);
+
     const LIMIT = 10;
 
     const pendingReports = useLiveQuery(() => db.pendingReports.toArray());
@@ -77,7 +77,7 @@ export function CreateReport() {
         id: user.id || '',
         name: user.name || '',
         role: user.role || ''
-    } : null, [user?.id, user?.name, user?.role]);
+    } : null, [user]);
 
     const {
         socket,
@@ -97,7 +97,16 @@ export function CreateReport() {
             });
             playNotificationSound();
         },
-        onNewNotification: (notif) => {
+        onNewNotification: (payload) => {
+            const notif: Notification = {
+                id: (payload.id as string) || Date.now().toString(),
+                title: payload.title,
+                message: payload.message,
+                type: (payload.type as string) || 'system',
+                read: false,
+                createdAt: (payload.createdAt as string) || new Date().toISOString(),
+                link: payload.link as string | undefined
+            };
             setNotifications(prev => [notif, ...prev]);
         }
     });
@@ -106,20 +115,27 @@ export function CreateReport() {
         Object.values(unreadMessages).some(v => v === true),
         [unreadMessages]);
 
-    useEffect(() => {
-        isChatOpenRef.current = isChatOpen;
-    }, [isChatOpen]);
+
+    const fetchNotifications = useCallback(async () => {
+        if (!user?.id) return;
+        try {
+            const res = await api.get('/notifications');
+            setNotifications(res.data);
+        } catch {
+            console.warn('Erro ao buscar notificações');
+        }
+    }, [user?.id]);
 
     useEffect(() => {
         if (!socket) return;
-        socket.on('report_status_updated', (data: { reportId: string, newStatus: any, feedback?: string, feedbackAt?: string }) => {
+        socket.on('report_status_updated', (data: { reportId: string, newStatus: unknown, feedback?: string, feedbackAt?: string }) => {
             setHistory(prev => {
                 if (statusFilter && statusFilter !== data.newStatus) {
                     return prev.filter(item => item.id !== data.reportId);
                 }
                 return prev.map(item =>
                     item.id === data.reportId
-                        ? { ...item, status: data.newStatus, feedback: data.feedback, feedbackAt: data.feedbackAt }
+                        ? { ...item, status: data.newStatus as Report['status'], feedback: data.feedback, feedbackAt: data.feedbackAt }
                         : item
                 );
             });
@@ -129,12 +145,38 @@ export function CreateReport() {
         };
     }, [socket, statusFilter]);
 
+    // Sincroniza notificações
     useEffect(() => {
+        if (user?.id) {
+            fetchNotifications();
+        }
+    }, [user?.id, fetchNotifications]);
+
+    // Sincroniza perfil apenas uma vez no mount ou se o ID mudar
+    useEffect(() => {
+        if (!user?.id) return;
         api.get('/profile/me').then(res => {
             if (res.data) updateUser(res.data);
         }).catch(() => { });
-        fetchNotifications();
-    }, []);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [user?.id]);
+
+    const loadHistory = useCallback(async (pageNum: number = 1, reset: boolean = false, status?: string) => {
+        if (!user?.id) return;
+        setLoadingHistory(pageNum === 1);
+        try {
+            const url = `/reports/me?page=${pageNum}&limit=${LIMIT}${status ? `&status=${status}` : ''}`;
+            const response = await api.get(url);
+            const newHistory = response.data;
+
+            setHasMore(newHistory.length === LIMIT);
+            setHistory(prev => reset ? newHistory : [...prev, ...newHistory]);
+        } catch {
+            console.error('Erro ao carregar histórico');
+        } finally {
+            setLoadingHistory(false);
+        }
+    }, [user?.id]);
 
     useEffect(() => {
         loadHistory(1, true, statusFilter);
@@ -160,7 +202,7 @@ export function CreateReport() {
             window.removeEventListener('online', handleOnline);
             window.removeEventListener('offline', handleOffline);
         };
-    }, [statusFilter]);
+    }, [statusFilter, loadHistory]);
 
     useEffect(() => {
         const handleVisibilityChange = () => {
@@ -171,23 +213,7 @@ export function CreateReport() {
         };
         document.addEventListener('visibilitychange', handleVisibilityChange);
         return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-    }, [statusFilter]);
-
-    async function loadHistory(pageNum: number = 1, reset: boolean = false, status?: string) {
-        setLoadingHistory(pageNum === 1);
-        try {
-            const url = `/reports/me?page=${pageNum}&limit=${LIMIT}${status ? `&status=${status}` : ''}`;
-            const response = await api.get(url);
-            const newHistory = response.data;
-
-            setHasMore(newHistory.length === LIMIT);
-            setHistory(prev => reset ? newHistory : [...prev, ...newHistory]);
-        } catch (error) {
-            console.error('Erro ao carregar histórico');
-        } finally {
-            setLoadingHistory(false);
-        }
-    }
+    }, [statusFilter, loadHistory]);
 
     const handleOpenChat = () => {
         if (!user?.supervisorId) {
@@ -208,20 +234,13 @@ export function CreateReport() {
         loadHistory(nextPage, false, statusFilter);
     }
 
-    const fetchNotifications = async () => {
-        try {
-            const res = await api.get('/notifications');
-            setNotifications(res.data);
-        } catch (error) {
-            console.error('Erro ao buscar notificações');
-        }
-    };
+
 
     const handleMarkAsRead = async (id: string) => {
         try {
             await api.patch(`/notifications/${id}/read`);
             setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
-        } catch (error) {
+        } catch {
             toast.error('Erro ao marcar como lida');
         }
     };
@@ -231,7 +250,7 @@ export function CreateReport() {
             await api.post('/notifications/read-all');
             setNotifications(prev => prev.map(n => ({ ...n, read: true })));
             toast.success('Todas as notificações marcadas como lidas');
-        } catch (error) {
+        } catch {
             toast.error('Erro ao marcar todas como lidas');
         }
     };
@@ -373,12 +392,15 @@ export function CreateReport() {
                                         Tentar Agora
                                     </Button>
                                     <button
+                                        type="button"
                                         onClick={async () => {
                                             if (confirm('Deseja limpar todos os rascunhos offline?')) {
                                                 await db.pendingReports.clear();
                                             }
                                         }}
                                         className="p-2 text-amber-400 hover:text-red-500 transition-colors"
+                                        aria-label="Limpar rascunhos offline"
+                                        title="Limpar rascunhos offline"
                                     >
                                         <History className="w-4 h-4" />
                                     </button>
@@ -426,6 +448,7 @@ export function CreateReport() {
                                         { id: 'RESOLVED', label: 'Finalizado' },
                                     ].map(filter => (
                                         <button
+                                            type="button"
                                             key={filter.id}
                                             onClick={() => { setStatusFilter(filter.id); setPage(1); }}
                                             className={`px-6 py-2.5 rounded-2xl text-[10px] font-black tracking-widest uppercase transition-all border shrink-0 ${statusFilter === filter.id
@@ -499,8 +522,11 @@ export function CreateReport() {
 
             {view === 'history' && (
                 <button
+                    type="button"
                     onClick={() => setView('form')}
                     className="fixed bottom-8 right-6 w-18 h-18 bg-[#0f172a] rounded-[2rem] flex items-center justify-center text-white shadow-2xl shadow-gray-900/20 active:scale-90 transition-all hover:-translate-y-1 z-30 p-5 group"
+                    aria-label="Criar nova ocorrência"
+                    title="Criar nova ocorrência"
                 >
                     <Plus className="w-10 h-10 group-hover:rotate-90 transition-transform" />
                 </button>
@@ -522,7 +548,7 @@ export function CreateReport() {
             <ReportHistoryModal
                 isOpen={!!selectedReport}
                 onClose={() => setSelectedReport(null)}
-                report={selectedReport as any}
+                report={selectedReport}
             />
 
             <ConferenceModal

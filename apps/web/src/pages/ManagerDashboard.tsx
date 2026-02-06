@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
@@ -38,8 +38,7 @@ const FILTER_OPTIONS = [
     { id: 'SENT', label: 'Recebidos' },
     { id: 'IN_REVIEW', label: 'Análise' },
     { id: 'FORWARDED', label: 'Tramite' },
-    { id: 'RESOLVED', label: 'Feitos' },
-    { id: 'ARCHIVED', label: 'Arquivados' }
+    { id: 'RESOLVED', label: 'Feitos' }
 ];
 
 export function ManagerDashboard() {
@@ -84,7 +83,7 @@ export function ManagerDashboard() {
     const [hasMore, setHasMore] = useState(true);
     const LIMIT = 6;
 
-    const loadReports = async (pageNum: number, reset: boolean = false, status?: string) => {
+    const loadReports = useCallback(async (pageNum: number, reset: boolean = false, status?: string) => {
         try {
             let url = `/reports/department?page=${pageNum}&limit=${LIMIT}`;
             if (status) url += `&status=${status}`;
@@ -92,21 +91,21 @@ export function ManagerDashboard() {
             const response = await api.get(url);
             setHasMore(response.data.length === LIMIT);
             setReports(prev => reset ? response.data : [...prev, ...response.data]);
-        } catch (error) {
-            console.error('Erro ao buscar relatórios do departamento:', error);
+        } catch {
+            console.error('Erro ao buscar relatórios do departamento');
         }
-    };
+    }, [LIMIT]);
 
-    const loadStats = async () => {
+    const loadStats = useCallback(async () => {
         try {
             const response = await api.get('/reports/department/stats');
             setStats(response.data);
-        } catch (error) {
-            console.error('Erro ao buscar estatísticas do departamento:', error);
+        } catch {
+            console.error('Erro ao buscar estatísticas do departamento');
         }
-    };
+    }, []);
 
-    const loadContacts = async () => {
+    const loadContacts = useCallback(async () => {
         try {
             const response = await api.get('/support-network');
             const allContacts = response.data
@@ -114,30 +113,41 @@ export function ManagerDashboard() {
                 .map((c: UserContact) => ({ ...c, isOnline: false }));
 
             setContacts(allContacts);
-        } catch (error) {
-            console.error('Erro ao buscar contatos:', error);
+        } catch {
+            console.error('Erro ao buscar contatos');
         }
-    };
+    }, [user?.id]);
 
-    const loadDepartments = async () => {
+    const loadDepartments = useCallback(async () => {
         try {
             const response = await api.get('/departments');
             setDepartments(response.data.filter((d: Department) => d.id !== user?.departmentId));
-        } catch (error) {
-            console.error('Erro ao buscar departamentos:', error);
+        } catch {
+            console.error('Erro ao buscar departamentos');
         }
-    };
+    }, [user?.departmentId]);
+
+    const fetchNotifications = useCallback(async () => {
+        try {
+            const res = await api.get('/notifications');
+            setNotifications(res.data);
+        } catch {
+            console.error('Erro ao buscar notificações');
+        }
+    }, []);
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         loadReports(1, true, statusFilter);
         loadStats();
-    }, [statusFilter, selectedDeptId]);
+    }, [statusFilter, selectedDeptId, loadReports, loadStats]);
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         loadContacts();
         loadDepartments();
         fetchNotifications();
-    }, []);
+    }, [loadContacts, loadDepartments, fetchNotifications]);
 
     const chatTarget = useMemo(() => {
         if (!activeChatId) return null;
@@ -152,7 +162,7 @@ export function ManagerDashboard() {
         id: user.id || '',
         name: user.name || '',
         role: user.role || ''
-    } : null, [user?.id, user?.name, user?.role]);
+    } : null, [user]);
 
     const {
         socket,
@@ -201,20 +211,13 @@ export function ManagerDashboard() {
         }
     }, [activeChatId, markAsRead]);
 
-    const fetchNotifications = async () => {
-        try {
-            const res = await api.get('/notifications');
-            setNotifications(res.data);
-        } catch (error) {
-            console.error('Erro ao buscar notificações');
-        }
-    };
+
 
     const handleMarkAsRead = async (id: string) => {
         try {
             await api.patch(`/notifications/${id}/read`);
             setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
-        } catch (error) {
+        } catch {
             toast.error('Erro ao marcar como lida');
         }
     };
@@ -224,7 +227,7 @@ export function ManagerDashboard() {
             await api.post('/notifications/read-all');
             setNotifications(prev => prev.map(n => ({ ...n, read: true })));
             toast.success('Todas as notificações marcadas como lidas');
-        } catch (error) {
+        } catch {
             toast.error('Erro ao marcar todas como lidas');
         }
     };
@@ -243,7 +246,7 @@ export function ManagerDashboard() {
             resetAnalysisForm();
             loadReports(1, true, statusFilter);
             loadStats();
-        } catch (error) {
+        } catch {
             toast.error('Erro ao processar relatório.');
         }
     };
@@ -301,7 +304,7 @@ export function ManagerDashboard() {
                             reports={reports.filter(r =>
                                 r.comment.toLowerCase().includes(searchTerm.toLowerCase()) ||
                                 r.id.toLowerCase().includes(searchTerm.toLowerCase())
-                            ) as any}
+                            )}
                             searchTerm={searchTerm}
                             onSearchChange={setSearchTerm}
                             hasMore={hasMore}
@@ -314,7 +317,7 @@ export function ManagerDashboard() {
                                 <Button
                                     variant="primary"
                                     size="sm"
-                                    onClick={() => { setAnalyzingReport(report as any); }}
+                                    onClick={() => { setAnalyzingReport(report); }}
                                 >
                                     Analisar
                                 </Button>

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import { api } from '../services/api';
 
 interface User {
@@ -22,25 +22,29 @@ interface AuthContextData {
     loading: boolean;
 }
 
+interface LoginResponse {
+    user: User;
+    token: string;
+}
+
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [user, setUser] = useState<User | null>(null);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
+    const [user, setUser] = useState<User | null>(() => {
         const storedUser = localStorage.getItem('@flash:user');
         const storedToken = localStorage.getItem('@flash:token');
 
         if (storedUser && storedToken) {
-            setUser(JSON.parse(storedUser));
+            return JSON.parse(storedUser) as User;
         }
-        setLoading(false);
-    }, []);
+
+        return null;
+    });
+    const [loading] = useState(false);
 
     async function signIn(email: string, password: string) {
         // Reduzido para usar instãncia centralizada
-        const response = await api.post('/login', {
+        const response = await api.post<LoginResponse>('/login', {
             email,
             password,
         });
@@ -71,6 +75,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
     const context = useContext(AuthContext);
     if (!context) {

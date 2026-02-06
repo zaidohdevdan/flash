@@ -1,4 +1,4 @@
-export type ReportStatus = 'SENT' | 'IN_REVIEW' | 'FORWARDED' | 'RESOLVED' | 'ARCHIVED';
+export type ReportStatus = 'SENT' | 'IN_REVIEW' | 'FORWARDED' | 'RESOLVED';
 
 export interface ReportHistory {
     id: string;

@@ -1,11 +1,11 @@
-import { BarChart3, Clock, AlertCircle, Download, Video, Calendar } from 'lucide-react';
+import { BarChart3, Clock, AlertCircle, Download, Video, Calendar, type LucideIcon } from 'lucide-react';
 import { Button, GlassCard } from '../ui';
 import { KpiCard } from './KpiCard';
 
 interface KPIConfig {
     label: string;
     status: string;
-    icon: any;
+    icon: LucideIcon;
     color: 'blue' | 'purple' | 'emerald' | 'orange';
     trend?: string;
 }
@@ -72,6 +72,7 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
                         <div className="flex flex-wrap items-center gap-3">
                             {onAnalyticsClick && (
                                 <Button
+                                    type="button"
                                     variant="glass"
                                     className="!px-4 !py-2 !bg-blue-500/20 hover:!bg-blue-500/30 text-blue-300 border-blue-500/30 backdrop-blur-md whitespace-nowrap"
                                     onClick={onAnalyticsClick}
@@ -82,6 +83,7 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
                             )}
                             {onExportClick && (
                                 <Button
+                                    type="button"
                                     variant="glass"
                                     className="!px-4 !py-2 !bg-emerald-500/20 hover:!bg-emerald-500/30 text-emerald-300 border-emerald-500/30 backdrop-blur-md whitespace-nowrap"
                                     onClick={onExportClick}
@@ -92,6 +94,7 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
                             )}
                             {onConferenceClick && (
                                 <Button
+                                    type="button"
                                     variant="glass"
                                     className="!px-4 !py-2 !bg-red-600/20 hover:!bg-red-600/30 text-red-400 border-red-500/30 backdrop-blur-md whitespace-nowrap animate-pulse hover:animate-none"
                                     onClick={onConferenceClick}
@@ -102,6 +105,7 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
                             )}
                             {onAgendaClick && (
                                 <Button
+                                    type="button"
                                     variant="glass"
                                     className="!px-4 !py-2 !bg-blue-600/20 hover:!bg-blue-600/30 text-blue-200 border-blue-500/30 backdrop-blur-md whitespace-nowrap"
                                     onClick={onAgendaClick}
@@ -118,6 +122,7 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
                         <GlassCard variant="dark" blur="lg" className="p-1 px-1.5 flex flex-wrap items-center gap-1 border-white/5 !rounded-[1.25rem] w-full xl:w-auto justify-center bg-slate-950/40">
                             {filters.map(filter => (
                                 <button
+                                    type="button"
                                     key={filter.id}
                                     onClick={() => onStatusFilterChange(filter.id)}
                                     className={`flex-1 sm:flex-none px-6 py-2.5 rounded-[1rem] text-[10px] font-black uppercase tracking-widest transition-all ${statusFilter === filter.id
@@ -139,6 +144,8 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
                                         value={startDate}
                                         onChange={e => onStartDateChange?.(e.target.value)}
                                         className="bg-transparent text-[10px] font-black outline-none text-white h-8 uppercase flex-1 [color-scheme:dark]"
+                                        title="Data Inicial"
+                                        aria-label="Data Inicial"
                                     />
                                 </div>
                                 <div className="flex items-center gap-2 px-4 py-2 sm:py-0">
@@ -148,12 +155,17 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
                                         value={endDate}
                                         onChange={e => onEndDateChange?.(e.target.value)}
                                         className="bg-transparent text-[10px] font-black outline-none text-white h-8 uppercase flex-1 [color-scheme:dark]"
+                                        title="Data Final"
+                                        aria-label="Data Final"
                                     />
                                 </div>
                                 {(startDate || endDate) && (
                                     <button
+                                        type="button"
                                         onClick={onClearDates}
                                         className="p-3 sm:p-2 hover:bg-red-500/10 rounded-xl transition text-slate-400 hover:text-red-500 flex justify-center"
+                                        title="Limpar datas"
+                                        aria-label="Limpar datas"
                                     >
                                         <AlertCircle className="w-3.5 h-3.5" />
                                     </button>

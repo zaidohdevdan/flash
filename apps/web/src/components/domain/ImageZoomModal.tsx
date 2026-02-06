@@ -17,6 +17,7 @@ export const ImageZoomModal: React.FC<ImageZoomModalProps> = ({ isOpen, onClose,
     // Reset state when opening/closing
     useEffect(() => {
         if (!isOpen) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setScale(1);
             setPosition({ x: 0, y: 0 });
         }
@@ -71,31 +72,40 @@ export const ImageZoomModal: React.FC<ImageZoomModalProps> = ({ isOpen, onClose,
                 <div className="w-full max-w-6xl flex items-center justify-between pointer-events-auto">
                     <div className="flex bg-white/10 backdrop-blur-md rounded-2xl p-1.5 border border-white/20 shadow-2xl">
                         <button
+                            type="button"
                             onClick={handleZoomOut}
                             className="p-2.5 text-white hover:bg-white/10 rounded-xl transition-colors"
                             title="Diminuir Zoom"
+                            aria-label="Diminuir Zoom"
                         >
                             <ZoomOut className="w-5 h-5" />
                         </button>
                         <button
+                            type="button"
                             onClick={handleReset}
                             className="p-2.5 text-white hover:bg-white/10 rounded-xl transition-colors"
                             title="Resetar"
+                            aria-label="Resetar"
                         >
                             <RotateCcw className="w-5 h-5" />
                         </button>
                         <button
+                            type="button"
                             onClick={handleZoomIn}
                             className="p-2.5 text-white hover:bg-white/10 rounded-xl transition-colors"
                             title="Aumentar Zoom"
+                            aria-label="Aumentar Zoom"
                         >
                             <ZoomIn className="w-5 h-5" />
                         </button>
                     </div>
 
                     <button
+                        type="button"
                         onClick={onClose}
                         className="p-3 bg-red-500/80 hover:bg-red-500 text-white rounded-2xl backdrop-blur-md shadow-2xl transition-all hover:scale-110 active:scale-95 border border-red-400/50"
+                        title="Fechar Visualização"
+                        aria-label="Fechar Visualização"
                     >
                         <X className="w-6 h-6" />
                     </button>

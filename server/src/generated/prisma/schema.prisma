@@ -21,7 +21,6 @@ enum ReportStatus {
   IN_REVIEW
   FORWARDED // Encaminhado ao Departamento
   RESOLVED
-  ARCHIVED // Arquivado para histórico
 }
 
 model User {

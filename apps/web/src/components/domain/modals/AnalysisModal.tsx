@@ -72,8 +72,9 @@ export const AnalysisModal: React.FC<AnalysisModalProps> = ({
                             { id: 'RESOLVED', label: 'RESOLVIDO', color: 'text-emerald-600' }
                         ].map(opt => (
                             <button
+                                type="button"
                                 key={opt.id}
-                                onClick={() => setTargetStatus(opt.id as any)}
+                                onClick={() => setTargetStatus(opt.id as AnalysisModalProps['targetStatus'])}
                                 className={`flex-1 py-3 text-[9px] font-black tracking-widest rounded-xl transition-all ${targetStatus === opt.id ? 'bg-white shadow-xl ' + opt.color : 'text-gray-400 hover:text-gray-600'}`}
                             >
                                 {opt.label}
@@ -89,6 +90,8 @@ export const AnalysisModal: React.FC<AnalysisModalProps> = ({
                                     value={selectedDeptId}
                                     onChange={e => setSelectedDeptId(e.target.value)}
                                     className="w-full px-5 py-3.5 bg-gray-50/50 border border-gray-100 rounded-2xl outline-none focus:bg-white focus:border-purple-500/50 transition-all font-bold text-gray-700 appearance-none text-xs"
+                                    title="Selecione o departamento de destino"
+                                    aria-label="Selecione o departamento de destino"
                                 >
                                     <option value="">-- Escolha um destino --</option>
                                     {departments.map(d => (

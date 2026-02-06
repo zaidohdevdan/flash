@@ -18,7 +18,7 @@ export function Login() {
         setLoading(true);
         try {
             await signIn(email, password);
-        } catch (err) {
+        } catch {
             toast.error('Credenciais inválidas. Verifique seu e-mail e senha.', {
                 style: {
                     borderRadius: '1.5rem',

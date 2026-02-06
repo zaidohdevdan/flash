@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
 import { toast } from 'react-hot-toast';
@@ -46,7 +46,7 @@ interface UserSummary {
 
 export function AdminDashboard() {
     const { user, signOut } = useAuth();
-    const [view, setView] = useState<'list' | 'create' | 'edit'>('list');
+    const [view, setView] = useState<'list' | 'create' | 'edit' | 'departments'>('list');
     const [users, setUsers] = useState<UserSummary[]>([]);
     const [supervisors, setSupervisors] = useState<Supervisor[]>([]);
     const [departments, setDepartments] = useState<Department[]>([]);
@@ -68,40 +68,42 @@ export function AdminDashboard() {
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
 
-    useEffect(() => {
-        fetchSupervisors();
-        fetchDepartments();
-        fetchUsers();
-    }, [searchQuery, roleFilter]);
 
-    async function fetchUsers() {
+
+    const fetchUsers = useCallback(async () => {
         try {
             const response = await api.get('/users', {
                 params: { search: searchQuery, role: roleFilter }
             });
             setUsers(response.data);
-        } catch (err) {
+        } catch {
             console.error('Erro ao buscar usuários');
         }
-    }
+    }, [searchQuery, roleFilter]);
 
-    async function fetchSupervisors() {
+    const fetchSupervisors = useCallback(async () => {
         try {
             const response = await api.get('/supervisors');
             setSupervisors(response.data);
-        } catch (err) {
+        } catch {
             console.error('Erro ao buscar supervisores');
         }
-    }
+    }, []);
 
-    async function fetchDepartments() {
+    const fetchDepartments = useCallback(async () => {
         try {
             const response = await api.get('/departments');
             setDepartments(response.data);
-        } catch (err) {
+        } catch {
             console.error('Erro ao buscar departamentos');
         }
-    }
+    }, []);
+
+    useEffect(() => {
+        fetchSupervisors();
+        fetchDepartments();
+        fetchUsers();
+    }, [fetchUsers, fetchSupervisors, fetchDepartments]);
 
     async function handleProcessUser(e: React.FormEvent) {
         e.preventDefault();
@@ -138,8 +140,9 @@ export function AdminDashboard() {
                 resetForm();
                 fetchUsers();
             }, 1500);
-        } catch (err: any) {
-            console.error('Erro na operação:', err.response?.data?.error);
+        } catch (err: unknown) {
+            const error = err as { response?: { data?: { error?: string } } };
+            console.error('Erro na operação:', error.response?.data?.error);
         } finally {
             setLoading(false);
         }
@@ -162,9 +165,10 @@ export function AdminDashboard() {
             toast.success('Usuário removido com sucesso!');
             // Recarrega dados reais em background para garantir consistência
             fetchUsers();
-        } catch (err: any) {
-            // Reverte em caso de erro (opcional, mas boa prática)
-            console.error('Erro ao deletar:', err.response?.data?.error);
+        } catch (err: unknown) {
+            // Reverte em caso de error (opcional, mas boa prática)
+            const error = err as { response?: { data?: { error?: string } } };
+            console.error('Erro ao deletar:', error.response?.data?.error);
             toast.error('Erro ao deletar usuário. A lista será atualizada.');
             fetchUsers(); // Restaura lista
         }
@@ -178,7 +182,7 @@ export function AdminDashboard() {
         setEditingUser(u);
         setName(u.name);
         setEmail(u.email);
-        setRole(u.role as any);
+        setRole(u.role as 'PROFESSIONAL' | 'SUPERVISOR' | 'MANAGER');
         setSupervisorId(u.supervisorId || '');
         setDepartmentId(u.departmentId || '');
         setPassword('');
@@ -208,7 +212,7 @@ export function AdminDashboard() {
             await api.delete(`/departments/${deptId}`);
             toast.success('Departamento excluído e processos reatribuídos.');
             fetchDepartments();
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error('Erro ao deletar departamento:', err);
             toast.error('Erro ao excluir departamento.');
             fetchDepartments();
@@ -248,8 +252,8 @@ export function AdminDashboard() {
                             <UserPlus className="w-5 h-5" /> NOVO CADASTRO
                         </button>
                         <button
-                            onClick={() => { setView('departments' as any); resetForm(); }}
-                            className={`w-full flex items-center gap-3 px-6 py-4 rounded-2xl font-black text-[10px] tracking-widest uppercase transition-all ${view === 'departments' as any ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-300 hover:bg-white/5'}`}
+                            onClick={() => { setView('departments'); resetForm(); }}
+                            className={`w-full flex items-center gap-3 px-6 py-4 rounded-2xl font-black text-[10px] tracking-widest uppercase transition-all ${view === 'departments' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-300 hover:bg-white/5'}`}
                         >
                             <Filter className="w-5 h-5" /> GESTÃO DE SETORES
                         </button>
@@ -275,6 +279,7 @@ export function AdminDashboard() {
                                     <input
                                         type="text"
                                         placeholder="Buscar usuários..."
+                                        title="Buscar usuários"
                                         value={searchQuery}
                                         onChange={e => setSearchQuery(e.target.value)}
                                         className="w-full pl-12 pr-6 py-4 bg-slate-900/50 border-transparent border rounded-2xl focus:bg-slate-800 focus:border-blue-500/30 outline-none transition-all text-xs font-bold text-white uppercase tracking-wider placeholder:text-slate-400"
@@ -285,6 +290,7 @@ export function AdminDashboard() {
                                     <select
                                         value={roleFilter}
                                         onChange={e => setRoleFilter(e.target.value)}
+                                        title="Filtrar por papel"
                                         className="bg-transparent border-none outline-none text-[10px] font-black text-slate-300 py-2.5 px-4 cursor-pointer uppercase tracking-widest"
                                     >
                                         <option value="">TODOS PAPÉIS</option>
@@ -391,7 +397,7 @@ export function AdminDashboard() {
                                 </div>
                             </Card>
                         </>
-                    ) : view === 'departments' as any ? (
+                    ) : view === 'departments' ? (
                         <div className="max-w-4xl mx-auto lg:mx-0 animate-in slide-in-from-bottom-5 duration-500">
                             <Card variant="dark" className="!rounded-[2.5rem] shadow-2xl shadow-black/20 overflow-hidden border-white/5">
                                 <div className="p-8 border-b border-white/5 flex justify-between items-center bg-white/5">
@@ -502,7 +508,7 @@ export function AdminDashboard() {
                                                 <button
                                                     key={r}
                                                     type="button"
-                                                    onClick={() => setRole(r as any)}
+                                                    onClick={() => setRole(r as 'PROFESSIONAL' | 'SUPERVISOR' | 'MANAGER')}
                                                     className={`py-3.5 rounded-2xl text-[10px] font-black tracking-widest uppercase transition-all ${role === r ? 'bg-blue-600 text-white shadow-xl' : 'text-slate-500 hover:text-white'}`}
                                                 >
                                                     {r}
@@ -513,9 +519,10 @@ export function AdminDashboard() {
 
                                     {role === 'PROFESSIONAL' && (
                                         <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
-                                            <label className="text-[10px] font-black text-slate-300 uppercase tracking-widest ml-1">Vincular Supervisor</label>
+                                            <label htmlFor="supervisor-select" className="text-[10px] font-black text-slate-300 uppercase tracking-widest ml-1">Vincular Supervisor</label>
                                             <div className="relative">
                                                 <select
+                                                    id="supervisor-select"
                                                     value={supervisorId}
                                                     onChange={e => setSupervisorId(e.target.value)}
                                                     className="w-full px-6 py-4 bg-slate-900/50 border border-white/5 rounded-[1.5rem] outline-none focus:border-blue-500/30 transition-all font-bold text-white text-xs appearance-none"
@@ -532,9 +539,10 @@ export function AdminDashboard() {
                                     {role === 'MANAGER' && (
                                         <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
                                             <div className="space-y-2">
-                                                <label className="text-[10px] font-black text-slate-300 uppercase tracking-widest ml-1">Vincular Departamento</label>
+                                                <label htmlFor="department-select" className="text-[10px] font-black text-slate-300 uppercase tracking-widest ml-1">Vincular Departamento</label>
                                                 <div className="relative">
                                                     <select
+                                                        id="department-select"
                                                         value={departmentId}
                                                         onChange={e => setDepartmentId(e.target.value)}
                                                         className="w-full px-6 py-4 bg-slate-900/50 border border-white/5 rounded-[1.5rem] outline-none focus:border-blue-500/30 transition-all font-bold text-white text-xs appearance-none"

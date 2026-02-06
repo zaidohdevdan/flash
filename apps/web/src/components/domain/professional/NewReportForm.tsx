@@ -31,6 +31,8 @@ export const NewReportForm: React.FC<NewReportFormProps> = ({
                             type="button"
                             onClick={onClearImage}
                             className="absolute top-6 right-6 p-3 bg-red-600/90 hover:bg-red-600 text-white rounded-2xl backdrop-blur-md transition-all scale-90 opacity-0 group-hover:opacity-100 group-hover:scale-100"
+                            title="Remover evidência"
+                            aria-label="Remover evidência"
                         >
                             <X className="w-5 h-5" />
                         </button>
@@ -39,7 +41,14 @@ export const NewReportForm: React.FC<NewReportFormProps> = ({
                     <label className="w-full h-full flex flex-col items-center justify-center cursor-pointer hover:bg-slate-800/50 transition-colors">
                         <Camera className="w-20 h-20 text-slate-400 mb-4" />
                         <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Toque para capturar evidência</p>
-                        <input type="file" accept="image/*" capture="environment" onChange={onImageChange} className="hidden" />
+                        <input
+                            type="file"
+                            accept="image/*"
+                            onChange={onImageChange}
+                            className="hidden"
+                            title="Capturar evidência"
+                            aria-label="Capturar evidência"
+                        />
                     </label>
                 )}
             </div>
@@ -51,6 +60,7 @@ export const NewReportForm: React.FC<NewReportFormProps> = ({
                     onChange={e => onCommentChange(e.target.value)}
                     className="!rounded-[2rem] p-6 text-sm font-bold text-white placeholder:text-slate-400 placeholder:uppercase placeholder:tracking-widest bg-slate-900/50 border-white/5"
                     rows={4}
+                    aria-label="Descrição da ocorrência"
                 />
                 <Button
                     type="submit"

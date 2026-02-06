@@ -431,21 +431,21 @@ export function Home() {
                             <form onSubmit={handleContactSubmit} className="space-y-6">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Seu Nome</label>
-                                        <input required type="text" className="w-full bg-slate-950/50 px-6 py-4 rounded-2xl border border-white/5 focus:border-blue-500/50 focus:bg-slate-900 text-white outline-none transition font-medium" />
+                                        <label htmlFor="name" className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Seu Nome</label>
+                                        <input id="name" required type="text" placeholder="Ex: João Silva" className="w-full bg-slate-950/50 px-6 py-4 rounded-2xl border border-white/5 focus:border-blue-500/50 focus:bg-slate-900 text-white outline-none transition font-medium placeholder:text-slate-600" />
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Empresa</label>
-                                        <input required type="text" className="w-full bg-slate-950/50 px-6 py-4 rounded-2xl border border-white/5 focus:border-blue-500/50 focus:bg-slate-900 text-white outline-none transition font-medium" />
+                                        <label htmlFor="company" className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Empresa</label>
+                                        <input id="company" required type="text" placeholder="Ex: Acme Corp" className="w-full bg-slate-950/50 px-6 py-4 rounded-2xl border border-white/5 focus:border-blue-500/50 focus:bg-slate-900 text-white outline-none transition font-medium placeholder:text-slate-600" />
                                     </div>
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">E-mail Corporativo</label>
-                                    <input required type="email" className="w-full bg-slate-950/50 px-6 py-4 rounded-2xl border border-white/5 focus:border-blue-500/50 focus:bg-slate-900 text-white outline-none transition font-medium" />
+                                    <label htmlFor="email" className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">E-mail Corporativo</label>
+                                    <input id="email" required type="email" placeholder="nome@empresa.com" className="w-full bg-slate-950/50 px-6 py-4 rounded-2xl border border-white/5 focus:border-blue-500/50 focus:bg-slate-900 text-white outline-none transition font-medium placeholder:text-slate-600" />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Mensagem</label>
-                                    <textarea required className="w-full bg-slate-950/50 px-6 py-4 rounded-2xl border border-white/5 focus:border-blue-500/50 focus:bg-slate-900 text-white outline-none transition h-32 resize-none font-medium"></textarea>
+                                    <label htmlFor="message" className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Mensagem</label>
+                                    <textarea id="message" required placeholder="Como podemos ajudar?" className="w-full bg-slate-950/50 px-6 py-4 rounded-2xl border border-white/5 focus:border-blue-500/50 focus:bg-slate-900 text-white outline-none transition h-32 resize-none font-medium placeholder:text-slate-600"></textarea>
                                 </div>
                                 <button
                                     disabled={formStatus === 'sending'}

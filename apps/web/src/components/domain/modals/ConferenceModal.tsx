@@ -2,6 +2,10 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { JitsiMeeting } from '@jitsi/react-sdk';
 import { X, Zap, CheckCircle2 } from 'lucide-react';
 
+interface JitsiMeetExternalAPI {
+    addEventListeners: (listeners: Record<string, (event: unknown) => void>) => void;
+}
+
 interface ConferenceModalProps {
     isOpen: boolean;
     onClose: () => void;
@@ -16,12 +20,13 @@ export const ConferenceModal: React.FC<ConferenceModalProps> = ({
     userName = 'Operador Flash'
 }) => {
     const [isTerminated, setIsTerminated] = useState(false);
-    const terminateTimeoutRef = useRef<any>(null);
+    const terminateTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const userIntendsToLeaveRef = useRef(false);
 
     // Resetar estado quando o modal abrir/fechar
     useEffect(() => {
         if (!isOpen) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setIsTerminated(false);
             userIntendsToLeaveRef.current = false;
             if (terminateTimeoutRef.current) {
@@ -41,7 +46,7 @@ export const ConferenceModal: React.FC<ConferenceModalProps> = ({
         // Não setamos isTerminated aqui ainda, esperamos o videoConferenceLeft confirmar
     }, []);
 
-    const handleLeave = useCallback((event: any) => {
+    const handleLeave = useCallback((event: unknown) => {
         console.log('[Jitsi] Evento left detectado:', event);
 
         if (terminateTimeoutRef.current) clearTimeout(terminateTimeoutRef.current);
@@ -62,7 +67,7 @@ export const ConferenceModal: React.FC<ConferenceModalProps> = ({
         }, 8000); // 8 segundos para ser bem conservativo
     }, []);
 
-    const handleJoined = useCallback((event: any) => {
+    const handleJoined = useCallback((event: unknown) => {
         console.log('[Jitsi] Usuário entrou/re-entrou:', event);
         if (terminateTimeoutRef.current) {
             console.log('[Jitsi] Re-entry detectado com sucesso. Cancelando timeout.');
@@ -93,6 +98,7 @@ export const ConferenceModal: React.FC<ConferenceModalProps> = ({
                     </div>
 
                     <button
+                        type="button"
                         onClick={onClose}
                         className="p-2 hover:bg-white/10 rounded-xl transition-colors text-slate-400 hover:text-white"
                         title="Sair da Reunião"
@@ -135,12 +141,12 @@ export const ConferenceModal: React.FC<ConferenceModalProps> = ({
                                 displayName: userName,
                                 email: ''
                             }}
-                            onApiReady={(externalApi: any) => {
+                            onApiReady={(externalApi: JitsiMeetExternalAPI) => {
                                 externalApi.addEventListeners({
                                     videoConferenceJoined: handleJoined,
                                     videoConferenceLeft: handleLeave,
                                     readyToHangup: handleReadyToHangup,
-                                    participantRoleChanged: (event: any) => {
+                                    participantRoleChanged: (event: unknown) => {
                                         console.log('[Jitsi] Role change:', event);
                                     }
                                 });
@@ -173,6 +179,7 @@ export const ConferenceModal: React.FC<ConferenceModalProps> = ({
                             </p>
 
                             <button
+                                type="button"
                                 onClick={onClose}
                                 className="px-8 py-3 bg-white text-slate-950 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-blue-50 transition-all active:scale-95 shadow-xl shadow-white/5"
                             >

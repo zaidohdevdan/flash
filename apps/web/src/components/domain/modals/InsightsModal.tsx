@@ -2,10 +2,28 @@ import React, { useEffect, useState } from 'react';
 import { Copy, Check, Brain } from 'lucide-react';
 import { Modal, Button, GlassCard } from '../../ui';
 
+interface InsightData {
+    bottlenecks: {
+        criticalSector?: {
+            name: string;
+            avgHours: number;
+        };
+        impactedCount: number;
+    };
+    efficiency: {
+        avgResolutionTime: number;
+        resolvedCount: number;
+    };
+    predictions: {
+        trend: 'UP' | 'DOWN';
+        nextDayVolume: number;
+    };
+}
+
 interface InsightsModalProps {
     isOpen: boolean;
     onClose: () => void;
-    data: any;
+    data: InsightData;
 }
 
 export const InsightsModal: React.FC<InsightsModalProps> = ({ isOpen, onClose, data }) => {
@@ -13,14 +31,7 @@ export const InsightsModal: React.FC<InsightsModalProps> = ({ isOpen, onClose, d
     const [copied, setCopied] = useState(false);
     const [insightText, setInsightText] = useState('');
 
-    useEffect(() => {
-        if (isOpen && data) {
-            setStep('generating');
-            generateText(data);
-        }
-    }, [isOpen, data]);
-
-    const generateText = (d: any) => {
+    const generateText = (d: InsightData) => {
         // Simulating AI processing delay
         setTimeout(() => {
             const date = new Date().toLocaleDateString('pt-BR');
@@ -49,6 +60,14 @@ ${d.predictions.trend === 'UP'
             setStep('done');
         }, 2000);
     };
+
+    useEffect(() => {
+        if (isOpen && data) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            setStep('generating');
+            generateText(data);
+        }
+    }, [isOpen, data]);
 
     const handleCopy = () => {
         navigator.clipboard.writeText(insightText);

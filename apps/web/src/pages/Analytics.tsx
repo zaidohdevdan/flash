@@ -93,6 +93,8 @@ export function Analytics() {
                         <button
                             onClick={() => navigate(-1)}
                             className="p-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl transition-all active:scale-95 group print:hidden"
+                            aria-label="Voltar"
+                            title="Voltar para página anterior"
                         >
                             <ArrowLeft className="w-5 h-5 text-blue-400 group-hover:-translate-x-1 transition-transform" />
                         </button>
@@ -326,7 +328,7 @@ export function Analytics() {
                                 </div>
                             </div>
 
-                            <div className="h-[300px] flex items-center justify-center relative">
+                            <div className="h-[300px] w-full flex items-center justify-center relative">
                                 <div className="absolute inset-0 bg-blue-500/5 rounded-full blur-3xl" />
                                 {isReady && (
                                     <ResponsiveContainer width="100%" height={300}>
