@@ -28,7 +28,7 @@ export const DepartmentController = {
     async delete(req: Request, res: Response) {
         const { id } = req.params;
         try {
-            await departmentService.delete(id);
+            await departmentService.delete(id as string);
             return res.status(204).send();
         } catch (error) {
             return res.status(500).json({ error: "Erro ao excluir departamento" });
