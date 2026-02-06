@@ -4,9 +4,10 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev:web": "bun --cwd apps/web dev",
-    "dev:server": "bun --cwd server dev",
+    "dev:web": "bun --filter=@flash/web dev",
+    "dev:server": "bun --filter=@flash/server dev",
     "dev": "bun run dev:server & bun run dev:web",
+    "build": "bun run --filter=@flash/web build",
     "install:all": "bun install"
   },
   "devDependencies": {
