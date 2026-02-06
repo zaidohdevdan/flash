@@ -180,7 +180,7 @@ model AgendaEvent {
 model Notification {
   id     String @id @default(auto()) @map("_id") @db.ObjectId
   userId String @db.ObjectId
-  user   User   @relation("UserNotifications", fields: [userId], references: [id])
+  user   User   @relation("UserNotifications", fields: [userId], references: [id], onDelete: Cascade)
 
   fromId       String?   @db.ObjectId
   type         String // e.g., "AGENDA_REMINDER", "CONFERENCE_INVITE", "REPORT_FORWARDED"
@@ -196,7 +196,7 @@ model Notification {
 model Note {
   id      String @id @default(auto()) @map("_id") @db.ObjectId
   userId  String @db.ObjectId
-  user    User   @relation(fields: [userId], references: [id])
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   content String
 
   createdAt DateTime @default(now())
