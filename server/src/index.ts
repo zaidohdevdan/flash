@@ -5,6 +5,8 @@ import express, { type Application, type Request, type Response, type NextFuncti
 import cors from 'cors';
 import { createServer } from 'http';
 import { Server as SocketIOServer } from 'socket.io';
+// Force redeploy frontend
+import { BrowserRouter } from 'react-router-dom';
 import { routes } from './routes';
 import { ChatService } from './services/ChatService';
 import { startScheduler } from './jobs/scheduler';
@@ -225,5 +227,6 @@ async function bootstrap() {
     }
 }
 
+// Force redeploy backend
 bootstrap();
 // Trigger deploy fix
