@@ -481,7 +481,7 @@ export function Dashboard() {
                                 isLoading={isReportsLoading}
                                 renderReportActions={(report) => (
                                     <div className="flex gap-2 w-full">
-                                        {report.status !== 'RESOLVED' && report.status !== 'ARCHIVED' && (
+                                        {report.status !== 'RESOLVED' && report.status !== 'ARCHIVED' && !report.department && (
                                             <Button
                                                 variant="primary"
                                                 size="sm"
