@@ -145,7 +145,56 @@ export function AdminDashboard() {
         }
     }
 
-    async    async function handleDeleteDepartment(deptId: string, deptName: string) {
+    async function handleDeleteUser(userId: string, userName: string) {
+        if (userId === user?.id) {
+            toast.error('Você não pode remover seu próprio acesso administrativo.');
+            return;
+        }
+        if (!window.confirm(`Tem certeza que deseja remover o usuário ${userName}? Esta ação não pode ser desfeita.`)) {
+            return;
+        }
+
+        try {
+            await api.delete(`/users/${userId}`);
+            setSuccess(true);
+            toast.success('Usuário removido com sucesso!');
+            setTimeout(() => {
+                setSuccess(false);
+                fetchUsers();
+            }, 1000);
+        } catch (err: any) {
+            console.error('Erro ao deletar:', err.response?.data?.error);
+            alert(err.response?.data?.error || 'Erro ao deletar usuário.');
+        }
+    }
+
+    function startEdit(u: UserSummary) {
+        if (u.id === user?.id) {
+            toast.error('Alterações no seu próprio perfil administrativo não são permitidas por segurança.');
+            return;
+        }
+        setEditingUser(u);
+        setName(u.name);
+        setEmail(u.email);
+        setRole(u.role as any);
+        setSupervisorId(u.supervisorId || '');
+        setDepartmentId(u.departmentId || '');
+        setPassword('');
+        setView('edit');
+    }
+
+    function resetForm() {
+        setName('');
+        setEmail('');
+        setPassword('');
+        setRole('PROFESSIONAL');
+        setSupervisorId('');
+        setDepartmentId('');
+        setNewDepartmentName('');
+        setEditingUser(null);
+    }
+
+    async function handleDeleteDepartment(deptId: string, deptName: string) {
         if (!window.confirm(`ATENÇÃO: Você está prestes a excluir o setor "${deptName}".\n\nTodos os processos (reports) atualmente neste setor serão devolvidos para o SUPERVISOR responsável para reanálise.\n\nTem certeza que deseja continuar?`)) {
             return;
         }
