@@ -23,7 +23,7 @@ export const NewReportForm: React.FC<NewReportFormProps> = ({
 }) => {
     return (
         <form onSubmit={onSubmit} className="space-y-6">
-            <div className="relative aspect-video rounded-[2.5rem] bg-gray-900 overflow-hidden group shadow-2xl shadow-blue-500/10">
+            <div className="relative aspect-video rounded-[2.5rem] bg-slate-900/50 border border-white/5 overflow-hidden group shadow-2xl shadow-blue-500/10">
                 {preview ? (
                     <>
                         <img src={preview} alt="Evidence" className="w-full h-full object-cover" />
@@ -36,9 +36,9 @@ export const NewReportForm: React.FC<NewReportFormProps> = ({
                         </button>
                     </>
                 ) : (
-                    <label className="w-full h-full flex flex-col items-center justify-center cursor-pointer hover:bg-gray-800 transition-colors">
-                        <Camera className="w-20 h-20 text-gray-700 mb-4" />
-                        <p className="text-[10px] text-gray-600 font-black uppercase tracking-widest">Toque para capturar evidência</p>
+                    <label className="w-full h-full flex flex-col items-center justify-center cursor-pointer hover:bg-slate-800/50 transition-colors">
+                        <Camera className="w-20 h-20 text-slate-400 mb-4" />
+                        <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Toque para capturar evidência</p>
                         <input type="file" accept="image/*" capture="environment" onChange={onImageChange} className="hidden" />
                     </label>
                 )}
@@ -49,7 +49,7 @@ export const NewReportForm: React.FC<NewReportFormProps> = ({
                     placeholder="DESCREVA A OCORRÊNCIA OU ATUALIZAÇÃO OPERACIONAL..."
                     value={comment}
                     onChange={e => onCommentChange(e.target.value)}
-                    className="!rounded-[2rem] p-6 text-sm font-bold placeholder:text-gray-400 placeholder:uppercase placeholder:tracking-widest"
+                    className="!rounded-[2rem] p-6 text-sm font-bold text-white placeholder:text-slate-400 placeholder:uppercase placeholder:tracking-widest bg-slate-900/50 border-white/5"
                     rows={4}
                 />
                 <Button

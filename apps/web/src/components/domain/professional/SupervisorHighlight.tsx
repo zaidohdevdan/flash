@@ -26,7 +26,7 @@ export const SupervisorHighlight: React.FC<SupervisorHighlightProps> = ({
                 </div>
                 <div>
                     <div className="flex items-center gap-2">
-                        <p className="text-[9px] font-black text-gray-400/80 uppercase tracking-widest">Supervisor Direto</p>
+                        <p className="text-[9px] font-black text-white/60 uppercase tracking-widest">Supervisor Direto</p>
                         <div className={`w-1.5 h-1.5 rounded-full ${isOnline ? 'bg-emerald-400 animate-pulse' : 'bg-white/30'}`} />
                     </div>
                     <h3 className={`text-lg font-bold transition-all duration-300 ${hasUnread ? 'text-amber-300 animate-pulse' : 'text-white'}`}>
