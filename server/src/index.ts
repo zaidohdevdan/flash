@@ -68,7 +68,7 @@ app.use(routes);
 
 // Fallback do SPA (React / Vite)
 if (hasDist) {
-    app.get('*', (_req: Request, res: Response) => {
+    app.get('(.*)', (_req: Request, res: Response) => {
         res.sendFile(path.join(distPath, 'index.html'));
     });
 }
