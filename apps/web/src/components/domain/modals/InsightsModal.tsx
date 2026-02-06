@@ -11,7 +11,7 @@ interface InsightData {
         impactedCount: number;
     };
     efficiency: {
-        avgResolutionTime: number;
+        avgResolutionTime: string;
         resolvedCount: number;
     };
     predictions: {
