@@ -145,53 +145,23 @@ export function AdminDashboard() {
         }
     }
 
-    async function handleDeleteUser(userId: string, userName: string) {
-        if (userId === user?.id) {
-            toast.error('Você não pode remover seu próprio acesso administrativo.');
-            return;
-        }
-        if (!window.confirm(`Tem certeza que deseja remover o usuário ${userName}? Esta ação não pode ser desfeita.`)) {
+    async    async function handleDeleteDepartment(deptId: string, deptName: string) {
+        if (!window.confirm(`ATENÇÃO: Você está prestes a excluir o setor "${deptName}".\n\nTodos os processos (reports) atualmente neste setor serão devolvidos para o SUPERVISOR responsável para reanálise.\n\nTem certeza que deseja continuar?`)) {
             return;
         }
 
         try {
-            await api.delete(`/users/${userId}`);
+            await api.delete(`/departments/${deptId}`);
             setSuccess(true);
-            toast.success('Usuário removido com sucesso!'); // Caso toast esteja disponível, senão setSuccess cuida.
+            toast.success('Departamento excluído e processos reatribuídos.');
             setTimeout(() => {
                 setSuccess(false);
-                fetchUsers();
-            }, 1000);
+                fetchDepartments();
+            }, 1500);
         } catch (err: any) {
-            console.error('Erro ao deletar:', err.response?.data?.error);
-            alert(err.response?.data?.error || 'Erro ao deletar usuário.');
+            console.error('Erro ao deletar departamento:', err);
+            toast.error('Erro ao excluir departamento.');
         }
-    }
-
-    function startEdit(u: UserSummary) {
-        if (u.id === user?.id) {
-            toast.error('Alterações no seu próprio perfil administrativo não são permitidas por segurança.');
-            return;
-        }
-        setEditingUser(u);
-        setName(u.name);
-        setEmail(u.email);
-        setRole(u.role as any);
-        setSupervisorId(u.supervisorId || '');
-        setDepartmentId(u.departmentId || '');
-        setPassword('');
-        setView('edit');
-    }
-
-    function resetForm() {
-        setName('');
-        setEmail('');
-        setPassword('');
-        setRole('PROFESSIONAL');
-        setSupervisorId('');
-        setDepartmentId('');
-        setNewDepartmentName('');
-        setEditingUser(null);
     }
 
     return (
@@ -225,6 +195,12 @@ export function AdminDashboard() {
                             className={`w-full flex items-center gap-3 px-6 py-4 rounded-2xl font-black text-[10px] tracking-widest uppercase transition-all ${view === 'create' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-300 hover:bg-white/5'}`}
                         >
                             <UserPlus className="w-5 h-5" /> NOVO CADASTRO
+                        </button>
+                        <button
+                            onClick={() => { setView('departments' as any); resetForm(); }}
+                            className={`w-full flex items-center gap-3 px-6 py-4 rounded-2xl font-black text-[10px] tracking-widest uppercase transition-all ${view === 'departments' as any ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-300 hover:bg-white/5'}`}
+                        >
+                            <Filter className="w-5 h-5" /> GESTÃO DE SETORES
                         </button>
 
                         <div className="pt-4 mt-4 border-t border-white/5 p-4">
@@ -364,6 +340,64 @@ export function AdminDashboard() {
                                 </div>
                             </Card>
                         </>
+                    ) : view === 'departments' as any ? (
+                        <div className="max-w-4xl mx-auto lg:mx-0 animate-in slide-in-from-bottom-5 duration-500">
+                            <Card variant="dark" className="!rounded-[2.5rem] shadow-2xl shadow-black/20 overflow-hidden border-white/5">
+                                <div className="p-8 border-b border-white/5 flex justify-between items-center bg-white/5">
+                                    <div>
+                                        <h2 className="text-xl font-black text-white uppercase tracking-tight">Setores Operacionais</h2>
+                                        <p className="text-[10px] text-slate-300 font-black uppercase tracking-widest mt-1">Gestão de Departamentos</p>
+                                    </div>
+                                    <Button variant="secondary" size="sm" onClick={() => setView('list')}>
+                                        Voltar
+                                    </Button>
+                                </div>
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left border-collapse">
+                                        <thead>
+                                            <tr className="bg-white/5 text-[10px] font-black text-slate-300 uppercase tracking-widest border-b border-white/5">
+                                                <th className="px-8 py-5">NOME DO SETOR</th>
+                                                <th className="px-8 py-5 text-right w-32">AÇÕES</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-white/5">
+                                            {departments.length === 0 ? (
+                                                <tr>
+                                                    <td colSpan={2} className="px-8 py-16 text-center text-slate-400">
+                                                        <Filter className="w-12 h-12 mx-auto mb-4 opacity-10" />
+                                                        <p className="text-[10px] font-black uppercase tracking-widest">Nenhum departamento encontrado</p>
+                                                    </td>
+                                                </tr>
+                                            ) : (
+                                                departments.map(dept => (
+                                                    <tr key={dept.id} className="hover:bg-blue-500/10 transition-all group">
+                                                        <td className="px-8 py-6">
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="bg-blue-500/20 p-2 rounded-lg text-blue-400">
+                                                                    <Filter className="w-5 h-5" />
+                                                                </div>
+                                                                <span className="font-bold text-white text-sm">{dept.name}</span>
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-8 py-6 text-right">
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                onClick={() => handleDeleteDepartment(dept.id, dept.name)}
+                                                                className="hover:text-red-500 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                                title="Excluir Setor"
+                                                            >
+                                                                <Trash2 className="w-4 h-4" />
+                                                            </Button>
+                                                        </td>
+                                                    </tr>
+                                                ))
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </Card>
+                        </div>
                     ) : (
                         <div className="max-w-2xl mx-auto lg:mx-0 animate-in slide-in-from-bottom-5 duration-500">
                             <Card variant="dark" className="p-10 !rounded-[3rem] shadow-2xl shadow-black/20 border-white/5">
