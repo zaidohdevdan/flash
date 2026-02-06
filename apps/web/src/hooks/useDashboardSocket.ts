@@ -122,7 +122,7 @@ export const useDashboardSocket = ({ user, onNotification, onConferenceInvite, o
         });
 
         // Listen for new reports
-        newSocket.on('new_report_for_supervisor', () => {
+        newSocket.on('new_report_to_review', () => {
             if (onNewReport) {
                 onNewReport();
             }
