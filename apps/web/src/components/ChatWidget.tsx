@@ -254,7 +254,6 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket }: ChatWid
     };
 
     return (
-    return (
         <div className="fixed inset-0 sm:top-auto sm:left-auto sm:bottom-6 sm:right-6 w-full sm:w-[400px] md:w-[440px] h-[100dvh] sm:h-[650px] sm:max-h-[calc(100vh-4rem)] bg-slate-950/90 backdrop-blur-[32px] sm:rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden sm:border border-white/10 ring-1 ring-white/5 z-[60] animate-in slide-in-from-bottom-5 fade-in duration-500">
             {/* Header */}
             <div className="p-4 bg-slate-900/80 backdrop-blur-xl text-white flex justify-between items-center border-b border-white/5">
