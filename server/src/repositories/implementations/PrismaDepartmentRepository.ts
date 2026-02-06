@@ -20,4 +20,16 @@ export class PrismaDepartmentRepository implements IDepartmentRepository {
             data: { name }
         });
     }
+
+    async findById(id: string): Promise<Department | null> {
+        return prisma.department.findUnique({
+            where: { id }
+        });
+    }
+
+    async delete(id: string): Promise<void> {
+        await prisma.department.delete({
+            where: { id }
+        });
+    }
 }

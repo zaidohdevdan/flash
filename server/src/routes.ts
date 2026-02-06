@@ -64,6 +64,7 @@ routes.patch('/reports/:id/status', AuthMiddleware, ReportController.updateStatu
 // controllers/DepartmentController.ts
 routes.get('/departments', AuthMiddleware, DepartmentController.index);
 routes.post('/departments', AuthMiddleware, DepartmentController.store);
+routes.delete('/departments/:id', AuthMiddleware, AdminMiddleware, DepartmentController.delete);
 
 // Perfil
 routes.get('/profile/me', AuthMiddleware, ProfileController.me);
