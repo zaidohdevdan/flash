@@ -1,3 +1,4 @@
+/* Force Vercel Deploy */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -106,19 +107,32 @@ html {
 .custom-scrollbar::-webkit-scrollbar {
   width: 4px;
 }
+
 .custom-scrollbar::-webkit-scrollbar-track {
   background: transparent;
 }
+
 .custom-scrollbar::-webkit-scrollbar-thumb {
   background: #ffffff10;
   border-radius: 10px;
 }
+
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #ffffff20;
 }
 
 @media print {
-  .min-h-screen { background: white !important; }
-  section, div, card { break-inside: avoid !important; }
-  .recharts-area-area { fill-opacity: 0.2 !important; }
+  .min-h-screen {
+    background: white !important;
+  }
+
+  section,
+  div,
+  card {
+    break-inside: avoid !important;
+  }
+
+  .recharts-area-area {
+    fill-opacity: 0.2 !important;
+  }
 }
