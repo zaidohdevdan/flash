@@ -8,6 +8,7 @@
     "dev:server": "bun --filter=@flash/server dev",
     "dev": "bun run dev:server & bun run dev:web",
     "build": "bun run --filter=@flash/web build",
+    "start": "bun run --filter=@flash/server start",
     "install:all": "bun install"
   },
   "devDependencies": {
