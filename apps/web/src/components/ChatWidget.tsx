@@ -370,9 +370,7 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket }: ChatWid
                                             <span className={`text-[9px] font-bold opacity-60 ${isMe ? 'text-[var(--accent-text)]' : 'text-[var(--text-tertiary)]'}`}>
                                                 {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                             </span>
-                                            {isMe && (
-                                                <Zap className="w-2.5 h-2.5 text-[#d4e720] fill-[#d4e720] drop-shadow-[0_0_2px_rgba(212,231,32,0.5)]" />
-                                            )}
+                                            <Zap className={`w-3 h-3 shrink-0 ${isMe ? 'text-[#d4e720] fill-[#d4e720] drop-shadow-[0_0_3px_rgba(212,231,32,0.4)]' : 'text-[var(--text-tertiary)] opacity-30 group-hover:opacity-60 transition-opacity'}`} />
                                         </div>
                                     </>
                                 )}
