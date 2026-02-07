@@ -1,83 +1,201 @@
 /* Force Vercel Deploy */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  font-family: 'Outfit', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  /* Ultra-clean Base Colors */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f9fafb;
+  /* gray-50 */
+  --bg-tertiary: #f3f4f6;
+  /* gray-100 */
+
+  /* Text Colors */
+  --text-primary: #111827;
+  /* gray-900 */
+  --text-secondary: #4b5563;
+  /* gray-600 */
+  --text-tertiary: #9ca3af;
+  /* gray-400 */
+
+  /* Accent Colors - Lime Pop */
+  --accent-primary: #d4e720;
+  /* Lime green - energetic but not neon */
+  --accent-secondary: #BECA20;
+  /* Darker lime for hovers */
+  --accent-text: #1a2e05;
+  /* Deep green for text on lime */
+
+  /* Semantic Colors */
+  --success: #22c55e;
+  --warning: #eab308;
+  --error: #ef4444;
+  --info: #3b82f6;
+
+  /* Borders & Dividers */
+  --border-subtle: #e5e7eb;
+  /* gray-200 */
+  --border-medium: #d1d5db;
+  /* gray-300 */
+
+  /* Shadows - Soft & Diffuse */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+  --shadow-float: 0 20px 25px -5px rgb(0 0 0 / 0.05), 0 8px 10px -6px rgb(0 0 0 / 0.01);
 }
 
-body {
-  @apply bg-gray-50 text-gray-900 overflow-x-hidden selection:bg-blue-500/40 selection:text-white;
-  width: 100%;
-  position: relative;
+/* Dark Mode - Professional Slate */
+.dark {
+  --bg-primary: #0f172a;
+  /* slate-900 */
+  --bg-secondary: #1e293b;
+  /* slate-800 */
+  --bg-tertiary: #334155;
+  /* slate-700 */
+
+  --text-primary: #f8fafc;
+  /* slate-50 */
+  --text-secondary: #cbd5e1;
+  /* slate-300 */
+  --text-tertiary: #94a3b8;
+  /* slate-400 */
+
+  --border-subtle: #334155;
+  /* slate-700 */
+  --border-medium: #475569;
+  /* slate-600 */
 }
 
-html {
-  overflow-x: hidden;
-  width: 100%;
+@layer base {
+  body {
+    @apply bg-[var(--bg-secondary)] text-[var(--text-primary)] font-['Inter'] antialiased;
+    font-feature-settings: "cv11", "ss01";
+  }
+
+  /* Custom Scrollbar - Slim & Minimal */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 rounded-full transition-colors;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-400;
+  }
 }
 
-@keyframes vibrate {
+@layer components {
+
+  /* Minimalist Card */
+  .card-base {
+    @apply bg-[var(--bg-primary)] border border-[var(--border-subtle)] rounded-2xl shadow-[var(--shadow-sm)] transition-all duration-200;
+  }
+
+  .card-hover {
+    @apply hover:shadow-[var(--shadow-md)] hover:border-[var(--border-medium)];
+  }
+
+  /* Minimalist Button Base */
+  .btn-base {
+    @apply inline-flex items-center justify-center rounded-xl font-medium transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none;
+  }
+
+  /* Status Badge Base */
+  .badge-base {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ring-1 ring-inset;
+  }
+}
+
+/* Utilities for glass effects (kept minimal) */
+.glass {
+  @apply bg-white/70 backdrop-blur-md border border-white/20 shadow-sm;
+}
+
+.dark .glass {
+  @apply bg-slate-900/70 backdrop-blur-md border border-white/5;
+}
+
+/* Animation utilities */
+.animate-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shimmer {
   0% {
-    transform: translate(0);
-  }
-
-  20% {
-    transform: translate(-1px, 1px);
-  }
-
-  40% {
-    transform: translate(-1px, -1px);
-  }
-
-  60% {
-    transform: translate(1px, 1px);
-  }
-
-  80% {
-    transform: translate(1px, -1px);
+    background-position: 200% 0;
   }
 
   100% {
-    transform: translate(0);
+    background-position: -200% 0;
   }
 }
 
-@keyframes shiny-pulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
+.animate-shimmer {
+  animation: shimmer 8s infinite linear;
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0);
   }
 
-  70% {
-    box-shadow: 0 0 0 6px rgba(255, 255, 255, 0);
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes reflection {
+  0% {
+    background-position: 200% center;
   }
 
   100% {
-    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+    background-position: -200% center;
   }
-}
-
-.animate-vibrate-fast {
-  animation: vibrate 0.2s linear infinite;
-}
-
-.animate-shiny-pulse {
-  animation: shiny-pulse 2s infinite;
 }
 
 @media print {
-  @page {
-    margin: 10mm;
-    size: auto;
-  }
-
-  body {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-    background-color: #ffffff !important;
-    color: #000000 !important;
-  }
 
   /* Reset all backgrounds to white/transparent for print */
   * {
@@ -85,7 +203,6 @@ html {
     background-image: none !important;
     box-shadow: none !important;
     text-shadow: none !important;
-    color: #000000 !important;
     border-color: #e5e7eb !important;
   }
 
@@ -102,6 +219,7 @@ html {
     border-radius: 8px !important;
   }
 }
+
 
 /* Custom Scrollbar */
 .custom-scrollbar::-webkit-scrollbar {

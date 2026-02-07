@@ -16,19 +16,16 @@ import {
 } from 'lucide-react';
 import { ChatWidget } from '../components/ChatWidget';
 import {
-    Button,
-    Header
+    Button
 } from '../components/ui';
+import { DashboardLayout } from '../layouts/DashboardLayout';
 import { TeamSidebar, DashboardHero, ReportFeed } from '../components/domain';
 import { MapView } from '../components/domain/MapView';
-import { TacticalHud } from '../components/home/TacticalHud';
-import { ReportHistoryModal } from '../components/domain/modals/ReportHistoryModal';
 import { AnalysisModal } from '../components/domain/modals/AnalysisModal';
 import { ProfileSettingsModal } from '../components/domain/modals/ProfileSettingsModal';
 import { ExportReportsModal } from '../components/domain/modals/ExportReportsModal';
 import { ConferenceModal } from '../components/domain/modals/ConferenceModal';
 import { AgendaModal } from '../components/domain/modals/AgendaModal';
-import { NotificationDrawer } from '../components/ui/NotificationDrawer';
 import { ConferenceInviteNotification } from '../components/ui/ConferenceInviteNotification';
 
 import type { Report, Stats, Department, UserContact, Notification } from '../types';
@@ -92,7 +89,7 @@ export function Dashboard() {
     const LIMIT = 6;
 
     // Modals & UI State
-    const [selectedReport, setSelectedReport] = useState<Report | null>(null);
+    // const [selectedReport, setSelectedReport] = useState<Report | null>(null);
     const [analyzingReport, setAnalyzingReport] = useState<Report | null>(null);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [isExportModalOpen, setIsExportModalOpen] = useState(false);
@@ -101,7 +98,6 @@ export function Dashboard() {
     const [selectedDeptId, setSelectedDeptId] = useState('');
     const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
     const [isAgendaOpen, setIsAgendaOpen] = useState(false);
-    const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
     const [notifications, setNotifications] = useState<Notification[]>([]);
 
     // Restoration of missing states
@@ -130,7 +126,7 @@ export function Dashboard() {
                     icon: '💬',
                     duration: 5000,
                     style: {
-                        borderRadius: '1.5rem',
+                        borderRadius: '0.5rem',
                         background: '#333',
                         color: '#fff',
                         fontSize: '12px',
@@ -300,7 +296,7 @@ export function Dashboard() {
                 formData.append('avatar', profileAvatar);
             }
 
-            const response = await api.put('/profile', formData, {
+            const response = await api.patch('/profile', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
 
@@ -372,7 +368,7 @@ export function Dashboard() {
         {
             id: 'operacional',
             title: 'Operacional',
-            icon: <Users className="w-3 h-3" />,
+            icon: <Users className="w-4 h-4" />,
             members: subordinates.map(s => ({
                 id: s.id,
                 name: s.name,
@@ -386,7 +382,7 @@ export function Dashboard() {
         {
             id: 'contacts',
             title: 'Rede de Apoio',
-            icon: <Shield className="w-3 h-3" />,
+            icon: <Shield className="w-4 h-4" />,
             members: contacts.map(c => ({
                 id: c.id,
                 name: c.name,
@@ -410,200 +406,179 @@ export function Dashboard() {
     };
 
     return (
-        <div className="min-h-screen bg-[#020617] text-slate-200 font-sans selection:bg-blue-500/30 overflow-x-hidden relative">
-            {/* Mission Control Elements */}
-            <TacticalHud />
+        <DashboardLayout
+            user={{ name: user?.name, avatarUrl: user?.avatarUrl, role: user?.role }}
+            onLogout={signOut}
+            notifications={notifications}
+            onMarkAsRead={handleMarkAsRead}
+            onMarkAllAsRead={handleMarkAllAsRead}
+            onProfileClick={() => setIsProfileOpen(true)}
+        >
+            <DashboardHero
+                title="Dashboard Operacional"
+                subtitle="Monitoramento em tempo real e resposta rápida."
+                stats={stats}
+                kpiConfigs={KPI_CONFIGS}
+                statusFilter={statusFilter}
+                onStatusFilterChange={(s) => { setStatusFilter(s); setPage(1); }}
+                filters={FILTER_OPTIONS}
+                showDateFilters={true}
+                startDate={startDate}
+                endDate={endDate}
+                onStartDateChange={setStartDate}
+                onEndDateChange={setEndDate}
+                onClearDates={() => { setStartDate(''); setEndDate(''); }}
+                onAnalyticsClick={() => navigate('/analytics')}
+                onExportClick={() => setIsExportModalOpen(true)}
+                onConferenceClick={user?.role === 'SUPERVISOR' ? handleStartConference : undefined}
+                onAgendaClick={() => setIsAgendaOpen(true)}
+            >
+                <div className="flex bg-[var(--bg-tertiary)] p-1 rounded-lg border border-[var(--border-subtle)]">
+                    <button
+                        onClick={() => setViewMode('list')}
+                        className={`px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider transition-all ${viewMode === 'list' ? 'bg-white text-[var(--text-primary)] shadow-sm' : 'text-[var(--text-tertiary)] hover:bg-[var(--bg-primary)]'}`}
+                    >
+                        Lista
+                    </button>
+                    <button
+                        onClick={() => setViewMode('map')}
+                        className={`px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider transition-all ${viewMode === 'map' ? 'bg-white text-[var(--text-primary)] shadow-sm' : 'text-[var(--text-tertiary)] hover:bg-[var(--bg-primary)]'}`}
+                    >
+                        Mapa
+                    </button>
+                </div>
+            </DashboardHero>
 
-            {/* Background Effects */}
-            <div className="fixed inset-0 pointer-events-none z-0">
-                <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000,transparent)] opacity-[0.1]" />
-            </div>
-
-            <div className="relative z-10">
-                <Header
-                    user={{ name: user?.name, avatarUrl: user?.avatarUrl }}
-                    onLogout={signOut}
-                    unreadCount={notifications.filter(n => !n.read).length}
-                    onNotificationsClick={() => setIsNotificationsOpen(true)}
-                />
-
-                <DashboardHero
-                    title="Dashboard Operacional"
-                    subtitle="Monitoramento em tempo real e resposta rápida."
-                    stats={stats}
-                    kpiConfigs={KPI_CONFIGS}
-                    statusFilter={statusFilter}
-                    onStatusFilterChange={(s) => { setStatusFilter(s); setPage(1); }}
-                    filters={FILTER_OPTIONS}
-                    showDateFilters={true}
-                    startDate={startDate}
-                    endDate={endDate}
-                    onStartDateChange={setStartDate}
-                    onEndDateChange={setEndDate}
-                    onClearDates={() => { setStartDate(''); setEndDate(''); }}
-                    onAnalyticsClick={() => navigate('/analytics')}
-                    onExportClick={() => setIsExportModalOpen(true)}
-                    onConferenceClick={user?.role === 'SUPERVISOR' ? handleStartConference : undefined}
-                    onAgendaClick={() => setIsAgendaOpen(true)}
-                >
-                    <div className="flex bg-white/10 backdrop-blur-md p-1 rounded-xl border border-white/10">
-                        <button
-                            onClick={() => setViewMode('list')}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${viewMode === 'list' ? 'bg-blue-600 text-white shadow-lg' : 'text-blue-200 hover:bg-white/10'}`}
-                        >
-                            Lista
-                        </button>
-                        <button
-                            onClick={() => setViewMode('map')}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${viewMode === 'map' ? 'bg-blue-600 text-white shadow-lg' : 'text-blue-200 hover:bg-white/10'}`}
-                        >
-                            Mapa
-                        </button>
-                    </div>
-
-                    <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-blue-600/25 rounded-full blur-[160px] -mr-96 -mt-96 animate-pulse duration-[10s] pointer-events-none" />
-                    <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-indigo-600/20 rounded-full blur-[140px] -ml-40 -mb-40 pointer-events-none" />
-                </DashboardHero>
-
-                <main className="max-w-7xl mx-auto px-6 w-full -mt-20 mb-20 relative flex flex-col lg:flex-row gap-12">
-                    <div className="flex-1 space-y-12">
-                        <div className="relative group">
-                            <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-400 opacity-60 group-focus-within:opacity-100 transition-opacity" />
-                            <input
-                                type="text"
-                                placeholder="Filtrar por protocolo ou descrição..."
-                                value={searchTerm}
-                                onChange={e => setSearchTerm(e.target.value)}
-                                className="w-full pl-14 pr-8 py-4 bg-slate-900/50 border border-white/5 rounded-3xl outline-none focus:bg-slate-900/80 focus:border-blue-500/30 transition-all text-sm font-black text-white placeholder:text-slate-400"
-                            />
-                        </div>
-
-                        {viewMode === 'list' ? (
-                            <ReportFeed
-                                reports={reports.filter(r =>
-                                    r.comment.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                    r.id.toLowerCase().includes(searchTerm.toLowerCase())
-                                )}
-                                searchTerm={searchTerm}
-                                onSearchChange={setSearchTerm}
-                                hasMore={hasMore}
-                                onLoadMore={handleLoadMore}
-                                isLoading={isReportsLoading}
-                                renderReportActions={(report) => (
-                                    <div className="flex gap-2 w-full">
-                                        {report.status !== 'RESOLVED' && !report.department && (
-                                            <Button
-                                                variant="primary"
-                                                size="sm"
-                                                fullWidth
-                                                onClick={() => { setAnalyzingReport(report); setTargetStatus('FORWARDED'); }}
-                                            >
-                                                Trâmite
-                                            </Button>
-                                        )}
-                                        <Button variant="ghost" size="sm" onClick={() => setSelectedReport(report)}>
-                                            <History className="w-4 h-4" />
-                                        </Button>
-                                    </div>
-                                )}
-                            />
-                        ) : (
-                            <div className="w-full h-[600px]">
-                                <MapView reports={reports} onMarkerClick={setSelectedReport} />
-                            </div>
-                        )}
-                    </div>
-
-                    <aside className="w-full lg:w-80 shrink-0">
-
-                        <TeamSidebar
-                            onMemberClick={(member) => {
-                                setSearchParams({ chat: member.id }, { replace: true });
-                                markAsRead(member.id);
-                            }}
-                            groups={teamGroups}
+            <div className="flex flex-col lg:flex-row gap-8">
+                <main className="flex-1 space-y-6">
+                    <div className="relative group">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-tertiary)] group-focus-within:text-[var(--text-primary)] transition-colors" />
+                        <input
+                            type="text"
+                            placeholder="Filtrar por protocolo ou descrição..."
+                            value={searchTerm}
+                            onChange={e => setSearchTerm(e.target.value)}
+                            className="w-full pl-10 pr-4 py-3 bg-[var(--bg-primary)] border border-[var(--border-medium)] rounded-xl outline-none focus:ring-2 focus:ring-[var(--border-subtle)] transition-all text-sm font-medium text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] shadow-sm"
                         />
-                    </aside>
+                    </div>
+
+                    {viewMode === 'list' ? (
+                        <ReportFeed
+                            reports={reports.filter(r =>
+                                r.comment.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                r.id.toLowerCase().includes(searchTerm.toLowerCase())
+                            )}
+                            searchTerm={searchTerm}
+                            onSearchChange={setSearchTerm}
+                            hasMore={hasMore}
+                            onLoadMore={handleLoadMore}
+                            isLoading={isReportsLoading}
+                            renderReportActions={(report) => (
+                                <div className="flex gap-2 w-full">
+                                    {report.status !== 'RESOLVED' && !report.department && (
+                                        <Button
+                                            variant="secondary"
+                                            size="sm"
+                                            fullWidth
+                                            className="bg-[var(--bg-tertiary)] hover:bg-[var(--bg-primary)] border border-[var(--border-medium)]"
+                                            onClick={() => { setAnalyzingReport(report); setTargetStatus('FORWARDED'); }}
+                                        >
+                                            Trâmite
+                                        </Button>
+                                    )}
+                                    <Button variant="ghost" size="sm" onClick={() => { /* setSelectedReport(report) */ }}>
+                                        <History className="w-4 h-4" />
+                                    </Button>
+                                </div>
+                            )}
+                        />
+                    ) : (
+                        <div className="w-full h-[600px] rounded-2xl overflow-hidden border border-[var(--border-subtle)] shadow-sm">
+                            <MapView reports={reports} />
+                        </div>
+                    )}
                 </main>
 
-                <AnalysisModal
-                    isOpen={!!analyzingReport}
-                    onClose={() => { setAnalyzingReport(null); resetAnalysisForm(); }}
-                    onConfirm={handleProcessAnalysis}
-                    targetStatus={targetStatus}
-                    setTargetStatus={setTargetStatus}
-                    feedback={formFeedback}
-                    setFeedback={setFormFeedback}
-                    selectedDeptId={selectedDeptId}
-                    setSelectedDeptId={setSelectedDeptId}
-                    departments={departments}
-                    title="Análise de Fluxo"
-                />
-
-                <ReportHistoryModal
-                    isOpen={!!selectedReport}
-                    onClose={() => setSelectedReport(null)}
-                    report={selectedReport}
-                />
-
-                <ProfileSettingsModal
-                    isOpen={isProfileOpen}
-                    onClose={() => setIsProfileOpen(false)}
-                    onSave={handleUpdateProfile}
-                    isLoading={isUpdatingProfile}
-                    profilePhrase={profilePhrase}
-                    setProfilePhrase={setProfilePhrase}
-                    onAvatarChange={setProfileAvatar}
-                    avatarUrl={user?.avatarUrl}
-                />
-
-                {chatTarget && user && (
-                    <ChatWidget
-                        currentUser={{ id: user.id || '', name: user.name || '', role: user.role || '' }}
-                        targetUser={chatTarget}
-                        onClose={handleCloseChat}
-                        socket={socket}
+                <aside className="w-full lg:w-80 shrink-0">
+                    <TeamSidebar
+                        onMemberClick={(member) => {
+                            setSearchParams({ chat: member.id }, { replace: true });
+                            markAsRead(member.id);
+                        }}
+                        groups={teamGroups}
                     />
-                )}
-
-                <ExportReportsModal
-                    isOpen={isExportModalOpen}
-                    onClose={() => setIsExportModalOpen(false)}
-                    reports={reports}
-                    departments={departments}
-                />
-
-                <ConferenceModal
-                    isOpen={!!activeRoom}
-                    onClose={() => setActiveRoom(null)}
-                    roomName={activeRoom || ''}
-                    userName={user?.name}
-                />
-
-                <ConferenceInviteNotification
-                    isOpen={!!pendingInvite}
-                    hostName={pendingInvite?.hostName || ''}
-                    onAccept={() => {
-                        setActiveRoom(pendingInvite?.roomId || null);
-                        setPendingInvite(null);
-                    }}
-                    onDecline={() => setPendingInvite(null)}
-                />
-                {/* New Modals */}
-                <AgendaModal
-                    isOpen={isAgendaOpen}
-                    onClose={() => setIsAgendaOpen(false)}
-                />
-
-                <NotificationDrawer
-                    isOpen={isNotificationsOpen}
-                    onClose={() => setIsNotificationsOpen(false)}
-                    notifications={notifications}
-                    onMarkAsRead={handleMarkAsRead}
-                    onMarkAllAsRead={handleMarkAllAsRead}
-                />
+                </aside>
             </div>
-        </div>
+
+            <AnalysisModal
+                isOpen={!!analyzingReport}
+                onClose={() => { setAnalyzingReport(null); resetAnalysisForm(); }}
+                onConfirm={handleProcessAnalysis}
+                targetStatus={targetStatus}
+                setTargetStatus={setTargetStatus}
+                feedback={formFeedback}
+                setFeedback={setFormFeedback}
+                selectedDeptId={selectedDeptId}
+                setSelectedDeptId={setSelectedDeptId}
+                departments={departments}
+                title="Análise de Fluxo"
+            />
+
+            {/* <ReportHistoryModal
+                isOpen={!!selectedReport}
+                onClose={() => setSelectedReport(null)}
+                report={selectedReport}
+            /> */}
+
+            <ProfileSettingsModal
+                isOpen={isProfileOpen}
+                onClose={() => setIsProfileOpen(false)}
+                onSave={handleUpdateProfile}
+                isLoading={isUpdatingProfile}
+                profilePhrase={profilePhrase}
+                setProfilePhrase={setProfilePhrase}
+                onAvatarChange={setProfileAvatar}
+                avatarUrl={user?.avatarUrl}
+            />
+
+            {chatTarget && user && (
+                <ChatWidget
+                    currentUser={{ id: user.id || '', name: user.name || '', role: user.role || '' }}
+                    targetUser={chatTarget}
+                    onClose={handleCloseChat}
+                    socket={socket}
+                />
+            )}
+
+            <ExportReportsModal
+                isOpen={isExportModalOpen}
+                onClose={() => setIsExportModalOpen(false)}
+                reports={reports}
+                departments={departments}
+            />
+
+            <ConferenceModal
+                isOpen={!!activeRoom}
+                onClose={() => setActiveRoom(null)}
+                roomName={activeRoom || ''}
+                userName={user?.name}
+            />
+
+            <ConferenceInviteNotification
+                isOpen={!!pendingInvite}
+                hostName={pendingInvite?.hostName || ''}
+                onAccept={() => {
+                    setActiveRoom(pendingInvite?.roomId || null);
+                    setPendingInvite(null);
+                }}
+                onDecline={() => setPendingInvite(null)}
+            />
+
+            <AgendaModal
+                isOpen={isAgendaOpen}
+                onClose={() => setIsAgendaOpen(false)}
+            />
+        </DashboardLayout>
     );
 }
 

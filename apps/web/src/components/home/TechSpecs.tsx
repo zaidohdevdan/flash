@@ -3,42 +3,42 @@ import { Shield, Lock, Server, Cpu, Database, Eye } from 'lucide-react';
 
 const specs = [
     {
-        icon: <Lock className="w-5 h-5 text-blue-400" />,
+        icon: <Lock className="w-5 h-5 text-slate-700" />,
         category: "SEGURANÇA",
         title: "Criptografia End-to-End",
         desc: "Todas as transmissões são protegidas via TLS 1.3. Dados sensíveis de usuários são hasheados com Argon2.",
         delay: 0
     },
     {
-        icon: <Eye className="w-5 h-5 text-purple-400" />,
+        icon: <Eye className="w-5 h-5 text-slate-700" />,
         category: "AUDITORIA",
         title: "Imutabilidade de Logs",
         desc: "Cada ação crítica gera um registro de auditoria inalterável (AuditLog), garantindo total rastreabilidade.",
         delay: 0.1
     },
     {
-        icon: <Server className="w-5 h-5 text-green-400" />,
+        icon: <Server className="w-5 h-5 text-slate-700" />,
         category: "INFRAESTRUTURA",
         title: "Escalabilidade Horizontal",
         desc: "Backend Node.js/Bun preparado para escalar via clusters, com balanceamento de carga nativo.",
         delay: 0.2
     },
     {
-        icon: <Database className="w-5 h-5 text-orange-400" />,
+        icon: <Database className="w-5 h-5 text-slate-700" />,
         category: "DADOS",
         title: "MongoDB Cluster",
         desc: "Armazenamento distribuído com réplicas para alta disponibilidade e tolerância a falhas.",
         delay: 0.3
     },
     {
-        icon: <Cpu className="w-5 h-5 text-pink-400" />,
+        icon: <Cpu className="w-5 h-5 text-slate-700" />,
         category: "PERFORMANCE",
         title: "Real-time WebSockets",
         desc: "Comunicação bidirecional com latência sub-100ms para atualizações instantâneas de dashboard.",
         delay: 0.4
     },
     {
-        icon: <Shield className="w-5 h-5 text-cyan-400" />,
+        icon: <Shield className="w-5 h-5 text-slate-700" />,
         category: "COMPLIANCE",
         title: "RBAC Estrito",
         desc: "Controle de Acesso Baseado em Funções garante que cada usuário acesse apenas o permitido.",
@@ -48,7 +48,7 @@ const specs = [
 
 export const TechSpecs = () => {
     return (
-        <section className="py-32 bg-[#020617] relative">
+        <section className="py-32 bg-white relative">
             <div className="max-w-7xl mx-auto px-6">
                 <div className="flex flex-col lg:flex-row gap-16 items-start">
 
@@ -58,7 +58,7 @@ export const TechSpecs = () => {
                             initial={{ opacity: 0, x: -20 }}
                             whileInView={{ opacity: 1, x: 0 }}
                             viewport={{ once: true }}
-                            className="text-xs font-black text-green-500 uppercase tracking-[0.3em] mb-4"
+                            className="text-xs font-black text-slate-400 uppercase tracking-[0.3em] mb-4"
                         >
                             Especificações Técnicas
                         </motion.h2>
@@ -67,7 +67,7 @@ export const TechSpecs = () => {
                             whileInView={{ opacity: 1, x: 0 }}
                             viewport={{ once: true }}
                             transition={{ delay: 0.1 }}
-                            className="text-4xl font-black text-white tracking-tight mb-6"
+                            className="text-4xl font-black text-slate-900 tracking-tight mb-6"
                         >
                             Engenharia de precisão para missões críticas.
                         </motion.h3>
@@ -76,7 +76,7 @@ export const TechSpecs = () => {
                             whileInView={{ opacity: 1, x: 0 }}
                             viewport={{ once: true }}
                             transition={{ delay: 0.2 }}
-                            className="text-gray-400 leading-relaxed"
+                            className="text-slate-500 leading-relaxed"
                         >
                             O Flash não é apenas bonito. Por baixo do capô, existe uma arquitetura desenhada para resistir ao caos operacional e garantir a integridade da informação.
                         </motion.p>
@@ -91,16 +91,16 @@ export const TechSpecs = () => {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ delay: item.delay, duration: 0.5 }}
-                                className="p-8 rounded-3xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/10 transition-colors backdrop-blur-sm group"
+                                className="p-8 rounded-3xl bg-slate-50 border border-slate-100 hover:bg-white hover:border-slate-200 hover:shadow-xl hover:shadow-slate-200/40 transition-all group"
                             >
                                 <div className="flex items-center gap-4 mb-4">
-                                    <div className="p-3 rounded-xl bg-white/5 group-hover:scale-110 transition-transform">
+                                    <div className="p-3 rounded-xl bg-white border border-slate-200 shadow-sm group-hover:scale-110 transition-transform">
                                         {item.icon}
                                     </div>
-                                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">{item.category}</span>
+                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{item.category}</span>
                                 </div>
-                                <h4 className="text-lg font-bold text-white mb-2">{item.title}</h4>
-                                <p className="text-sm text-gray-400 leading-relaxed">
+                                <h4 className="text-lg font-bold text-slate-900 mb-2">{item.title}</h4>
+                                <p className="text-sm text-slate-500 leading-relaxed">
                                     {item.desc}
                                 </p>
                             </motion.div>

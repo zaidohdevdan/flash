@@ -1,0 +1,191 @@
+import React, { useState } from 'react';
+import {
+    LayoutDashboard,
+    LogOut,
+    Bell,
+    Menu,
+    Search
+} from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { Button } from '../components/ui/Button';
+import { NotificationDrawer } from '../components/ui/NotificationDrawer';
+import type { Notification } from '../types';
+
+interface DashboardLayoutProps {
+    children: React.ReactNode;
+    user?: {
+        name?: string;
+        avatarUrl?: string | null;
+        role?: string;
+    };
+    onLogout?: () => void;
+    notifications?: Notification[];
+    onMarkAsRead?: (id: string) => void;
+    onMarkAllAsRead?: () => void;
+    onProfileClick?: () => void;
+}
+
+export function DashboardLayout({
+    children,
+    user,
+    onLogout,
+    notifications = [],
+    onMarkAsRead = () => { },
+    onMarkAllAsRead = () => { },
+    onProfileClick
+}: DashboardLayoutProps) {
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    const menuItems = [
+        { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
+        // { icon: Users, label: 'Equipe', path: '/team' },
+        // { icon: Settings, label: 'Configurações', path: '/settings' },
+    ];
+
+    const isActive = (path: string) => location.pathname === path;
+    const unreadCount = notifications.filter(n => !n.read).length;
+
+    return (
+        <div className="min-h-screen bg-[var(--bg-secondary)] flex">
+            {/* Mobile Sidebar Overlay */}
+            {isSidebarOpen && (
+                <div
+                    className="fixed inset-0 bg-black/20 z-40 lg:hidden backdrop-blur-sm"
+                    onClick={() => setIsSidebarOpen(false)}
+                />
+            )}
+
+            {/* Sidebar */}
+            <aside className={`
+        fixed inset-y-0 left-0 z-50 w-64 bg-[var(--bg-primary)] border-r border-[var(--border-subtle)]
+        transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static
+        ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+        print:hidden
+      `}>
+                <div className="h-full flex flex-col">
+                    {/* Logo Area */}
+                    <div className="h-16 flex items-center px-6 border-b border-[var(--border-subtle)]">
+                        <span className="text-xl font-bold tracking-tight text-[var(--text-primary)]">
+                            Flash<span className="text-[var(--accent-primary)]">.</span>
+                        </span>
+                    </div>
+
+                    {/* User Profile Summary */}
+                    <div
+                        onClick={onProfileClick}
+                        className="p-4 border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)]/50 cursor-pointer hover:bg-[var(--bg-secondary)] transition-colors"
+                    >
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-[var(--bg-tertiary)] flex items-center justify-center overflow-hidden border border-[var(--border-subtle)]">
+                                {user?.avatarUrl ? (
+                                    <img src={user.avatarUrl} alt={user.name} className="w-full h-full object-cover" />
+                                ) : (
+                                    <span className="text-sm font-medium text-[var(--text-secondary)]">
+                                        {user?.name?.charAt(0) || 'U'}
+                                    </span>
+                                )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-[var(--text-primary)] truncate">
+                                    {user?.name || 'Usuário'}
+                                </p>
+                                <p className="text-xs text-[var(--text-tertiary)] truncate capitalize">
+                                    {user?.role?.toLowerCase() || 'Membro'}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Navigation */}
+                    <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+                        {menuItems.map((item) => (
+                            <button
+                                key={item.path}
+                                onClick={() => navigate(item.path)}
+                                className={`
+                  w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
+                  ${isActive(item.path)
+                                        ? 'bg-[var(--bg-tertiary)] text-[var(--text-primary)]'
+                                        : 'text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)]'}
+                `}
+                            >
+                                <item.icon className="w-4 h-4" />
+                                {item.label}
+                            </button>
+                        ))}
+                    </nav>
+
+                    {/* Bottom Actions */}
+                    <div className="p-4 border-t border-[var(--border-subtle)]">
+                        <button
+                            onClick={onLogout}
+                            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-[var(--text-secondary)] hover:bg-red-50 hover:text-red-600 transition-colors"
+                        >
+                            <LogOut className="w-4 h-4" />
+                            Sair
+                        </button>
+                    </div>
+                </div>
+            </aside>
+
+            {/* Main Content Area */}
+            <div className="flex-1 flex flex-col min-w-0 overflow-hidden print:overflow-visible">
+                {/* Top Header */}
+                <header className="h-16 bg-[var(--bg-primary)] border-b border-[var(--border-subtle)] flex items-center justify-between px-4 lg:px-8 print:hidden">
+                    <div className="flex items-center gap-4">
+                        <button
+                            onClick={() => setIsSidebarOpen(true)}
+                            className="lg:hidden p-2 -ml-2 text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] rounded-lg"
+                            aria-label="Toggle Sidebar"
+                        >
+                            <Menu className="w-5 h-5" />
+                        </button>
+
+                        <div className="hidden md:flex items-center max-w-md w-full">
+                            <div className="relative w-full max-w-xs">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-tertiary)]" />
+                                <input
+                                    type="text"
+                                    placeholder="Buscar..."
+                                    className="w-full pl-9 pr-4 py-1.5 bg-[var(--bg-secondary)] border-none rounded-lg text-sm focus:ring-1 focus:ring-[var(--border-medium)] placeholder:text-[var(--text-tertiary)] text-[var(--text-primary)]"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="relative text-[var(--text-secondary)]"
+                            onClick={() => setIsNotificationsOpen(true)}
+                        >
+                            <Bell className="w-4 h-4" />
+                            {unreadCount > 0 && (
+                                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-[var(--bg-primary)]"></span>
+                            )}
+                        </Button>
+                    </div>
+                </header>
+
+                {/* Page Content */}
+                <main className="flex-1 overflow-y-auto bg-[var(--bg-secondary)] p-4 lg:p-8 print:p-0 print:bg-white print:overflow-visible">
+                    <div className="max-w-7xl mx-auto print:max-w-none print:w-full">
+                        {children}
+                    </div>
+                </main>
+            </div>
+
+            <NotificationDrawer
+                isOpen={isNotificationsOpen}
+                onClose={() => setIsNotificationsOpen(false)}
+                notifications={notifications}
+                onMarkAsRead={onMarkAsRead}
+                onMarkAllAsRead={onMarkAllAsRead}
+            />
+        </div>
+    );
+}

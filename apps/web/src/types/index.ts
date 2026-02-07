@@ -25,6 +25,7 @@ export interface Report {
         name: string;
         avatarUrl?: string | null;
         statusPhrase?: string;
+        role?: string;
     };
 }
 

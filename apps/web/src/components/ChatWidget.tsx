@@ -252,16 +252,16 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket }: ChatWid
     };
 
     return (
-        <div className="fixed inset-0 sm:top-auto sm:left-auto sm:bottom-6 sm:right-6 w-full sm:w-[400px] md:w-[440px] h-[100dvh] sm:h-[650px] sm:max-h-[calc(100vh-4rem)] bg-slate-950/90 backdrop-blur-[32px] sm:rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden sm:border border-white/10 ring-1 ring-white/5 z-[60] animate-in slide-in-from-bottom-5 fade-in duration-500">
+        <div className="fixed inset-0 sm:top-auto sm:left-auto sm:bottom-6 sm:right-6 w-full sm:w-[400px] md:w-[440px] h-[100dvh] sm:h-[650px] sm:max-h-[calc(100vh-4rem)] bg-white/90 backdrop-blur-[32px] sm:rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden sm:border border-[var(--border-subtle)] ring-1 ring-black/5 z-[60] animate-in slide-in-from-bottom-5 fade-in duration-500">
             {/* Header */}
-            <div className="p-4 bg-slate-900/80 backdrop-blur-xl text-white flex justify-between items-center border-b border-white/5">
+            <div className="p-4 bg-white/80 backdrop-blur-xl text-[var(--text-primary)] flex justify-between items-center border-b border-[var(--border-subtle)]">
                 <div className="flex items-center gap-3">
-                    <div className="bg-blue-500/20 p-2 rounded-full text-blue-400">
+                    <div className="bg-[var(--accent-primary)]/10 p-2 rounded-full text-[var(--accent-primary)]">
                         <MessageSquare className="w-5 h-5" />
                     </div>
                     <div>
-                        <h3 className="font-bold text-sm text-white">{targetUser.name}</h3>
-                        <p className="text-[10px] text-slate-400 uppercase tracking-wider">
+                        <h3 className="font-bold text-sm text-[var(--text-primary)]">{targetUser.name}</h3>
+                        <p className="text-[10px] text-[var(--text-tertiary)] uppercase tracking-wider">
                             {targetUser.role === 'MANAGER' ? 'Gerente / Setor' :
                                 targetUser.role === 'SUPERVISOR' ? 'Supervisor' :
                                     targetUser.role === 'PROFESSIONAL' ? 'Operacional' :
@@ -269,11 +269,11 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket }: ChatWid
                         </p>
                     </div>
                 </div>
-                <div className="flex items-center gap-1 text-slate-400">
+                <div className="flex items-center gap-1 text-[var(--text-tertiary)]">
                     <button
                         type="button"
                         onClick={handleClearHistory}
-                        className="p-1.5 hover:bg-white/10 rounded-lg transition hover:text-white"
+                        className="p-1.5 hover:bg-[var(--bg-secondary)] rounded-lg transition hover:text-[var(--text-primary)]"
                         title="Excluir Histórico"
                         aria-label="Excluir Histórico"
                     >
@@ -282,7 +282,7 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket }: ChatWid
                     <button
                         type="button"
                         onClick={onClose}
-                        className="p-1 hover:bg-white/10 rounded-full transition hover:text-white"
+                        className="p-1 hover:bg-[var(--bg-secondary)] rounded-full transition hover:text-[var(--text-primary)]"
                         title="Fechar"
                         aria-label="Fechar"
                     >
@@ -292,9 +292,9 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket }: ChatWid
             </div>
 
             {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 overscroll-contain scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
+            <div className="flex-1 overflow-y-auto p-4 space-y-4 overscroll-contain scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
                 {messages.length === 0 && (
-                    <div className="flex flex-col items-center justify-center h-full text-slate-600 opacity-50">
+                    <div className="flex flex-col items-center justify-center h-full text-[var(--text-tertiary)] opacity-50">
                         <MessageSquare className="w-12 h-12 mb-2" />
                         <p className="text-xs font-medium">Inicie a conversa...</p>
                     </div>
@@ -311,16 +311,16 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket }: ChatWid
                             <div
                                 onClick={() => isMe && !isEditing && msg.id && setSelectedMessageId(isSelected ? null : msg.id)}
                                 className={`group relative max-w-[85%] p-3.5 rounded-2xl shadow-sm text-sm transition-all cursor-pointer ${isMe
-                                    ? 'bg-blue-600 text-white rounded-tr-none'
-                                    : 'bg-slate-800 border border-white/5 text-slate-200 rounded-tl-none'
-                                    } ${isSelected ? 'ring-2 ring-blue-500 ring-offset-2 ring-offset-slate-900' : ''}`}
+                                    ? 'bg-[var(--accent-primary)] text-[var(--accent-text)] rounded-tr-none'
+                                    : 'bg-[var(--bg-secondary)] border border-[var(--border-subtle)] text-[var(--text-primary)] rounded-tl-none'
+                                    } ${isSelected ? 'ring-2 ring-[var(--accent-primary)] ring-offset-2 ring-offset-white' : ''}`}
                             >
                                 {isEditing ? (
                                     <div className="flex flex-col gap-2 min-w-[200px]">
                                         <textarea
                                             value={editText}
                                             onChange={e => setEditText(e.target.value)}
-                                            className="w-full bg-slate-900/50 text-white placeholder-slate-500 border border-white/10 outline-none rounded-lg p-2 text-xs resize-none focus:border-blue-500/50 transition-colors"
+                                            className="w-full bg-white text-[var(--text-primary)] placeholder-[var(--text-tertiary)] border border-[var(--border-medium)] outline-none rounded-lg p-2 text-xs resize-none focus:border-[var(--accent-primary)] transition-colors"
                                             rows={2}
                                             autoFocus
                                             aria-label="Editar mensagem"
@@ -329,7 +329,7 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket }: ChatWid
                                             <button
                                                 type="button"
                                                 onClick={() => setEditingMessageId(null)}
-                                                className="p-1 hover:bg-white/10 rounded text-white/70 hover:text-white"
+                                                className="p-1 hover:bg-black/5 rounded text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                                                 title="Cancelar Edição"
                                             >
                                                 <X className="w-3.5 h-3.5" />
@@ -337,7 +337,7 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket }: ChatWid
                                             <button
                                                 type="button"
                                                 onClick={handleUpdateMessage}
-                                                className="p-1 bg-blue-500 text-white rounded hover:bg-blue-400"
+                                                className="p-1 bg-white text-[var(--accent-primary)] rounded hover:bg-white/90 border border-[var(--border-subtle)]"
                                                 title="Confirmar Edição"
                                             >
                                                 <Check className="w-3.5 h-3.5" />
@@ -346,12 +346,12 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket }: ChatWid
                                     </div>
                                 ) : (
                                     <>
-                                        {msg.text && <p className="whitespace-pre-wrap leading-relaxed">{msg.text}</p>}
+                                        {msg.text && <p className="whitespace-pre-wrap leading-relaxed font-medium">{msg.text}</p>}
                                         {msg.audioUrl && (
                                             <div className="space-y-1.5">
                                                 <audio controls src={msg.audioUrl} className="h-8 max-w-[200px] opacity-80 hover:opacity-100 transition-opacity" />
                                                 {msg.expiresAt && (
-                                                    <div className="flex items-center justify-end gap-1 text-[9px] font-bold text-red-400 bg-red-950/30 px-2 py-0.5 rounded-full border border-red-500/20 animate-pulse">
+                                                    <div className="flex items-center justify-end gap-1 text-[9px] font-bold text-red-500 bg-red-50 px-2 py-0.5 rounded-full border border-red-200 animate-pulse">
                                                         <Hourglass className="w-2.5 h-2.5" />
                                                         <span>
                                                             {(() => {
@@ -366,7 +366,7 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket }: ChatWid
                                                 )}
                                             </div>
                                         )}
-                                        <span className={`text-[9px] block mt-1.5 text-right font-medium opacity-60 ${isMe ? 'text-blue-100' : 'text-slate-400'}`}>
+                                        <span className={`text-[9px] block mt-1.5 text-right font-bold opacity-60 ${isMe ? 'text-[var(--accent-text)]' : 'text-[var(--text-tertiary)]'}`}>
                                             {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                         </span>
                                     </>
@@ -378,7 +378,7 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket }: ChatWid
                                         <button
                                             type="button"
                                             onClick={(e) => { e.stopPropagation(); handleStartEdit(msg); }}
-                                            className="p-2 bg-slate-800 shadow-xl border border-white/10 rounded-full text-slate-400 hover:text-blue-400 hover:bg-slate-700 transition"
+                                            className="p-2 bg-white shadow-md border border-[var(--border-subtle)] rounded-full text-[var(--text-tertiary)] hover:text-[var(--accent-primary)] hover:bg-[var(--bg-secondary)] transition"
                                             title="Editar"
                                             aria-label="Editar"
                                         >
@@ -388,7 +388,7 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket }: ChatWid
                                             <button
                                                 type="button"
                                                 onClick={(e) => { e.stopPropagation(); handleDeleteClick(msg.id!); }}
-                                                className="p-2 bg-slate-800 shadow-xl border border-white/10 rounded-full text-slate-400 hover:text-red-400 hover:bg-slate-700 transition"
+                                                className="p-2 bg-white shadow-md border border-[var(--border-subtle)] rounded-full text-[var(--text-tertiary)] hover:text-red-500 hover:bg-[var(--bg-secondary)] transition"
                                                 title="Excluir"
                                                 aria-label="Excluir"
                                             >
@@ -397,18 +397,18 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket }: ChatWid
 
                                             {/* Delete Menu */}
                                             {showDeleteMenuFor === msg.id && (
-                                                <div className="absolute right-full mr-2 top-0 bg-slate-800 shadow-xl rounded-xl border border-white/10 p-1 min-w-[140px] flex flex-col z-50 animate-in zoom-in-95 duration-200">
+                                                <div className="absolute right-full mr-2 top-0 bg-white shadow-xl rounded-xl border border-[var(--border-subtle)] p-1 min-w-[140px] flex flex-col z-50 animate-in zoom-in-95 duration-200">
                                                     <button
                                                         type="button"
                                                         onClick={(e) => { e.stopPropagation(); confirmDelete(msg.id!, 'me'); }}
-                                                        className="px-3 py-2 text-left text-xs font-bold text-slate-300 hover:bg-slate-700 rounded-lg flex items-center gap-2 transition-colors"
+                                                        className="px-3 py-2 text-left text-xs font-bold text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] rounded-lg flex items-center gap-2 transition-colors"
                                                     >
                                                         <User className="w-3 h-3" /> Para mim
                                                     </button>
                                                     <button
                                                         type="button"
                                                         onClick={(e) => { e.stopPropagation(); confirmDelete(msg.id!, 'everyone'); }}
-                                                        className="px-3 py-2 text-left text-xs font-bold text-red-400 hover:bg-red-950/30 rounded-lg flex items-center gap-2 transition-colors"
+                                                        className="px-3 py-2 text-left text-xs font-bold text-red-500 hover:bg-red-50 rounded-lg flex items-center gap-2 transition-colors"
                                                     >
                                                         <Trash2 className="w-3 h-3" /> Para todos
                                                     </button>
@@ -425,18 +425,18 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket }: ChatWid
             </div>
 
             {/* Input Area */}
-            <div className="p-3 bg-slate-900/80 border-t border-white/5 backdrop-blur-md">
+            <div className="p-3 bg-white/80 border-t border-[var(--border-subtle)] backdrop-blur-md">
                 {isRecording ? (
-                    <div className="flex items-center justify-between bg-red-950/20 p-3 rounded-xl border border-red-500/20 animate-pulse">
+                    <div className="flex items-center justify-between bg-red-50 p-3 rounded-xl border border-red-200 animate-pulse">
                         <div className="flex items-center gap-3 text-red-500">
                             <div className="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping" />
                             <span className="text-xs font-bold font-mono tracking-wider">{formatTime(recordingTime)}</span>
                         </div>
-                        <span className="text-xs text-red-400 font-medium">Gravando áudio...</span>
+                        <span className="text-xs text-red-500 font-medium">Gravando áudio...</span>
                         <button
                             type="button"
                             onClick={stopRecording}
-                            className="p-2 bg-red-500/10 text-red-500 rounded-full hover:bg-red-500/20 transition border border-red-500/20"
+                            className="p-2 bg-red-100/50 text-red-600 rounded-full hover:bg-red-100 transition border border-red-200"
                             title="Parar Gravação"
                             aria-label="Parar Gravação"
                         >
@@ -448,7 +448,7 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket }: ChatWid
                         <button
                             type="button"
                             onClick={startRecording}
-                            className="p-3 bg-slate-800 text-slate-400 rounded-xl hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/20 transition-all active:scale-95 border border-white/5"
+                            className="p-3 bg-[var(--bg-secondary)] text-[var(--text-secondary)] rounded-xl hover:bg-red-50 hover:text-red-500 hover:border-red-200 transition-all active:scale-95 border border-[var(--border-subtle)]"
                             title="Gravar áudio"
                             aria-label="Gravar áudio"
                         >
@@ -460,13 +460,13 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket }: ChatWid
                             onChange={e => setInputText(e.target.value)}
                             onKeyDown={e => e.key === 'Enter' && handleSendMessage()}
                             placeholder="Digite sua mensagem..."
-                            className="flex-1 bg-slate-800 border border-white/10 outline-none text-sm text-slate-100 placeholder:text-slate-400 px-4 py-3 rounded-xl focus:ring-2 focus:ring-blue-500/40 focus:bg-slate-800/80 transition-all font-medium"
+                            className="flex-1 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] outline-none text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] px-4 py-3 rounded-xl focus:ring-2 focus:ring-[var(--accent-primary)]/40 focus:bg-white transition-all font-medium"
                         />
                         <button
                             type="button"
                             onClick={handleSendMessage}
                             disabled={!inputText.trim()}
-                            className="p-3 bg-blue-600 text-white rounded-xl shadow-lg shadow-blue-900/20 hover:bg-blue-500 disabled:opacity-50 disabled:shadow-none transition active:scale-95"
+                            className="p-3 bg-[var(--accent-primary)] text-[var(--accent-text)] rounded-xl shadow-lg shadow-[var(--accent-primary)]/20 hover:bg-[var(--accent-primary)]/90 disabled:opacity-50 disabled:shadow-none transition active:scale-95"
                             title="Enviar"
                             aria-label="Enviar"
                         >

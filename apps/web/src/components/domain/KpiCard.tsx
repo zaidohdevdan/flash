@@ -1,66 +1,53 @@
 import React from 'react';
 import type { LucideIcon } from 'lucide-react';
-import { GlassCard } from '../ui/GlassCard';
+import { Card } from '../ui/Card';
 
-/**
- * Propriedades para o componente KpiCard.
- */
-export interface KpiCardProps {
-    /** Título da métrica (ex: 'Total de Reportes'). */
+interface KpiCardProps {
     label: string;
-    /** Valor numérico ou texto principal. */
-    value: string | number;
-    /** Ícone da biblioteca lucide-react. */
+    value: number;
     icon: LucideIcon;
-    /** Variante de cor para o ícone e fundo sutil. */
-    variant?: 'blue' | 'purple' | 'emerald' | 'orange';
-    /** Tendência (ex: '+12%'). */
+    variant: 'blue' | 'purple' | 'emerald' | 'orange';
     trend?: string;
 }
 
-/**
- * Cartão de KPI (Key Performance Indicator) desenhado para o Dashboard.
- * Utiliza Glassmorphism avançado para criar profundidade.
- */
 export const KpiCard: React.FC<KpiCardProps> = ({
     label,
     value,
     icon: Icon,
-    variant = 'blue',
+    variant,
     trend
 }) => {
-    const variants = {
-        blue: 'text-white bg-blue-500 shadow-lg shadow-blue-500/40',
-        purple: 'text-white bg-purple-500 shadow-lg shadow-purple-500/40',
-        emerald: 'text-white bg-emerald-500 shadow-lg shadow-emerald-500/40',
-        orange: 'text-white bg-orange-500 shadow-lg shadow-orange-500/40'
+    // We map colors to our new design system
+    const colorMap = {
+        blue: { icon: 'text-blue-600', bg: 'bg-blue-50' },
+        purple: { icon: 'text-purple-600', bg: 'bg-purple-50' },
+        emerald: { icon: 'text-emerald-600', bg: 'bg-emerald-50' },
+        orange: { icon: 'text-orange-600', bg: 'bg-orange-50' }
     };
 
+    const colors = colorMap[variant] || colorMap.blue;
+
     return (
-        <GlassCard
-            variant="dark"
-            blur="lg"
-            className="p-5 flex flex-col gap-4 group hover:scale-[1.02] transition-all duration-300 !rounded-[2rem] border-white/5 bg-slate-950/40"
-        >
-            <div className="flex justify-between items-start">
-                <div className={`p-3 rounded-2xl ${variants[variant]} transition-all duration-300 group-hover:scale-110`}>
-                    <Icon className="w-6 h-6" />
+        <Card className="p-5 flex flex-col justify-between h-full hover:shadow-md transition-shadow">
+            <div className="flex justify-between items-start mb-4">
+                <div className={`p-2 rounded-xl ${colors.bg}`}>
+                    <Icon className={`w-5 h-5 ${colors.icon}`} />
                 </div>
                 {trend && (
-                    <span className="text-[10px] font-black text-white bg-emerald-500/20 px-2.5 py-1 rounded-full border border-emerald-500/30 shadow-lg shadow-emerald-500/10 uppercase tracking-tighter">
+                    <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">
                         {trend}
                     </span>
                 )}
             </div>
 
             <div>
-                <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">
-                    {label}
-                </h3>
-                <p className="text-2xl font-black text-white tracking-tighter">
+                <h3 className="text-3xl font-bold tracking-tight text-[var(--text-primary)]">
                     {value}
+                </h3>
+                <p className="text-sm font-medium text-[var(--text-secondary)] mt-1">
+                    {label}
                 </p>
             </div>
-        </GlassCard>
+        </Card>
     );
 };

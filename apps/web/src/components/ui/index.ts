@@ -6,9 +6,7 @@ import { Card } from './Card';
 import { Input } from './Input';
 import { TextArea } from './TextArea';
 import { Shimmer, ReportShimmer } from './Shimmer';
-import { GlassCard } from './GlassCard';
 import { Modal } from './Modal';
-import { Header } from './Header';
 
 export {
     Avatar,
@@ -19,9 +17,7 @@ export {
     TextArea,
     Shimmer,
     ReportShimmer,
-    GlassCard,
-    Modal,
-    Header
+    Modal
 };
 
 export type { BadgeStatus };

@@ -1,5 +1,5 @@
-import { BarChart3, Clock, AlertCircle, Download, Video, Calendar, type LucideIcon } from 'lucide-react';
-import { Button, GlassCard } from '../ui';
+import { BarChart3, AlertCircle, Download, Video, Calendar, type LucideIcon } from 'lucide-react';
+import { Button } from '../ui';
 import { KpiCard } from './KpiCard';
 
 interface KPIConfig {
@@ -57,136 +57,137 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
     children
 }) => {
     return (
-        <div className="bg-[#020617] relative overflow-hidden pb-24 pt-12">
-            {/* Background Decorations */}
-            <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-blue-600/20 rounded-full blur-[160px] -mr-96 -mt-96 animate-pulse duration-[10s] pointer-events-none" />
-            <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-indigo-600/15 rounded-full blur-[140px] -ml-40 -mb-40 pointer-events-none" />
+        <div className="pb-8 animate-in">
+            <div className="flex flex-col gap-6 mb-8">
+                {/* Header Section */}
+                <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6">
+                    <div>
+                        <h2 className="text-3xl font-bold tracking-tight text-[var(--text-primary)]">{title}</h2>
+                        <p className="text-[var(--text-secondary)] font-medium mt-1">{subtitle}</p>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-3">
+                        {onAnalyticsClick && (
+                            <Button
+                                variant="secondary"
+                                onClick={onAnalyticsClick}
+                                leftIcon={<BarChart3 className="w-4 h-4" />}
+                            >
+                                Analytics
+                            </Button>
+                        )}
+                        {onExportClick && (
+                            <Button
+                                variant="secondary"
+                                onClick={onExportClick}
+                                leftIcon={<Download className="w-4 h-4" />}
+                            >
+                                Exportar
+                            </Button>
+                        )}
+                        {onConferenceClick && (
+                            <Button
+                                variant="secondary"
+                                onClick={onConferenceClick}
+                                leftIcon={<Video className="w-4 h-4" />}
+                            >
+                                War Room
+                            </Button>
+                        )}
+                        {onAgendaClick && (
+                            <Button
+                                variant="secondary"
+                                onClick={onAgendaClick}
+                                leftIcon={<Calendar className="w-4 h-4" />}
+                            >
+                                Agenda
+                            </Button>
+                        )}
+                        {children}
+                    </div>
+                </div>
 
-            <div className="max-w-7xl mx-auto px-6 relative z-10">
-                <div className="flex flex-col gap-8 mb-12">
-                    <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
-                        <div>
-                            <h2 className="text-3xl font-black text-white tracking-tight uppercase">{title}</h2>
-                            <p className="text-white/90 text-sm font-medium mt-1 uppercase tracking-widest">{subtitle}</p>
-                        </div>
-                        <div className="flex flex-wrap items-center gap-3">
-                            {onAnalyticsClick && (
-                                <Button
-                                    type="button"
-                                    variant="glass"
-                                    className="!px-4 !py-2 !bg-blue-500/20 hover:!bg-blue-500/30 text-blue-300 border-blue-500/30 backdrop-blur-md whitespace-nowrap"
-                                    onClick={onAnalyticsClick}
-                                >
-                                    <BarChart3 className="w-5 h-5 mr-2" />
-                                    Analytics
-                                </Button>
-                            )}
-                            {onExportClick && (
-                                <Button
-                                    type="button"
-                                    variant="glass"
-                                    className="!px-4 !py-2 !bg-emerald-500/20 hover:!bg-emerald-500/30 text-emerald-300 border-emerald-500/30 backdrop-blur-md whitespace-nowrap"
-                                    onClick={onExportClick}
-                                >
-                                    <Download className="w-5 h-5 mr-2" />
-                                    Exportar
-                                </Button>
-                            )}
-                            {onConferenceClick && (
-                                <Button
-                                    type="button"
-                                    variant="glass"
-                                    className="!px-4 !py-2 !bg-red-600/20 hover:!bg-red-600/30 text-red-400 border-red-500/30 backdrop-blur-md whitespace-nowrap animate-pulse hover:animate-none"
-                                    onClick={onConferenceClick}
-                                >
-                                    <Video className="w-5 h-5 mr-2" />
-                                    War Room
-                                </Button>
-                            )}
-                            {onAgendaClick && (
-                                <Button
-                                    type="button"
-                                    variant="glass"
-                                    className="!px-4 !py-2 !bg-blue-600/20 hover:!bg-blue-600/30 text-blue-200 border-blue-500/30 backdrop-blur-md whitespace-nowrap"
-                                    onClick={onAgendaClick}
-                                >
-                                    <Calendar className="w-5 h-5 mr-2" />
-                                    Agenda
-                                </Button>
-                            )}
-                            {children}
-                        </div>
+                {/* Filters Section */}
+                <div className="flex flex-col xl:flex-row items-center justify-between gap-4 w-full">
+                    {/* Status Filter Tabs */}
+                    <div className="flex bg-[var(--bg-tertiary)] p-1 rounded-xl w-full xl:w-auto overflow-x-auto">
+                        {filters.map(filter => (
+                            <button
+                                type="button"
+                                key={filter.id}
+                                onClick={() => onStatusFilterChange(filter.id)}
+                                className={`
+                                    flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-semibold uppercase tracking-wide transition-all whitespace-nowrap
+                                    ${statusFilter === filter.id
+                                        ? 'bg-white text-[var(--text-primary)] shadow-sm'
+                                        : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'
+                                    }
+                                `}
+                            >
+                                {filter.label}
+                            </button>
+                        ))}
                     </div>
 
-                    <div className="flex flex-col xl:flex-row items-center justify-between gap-4 w-full">
-                        <GlassCard variant="dark" blur="lg" className="p-1 px-1.5 flex flex-wrap items-center gap-1 border-white/5 !rounded-[1.25rem] w-full xl:w-auto justify-center bg-slate-950/40">
-                            {filters.map(filter => (
+                    {/* Date Filters */}
+                    {showDateFilters && (
+                        <div className="flex items-center bg-white border border-[var(--border-subtle)] p-1 rounded-xl shadow-sm">
+                            <div className="relative group">
+                                <div className="flex items-center gap-2 px-4 py-2 hover:bg-[var(--bg-secondary)] rounded-lg transition-colors cursor-pointer border-r border-[var(--border-subtle)]">
+                                    <Calendar className="w-4 h-4 text-[var(--accent-secondary)]" />
+                                    <div className="flex flex-col">
+                                        <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase leading-none">De</span>
+                                        <input
+                                            type="date"
+                                            value={startDate}
+                                            onChange={e => onStartDateChange?.(e.target.value)}
+                                            className="bg-transparent text-xs font-bold outline-none text-[var(--text-primary)] uppercase font-sans cursor-pointer p-0 m-0 w-[110px]"
+                                            aria-label="Start Date"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="relative group">
+                                <div className="flex items-center gap-2 px-4 py-2 hover:bg-[var(--bg-secondary)] rounded-lg transition-colors cursor-pointer">
+                                    <Calendar className="w-4 h-4 text-[var(--accent-secondary)]" />
+                                    <div className="flex flex-col">
+                                        <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase leading-none">Até</span>
+                                        <input
+                                            type="date"
+                                            value={endDate}
+                                            onChange={e => onEndDateChange?.(e.target.value)}
+                                            className="bg-transparent text-xs font-bold outline-none text-[var(--text-primary)] uppercase font-sans cursor-pointer p-0 m-0 w-[110px]"
+                                            aria-label="End Date"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                            {(startDate || endDate) && (
                                 <button
                                     type="button"
-                                    key={filter.id}
-                                    onClick={() => onStatusFilterChange(filter.id)}
-                                    className={`flex-1 sm:flex-none px-6 py-2.5 rounded-[1rem] text-[10px] font-black uppercase tracking-widest transition-all ${statusFilter === filter.id
-                                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
-                                        : 'text-gray-400 hover:text-white hover:bg-white/10'
-                                        }`}
+                                    onClick={onClearDates}
+                                    className="p-2 hover:bg-red-50 text-red-400 hover:text-red-500 rounded-lg transition-colors mx-1"
+                                    title="Limpar datas"
                                 >
-                                    {filter.label}
+                                    <AlertCircle className="w-4 h-4" />
                                 </button>
-                            ))}
-                        </GlassCard>
-
-                        {showDateFilters && (
-                            <GlassCard variant="dark" blur="lg" className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 bg-slate-950/40 backdrop-blur-xl p-1.5 !rounded-[1.25rem] border border-white/5 w-full xl:w-auto">
-                                <div className="flex items-center gap-2 px-4 border-b sm:border-b-0 sm:border-r border-white/5 py-2 sm:py-0">
-                                    <Clock className="w-3.5 h-3.5 text-blue-500" />
-                                    <input
-                                        type="date"
-                                        value={startDate}
-                                        onChange={e => onStartDateChange?.(e.target.value)}
-                                        className="bg-transparent text-[10px] font-black outline-none text-white h-8 uppercase flex-1 [color-scheme:dark]"
-                                        title="Data Inicial"
-                                        aria-label="Data Inicial"
-                                    />
-                                </div>
-                                <div className="flex items-center gap-2 px-4 py-2 sm:py-0">
-                                    <Clock className="w-3.5 h-3.5 text-blue-500" />
-                                    <input
-                                        type="date"
-                                        value={endDate}
-                                        onChange={e => onEndDateChange?.(e.target.value)}
-                                        className="bg-transparent text-[10px] font-black outline-none text-white h-8 uppercase flex-1 [color-scheme:dark]"
-                                        title="Data Final"
-                                        aria-label="Data Final"
-                                    />
-                                </div>
-                                {(startDate || endDate) && (
-                                    <button
-                                        type="button"
-                                        onClick={onClearDates}
-                                        className="p-3 sm:p-2 hover:bg-red-500/10 rounded-xl transition text-slate-400 hover:text-red-500 flex justify-center"
-                                        title="Limpar datas"
-                                        aria-label="Limpar datas"
-                                    >
-                                        <AlertCircle className="w-3.5 h-3.5" />
-                                    </button>
-                                )}
-                            </GlassCard>
-                        )}
-                    </div>
+                            )}
+                        </div>
+                    )}
                 </div>
+            </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {kpiConfigs.map(kpi => (
-                        <KpiCard
-                            key={kpi.status}
-                            label={kpi.label}
-                            value={stats.find(s => s.status === kpi.status)?._count || 0}
-                            icon={kpi.icon}
-                            variant={kpi.color}
-                            trend={kpi.trend}
-                        />
-                    ))}
-                </div>
+            {/* KPI Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {kpiConfigs.map(kpi => (
+                    <KpiCard
+                        key={kpi.status}
+                        label={kpi.label}
+                        value={stats.find(s => s.status === kpi.status)?._count || 0}
+                        icon={kpi.icon}
+                        variant={kpi.color}
+                        trend={kpi.trend}
+                    />
+                ))}
             </div>
         </div>
     );

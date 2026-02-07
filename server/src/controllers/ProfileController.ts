@@ -13,9 +13,21 @@ const mediaService = new MediaService(mediaRepository);
 export const ProfileController = {
     async update(req: Request, res: Response) {
         const userId = req.userId!;
-        const { statusPhrase, avatarUrl } = req.body;
+        let { statusPhrase, avatarUrl } = req.body;
 
         try {
+            if (req.file) {
+                const uploadedMedia = await mediaService.uploadFromBuffer({
+                    buffer: req.file.buffer,
+                    userId: userId,
+                    options: {
+                        folder: 'avatars',
+                        resourceType: 'image'
+                    }
+                });
+                avatarUrl = uploadedMedia.secureUrl;
+            }
+
             const user = await authService.updateUser(userId, {
                 statusPhrase,
                 avatarUrl
@@ -23,6 +35,7 @@ export const ProfileController = {
 
             return res.json(user);
         } catch (error) {
+            console.error(error);
             return res.status(500).json({ error: "Erro ao atualizar perfil" });
         }
     },

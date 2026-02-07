@@ -16,11 +16,9 @@ import {
     Button,
     Input,
     Card,
-    Header,
-    Badge,
-    GlassCard
+    Badge
 } from '../components/ui';
-import { TacticalHud } from '../components/home/TacticalHud';
+import { DashboardLayout } from '../layouts/DashboardLayout';
 
 interface Supervisor {
     id: string;
@@ -220,48 +218,45 @@ export function AdminDashboard() {
     }
 
     return (
-        <div className="min-h-screen bg-[#020617] text-slate-200 flex flex-col font-sans selection:bg-blue-500/30 overflow-x-hidden relative">
-            <TacticalHud />
-
-            <div className="fixed inset-0 pointer-events-none z-0">
-                <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000,transparent)] opacity-[0.1]" />
-            </div>
-
-            <Header
-                user={{
-                    name: user?.name,
-                    avatarUrl: user?.avatarUrl
-                }}
-                onLogout={signOut}
-            />
-
-            <main className="max-w-7xl mx-auto px-6 w-full mt-8 grid grid-cols-1 lg:grid-cols-4 gap-8 relative z-10">
-                {/* Background Decorations - Removed in favor of Global Mesh */}
-                <aside className="lg:col-span-1">
-                    <Card variant="dark" className="p-2 space-y-1 shadow-xl shadow-black/50 border-white/5 !rounded-[2rem] sticky top-28">
+        <DashboardLayout
+            user={{ name: user?.name, avatarUrl: user?.avatarUrl, role: user?.role }}
+            onLogout={signOut}
+        >
+            <div className="flex flex-col lg:flex-row gap-8 animate-in fade-in duration-500">
+                <aside className="w-full lg:w-72 shrink-0 space-y-4">
+                    <Card variant="white" className="p-2 space-y-1 shadow-sm sticky top-6">
                         <button
                             onClick={() => { setView('list'); resetForm(); }}
-                            className={`w-full flex items-center gap-3 px-6 py-4 rounded-2xl font-black text-[10px] tracking-widest uppercase transition-all ${view === 'list' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-300 hover:bg-white/5'}`}
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-xs uppercase tracking-wide transition-all ${view === 'list'
+                                ? 'bg-[var(--accent-primary)] text-white shadow-md'
+                                : 'text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]'
+                                }`}
                         >
-                            <Users className="w-5 h-5" /> GESTÃO DE USUÁRIOS
+                            <Users className="w-4 h-4" /> Gestão de Usuários
                         </button>
                         <button
                             onClick={() => { setView('create'); resetForm(); }}
-                            className={`w-full flex items-center gap-3 px-6 py-4 rounded-2xl font-black text-[10px] tracking-widest uppercase transition-all ${view === 'create' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-300 hover:bg-white/5'}`}
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-xs uppercase tracking-wide transition-all ${view === 'create'
+                                ? 'bg-[var(--accent-primary)] text-white shadow-md'
+                                : 'text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]'
+                                }`}
                         >
-                            <UserPlus className="w-5 h-5" /> NOVO CADASTRO
+                            <UserPlus className="w-4 h-4" /> Novo Cadastro
                         </button>
                         <button
                             onClick={() => { setView('departments'); resetForm(); }}
-                            className={`w-full flex items-center gap-3 px-6 py-4 rounded-2xl font-black text-[10px] tracking-widest uppercase transition-all ${view === 'departments' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-300 hover:bg-white/5'}`}
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-xs uppercase tracking-wide transition-all ${view === 'departments'
+                                ? 'bg-[var(--accent-primary)] text-white shadow-md'
+                                : 'text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]'
+                                }`}
                         >
-                            <Filter className="w-5 h-5" /> GESTÃO DE SETORES
+                            <Filter className="w-4 h-4" /> Gestão de Setores
                         </button>
 
-                        <div className="pt-4 mt-4 border-t border-white/5 p-4">
-                            <div className="bg-emerald-500/10 p-4 rounded-2xl border border-emerald-500/20">
-                                <p className="text-[10px] font-black text-emerald-400 uppercase tracking-widest leading-none mb-1">Status do Sistema</p>
-                                <div className="flex items-center gap-2 text-emerald-400 font-bold text-xs">
+                        <div className="pt-4 mt-4 border-t border-[var(--border-subtle)] px-2 pb-2">
+                            <div className="bg-emerald-50 p-3 rounded-xl border border-emerald-100">
+                                <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest leading-none mb-1">Status do Sistema</p>
+                                <div className="flex items-center gap-2 text-emerald-700 font-bold text-xs">
                                     <CheckCircle className="w-4 h-4" /> Operacional
                                 </div>
                             </div>
@@ -269,105 +264,105 @@ export function AdminDashboard() {
                     </Card>
                 </aside>
 
-                <section className="lg:col-span-3 space-y-8">
+                <section className="flex-1 space-y-6">
                     {view === 'list' ? (
                         <>
                             {/* Filter Bar */}
-                            <GlassCard variant="dark" blur="lg" className="p-3 flex flex-col md:flex-row gap-4 items-center !rounded-[2rem] border-white/10 shadow-xl shadow-black/50">
+                            <Card variant="white" className="p-3 flex flex-col md:flex-row gap-4 items-center border-[var(--border-subtle)]">
                                 <div className="relative flex-1 w-full">
-                                    <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
+                                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-tertiary)]" />
                                     <input
                                         type="text"
                                         placeholder="Buscar usuários..."
                                         title="Buscar usuários"
                                         value={searchQuery}
                                         onChange={e => setSearchQuery(e.target.value)}
-                                        className="w-full pl-12 pr-6 py-4 bg-slate-900/50 border-transparent border rounded-2xl focus:bg-slate-800 focus:border-blue-500/30 outline-none transition-all text-xs font-bold text-white uppercase tracking-wider placeholder:text-slate-400"
+                                        className="w-full pl-10 pr-4 py-3 bg-[var(--bg-tertiary)] border-transparent border rounded-xl focus:bg-[var(--bg-primary)] focus:border-[var(--accent-primary)] outline-none transition-all text-sm font-medium text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)]"
                                     />
                                 </div>
-                                <div className="flex items-center gap-2 bg-white/5 p-1.5 rounded-2xl w-full md:w-auto border border-white/10">
-                                    <Filter className="w-4 h-4 text-slate-300 ml-3 hidden md:block" />
+                                <div className="flex items-center gap-2 bg-[var(--bg-tertiary)] p-1.5 rounded-xl w-full md:w-auto border border-[var(--border-subtle)]">
+                                    <Filter className="w-4 h-4 text-[var(--text-tertiary)] ml-2 hidden md:block" />
                                     <select
                                         value={roleFilter}
                                         onChange={e => setRoleFilter(e.target.value)}
                                         title="Filtrar por papel"
-                                        className="bg-transparent border-none outline-none text-[10px] font-black text-slate-300 py-2.5 px-4 cursor-pointer uppercase tracking-widest"
+                                        className="bg-transparent border-none outline-none text-xs font-bold text-[var(--text-secondary)] py-2 px-4 cursor-pointer uppercase tracking-wide w-full md:w-auto"
                                     >
-                                        <option value="">TODOS PAPÉIS</option>
-                                        <option value="ADMIN">ADMINS</option>
-                                        <option value="SUPERVISOR">SUPERVISORES</option>
-                                        <option value="MANAGER">GERENTES</option>
-                                        <option value="PROFESSIONAL">PROFISSIONAIS</option>
+                                        <option value="">Todos os Papéis</option>
+                                        <option value="ADMIN">Admins</option>
+                                        <option value="SUPERVISOR">Supervisores</option>
+                                        <option value="MANAGER">Gerentes</option>
+                                        <option value="PROFESSIONAL">Profissionais</option>
                                     </select>
                                 </div>
-                            </GlassCard>
+                            </Card>
 
                             {/* Users Table */}
-                            <Card variant="dark" className="!rounded-[2.5rem] shadow-2xl shadow-black/20 overflow-hidden border-white/5">
-                                <div className="p-8 border-b border-white/5 flex justify-between items-center bg-white/5">
+                            <Card variant="white" className="overflow-hidden border-[var(--border-subtle)]">
+                                <div className="p-6 border-b border-[var(--border-subtle)] flex justify-between items-center bg-[var(--bg-primary)]">
                                     <div>
-                                        <h2 className="text-xl font-black text-white uppercase tracking-tight">Equipe FLASH</h2>
-                                        <p className="text-[10px] text-slate-300 font-black uppercase tracking-widest mt-1">Gerenciamento de acessos e permissões</p>
+                                        <h2 className="text-lg font-bold text-[var(--text-primary)] uppercase tracking-tight">Equipe FLASH</h2>
+                                        <p className="text-xs text-[var(--text-tertiary)] font-medium mt-1">Gerenciamento de acessos e permissões</p>
                                     </div>
-                                    <Badge status="SENT" label={`${users.length} ATIVOS`} />
+                                    <Badge status="SENT" label={`${users.length} ATIVOS`} className="bg-[var(--bg-tertiary)] text-[var(--text-secondary)] border-[var(--border-medium)]" />
                                 </div>
 
                                 <div className="overflow-x-auto">
                                     <table className="w-full text-left border-collapse">
                                         <thead>
-                                            <tr className="bg-white/5 text-[10px] font-black text-slate-300 uppercase tracking-widest border-b border-white/5">
-                                                <th className="px-8 py-5">USUÁRIO / IDENTIDADE</th>
-                                                <th className="px-8 py-5">NÍVEL / PAPEL</th>
-                                                <th className="px-8 py-5">SUPERVISÃO / DEP</th>
-                                                <th className="px-8 py-5 text-right">AÇÕES</th>
+                                            <tr className="bg-[var(--bg-tertiary)] text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest border-b border-[var(--border-subtle)]">
+                                                <th className="px-6 py-4">Usuário / Identidade</th>
+                                                <th className="px-6 py-4">Nível / Papel</th>
+                                                <th className="px-6 py-4">Supervisão / Dep</th>
+                                                <th className="px-6 py-4 text-right">Ações</th>
                                             </tr>
                                         </thead>
-                                        <tbody className="divide-y divide-white/5">
+                                        <tbody className="divide-y divide-[var(--border-subtle)]">
                                             {users.length === 0 ? (
                                                 <tr>
-                                                    <td colSpan={4} className="px-8 py-32 text-center text-slate-400">
-                                                        <Users className="w-12 h-12 mx-auto mb-4 opacity-10" />
-                                                        <p className="text-[10px] font-black uppercase tracking-widest">Nenhum usuário encontrado</p>
+                                                    <td colSpan={4} className="px-6 py-24 text-center text-[var(--text-tertiary)]">
+                                                        <Users className="w-12 h-12 mx-auto mb-4 opacity-20" />
+                                                        <p className="text-xs font-bold uppercase tracking-widest">Nenhum usuário encontrado</p>
                                                     </td>
                                                 </tr>
                                             ) : (
                                                 users.map(u => (
-                                                    <tr key={u.id} className="hover:bg-blue-500/10 transition-all group">
-                                                        <td className="px-8 py-6">
-                                                            <div className="flex items-center gap-4">
-                                                                <div className="w-11 h-11 rounded-2xl bg-white/5 shadow-lg shadow-black/20 flex items-center justify-center text-blue-400 font-black text-sm border border-white/10 group-hover:scale-110 transition-transform">
+                                                    <tr key={u.id} className="hover:bg-[var(--bg-tertiary)]/50 transition-colors group">
+                                                        <td className="px-6 py-4">
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="w-10 h-10 rounded-xl bg-[var(--bg-tertiary)] flex items-center justify-center text-[var(--accent-primary)] font-black text-sm border border-[var(--border-subtle)]">
                                                                     {u.name.charAt(0)}
                                                                 </div>
                                                                 <div>
-                                                                    <p className="font-bold text-white text-sm leading-none mb-1">{u.name}</p>
-                                                                    <p className="text-xs text-slate-300 font-medium">{u.email}</p>
+                                                                    <p className="font-bold text-[var(--text-primary)] text-sm leading-tight mb-0.5">{u.name}</p>
+                                                                    <p className="text-xs text-[var(--text-secondary)]">{u.email}</p>
                                                                 </div>
                                                             </div>
                                                         </td>
-                                                        <td className="px-8 py-6">
+                                                        <td className="px-6 py-4">
                                                             <Badge
                                                                 status={u.role === 'ADMIN' ? 'RESOLVED' : u.role === 'SUPERVISOR' ? 'FORWARDED' : u.role === 'MANAGER' ? 'SENT' : 'IN_REVIEW'}
                                                                 label={u.role}
                                                             />
                                                         </td>
-                                                        <td className="px-8 py-6">
+                                                        <td className="px-6 py-4">
                                                             {u.supervisor ? (
                                                                 <div className="flex items-center gap-2">
-                                                                    <Shield className="w-3.5 h-3.5 text-purple-400" />
-                                                                    <span className="text-xs font-bold text-slate-300 uppercase tracking-tight">{u.supervisor}</span>
+                                                                    <Shield className="w-3.5 h-3.5 text-purple-500" />
+                                                                    <span className="text-xs font-semibold text-[var(--text-secondary)]">{u.supervisor}</span>
                                                                 </div>
                                                             ) : u.departmentName ? (
                                                                 <div className="flex items-center gap-2">
-                                                                    <Filter className="w-3.5 h-3.5 text-blue-400" />
-                                                                    <span className="text-xs font-bold text-slate-300 uppercase tracking-tight">{u.departmentName}</span>
+                                                                    <Filter className="w-3.5 h-3.5 text-blue-500" />
+                                                                    <span className="text-xs font-semibold text-[var(--text-secondary)]">{u.departmentName}</span>
                                                                 </div>
                                                             ) : (
-                                                                <span className="text-[10px] font-black text-slate-500 uppercase italic">DIRETO / GLOBAL</span>
+                                                                <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase">Direto / Global</span>
                                                             )}
                                                         </td>
-                                                        <td className="px-8 py-6 text-right">
+                                                        <td className="px-6 py-4 text-right">
                                                             {u.id !== user?.id && (
-                                                                <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                <div className="flex items-center justify-end gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
                                                                     <Button
                                                                         variant="ghost"
                                                                         size="sm"
@@ -379,14 +374,14 @@ export function AdminDashboard() {
                                                                         variant="ghost"
                                                                         size="sm"
                                                                         onClick={() => handleDeleteUser(u.id, u.name)}
-                                                                        className="hover:text-red-500 hover:bg-red-500/10"
+                                                                        className="hover:text-red-600 hover:bg-red-50"
                                                                     >
                                                                         <Trash2 className="w-4 h-4" />
                                                                     </Button>
                                                                 </div>
                                                             )}
                                                             {u.id === user?.id && (
-                                                                <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest bg-blue-500/10 px-3 py-1 rounded-full">VOCÊ</span>
+                                                                <span className="text-[10px] font-bold text-[var(--accent-primary)] uppercase tracking-wider bg-blue-50 px-2 py-1 rounded-md">Você</span>
                                                             )}
                                                         </td>
                                                     </tr>
@@ -398,12 +393,12 @@ export function AdminDashboard() {
                             </Card>
                         </>
                     ) : view === 'departments' ? (
-                        <div className="max-w-4xl mx-auto lg:mx-0 animate-in slide-in-from-bottom-5 duration-500">
-                            <Card variant="dark" className="!rounded-[2.5rem] shadow-2xl shadow-black/20 overflow-hidden border-white/5">
-                                <div className="p-8 border-b border-white/5 flex justify-between items-center bg-white/5">
+                        <div className="animate-in slide-in-from-right-4 duration-500">
+                            <Card variant="white" className="overflow-hidden border-[var(--border-subtle)]">
+                                <div className="p-6 border-b border-[var(--border-subtle)] flex justify-between items-center bg-[var(--bg-primary)]">
                                     <div>
-                                        <h2 className="text-xl font-black text-white uppercase tracking-tight">Setores Operacionais</h2>
-                                        <p className="text-[10px] text-slate-300 font-black uppercase tracking-widest mt-1">Gestão de Departamentos</p>
+                                        <h2 className="text-lg font-bold text-[var(--text-primary)] uppercase tracking-tight">Setores Operacionais</h2>
+                                        <p className="text-xs text-[var(--text-tertiary)] font-medium mt-1">Gestão de Departamentos</p>
                                     </div>
                                     <Button variant="secondary" size="sm" onClick={() => setView('list')}>
                                         Voltar
@@ -412,36 +407,36 @@ export function AdminDashboard() {
                                 <div className="overflow-x-auto">
                                     <table className="w-full text-left border-collapse">
                                         <thead>
-                                            <tr className="bg-white/5 text-[10px] font-black text-slate-300 uppercase tracking-widest border-b border-white/5">
-                                                <th className="px-8 py-5">NOME DO SETOR</th>
-                                                <th className="px-8 py-5 text-right w-32">AÇÕES</th>
+                                            <tr className="bg-[var(--bg-tertiary)] text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest border-b border-[var(--border-subtle)]">
+                                                <th className="px-6 py-4">Nome do Setor</th>
+                                                <th className="px-6 py-4 text-right w-32">Ações</th>
                                             </tr>
                                         </thead>
-                                        <tbody className="divide-y divide-white/5">
+                                        <tbody className="divide-y divide-[var(--border-subtle)]">
                                             {departments.length === 0 ? (
                                                 <tr>
-                                                    <td colSpan={2} className="px-8 py-16 text-center text-slate-400">
-                                                        <Filter className="w-12 h-12 mx-auto mb-4 opacity-10" />
-                                                        <p className="text-[10px] font-black uppercase tracking-widest">Nenhum departamento encontrado</p>
+                                                    <td colSpan={2} className="px-6 py-16 text-center text-[var(--text-tertiary)]">
+                                                        <Filter className="w-12 h-12 mx-auto mb-4 opacity-20" />
+                                                        <p className="text-xs font-bold uppercase tracking-widest">Nenhum departamento encontrado</p>
                                                     </td>
                                                 </tr>
                                             ) : (
                                                 departments.map(dept => (
-                                                    <tr key={dept.id} className="hover:bg-blue-500/10 transition-all group">
-                                                        <td className="px-8 py-6">
+                                                    <tr key={dept.id} className="hover:bg-[var(--bg-tertiary)]/50 transition-colors group">
+                                                        <td className="px-6 py-4">
                                                             <div className="flex items-center gap-3">
-                                                                <div className="bg-blue-500/20 p-2 rounded-lg text-blue-400">
+                                                                <div className="bg-blue-50 p-2 rounded-lg text-blue-600">
                                                                     <Filter className="w-5 h-5" />
                                                                 </div>
-                                                                <span className="font-bold text-white text-sm">{dept.name}</span>
+                                                                <span className="font-semibold text-[var(--text-primary)] text-sm">{dept.name}</span>
                                                             </div>
                                                         </td>
-                                                        <td className="px-8 py-6 text-right">
+                                                        <td className="px-6 py-4 text-right">
                                                             <Button
                                                                 variant="ghost"
                                                                 size="sm"
                                                                 onClick={() => handleDeleteDepartment(dept.id, dept.name)}
-                                                                className="hover:text-red-500 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                                className="hover:text-red-600 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-opacity"
                                                                 title="Excluir Setor"
                                                             >
                                                                 <Trash2 className="w-4 h-4" />
@@ -456,24 +451,23 @@ export function AdminDashboard() {
                             </Card>
                         </div>
                     ) : (
-                        <div className="max-w-2xl mx-auto lg:mx-0 animate-in slide-in-from-bottom-5 duration-500">
-                            <Card variant="dark" className="p-10 !rounded-[3rem] shadow-2xl shadow-black/20 border-white/5">
-                                <div className="flex justify-between items-start mb-10">
+                        <div className="max-w-3xl mx-auto animate-in slide-in-from-bottom-5 duration-500">
+                            <Card variant="white" className="p-8 border-[var(--border-subtle)]">
+                                <div className="flex justify-between items-start mb-8 border-b border-[var(--border-subtle)] pb-6">
                                     <div>
-                                        <h2 className="text-3xl font-black text-white tracking-tight uppercase mb-1">{view === 'create' ? 'Novo Cadastro' : 'Editar Membro'}</h2>
-                                        <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Controle de acesso à rede operacional</p>
+                                        <h2 className="text-2xl font-bold text-[var(--text-primary)] tracking-tight mb-1">{view === 'create' ? 'Novo Cadastro' : 'Editar Membro'}</h2>
+                                        <p className="text-xs text-[var(--text-secondary)] font-medium">Preencha as informações de acesso</p>
                                     </div>
                                     <Button variant="secondary" size="sm" onClick={() => { setView('list'); resetForm(); }}>
                                         Voltar para Lista
                                     </Button>
                                 </div>
 
-                                <form onSubmit={handleProcessUser} className="space-y-8">
+                                <form onSubmit={handleProcessUser} className="space-y-6">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <Input
                                             label="Nome Operacional"
                                             value={name}
-                                            variant="dark"
                                             onChange={e => setName(e.target.value.toUpperCase())}
                                             placeholder="EX: PEDRO SILVA"
                                             required
@@ -482,7 +476,6 @@ export function AdminDashboard() {
                                             label="E-mail de Acesso"
                                             type="email"
                                             value={email}
-                                            variant="dark"
                                             onChange={e => setEmail(e.target.value)}
                                             placeholder="nome@empresa.com"
                                             required
@@ -494,22 +487,24 @@ export function AdminDashboard() {
                                         label={view === 'edit' ? 'Redefinir Senha (opcional)' : 'Senha de Acesso'}
                                         type="password"
                                         value={password}
-                                        variant="dark"
                                         onChange={e => setPassword(e.target.value)}
                                         placeholder="••••••••"
                                         required={view === 'create'}
                                         autoComplete="new-password"
                                     />
 
-                                    <div className="space-y-3">
-                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Nível de Hierarquia</label>
-                                        <div className="grid grid-cols-3 gap-3 p-1.5 bg-slate-900/50 border border-white/5 rounded-[1.5rem]">
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold text-[var(--text-secondary)] ml-1">Nível de Hierarquia</label>
+                                        <div className="grid grid-cols-3 gap-3 p-1 bg-[var(--bg-tertiary)] border border-[var(--border-medium)] rounded-xl">
                                             {['PROFESSIONAL', 'SUPERVISOR', 'MANAGER'].map(r => (
                                                 <button
                                                     key={r}
                                                     type="button"
                                                     onClick={() => setRole(r as 'PROFESSIONAL' | 'SUPERVISOR' | 'MANAGER')}
-                                                    className={`py-3.5 rounded-2xl text-[10px] font-black tracking-widest uppercase transition-all ${role === r ? 'bg-blue-600 text-white shadow-xl' : 'text-slate-500 hover:text-white'}`}
+                                                    className={`py-2.5 rounded-lg text-[10px] font-black tracking-widest uppercase transition-all ${role === r
+                                                        ? 'bg-white text-[var(--accent-primary)] shadow-sm border border-[var(--border-subtle)]'
+                                                        : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'
+                                                        }`}
                                                 >
                                                     {r}
                                                 </button>
@@ -519,19 +514,19 @@ export function AdminDashboard() {
 
                                     {role === 'PROFESSIONAL' && (
                                         <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
-                                            <label htmlFor="supervisor-select" className="text-[10px] font-black text-slate-300 uppercase tracking-widest ml-1">Vincular Supervisor</label>
+                                            <label htmlFor="supervisor-select" className="text-xs font-bold text-[var(--text-secondary)] ml-1">Vincular Supervisor</label>
                                             <div className="relative">
                                                 <select
                                                     id="supervisor-select"
                                                     value={supervisorId}
                                                     onChange={e => setSupervisorId(e.target.value)}
-                                                    className="w-full px-6 py-4 bg-slate-900/50 border border-white/5 rounded-[1.5rem] outline-none focus:border-blue-500/30 transition-all font-bold text-white text-xs appearance-none"
+                                                    className="w-full px-4 py-3 bg-[var(--bg-primary)] border border-[var(--border-medium)] rounded-xl outline-none focus:ring-2 focus:ring-[var(--border-subtle)] focus:border-[var(--text-primary)] transition-all font-medium text-[var(--text-primary)] text-sm appearance-none"
                                                     required
                                                 >
                                                     <option value="">-- Selecione o responsável técnico --</option>
                                                     {supervisors.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                                                 </select>
-                                                <Users className="w-4 h-4 absolute right-6 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
+                                                <Users className="w-4 h-4 absolute right-4 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] pointer-events-none" />
                                             </div>
                                         </div>
                                     )}
@@ -539,18 +534,18 @@ export function AdminDashboard() {
                                     {role === 'MANAGER' && (
                                         <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
                                             <div className="space-y-2">
-                                                <label htmlFor="department-select" className="text-[10px] font-black text-slate-300 uppercase tracking-widest ml-1">Vincular Departamento</label>
+                                                <label htmlFor="department-select" className="text-xs font-bold text-[var(--text-secondary)] ml-1">Vincular Departamento</label>
                                                 <div className="relative">
                                                     <select
                                                         id="department-select"
                                                         value={departmentId}
                                                         onChange={e => setDepartmentId(e.target.value)}
-                                                        className="w-full px-6 py-4 bg-slate-900/50 border border-white/5 rounded-[1.5rem] outline-none focus:border-blue-500/30 transition-all font-bold text-white text-xs appearance-none"
+                                                        className="w-full px-4 py-3 bg-[var(--bg-primary)] border border-[var(--border-medium)] rounded-xl outline-none focus:ring-2 focus:ring-[var(--border-subtle)] focus:border-[var(--text-primary)] transition-all font-medium text-[var(--text-primary)] text-sm appearance-none"
                                                     >
                                                         <option value="">-- Selecione o departamento (ou crie um abaixo) --</option>
                                                         {departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
                                                     </select>
-                                                    <Filter className="w-4 h-4 absolute right-6 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
+                                                    <Filter className="w-4 h-4 absolute right-4 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] pointer-events-none" />
                                                 </div>
                                             </div>
 
@@ -558,7 +553,6 @@ export function AdminDashboard() {
                                                 label="Ou criar novo setor:"
                                                 placeholder="EX: TI / RH / LOGÍSTICA"
                                                 value={newDepartmentName}
-                                                variant="dark"
                                                 onChange={e => setNewDepartmentName(e.target.value.toUpperCase())}
                                             />
                                         </div>
@@ -570,28 +564,28 @@ export function AdminDashboard() {
                                         size="lg"
                                         fullWidth
                                         isLoading={loading}
-                                        className="!py-6 mt-4 shadow-xl shadow-blue-900/20"
+                                        className="mt-6"
                                     >
-                                        {view === 'create' ? 'CONCLUIR CADASTRO' : 'SALVAR ALTERAÇÕES OPERACIONAIS'}
+                                        {view === 'create' ? 'Concluir Cadastro' : 'Salvar Alterações'}
                                     </Button>
                                 </form>
                             </Card>
                         </div>
                     )}
                 </section>
-            </main>
+            </div>
 
             {success && (
                 <div className="fixed bottom-10 right-10 z-50 animate-in slide-in-from-right-10">
-                    <Card variant="dark" className="p-6 bg-emerald-500 !text-white border-none shadow-2xl flex items-center gap-4">
-                        <CheckCircle className="w-8 h-8" />
+                    <Card variant="white" className="p-4 bg-emerald-50 text-emerald-800 border-emerald-100 shadow-xl flex items-center gap-3">
+                        <CheckCircle className="w-6 h-6 text-emerald-600" />
                         <div>
-                            <p className="font-black text-sm uppercase tracking-tight">Operação Concluída</p>
-                            <p className="text-[10px] font-bold uppercase tracking-widest opacity-80">Dados sincronizados com sucesso</p>
+                            <p className="font-bold text-sm">Operação Concluída</p>
+                            <p className="text-xs opacity-80">Dados sincronizados com sucesso</p>
                         </div>
                     </Card>
                 </div>
             )}
-        </div>
+        </DashboardLayout>
     );
 }

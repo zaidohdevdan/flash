@@ -23,14 +23,14 @@ export const NewReportForm: React.FC<NewReportFormProps> = ({
 }) => {
     return (
         <form onSubmit={onSubmit} className="space-y-6">
-            <div className="relative aspect-video rounded-[2.5rem] bg-slate-900/50 border border-white/5 overflow-hidden group shadow-2xl shadow-blue-500/10">
+            <div className="relative aspect-video rounded-[2.5rem] bg-[var(--bg-secondary)] border border-[var(--border-subtle)] overflow-hidden group shadow-sm transition-all hover:border-[var(--accent-primary)]">
                 {preview ? (
                     <>
                         <img src={preview} alt="Evidence" className="w-full h-full object-cover" />
                         <button
                             type="button"
                             onClick={onClearImage}
-                            className="absolute top-6 right-6 p-3 bg-red-600/90 hover:bg-red-600 text-white rounded-2xl backdrop-blur-md transition-all scale-90 opacity-0 group-hover:opacity-100 group-hover:scale-100"
+                            className="absolute top-6 right-6 p-3 bg-white/90 hover:bg-white text-red-600 rounded-2xl backdrop-blur-md transition-all scale-90 opacity-0 group-hover:opacity-100 group-hover:scale-100 shadow-sm"
                             title="Remover evidência"
                             aria-label="Remover evidência"
                         >
@@ -38,9 +38,11 @@ export const NewReportForm: React.FC<NewReportFormProps> = ({
                         </button>
                     </>
                 ) : (
-                    <label className="w-full h-full flex flex-col items-center justify-center cursor-pointer hover:bg-slate-800/50 transition-colors">
-                        <Camera className="w-20 h-20 text-slate-400 mb-4" />
-                        <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Toque para capturar evidência</p>
+                    <label className="w-full h-full flex flex-col items-center justify-center cursor-pointer hover:bg-[var(--bg-tertiary)] transition-colors">
+                        <div className="p-4 bg-white rounded-full shadow-sm mb-4 group-hover:scale-110 transition-transform">
+                            <Camera className="w-8 h-8 text-[var(--accent-primary)]" />
+                        </div>
+                        <p className="text-[10px] text-[var(--text-secondary)] font-black uppercase tracking-widest">Toque para capturar evidência</p>
                         <input
                             type="file"
                             accept="image/*"
@@ -58,7 +60,7 @@ export const NewReportForm: React.FC<NewReportFormProps> = ({
                     placeholder="DESCREVA A OCORRÊNCIA OU ATUALIZAÇÃO OPERACIONAL..."
                     value={comment}
                     onChange={e => onCommentChange(e.target.value)}
-                    className="!rounded-[2rem] p-6 text-sm font-bold text-white placeholder:text-slate-400 placeholder:uppercase placeholder:tracking-widest bg-slate-900/50 border-white/5"
+                    className="!rounded-[2rem] p-6 text-sm font-bold text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] placeholder:uppercase placeholder:tracking-widest bg-white border-[var(--border-subtle)] focus:border-[var(--accent-primary)] focus:ring-[var(--accent-primary)]"
                     rows={4}
                     aria-label="Descrição da ocorrência"
                 />
@@ -68,7 +70,7 @@ export const NewReportForm: React.FC<NewReportFormProps> = ({
                     size="lg"
                     fullWidth
                     disabled={isSending || !preview}
-                    className="h-16 !rounded-[2rem] text-sm shadow-xl shadow-blue-500/20"
+                    className="h-16 !rounded-[2rem] text-sm shadow-xl shadow-[var(--accent-primary)]/20"
                 >
                     <Send className={`w-5 h-5 mr-3 ${isSending ? 'animate-ping' : ''}`} />
                     {isSending ? 'ENVIANDO RELATÓRIO...' : 'CONFIRMAR OPERAÇÃO'}

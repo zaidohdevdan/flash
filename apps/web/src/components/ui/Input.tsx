@@ -10,8 +10,6 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
     error?: string;
     /** Ícone para exibir à esquerda. */
     icon?: React.ReactNode;
-    /** Variante de estilo. */
-    variant?: 'light' | 'dark';
 }
 
 /**
@@ -22,49 +20,53 @@ export const Input: React.FC<InputProps> = ({
     error,
     icon,
     className = '',
-    variant = 'light',
+    id,
     ...props
 }) => {
-
-    const variants = {
-        light: 'bg-gray-50/50 border-gray-100 text-gray-900 focus:bg-white focus:border-blue-500/50',
-        dark: 'bg-slate-900/50 border-white/10 text-white focus:bg-slate-900/80 focus:border-blue-500/50 placeholder:text-slate-400'
-    };
+    const generatedId = React.useId();
+    const inputId = id || generatedId;
 
     return (
-        <div className="space-y-1 w-full">
+        <div className="space-y-1.5 w-full">
             {label && (
-                <label className={`text-[10px] font-black uppercase tracking-widest ml-1 ${variant === 'dark' ? 'text-slate-300' : 'text-gray-700'}`}>
+                <label
+                    htmlFor={inputId}
+                    className="text-sm font-medium text-[var(--text-secondary)] ml-0.5"
+                >
                     {label}
                 </label>
             )}
             <div className="relative group">
                 {icon && (
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors">
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] group-focus-within:text-[var(--text-primary)] transition-colors">
                         {icon}
                     </div>
                 )}
                 <input
+                    id={inputId}
                     className={`
             w-full 
-            ${icon ? 'pl-11' : 'px-5'} 
-            py-3.5 
-            rounded-2xl 
-            outline-none 
-            focus:ring-4 
-            focus:ring-blue-500/5 
+            ${icon ? 'pl-10' : 'px-4'} 
+            py-2.5 
+            rounded-xl
+            bg-[var(--bg-primary)]
+            border border-[var(--border-medium)]
+            text-[var(--text-primary)]
+            placeholder:text-[var(--text-tertiary)]
+            focus:outline-none 
+            focus:ring-2 
+            focus:ring-[var(--border-subtle)]
+            focus:border-[var(--text-primary)]
             transition-all 
-            font-medium 
             text-sm 
-            ${variants[variant]}
-            ${error ? 'border-red-300 bg-red-50/50' : ''}
+            ${error ? 'border-red-300 focus:border-red-500 focus:ring-red-100' : ''}
             ${className}
           `}
                     {...props}
                 />
             </div>
             {error && (
-                <p className="text-[10px] font-bold text-red-500 ml-1">{error}</p>
+                <p className="text-xs text-red-500 ml-0.5">{error}</p>
             )}
         </div>
     );

@@ -20,15 +20,15 @@ import {
 import { ChatWidget } from '../components/ChatWidget';
 import {
     Button,
-    Header,
     Card,
     ReportShimmer
 } from '../components/ui';
+import { DashboardLayout } from '../layouts/DashboardLayout';
 import { ReportCard } from '../components/domain';
 import { ReportHistoryModal } from '../components/domain/modals/ReportHistoryModal';
+import { ProfileSettingsModal } from '../components/domain/modals/ProfileSettingsModal';
 import { ConferenceModal } from '../components/domain/modals/ConferenceModal';
 import { ConferenceInviteNotification } from '../components/ui/ConferenceInviteNotification';
-import { NotificationDrawer } from '../components/ui/NotificationDrawer';
 import { db } from '../services/db';
 import { syncPendingReports } from '../services/offlineSync';
 import { useLiveQuery } from 'dexie-react-hooks';
@@ -53,10 +53,10 @@ export function CreateReport() {
     const [searchTerm, setSearchTerm] = useState('');
     const [loadingHistory, setLoadingHistory] = useState(false);
     const [selectedReport, setSelectedReport] = useState<Report | null>(null);
-    const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+
     const [notifications, setNotifications] = useState<Notification[]>([]);
 
-    const LIMIT = 10;
+    const LIMIT = 4;
 
     const pendingReports = useLiveQuery(() => db.pendingReports.toArray());
 
@@ -255,6 +255,44 @@ export function CreateReport() {
         }
     };
 
+    // Profile Management
+    const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const [profilePhrase, setProfilePhrase] = useState(user?.statusPhrase || '');
+    const [profileAvatar, setProfileAvatar] = useState<File | null>(null);
+    const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
+
+    useEffect(() => {
+        if (user?.statusPhrase) {
+            setProfilePhrase(user.statusPhrase);
+        }
+    }, [user?.statusPhrase]);
+
+    const handleUpdateProfile = async () => {
+        if (!user) return;
+        setIsUpdatingProfile(true);
+        try {
+            const formData = new FormData();
+            formData.append('statusPhrase', profilePhrase);
+            if (profileAvatar) {
+                formData.append('avatar', profileAvatar);
+            }
+
+            const response = await api.patch('/profile', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+
+            updateUser(response.data);
+            setIsProfileOpen(false);
+            setProfileAvatar(null);
+            toast.success('Perfil atualizado com sucesso!');
+        } catch (error) {
+            console.error('Update profile error:', error);
+            toast.error('Erro ao atualizar perfil.');
+        } finally {
+            setIsUpdatingProfile(false);
+        }
+    };
+
     function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
         const file = e.target.files?.[0];
         if (file) {
@@ -350,191 +388,183 @@ export function CreateReport() {
     }
 
     return (
-        <div className="min-h-screen bg-[#020617] flex flex-col font-sans selection:bg-blue-500/30 selection:text-blue-200 transition-colors duration-700 overflow-x-hidden">
-            <Header
-                user={{
-                    name: user?.name,
-                    avatarUrl: user?.avatarUrl
-                }}
-                onLogout={signOut}
-                unreadCount={notifications.filter(n => !n.read).length}
-                onNotificationsClick={() => setIsNotificationsOpen(true)}
-            />
-
-            <main className="flex-1 relative overflow-hidden">
-                {/* Background Decorations */}
-                <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-600/10 rounded-full blur-[120px] animate-pulse pointer-events-none" />
-                <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-indigo-600/10 rounded-full blur-[140px] animate-pulse pointer-events-none" style={{ animationDelay: '2s' }} />
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.03),transparent_70%)] pointer-events-none" />
-
-                <div className="relative z-10 w-full h-full">
-                    {/* Alerta de Modo Offline */}
-                    <div className="max-w-2xl mx-auto px-6 pt-4">
-                        {pendingReports && pendingReports.length > 0 && (
-                            <Card variant="glass" className="p-4 border-amber-200 bg-amber-50/50 flex items-center justify-between animate-in slide-in-from-top-4 duration-500">
-                                <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-amber-100 text-amber-600 rounded-xl">
-                                        <CloudOff className="w-5 h-5" />
-                                    </div>
-                                    <div>
-                                        <h4 className="text-xs font-black text-amber-900 uppercase tracking-tight">Relatórios Pendentes</h4>
-                                        <p className="text-[10px] font-bold text-amber-700 uppercase tracking-widest">{pendingReports.length} arquivos aguardando internet</p>
-                                    </div>
+        <DashboardLayout
+            user={{ name: user?.name, avatarUrl: user?.avatarUrl, role: user?.role }}
+            onLogout={signOut}
+            notifications={notifications}
+            onMarkAsRead={handleMarkAsRead}
+            onMarkAllAsRead={handleMarkAllAsRead}
+            onProfileClick={() => setIsProfileOpen(true)}
+        >
+            <div className="relative h-full">
+                {/* Alerta de Modo Offline */}
+                <div className="max-w-2xl mx-auto pt-4 mb-6">
+                    {pendingReports && pendingReports.length > 0 && (
+                        <Card variant="outline" className="p-4 border-amber-200 bg-amber-50 flex items-center justify-between animate-in slide-in-from-top-4 duration-500">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-amber-100 text-amber-600 rounded-xl">
+                                    <CloudOff className="w-5 h-5" />
                                 </div>
-                                <div className="flex items-center gap-2">
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => syncPendingReports()}
-                                        className="!text-amber-800 hover:bg-amber-100 !px-4"
-                                    >
-                                        <RefreshCw className="w-4 h-4 mr-2" />
-                                        Tentar Agora
-                                    </Button>
-                                    <button
-                                        type="button"
-                                        onClick={async () => {
-                                            if (confirm('Deseja limpar todos os rascunhos offline?')) {
-                                                await db.pendingReports.clear();
-                                            }
-                                        }}
-                                        className="p-2 text-amber-400 hover:text-red-500 transition-colors"
-                                        aria-label="Limpar rascunhos offline"
-                                        title="Limpar rascunhos offline"
-                                    >
-                                        <History className="w-4 h-4" />
-                                    </button>
-                                </div>
-                            </Card>
-                        )}
-                    </div>
-
-                    {view === 'history' ? (
-                        <div className="p-6 max-w-2xl mx-auto space-y-8">
-                            <ProfessionalHeader
-                                userName={user?.name || 'Profissional'}
-                                isConnected={isConnected}
-                            />
-
-                            {user?.supervisorId && (
-                                <SupervisorHighlight
-                                    supervisorName={user.supervisorName || 'Responsável Técnico'}
-                                    isOnline={onlineUserIds.includes(user.supervisorId)}
-                                    hasUnread={hasUnreadMessages || !!unreadMessages[user.supervisorId]}
-                                    onChatOpen={handleOpenChat}
-                                />
-                            )}
-
-                            <div className="flex flex-col gap-4">
-                                <Card variant="dark" className="p-4 border-white/5 shadow-sm !rounded-[1.5rem] bg-slate-950/40">
-                                    <div className="relative group">
-                                        <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-400 opacity-60 group-focus-within:opacity-100 transition-opacity" />
-                                        <input
-                                            type="text"
-                                            placeholder="Buscar por protocolo ou descrição..."
-                                            value={searchTerm}
-                                            onChange={e => setSearchTerm(e.target.value)}
-                                            className="w-full pl-14 pr-8 py-3 bg-slate-900/50 border border-white/5 rounded-2xl outline-none focus:bg-slate-900 focus:border-blue-500/30 transition-all text-xs font-bold text-white placeholder:text-slate-400 placeholder:font-bold placeholder:uppercase"
-                                        />
-                                    </div>
-                                </Card>
-
-                                <div className="flex gap-2 overflow-x-auto pb-4 no-scrollbar">
-                                    {[
-                                        { id: '', label: 'Tudo' },
-                                        { id: 'SENT', label: 'Enviados' },
-                                        { id: 'IN_REVIEW', label: 'Análise' },
-                                        { id: 'FORWARDED', label: 'Depto' },
-                                        { id: 'RESOLVED', label: 'Finalizado' },
-                                    ].map(filter => (
-                                        <button
-                                            type="button"
-                                            key={filter.id}
-                                            onClick={() => { setStatusFilter(filter.id); setPage(1); }}
-                                            className={`px-6 py-2.5 rounded-2xl text-[10px] font-black tracking-widest uppercase transition-all border shrink-0 ${statusFilter === filter.id
-                                                ? 'bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-500/20'
-                                                : 'bg-slate-900/50 text-slate-300 border-white/5 hover:border-white/10'
-                                                }`}
-                                        >
-                                            {filter.label}
-                                        </button>
-                                    ))}
+                                <div>
+                                    <h4 className="text-xs font-black text-amber-900 uppercase tracking-tight">Relatórios Pendentes</h4>
+                                    <p className="text-[10px] font-bold text-amber-700 uppercase tracking-widest">{pendingReports.length} arquivos aguardando internet</p>
                                 </div>
                             </div>
+                            <div className="flex items-center gap-2">
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => syncPendingReports()}
+                                    className="!text-amber-800 hover:bg-amber-100 !px-4"
+                                >
+                                    <RefreshCw className="w-4 h-4 mr-2" />
+                                    Tentar Agora
+                                </Button>
+                                <button
+                                    type="button"
+                                    onClick={async () => {
+                                        if (confirm('Deseja limpar todos os rascunhos offline?')) {
+                                            await db.pendingReports.clear();
+                                        }
+                                    }}
+                                    className="p-2 text-amber-400 hover:text-red-500 transition-colors"
+                                    aria-label="Limpar rascunhos offline"
+                                    title="Limpar rascunhos offline"
+                                >
+                                    <History className="w-4 h-4" />
+                                </button>
+                            </div>
+                        </Card>
+                    )}
+                </div>
 
-                            {loadingHistory ? (
-                                <div className="space-y-6">
-                                    <ReportShimmer />
-                                    <ReportShimmer />
-                                    <ReportShimmer />
-                                </div>
-                            ) : history.length === 0 ? (
-                                <Card variant="glass" className="py-20 flex flex-col items-center justify-center text-gray-300">
-                                    <History className="w-12 h-12 mb-4 opacity-20" />
-                                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-700 underline decoration-2 decoration-blue-500/30">Nenhum evento registrado</p>
-                                </Card>
-                            ) : (
-                                <div className="grid gap-6">
-                                    {history.filter(r =>
-                                        r.comment.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                        r.id.toLowerCase().includes(searchTerm.toLowerCase())
-                                    ).map(item => (
-                                        <ReportCard
-                                            key={item.id}
-                                            report={item}
-                                            actions={
-                                                <Button variant="ghost" size="sm" onClick={() => setSelectedReport(item)}>
-                                                    Detalhes
-                                                </Button>
-                                            }
-                                        />
-                                    ))}
+                {view === 'history' ? (
+                    <div className="max-w-2xl mx-auto space-y-8 pb-24">
+                        <ProfessionalHeader
+                            userName={user?.name || 'Profissional'}
+                            isConnected={isConnected}
+                        />
 
-                                    {hasMore && (
-                                        <Button variant="secondary" size="lg" fullWidth onClick={handleLoadMore} className="bg-slate-900/50 border-white/5 text-white hover:bg-slate-900 mt-4">
-                                            Carregar Mais Atividades
-                                        </Button>
-                                    )}
-                                </div>
-                            )}
-                            <div className="h-24"></div>
+                        {user?.supervisorId && (
+                            <SupervisorHighlight
+                                supervisorName={user.supervisorName || 'Responsável Técnico'}
+                                isOnline={onlineUserIds.includes(user.supervisorId)}
+                                hasUnread={hasUnreadMessages || !!unreadMessages[user.supervisorId]}
+                                onChatOpen={handleOpenChat}
+                            />
+                        )}
+
+                        <div className="flex flex-col gap-4">
+                            <div className="relative group">
+                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-tertiary)] group-focus-within:text-[var(--text-primary)] transition-colors" />
+                                <input
+                                    type="text"
+                                    placeholder="Buscar por protocolo ou descrição..."
+                                    value={searchTerm}
+                                    onChange={e => setSearchTerm(e.target.value)}
+                                    className="w-full pl-10 pr-4 py-3 bg-[var(--bg-primary)] border border-[var(--border-subtle)] rounded-xl outline-none focus:ring-2 focus:ring-[var(--border-medium)] transition-all text-sm font-medium text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)]"
+                                />
+                            </div>
+
+                            <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
+                                {[
+                                    { id: '', label: 'Tudo' },
+                                    { id: 'SENT', label: 'Enviados' },
+                                    { id: 'IN_REVIEW', label: 'Análise' },
+                                    { id: 'FORWARDED', label: 'Depto' },
+                                    { id: 'RESOLVED', label: 'Finalizado' },
+                                ].map(filter => (
+                                    <button
+                                        type="button"
+                                        key={filter.id}
+                                        onClick={() => { setStatusFilter(filter.id); setPage(1); }}
+                                        className={`px-4 py-2 rounded-lg text-xs font-semibold uppercase tracking-wide transition-all border shrink-0 whitespace-nowrap ${statusFilter === filter.id
+                                            ? 'bg-[var(--accent-primary)] text-white border-[var(--accent-primary)] shadow-sm'
+                                            : 'bg-[var(--bg-primary)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:bg-[var(--bg-tertiary)]'
+                                            }`}
+                                    >
+                                        {filter.label}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
-                    ) : (
-                        <div className="p-6 max-w-xl mx-auto space-y-12 animate-in slide-in-from-bottom-5 duration-500">
+
+                        {loadingHistory ? (
+                            <div className="space-y-6">
+                                <ReportShimmer />
+                                <ReportShimmer />
+                                <ReportShimmer />
+                            </div>
+                        ) : history.length === 0 ? (
+                            <Card variant="white" className="py-20 flex flex-col items-center justify-center text-[var(--text-tertiary)] border-[var(--border-dashed)]">
+                                <History className="w-12 h-12 mb-4 opacity-20" />
+                                <p className="text-xs font-bold uppercase tracking-widest opacity-60">Nenhum evento registrado</p>
+                            </Card>
+                        ) : (
+                            <div className="grid gap-6">
+                                {history.filter(r =>
+                                    r.comment.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                    r.id.toLowerCase().includes(searchTerm.toLowerCase())
+                                ).map(item => (
+                                    <ReportCard
+                                        key={item.id}
+                                        report={item}
+                                        actions={
+                                            <Button variant="ghost" size="sm" onClick={() => setSelectedReport(item)}>
+                                                Detalhes
+                                            </Button>
+                                        }
+                                    />
+                                ))}
+
+                                {hasMore && (
+                                    <Button variant="secondary" size="lg" fullWidth onClick={handleLoadMore} className="mt-4">
+                                        Carregar Mais Atividades
+                                    </Button>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                ) : (
+                    <div className="max-w-xl mx-auto space-y-8 animate-in slide-in-from-bottom-5 duration-500 pb-24">
+                        <div className="flex items-center justify-between">
                             <ProfessionalHeader
                                 userName={user?.name || 'Profissional'}
                                 isConnected={isConnected}
                             />
-
-                            <NewReportForm
-                                comment={comment}
-                                onCommentChange={setComment}
-                                preview={preview}
-                                onImageChange={handleImageChange}
-                                onClearImage={() => { setImage(null); setPreview(null); }}
-                                onSubmit={handleSubmit}
-                                isSending={sending}
-                            />
+                            <Button variant="ghost" size="sm" onClick={() => setView('history')}>
+                                Cancelar
+                            </Button>
                         </div>
-                    )}
-                </div>
-            </main>
+
+                        <NewReportForm
+                            comment={comment}
+                            onCommentChange={setComment}
+                            preview={preview}
+                            onImageChange={handleImageChange}
+                            onClearImage={() => { setImage(null); setPreview(null); }}
+                            onSubmit={handleSubmit}
+                            isSending={sending}
+                        />
+                    </div>
+                )}
+            </div>
 
             {view === 'history' && (
                 <button
                     type="button"
                     onClick={() => setView('form')}
-                    className="fixed bottom-8 right-6 w-18 h-18 bg-[#0f172a] rounded-[2rem] flex items-center justify-center text-white shadow-2xl shadow-gray-900/20 active:scale-90 transition-all hover:-translate-y-1 z-30 p-5 group"
+                    className="fixed bottom-8 right-6 w-14 h-14 bg-[var(--accent-primary)] rounded-2xl flex items-center justify-center text-white shadow-xl shadow-[var(--accent-primary)]/30 active:scale-95 transition-all hover:-translate-y-1 z-30 group"
                     aria-label="Criar nova ocorrência"
                     title="Criar nova ocorrência"
                 >
-                    <Plus className="w-10 h-10 group-hover:rotate-90 transition-transform" />
+                    <Plus className="w-7 h-7 group-hover:rotate-90 transition-transform" />
                 </button>
             )}
 
             {isChatOpen && user && (
                 <ChatWidget
-                    currentUser={{ id: user.id, name: user.name, role: user.role }}
+                    currentUser={{ id: user.id || '', name: user.name || '', role: user.role || '' }}
                     targetUser={{
                         id: user.supervisorId || 'supervisor',
                         name: user.supervisorName || 'Supervisor',
@@ -549,6 +579,17 @@ export function CreateReport() {
                 isOpen={!!selectedReport}
                 onClose={() => setSelectedReport(null)}
                 report={selectedReport}
+            />
+
+            <ProfileSettingsModal
+                isOpen={isProfileOpen}
+                onClose={() => setIsProfileOpen(false)}
+                onSave={handleUpdateProfile}
+                isLoading={isUpdatingProfile}
+                profilePhrase={profilePhrase}
+                setProfilePhrase={setProfilePhrase}
+                onAvatarChange={setProfileAvatar}
+                avatarUrl={user?.avatarUrl}
             />
 
             <ConferenceModal
@@ -567,14 +608,6 @@ export function CreateReport() {
                 }}
                 onDecline={() => setPendingInvite(null)}
             />
-
-            <NotificationDrawer
-                isOpen={isNotificationsOpen}
-                onClose={() => setIsNotificationsOpen(false)}
-                notifications={notifications}
-                onMarkAsRead={handleMarkAsRead}
-                onMarkAllAsRead={handleMarkAllAsRead}
-            />
-        </div>
+        </DashboardLayout>
     );
 }

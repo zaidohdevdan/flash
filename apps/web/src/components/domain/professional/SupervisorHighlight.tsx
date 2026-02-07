@@ -15,28 +15,29 @@ export const SupervisorHighlight: React.FC<SupervisorHighlightProps> = ({
     hasUnread,
     onChatOpen
 }) => {
+
     return (
-        <Card variant="blue" className="!bg-blue-600 p-6 shadow-xl shadow-blue-900/10 flex flex-col sm:flex-row items-center justify-between gap-6 mb-8">
-            <div className="flex items-center gap-4 text-white">
-                <div className={`p-3 rounded-2xl backdrop-blur-md relative transition-all duration-500 ${hasUnread ? 'bg-amber-500/20 animate-pulse shadow-[0_0_20px_rgba(245,158,11,0.4)] border border-amber-400/30' : 'bg-white/20'}`}>
-                    <MessageSquare className={`w-6 h-6 ${hasUnread ? 'text-amber-400' : 'text-white'}`} />
+        <Card className="bg-white p-6 border border-[var(--border-subtle)] shadow-sm flex flex-col sm:flex-row items-center justify-between gap-6 mb-8 hover:border-[var(--accent-primary)] transition-all">
+            <div className="flex items-center gap-4">
+                <div className={`p-3 rounded-2xl transition-all duration-500 ${hasUnread ? 'bg-amber-50 animate-pulse border border-amber-200' : 'bg-[var(--bg-secondary)]'}`}>
+                    <MessageSquare className={`w-6 h-6 ${hasUnread ? 'text-amber-500' : 'text-[var(--text-tertiary)]'}`} />
                     {hasUnread && (
-                        <span className="absolute -top-1 -right-1 w-4 h-4 bg-teal-400 rounded-full border-2 border-blue-600 animate-bounce" />
+                        <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-white animate-bounce" />
                     )}
                 </div>
                 <div>
                     <div className="flex items-center gap-2">
-                        <p className="text-[9px] font-black text-white/60 uppercase tracking-widest">Supervisor Direto</p>
-                        <div className={`w-1.5 h-1.5 rounded-full ${isOnline ? 'bg-emerald-400 animate-pulse' : 'bg-white/30'}`} />
+                        <p className="text-[9px] font-black text-[var(--text-tertiary)] uppercase tracking-widest">Supervisor Direto</p>
+                        <div className={`w-1.5 h-1.5 rounded-full ${isOnline ? 'bg-emerald-500 animate-pulse' : 'bg-gray-300'}`} />
                     </div>
-                    <h3 className={`text-lg font-bold transition-all duration-300 ${hasUnread ? 'text-amber-300 animate-pulse' : 'text-white'}`}>
+                    <h3 className={`text-lg font-bold transition-all duration-300 ${hasUnread ? 'text-amber-600' : 'text-[var(--text-primary)]'}`}>
                         {supervisorName}
                     </h3>
                 </div>
             </div>
             <Button
-                variant="glass"
-                className="!bg-white/10 !text-white !border-white/20 hover:!bg-white/20"
+                variant={hasUnread ? 'primary' : 'secondary'}
+                className={!hasUnread ? "!bg-[var(--bg-secondary)] hover:!bg-[var(--bg-tertiary)] border-[var(--border-subtle)]" : ""}
                 onClick={onChatOpen}
             >
                 {hasUnread ? 'NOVA MENSAGEM' : 'CONTATAR SUPERVISOR'}

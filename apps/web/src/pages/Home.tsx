@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion';
+import { motion, useScroll, useTransform, useReducedMotion, useSpring } from 'framer-motion';
 import {
     Send,
     ArrowRight,
@@ -15,26 +15,34 @@ import {
     Zap,
     BarChart3,
     Globe2,
-    Smartphone
+    Smartphone,
+    Twitter,
+    Mail,
+    MapPin,
+    Shield
 } from 'lucide-react';
 import { ProcessTimeline } from '../components/home/ProcessTimeline';
 import { TechSpecs } from '../components/home/TechSpecs';
-import { ParticleBackground } from '../components/home/ParticleBackground';
-import { LiveActivityTicker } from '../components/home/LiveActivityTicker';
 import { FaqSection } from '../components/home/FaqSection';
-import { TextScramble } from '../components/home/TextScramble';
 import { Globe } from '../components/home/Globe';
-import { TacticalHud } from '../components/home/TacticalHud';
 
 export function Home() {
     const navigate = useNavigate();
     const { isAuthenticated, user, loading } = useAuth();
     const [formStatus, setFormStatus] = useState<'idle' | 'sending' | 'sent'>('idle');
-    const { scrollY } = useScroll();
+    const { scrollY, scrollYProgress } = useScroll();
+
+    // Smooth progress bar
+    const scaleX = useSpring(scrollYProgress, {
+        stiffness: 100,
+        damping: 30,
+        restDelta: 0.001
+    });
 
     // 3D Tilt Effect State
     const [rotateX, setRotateX] = useState(0);
     const [rotateY, setRotateY] = useState(0);
+    const [glarePosition, setGlarePosition] = useState({ x: 50, y: 50 });
 
     const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
         const rect = e.currentTarget.getBoundingClientRect();
@@ -43,39 +51,40 @@ export function Home() {
         const centerX = rect.width / 2;
         const centerY = rect.height / 2;
 
-        const rotateXValue = ((y - centerY) / centerY) * -10; // Max 10 deg rotation
-        const rotateYValue = ((x - centerX) / centerX) * 10;
+        const rotateXValue = ((y - centerY) / centerY) * -8;
+        const rotateYValue = ((x - centerX) / centerX) * 8;
 
         setRotateX(rotateXValue);
         setRotateY(rotateYValue);
+        setGlarePosition({ x: (x / rect.width) * 100, y: (y / rect.height) * 100 });
     };
 
     const handleMouseLeave = () => {
         setRotateX(0);
         setRotateY(0);
+        setGlarePosition({ x: 50, y: 50 });
     }
 
     const shouldReduceMotion = useReducedMotion();
 
     // Parallax & Explosive Scrollytelling Effects
-    // If reduced motion is requested, we disable the parallax and explosion
-    const yHeroText = useTransform(scrollY, [0, 500], shouldReduceMotion ? [0, 0] : [0, 200]);
-    const opacityHero = useTransform(scrollY, [0, 300], [1, 0]);
+    const yHeroText = useTransform(scrollY, [0, 500], shouldReduceMotion ? [0, 0] : [0, 150]);
+    const opacityHero = useTransform(scrollY, [0, 400], [1, 0]);
 
     // Layer 1 (Base Map)
-    const yLayer1 = useTransform(scrollY, [0, 500], shouldReduceMotion ? [0, 0] : [0, -400]);
-    const opacityLayer1 = useTransform(scrollY, [300, 600], [1, 0]);
-    const scaleLayer1 = useTransform(scrollY, [0, 500], shouldReduceMotion ? [1, 1] : [1, 0.6]);
+    const yLayer1 = useTransform(scrollY, [0, 500], shouldReduceMotion ? [0, 0] : [0, -200]);
+    const opacityLayer1 = useTransform(scrollY, [100, 500], [1, 0]);
+    const scaleLayer1 = useTransform(scrollY, [0, 500], shouldReduceMotion ? [1, 1] : [1, 0.9]);
 
     // Layer 2 (Main UI)
-    const xLayer2A = useTransform(scrollY, [0, 500], shouldReduceMotion ? [0, 0] : [0, -500]);
-    const xLayer2B = useTransform(scrollY, [0, 500], shouldReduceMotion ? [0, 0] : [0, 500]);
-    const rotateLayer2 = useTransform(scrollY, [0, 500], shouldReduceMotion ? [0, 0] : [0, 45]);
-    const opacityLayer2 = useTransform(scrollY, [400, 700], [1, 0]);
+    const xLayer2A = useTransform(scrollY, [0, 500], shouldReduceMotion ? [0, 0] : [0, -200]);
+    const xLayer2B = useTransform(scrollY, [0, 500], shouldReduceMotion ? [0, 0] : [0, 200]);
+    const rotateLayer2 = useTransform(scrollY, [0, 500], shouldReduceMotion ? [0, 0] : [0, 15]);
+    const opacityLayer2 = useTransform(scrollY, [200, 600], [1, 0]);
 
     // Layer 3 (Floating)
-    const zLayer3 = useTransform(scrollY, [0, 500], shouldReduceMotion ? [0, 0] : [0, 1200]);
-    const opacityLayer3 = useTransform(scrollY, [400, 600], [1, 0]);
+    const zLayer3 = useTransform(scrollY, [0, 500], shouldReduceMotion ? [0, 0] : [0, 500]);
+    const opacityLayer3 = useTransform(scrollY, [300, 600], [1, 0]);
 
     useEffect(() => {
         if (!loading && isAuthenticated && user) {
@@ -93,191 +102,232 @@ export function Home() {
     };
 
     return (
-        <div className="min-h-screen bg-[#020617] font-sans text-slate-200 overflow-x-hidden selection:bg-blue-500/30 selection:text-blue-200 relative">
+        <div className="min-h-screen bg-white font-sans text-slate-900 overflow-x-hidden selection:bg-lime-200 selection:text-lime-900 relative">
 
-            {/* Tier S+ (Mission Control): Tactical HUD */}
-            <TacticalHud />
+            {/* Scroll Progress Bar */}
+            <motion.div
+                className="fixed top-0 left-0 right-0 h-1 bg-[#d4e720] origin-left z-[60]"
+                style={{ scaleX }}
+            />
 
-            {/* Tier S: Particle Mesh Background */}
-            <ParticleBackground />
+            {/* Premium Grain Texture Overlay */}
+            <div className="fixed inset-0 pointer-events-none opacity-[0.035] z-[100] mix-blend-multiply" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }}></div>
 
-            {/* Tier S: Live Activity Ticker */}
-            <LiveActivityTicker />
-
-            {/* Background Effects (Subtle Overlay) */}
-            <div className="fixed inset-0 pointer-events-none">
-                <div className="absolute top-0 left-0 w-full h-[800px] bg-gradient-to-b from-blue-900/10 via-slate-900/5 to-transparent" />
-                <div className="absolute top-[-20%] right-[-10%] w-[800px] h-[800px] bg-blue-600/10 rounded-full blur-[120px] animate-pulse-slow" />
-                <div className="absolute bottom-[-20%] left-[-10%] w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[100px] animate-pulse-slow delay-1000" />
-                {/* Grid Pattern */}
-                <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000,transparent)] opacity-[0.1]" />
+            {/* Dynamic Mesh Gradient Background */}
+            <div className="fixed inset-0 pointer-events-none z-0">
+                <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-100/40 rounded-full blur-[120px] mix-blend-multiply animate-pulse-slow" />
+                <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-[#d4e720]/15 rounded-full blur-[120px] mix-blend-multiply animate-pulse-slow delay-1000" />
+                <div className="absolute top-[40%] left-[40%] w-[40%] h-[40%] bg-slate-100/80 rounded-full blur-[100px] mix-blend-multiply animate-pulse-slow delay-500" />
             </div>
 
             {/* Navigation */}
-            <nav className="fixed top-0 w-full z-50 bg-slate-950/70 backdrop-blur-xl border-b border-white/5">
-                <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <div className="bg-blue-600 p-1.5 rounded-lg shadow-lg shadow-blue-500/20">
-                            <Send className="w-5 h-5 text-white" />
+            <nav className="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-2xl border-b border-white/20 shadow-[0_2px_20px_rgba(0,0,0,0.02)] transition-all">
+                <div className="max-w-7xl mx-auto px-6 h-24 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className="bg-[#d4e720] p-2 rounded-xl shadow-lg shadow-lime-500/20 border border-[#bed20e]">
+                            <Send className="w-5 h-5 text-[#1a2e05]" />
                         </div>
-                        <span className="text-xl font-black tracking-tighter text-white">FLASH<span className="text-blue-500">APP</span></span>
+                        <span className="text-2xl font-black tracking-tighter text-slate-900">FLASH<span className="text-[#a3b60b]">APP</span></span>
                     </div>
 
-                    <div className="hidden md:flex items-center gap-8 text-[11px] font-bold text-slate-400 uppercase tracking-[0.15em]">
-                        <a href="#features" className="hover:text-white transition-colors">Recursos</a>
-                        <a href="#process" className="hover:text-white transition-colors">Processo</a>
-                        <a href="#specs" className="hover:text-white transition-colors">Tecnologia</a>
-                        <a href="#contact" className="hover:text-white transition-colors">Contato</a>
+                    <div className="hidden md:flex items-center gap-10 text-xs font-bold text-slate-500 uppercase tracking-[0.15em]">
+                        <a href="#features" className="hover:text-slate-900 transition-colors relative group">
+                            Recursos
+                            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#d4e720] transition-all group-hover:w-full" />
+                        </a>
+                        <a href="#process" className="hover:text-slate-900 transition-colors relative group">
+                            Processo
+                            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#d4e720] transition-all group-hover:w-full" />
+                        </a>
+                        <a href="#specs" className="hover:text-slate-900 transition-colors relative group">
+                            Tecnologia
+                            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#d4e720] transition-all group-hover:w-full" />
+                        </a>
+                        <a href="#contact" className="hover:text-slate-900 transition-colors relative group">
+                            Contato
+                            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#d4e720] transition-all group-hover:w-full" />
+                        </a>
                     </div>
 
                     <button
                         onClick={() => navigate('/login')}
-                        className="bg-white text-slate-950 px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-[0.15em] hover:bg-blue-500 hover:text-white transition-all shadow-xl hover:shadow-2xl hover:shadow-blue-500/20 active:scale-95"
+                        className="bg-slate-900 text-white px-8 py-4 rounded-2xl font-black text-[11px] uppercase tracking-[0.15em] hover:bg-slate-800 transition-all shadow-xl hover:shadow-2xl hover:scale-[1.02] active:scale-95 group relative overflow-hidden"
                     >
-                        Acessar Sistema
+                        <span className="relative z-10">Acessar Sistema</span>
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
                     </button>
                 </div>
             </nav>
 
             {/* Hero Section */}
-            <section className="relative pt-48 pb-32 px-6 overflow-hidden perspective-distant">
-                <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-20 relative z-10">
+            <section className="relative pt-48 pb-32 px-6 overflow-visible perspective-distant">
+                <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16 relative z-10">
                     <motion.div
                         style={{ y: yHeroText, opacity: opacityHero }}
-                        className="flex-1 space-y-8"
+                        className="flex-1 space-y-10"
                     >
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.6 }}
-                            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/10 backdrop-blur-sm rounded-full border border-blue-500/20"
+                            transition={{ duration: 0.8, ease: "easeOut" }}
+                            className="inline-flex items-center gap-3 px-5 py-2.5 bg-white backdrop-blur-md rounded-full border border-slate-200 text-slate-600 shadow-sm hover:shadow-md transition-shadow cursor-default group"
                         >
-                            <span className="relative flex h-2 w-2">
-                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                                <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                            <span className="relative flex h-2.5 w-2.5">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#d4e720] opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#a3b60b]"></span>
                             </span>
-                            <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest"><TextScramble>Enterprise System v4.0</TextScramble></span>
+                            <span className="text-[11px] font-black uppercase tracking-widest text-slate-500 group-hover:text-slate-900 transition-colors">Enterprise System v4.0</span>
                         </motion.div>
 
                         <motion.h1
-                            initial={{ opacity: 0, y: 20 }}
+                            initial={{ opacity: 0, y: 30 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.6, delay: 0.1 }}
-                            className="text-6xl lg:text-[5.5rem] font-black tracking-tighter leading-[0.95] text-white"
+                            transition={{ duration: 0.8, delay: 0.1, ease: "easeOut" }}
+                            className="text-7xl lg:text-[6.5rem] font-black tracking-tighter leading-[0.9] text-slate-900 relative"
                         >
-                            Gestão de Processos <br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">Em Tempo Real.</span>
+                            Gestão <br />
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-800 via-slate-600 to-slate-400 bg-[length:200%_auto] animate-shimmer">Sem Ruído.</span>
                         </motion.h1>
 
                         <motion.p
-                            initial={{ opacity: 0, y: 20 }}
+                            initial={{ opacity: 0, y: 30 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.6, delay: 0.2 }}
-                            className="text-lg text-slate-400 max-w-xl leading-relaxed font-medium"
+                            transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+                            className="text-xl text-slate-500 max-w-xl leading-relaxed font-medium"
                         >
-                            O FLASH evoluiu. Além do ruído operacional, entregamos inteligência preditiva, operação offline e sincronia instantânea em uma única plataforma visual.
+                            O <span className="font-bold text-slate-900">FLASH</span> unifica sua operação de campo. Inteligência preditiva, operação offline e design minimalista para quem lidera o futuro.
                         </motion.p>
 
                         <motion.div
-                            initial={{ opacity: 0, y: 20 }}
+                            initial={{ opacity: 0, y: 30 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.6, delay: 0.3 }}
-                            className="flex flex-col sm:flex-row items-center gap-4"
+                            transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
+                            className="flex flex-col sm:flex-row items-center gap-6"
                         >
                             <button
                                 onClick={() => navigate('/login')}
-                                className="w-full sm:w-auto px-8 py-5 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-500 transition-all shadow-2xl shadow-blue-500/20 flex items-center justify-center gap-3 hover:-translate-y-1 group"
+                                className="w-full sm:w-auto px-10 py-6 bg-[#d4e720] text-[#1a2e05] border border-[#bed20e] rounded-[1.25rem] font-black text-xs uppercase tracking-widest hover:bg-[#bfd40b] hover:shadow-2xl hover:scale-105 transition-all shadow-xl shadow-lime-500/20 flex items-center justify-center gap-3 group relative overflow-hidden"
                             >
-                                <TextScramble>Iniciar Operação</TextScramble> <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                <span className="relative z-10 flex items-center gap-3">
+                                    Iniciar Operação <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                </span>
+                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+                            </button>
+                            <button className="w-full sm:w-auto px-10 py-6 bg-white text-slate-900 border border-slate-200 rounded-[1.25rem] font-black text-xs uppercase tracking-widest hover:bg-slate-50 hover:border-slate-300 transition-all flex items-center justify-center gap-3 hover:shadow-lg hover:-translate-y-0.5">
+                                Ver Documentação
                             </button>
                         </motion.div>
                     </motion.div>
 
-                    {/* 3D Composition Hero with Explosive Scrollytelling */}
+                    {/* 3D Composition Hero - Ultra Premium with Glare */}
                     <div
-                        className="flex-1 w-full perspective-[2000px] group"
+                        className="flex-1 w-full perspective-[2500px] group h-[600px] flex items-center justify-center relative"
                         onMouseMove={handleMouseMove}
                         onMouseLeave={handleMouseLeave}
                     >
                         <motion.div
-                            className="relative w-full aspect-[4/3] transform-style-3d transition-transform duration-200 ease-out"
+                            className="relative w-full aspect-[4/3] transform-style-3d transition-transform duration-300 ease-out"
                             style={{
                                 rotateX,
                                 rotateY
                             }}
                         >
-                            {/* Layer 1: Base - Flies Backward */}
+                            {/* Layer 1: Base - Clean Card with heavy shadow */}
                             <motion.div
                                 style={{ y: yLayer1, opacity: opacityLayer1, scale: scaleLayer1 }}
-                                className="absolute inset-0 bg-slate-900 rounded-[2.5rem] border border-white/10 shadow-2xl overflow-hidden transform-style-3d translate-z-[-50px]"
+                                className="absolute inset-0 bg-white rounded-[3rem] border border-slate-100 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.1)] overflow-hidden transform-style-3d translate-z-[-50px]"
                             >
-                                <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(68,68,68,.2)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%,100%_100%] animate-shine opacity-20" />
-                                <div className="p-8 opacity-30 blur-[1px]">
-                                    <div className="h-64 rounded-3xl bg-slate-800/50 w-full mb-6 border border-white/5" />
-                                    <div className="grid grid-cols-2 gap-6">
-                                        <div className="h-32 rounded-3xl bg-slate-800/50 border border-white/5" />
-                                        <div className="h-32 rounded-3xl bg-slate-800/50 border border-white/5" />
+                                <div className="absolute inset-0 bg-slate-50/50" />
+                                {/* Dynamic Glare */}
+                                <div
+                                    className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none z-50 mix-blend-overlay"
+                                    style={{
+                                        backgroundPosition: `${glarePosition.x}% ${glarePosition.y}%`
+                                    }}
+                                />
+
+                                <div className="p-10 opacity-40 blur-[0.5px]">
+                                    <div className="flex gap-4 mb-8">
+                                        <div className="w-16 h-16 rounded-2xl bg-slate-200 animate-pulse" />
+                                        <div className="flex-1 space-y-3 pt-2">
+                                            <div className="h-4 w-1/3 bg-slate-200 rounded-full" />
+                                            <div className="h-3 w-1/4 bg-slate-100 rounded-full" />
+                                        </div>
+                                    </div>
+                                    <div className="h-64 rounded-[2rem] bg-slate-100 w-full mb-6 border border-slate-200" />
+                                    <div className="grid grid-cols-3 gap-6">
+                                        <div className="h-24 rounded-[1.5rem] bg-slate-100 border border-slate-200" />
+                                        <div className="h-24 rounded-[1.5rem] bg-slate-100 border border-slate-200" />
+                                        <div className="h-24 rounded-[1.5rem] bg-slate-100 border border-slate-200" />
                                     </div>
                                 </div>
                             </motion.div>
 
-                            {/* Layer 2: Main UI - Splits Apart */}
+                            {/* Layer 2: Main UI - Glass Panel with Realism */}
                             <motion.div
                                 style={{ rotateZ: rotateLayer2, opacity: opacityLayer2 }}
-                                className="absolute inset-4 bg-slate-900/80 backdrop-blur-xl rounded-[2rem] border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] transform-style-3d translate-z-[0px] flex flex-col overflow-hidden"
+                                className="absolute inset-8 bg-white/80 backdrop-blur-2xl rounded-[2.5rem] border border-white/60 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15)] transform-style-3d translate-z-[20px] flex flex-col overflow-hidden"
                             >
                                 {/* Header Mock */}
-                                <div className="h-16 border-b border-white/5 flex items-center justify-between px-8 bg-white/5">
-                                    <div className="flex gap-2">
-                                        <div className="w-3 h-3 rounded-full bg-red-500/20 border border-red-500/50" />
-                                        <div className="w-3 h-3 rounded-full bg-yellow-500/20 border border-yellow-500/50" />
-                                        <div className="w-3 h-3 rounded-full bg-green-500/20 border border-green-500/50" />
+                                <div className="h-20 border-b border-slate-100/50 flex items-center justify-between px-8 bg-white/50">
+                                    <div className="flex gap-2.5">
+                                        <div className="w-3.5 h-3.5 rounded-full bg-slate-300" />
+                                        <div className="w-3.5 h-3.5 rounded-full bg-slate-200" />
                                     </div>
-                                    <div className="h-2 w-20 bg-slate-700 rounded-full" />
+                                    <div className="flex gap-4">
+                                        <div className="h-2 w-20 bg-slate-200 rounded-full opacity-50" />
+                                        <div className="h-2 w-6 bg-slate-200 rounded-full opacity-50" />
+                                    </div>
                                 </div>
-                                <div className="p-8 grid grid-cols-2 gap-6 h-full p-6">
-                                    <motion.div style={{ x: xLayer2A }} className="bg-blue-500/10 border border-blue-500/20 rounded-2xl flex items-center justify-center flex-col gap-2 p-4">
-                                        <Brain className="w-8 h-8 text-blue-400" />
-                                        <div className="h-2 w-16 bg-blue-400/20 rounded-full" />
+                                <div className="p-8 grid grid-cols-2 gap-6 h-full p-6 relative">
+                                    <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/40 to-white/10 pointer-events-none" />
+
+                                    <motion.div style={{ x: xLayer2A }} className="bg-white border border-slate-100 rounded-[1.5rem] flex items-center justify-center flex-col gap-3 p-6 shadow-sm">
+                                        <div className="p-3 bg-blue-50 rounded-xl">
+                                            <Brain className="w-6 h-6 text-blue-500" />
+                                        </div>
+                                        <div className="h-2 w-12 bg-slate-100 rounded-full" />
                                     </motion.div>
-                                    <motion.div style={{ x: xLayer2B }} className="bg-purple-500/10 border border-purple-500/20 rounded-2xl flex items-center justify-center flex-col gap-2 p-4">
-                                        <Zap className="w-8 h-8 text-purple-400" />
-                                        <div className="h-2 w-16 bg-purple-400/20 rounded-full" />
+                                    <motion.div style={{ x: xLayer2B }} className="bg-white border border-slate-100 rounded-[1.5rem] flex items-center justify-center flex-col gap-3 p-6 shadow-sm">
+                                        <div className="p-3 bg-[#f7fccb] rounded-xl">
+                                            <Zap className="w-6 h-6 text-[#a3b60b]" />
+                                        </div>
+                                        <div className="h-2 w-12 bg-slate-100 rounded-full" />
                                     </motion.div>
-                                    <div className="col-span-2 bg-slate-800/30 border border-white/5 rounded-2xl h-full p-4">
-                                        <div className="flex gap-2 items-end h-full justify-around pb-2">
-                                            {[40, 70, 50, 90, 60, 80].map((h, i) => (
-                                                <div key={i} className="w-8 bg-blue-500/40 rounded-t-lg" style={{ height: `${h}%` }} />
+                                    <div className="col-span-2 bg-slate-50/50 border border-slate-100 rounded-[1.5rem] h-full p-6 relative overflow-hidden">
+                                        <div className="flex gap-3 items-end h-full justify-around pb-2">
+                                            {[45, 75, 55, 95, 65, 85].map((h, i) => (
+                                                <div key={i} className="w-8 bg-gradient-to-t from-[#d4e720] to-[#eaff66] rounded-t-lg shadow-sm" style={{ height: `${h}%` }} />
                                             ))}
                                         </div>
                                     </div>
                                 </div>
                             </motion.div>
 
-                            {/* Layer 3: Floating Elements - Flies to Screen */}
+                            {/* Layer 3: Floating Elements - High Definition */}
                             <motion.div
                                 style={{ z: zLayer3, opacity: opacityLayer3 }}
-                                className="absolute top-[20%] right-[-20px] bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-2xl shadow-xl flex items-center gap-4 transform-style-3d translate-z-[60px]"
+                                className="absolute top-[15%] right-[-40px] bg-white border border-slate-100 p-5 rounded-[1.5rem] shadow-[0_20px_40px_-10px_rgba(0,0,0,0.1)] flex items-center gap-5 transform-style-3d translate-z-[80px]"
                             >
-                                <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center text-white shadow-lg shadow-green-500/20">
+                                <div className="w-12 h-12 rounded-full bg-emerald-500 flex items-center justify-center text-white shadow-xl shadow-emerald-500/30">
                                     <CheckCircle2 className="w-6 h-6" />
                                 </div>
                                 <div>
-                                    <div className="h-2 w-24 bg-white/40 rounded-full mb-2" />
-                                    <div className="h-2 w-16 bg-white/20 rounded-full" />
+                                    <div className="h-2.5 w-24 bg-slate-800 rounded-full mb-2.5" />
+                                    <div className="h-2 w-16 bg-slate-200 rounded-full" />
                                 </div>
                             </motion.div>
 
                             <motion.div
                                 style={{ z: zLayer3, opacity: opacityLayer3 }}
-                                className="absolute bottom-[20%] left-[-20px] bg-slate-900/90 backdrop-blur-md border border-blue-500/30 p-4 rounded-2xl shadow-xl flex items-center gap-4 transform-style-3d translate-z-[80px]"
+                                className="absolute bottom-[15%] left-[-40px] bg-slate-900 backdrop-blur-md border border-slate-800 p-5 rounded-[1.5rem] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)] flex items-center gap-5 transform-style-3d translate-z-[120px]"
                             >
-                                <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white shadow-lg shadow-blue-500/20">
-                                    <WifiOff className="w-5 h-5" />
+                                <div className="w-12 h-12 rounded-full bg-[#d4e720] flex items-center justify-center text-[#1a2e05] shadow-xl shadow-lime-500/20 animate-pulse">
+                                    <WifiOff className="w-6 h-6" />
                                 </div>
                                 <div>
-                                    <p className="text-[10px] font-black uppercase text-blue-300 tracking-widest mb-1">Modo Offline</p>
-                                    <p className="text-xs font-bold text-white">Sincronizando...</p>
+                                    <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-1.5">Modo Offline</p>
+                                    <p className="text-sm font-bold text-white">Sincronização Ativa</p>
                                 </div>
                             </motion.div>
                         </motion.div>
@@ -285,69 +335,72 @@ export function Home() {
                 </div>
             </section>
 
-            {/* System Capabilities - Bento Grid */}
-            <section id="features" className="py-32 relative z-10">
+            {/* System Capabilities - Bento Grid Premium */}
+            <section id="features" className="py-40 relative z-10 bg-white border-y border-slate-100">
                 <div className="max-w-7xl mx-auto px-6">
-                    <div className="mb-20 text-center">
-                        <h2 className="text-[10px] font-black text-blue-500 uppercase tracking-[0.3em] mb-4">Core System</h2>
-                        <h3 className="text-4xl md:text-5xl font-black text-white tracking-tight">Capacidades Expandidas</h3>
+                    <div className="mb-24 text-center max-w-2xl mx-auto">
+                        <h2 className="text-xs font-black text-slate-400 uppercase tracking-[0.4em] mb-6">Core System</h2>
+                        <h3 className="text-5xl md:text-6xl font-black text-slate-900 tracking-tighter mb-6">Capacidades <br />Expandidas</h3>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[300px]">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 auto-rows-[350px]">
                         {/* AI & Neural Core */}
-                        <div className="md:col-span-2 group relative bg-slate-900/50 border border-white/5 rounded-[2.5rem] p-10 overflow-hidden hover:border-blue-500/30 transition-all">
-                            <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-blue-600/10 rounded-full blur-[80px] group-hover:bg-blue-600/20 transition-all" />
+                        <div className="md:col-span-2 group relative bg-slate-50 rounded-[3rem] p-12 overflow-hidden hover:shadow-2xl hover:shadow-slate-200/50 transition-all duration-500 hover:-translate-y-1">
+                            <div className="absolute inset-0 bg-white border border-slate-200 rounded-[3rem] transition-all group-hover:border-slate-300" />
+                            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-br from-blue-100/50 to-purple-100/50 rounded-full blur-[100px] group-hover:scale-110 transition-transform duration-700 opacity-0 group-hover:opacity-100" />
+
                             <div className="relative z-10 flex flex-col justify-between h-full">
-                                <div className="w-14 h-14 bg-blue-500/10 rounded-2xl flex items-center justify-center border border-blue-500/20 mb-6">
-                                    <Brain className="w-7 h-7 text-blue-400" />
+                                <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center border border-slate-100 mb-8 shadow-sm group-hover:rotate-6 transition-transform duration-500">
+                                    <Brain className="w-8 h-8 text-slate-800" />
                                 </div>
                                 <div>
-                                    <h4 className="text-2xl font-black text-white mb-2">Neural Core AI</h4>
-                                    <p className="text-slate-400 leading-relaxed max-w-md">Análise preditiva integrada que identifica gargalos operacionais antes que eles virem crise. Sumarização executiva automática.</p>
+                                    <h4 className="text-3xl font-black text-slate-900 mb-4 tracking-tight">Neural Core AI</h4>
+                                    <p className="text-slate-500 text-lg leading-relaxed max-w-md">Análise preditiva integrada que identifica gargalos operacionais antes que eles virem crise. Sumarização executiva automática.</p>
                                 </div>
                             </div>
                         </div>
 
                         {/* Offline First */}
-                        <div className="group relative bg-slate-900/50 border border-white/5 rounded-[2.5rem] p-10 overflow-hidden hover:border-purple-500/30 transition-all">
-                            <div className="absolute bottom-0 left-0 w-[200px] h-[200px] bg-purple-600/10 rounded-full blur-[60px] group-hover:bg-purple-600/20 transition-all" />
+                        <div className="group relative bg-slate-50 rounded-[3rem] p-12 overflow-hidden hover:shadow-2xl hover:shadow-slate-200/50 transition-all duration-500 hover:-translate-y-1">
+                            <div className="absolute inset-0 bg-white border border-slate-200 rounded-[3rem] transition-all group-hover:border-slate-300" />
                             <div className="relative z-10 flex flex-col justify-between h-full">
-                                <div className="w-14 h-14 bg-purple-500/10 rounded-2xl flex items-center justify-center border border-purple-500/20 mb-6">
-                                    <Smartphone className="w-7 h-7 text-purple-400" />
+                                <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center border border-slate-100 mb-8 shadow-sm group-hover:rotate-6 transition-transform duration-500">
+                                    <Smartphone className="w-8 h-8 text-slate-800" />
                                 </div>
                                 <div>
-                                    <h4 className="text-2xl font-black text-white mb-2">Offline First</h4>
-                                    <p className="text-slate-400 text-sm leading-relaxed">PWA robusto. Trabalhe em zonas sem sinal com sincronização automática.</p>
+                                    <h4 className="text-3xl font-black text-slate-900 mb-4 tracking-tight">Offline First</h4>
+                                    <p className="text-slate-500 text-lg leading-relaxed">PWA robusto. Trabalhe em zonas sem sinal com sincronização automática.</p>
                                 </div>
                             </div>
                         </div>
 
                         {/* Real-time Mesh (Orbital) */}
-                        <div className="group relative bg-slate-900/50 border border-white/5 rounded-[2.5rem] overflow-hidden hover:border-emerald-500/30 transition-all">
-                            <div className="absolute inset-0 z-0 opacity-40 group-hover:opacity-60 transition-opacity flex items-center justify-center">
-                                <Globe className="w-full h-full" />
+                        <div className="group relative bg-slate-900 rounded-[3rem] overflow-hidden shadow-2xl shadow-slate-900/20 hover:-translate-y-1 transition-all duration-500">
+                            <div className="absolute inset-0 z-0 opacity-40 group-hover:opacity-60 transition-opacity duration-700 flex items-center justify-center scale-150">
+                                <Globe className="w-full h-full text-[#d4e720]" />
                             </div>
-                            <div className="relative z-10 flex flex-col justify-end h-full p-10 pointer-events-none">
-                                <div className="w-14 h-14 bg-emerald-500/10 rounded-2xl flex items-center justify-center border border-emerald-500/20 mb-6 backdrop-blur-md">
-                                    <Globe2 className="w-7 h-7 text-emerald-400" />
+                            <div className="relative z-10 flex flex-col justify-end h-full p-12 pointer-events-none bg-gradient-to-t from-slate-900 via-slate-900/50 to-transparent">
+                                <div className="w-16 h-16 bg-[#d4e720]/20 rounded-2xl flex items-center justify-center border border-[#d4e720]/20 mb-6 backdrop-blur-md">
+                                    <Globe2 className="w-8 h-8 text-[#d4e720]" />
                                 </div>
                                 <div>
-                                    <h4 className="text-2xl font-black text-white mb-2">Global Mesh</h4>
-                                    <p className="text-slate-400 text-sm leading-relaxed">Rede orbital ativa. Sincronização multi-região com latência &lt; 20ms.</p>
+                                    <h4 className="text-3xl font-black text-white mb-2 tracking-tight">Global Mesh</h4>
+                                    <p className="text-slate-400 leading-relaxed">Rede orbital ativa. Sincronização multi-região com latência &lt; 20ms.</p>
                                 </div>
                             </div>
                         </div>
 
                         {/* Deep Analytics */}
-                        <div className="md:col-span-2 group relative bg-slate-900/50 border border-white/5 rounded-[2.5rem] p-10 overflow-hidden hover:border-orange-500/30 transition-all">
-                            <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-orange-600/10 rounded-full blur-[80px] group-hover:bg-orange-600/20 transition-all" />
+                        <div className="md:col-span-2 group relative bg-slate-50 rounded-[3rem] p-12 overflow-hidden hover:shadow-2xl hover:shadow-slate-200/50 transition-all duration-500 hover:-translate-y-1">
+                            <div className="absolute inset-0 bg-white border border-slate-200 rounded-[3rem] transition-all group-hover:border-slate-300" />
+                            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-br from-orange-100/50 to-red-100/50 rounded-full blur-[100px] group-hover:scale-110 transition-transform duration-700 opacity-0 group-hover:opacity-100" />
                             <div className="relative z-10 flex flex-col justify-between h-full">
-                                <div className="w-14 h-14 bg-orange-500/10 rounded-2xl flex items-center justify-center border border-orange-500/20 mb-6">
-                                    <BarChart3 className="w-7 h-7 text-orange-400" />
+                                <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center border border-slate-100 mb-8 shadow-sm group-hover:rotate-6 transition-transform duration-500">
+                                    <BarChart3 className="w-8 h-8 text-slate-800" />
                                 </div>
                                 <div>
-                                    <h4 className="text-2xl font-black text-white mb-2">Deep Analytics</h4>
-                                    <p className="text-slate-400 leading-relaxed max-w-md">Dashboards executivos com inteligência de dados, exportação em diversos formatos e métricas de eficiência em tempo real.</p>
+                                    <h4 className="text-3xl font-black text-slate-900 mb-4 tracking-tight">Deep Analytics</h4>
+                                    <p className="text-slate-500 text-lg leading-relaxed max-w-md">Dashboards executivos com inteligência de dados e métricas de eficiência em tempo real.</p>
                                 </div>
                             </div>
                         </div>
@@ -356,36 +409,36 @@ export function Home() {
             </section>
 
             {/* Developer Section */}
-            <section id="about" className="py-32 bg-slate-900/30 border-y border-white/5 relative overflow-hidden">
+            <section id="about" className="py-40 bg-slate-100 relative overflow-hidden">
                 <div className="max-w-7xl mx-auto px-6 relative z-10">
-                    <div className="flex flex-col lg:flex-row items-center gap-20">
+                    <div className="flex flex-col lg:flex-row items-center gap-24">
                         <motion.div
                             initial={{ opacity: 0, scale: 0.9 }}
                             whileInView={{ opacity: 1, scale: 1 }}
                             viewport={{ once: true }}
-                            className="flex-1"
+                            className="flex-1 w-full"
                         >
-                            <div className="p-10 bg-slate-950 rounded-[3rem] border border-white/5 relative overflow-hidden group hover:border-blue-500/30 transition-all">
-                                <Code2 className="w-40 h-40 text-blue-500/5 absolute top-[-20px] right-[-20px] group-hover:rotate-12 transition-transform duration-700" />
-                                <h3 className="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-4">Engenharia de Software</h3>
-                                <h2 className="text-4xl font-black mb-6 text-white">Daniel de Almeida</h2>
-                                <p className="text-slate-400 leading-relaxed mb-8">
+                            <div className="p-12 bg-white rounded-[3rem] border border-slate-200 shadow-2xl shadow-slate-200/50 relative overflow-hidden group hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.1)] transition-all duration-500">
+                                <Code2 className="w-64 h-64 text-slate-50 absolute top-[-40px] right-[-40px] group-hover:rotate-12 transition-transform duration-1000" />
+                                <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-6">Engenharia de Software</h3>
+                                <h2 className="text-5xl font-black mb-8 text-slate-900 tracking-tight">Daniel de Almeida</h2>
+                                <p className="text-slate-500 text-lg leading-relaxed mb-10 relative z-10">
                                     Especialista em criar sistemas que unem estética refinada com arquitetura robusta. O FLASH é o resultado dessa filosofia: invisível na complexidade, poderoso na entrega.
                                 </p>
-                                <div className="flex gap-4">
-                                    <a href="#" className="p-3 bg-white/5 border border-white/10 rounded-xl hover:bg-blue-600 hover:border-blue-500 hover:text-white transition-all text-slate-400"><Linkedin className="w-5 h-5" /></a>
-                                    <a href="#" className="p-3 bg-white/5 border border-white/10 rounded-xl hover:bg-pink-600 hover:border-pink-500 hover:text-white transition-all text-slate-400"><Instagram className="w-5 h-5" /></a>
-                                    <a href="#" className="p-3 bg-white/5 border border-white/10 rounded-xl hover:bg-white hover:border-white hover:text-black transition-all text-slate-400"><Github className="w-5 h-5" /></a>
+                                <div className="flex gap-4 relative z-10">
+                                    <a href="#" className="p-4 bg-slate-50 border border-slate-200 rounded-2xl hover:bg-slate-900 hover:border-slate-800 hover:text-white transition-all text-slate-500 hover:shadow-lg hover:-translate-y-1"><Linkedin className="w-6 h-6" /></a>
+                                    <a href="#" className="p-4 bg-slate-50 border border-slate-200 rounded-2xl hover:bg-pink-600 hover:border-pink-500 hover:text-white transition-all text-slate-500 hover:shadow-lg hover:-translate-y-1"><Instagram className="w-6 h-6" /></a>
+                                    <a href="#" className="p-4 bg-slate-50 border border-slate-200 rounded-2xl hover:bg-slate-900 hover:border-slate-800 hover:text-white transition-all text-slate-500 hover:shadow-lg hover:-translate-y-1"><Github className="w-6 h-6" /></a>
                                 </div>
                             </div>
                         </motion.div>
 
-                        <div className="flex-1 space-y-8">
-                            <h2 className="text-[10px] font-black text-blue-500 uppercase tracking-[0.3em]">Manifesto</h2>
-                            <h3 className="text-4xl lg:text-5xl font-black tracking-tight leading-time text-white">
-                                "Software corporativo não precisa ser chato."
+                        <div className="flex-1 space-y-10">
+                            <h2 className="text-xs font-black text-slate-400 uppercase tracking-[0.4em]">Manifesto</h2>
+                            <h3 className="text-5xl lg:text-7xl font-black tracking-tighter leading-[0.9] text-slate-900">
+                                "Software corporativo <br />não precisa ser chato."
                             </h3>
-                            <p className="text-lg text-slate-400 leading-relaxed">
+                            <p className="text-xl text-slate-500 leading-relaxed font-medium">
                                 Acreditamos que a qualidade da ferramenta define a qualidade do trabalho. Por isso, investimos tempo em cada pixel, cada transição e cada milissegundo de performance.
                             </p>
                         </div>
@@ -406,52 +459,53 @@ export function Home() {
             <FaqSection />
 
             {/* Contact Section */}
-            <section id="contact" className="py-32 px-6">
-                <div className="max-w-4xl mx-auto">
-                    <div className="bg-slate-900/80 backdrop-blur-xl border border-white/5 rounded-[3rem] shadow-2xl p-8 md:p-16 relative overflow-hidden">
-                        <div className="text-center mb-12 space-y-4">
-                            <h2 className="text-[10px] font-black text-blue-500 uppercase tracking-[0.3em]">Contato</h2>
-                            <h3 className="text-4xl font-black tracking-tight text-white">Pronto para transformar sua operação?</h3>
+            <section id="contact" className="py-40 px-6 bg-white border-t border-slate-100">
+                <div className="max-w-5xl mx-auto">
+                    <div className="bg-slate-50 border border-slate-200 rounded-[3.5rem] shadow-2xl shadow-slate-200/50 p-10 md:p-20 relative overflow-hidden">
+                        <div className="text-center mb-16 space-y-6">
+                            <h2 className="text-xs font-black text-slate-400 uppercase tracking-[0.4em]">Contato</h2>
+                            <h3 className="text-5xl md:text-6xl font-black tracking-tighter text-slate-900">Pronto para transformar <br /> sua operação?</h3>
                         </div>
 
                         {formStatus === 'sent' ? (
                             <motion.div
                                 initial={{ opacity: 0, scale: 0.9 }}
                                 animate={{ opacity: 1, scale: 1 }}
-                                className="py-20 text-center"
+                                className="py-24 text-center"
                             >
-                                <div className="w-20 h-20 bg-green-500/20 text-green-400 rounded-full flex items-center justify-center mx-auto mb-6 border border-green-500/30">
-                                    <CheckCircle2 className="w-10 h-10" />
+                                <div className="w-24 h-24 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-8 border border-emerald-100 animate-bounce">
+                                    <CheckCircle2 className="w-12 h-12" />
                                 </div>
-                                <h4 className="text-2xl font-black mb-2 text-white">Solicitação Recebida!</h4>
-                                <p className="text-slate-400 text-sm">Entraremos em contato em breve.</p>
-                                <button onClick={() => setFormStatus('idle')} className="mt-8 text-blue-400 font-bold text-xs uppercase underline tracking-widest hover:text-blue-300">Enviar Outra</button>
+                                <h4 className="text-3xl font-black mb-4 text-slate-900 tracking-tight">Solicitação Recebida!</h4>
+                                <p className="text-slate-500 text-lg">Entraremos em contato em breve.</p>
+                                <button onClick={() => setFormStatus('idle')} className="mt-10 text-blue-600 font-bold text-xs uppercase underline tracking-widest hover:text-blue-500">Enviar Outra</button>
                             </motion.div>
                         ) : (
-                            <form onSubmit={handleContactSubmit} className="space-y-6">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="space-y-2">
-                                        <label htmlFor="name" className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Seu Nome</label>
-                                        <input id="name" required type="text" placeholder="Ex: João Silva" className="w-full bg-slate-950/50 px-6 py-4 rounded-2xl border border-white/5 focus:border-blue-500/50 focus:bg-slate-900 text-white outline-none transition font-medium placeholder:text-slate-600" />
+                            <form onSubmit={handleContactSubmit} className="space-y-8 max-w-2xl mx-auto">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    <div className="space-y-3">
+                                        <label htmlFor="name" className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Seu Nome</label>
+                                        <input id="name" required type="text" placeholder="Ex: João Silva" className="w-full bg-white px-6 py-5 rounded-2xl border border-slate-200 focus:border-slate-300 focus:ring-4 focus:ring-slate-100 text-slate-900 outline-none transition font-medium placeholder:text-slate-300 text-lg" />
                                     </div>
-                                    <div className="space-y-2">
-                                        <label htmlFor="company" className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Empresa</label>
-                                        <input id="company" required type="text" placeholder="Ex: Acme Corp" className="w-full bg-slate-950/50 px-6 py-4 rounded-2xl border border-white/5 focus:border-blue-500/50 focus:bg-slate-900 text-white outline-none transition font-medium placeholder:text-slate-600" />
+                                    <div className="space-y-3">
+                                        <label htmlFor="company" className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Empresa</label>
+                                        <input id="company" required type="text" placeholder="Ex: Acme Corp" className="w-full bg-white px-6 py-5 rounded-2xl border border-slate-200 focus:border-slate-300 focus:ring-4 focus:ring-slate-100 text-slate-900 outline-none transition font-medium placeholder:text-slate-300 text-lg" />
                                     </div>
                                 </div>
-                                <div className="space-y-2">
-                                    <label htmlFor="email" className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">E-mail Corporativo</label>
-                                    <input id="email" required type="email" placeholder="nome@empresa.com" className="w-full bg-slate-950/50 px-6 py-4 rounded-2xl border border-white/5 focus:border-blue-500/50 focus:bg-slate-900 text-white outline-none transition font-medium placeholder:text-slate-600" />
+                                <div className="space-y-3">
+                                    <label htmlFor="email" className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">E-mail Corporativo</label>
+                                    <input id="email" required type="email" placeholder="nome@empresa.com" className="w-full bg-white px-6 py-5 rounded-2xl border border-slate-200 focus:border-slate-300 focus:ring-4 focus:ring-slate-100 text-slate-900 outline-none transition font-medium placeholder:text-slate-300 text-lg" />
                                 </div>
-                                <div className="space-y-2">
-                                    <label htmlFor="message" className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Mensagem</label>
-                                    <textarea id="message" required placeholder="Como podemos ajudar?" className="w-full bg-slate-950/50 px-6 py-4 rounded-2xl border border-white/5 focus:border-blue-500/50 focus:bg-slate-900 text-white outline-none transition h-32 resize-none font-medium placeholder:text-slate-600"></textarea>
+                                <div className="space-y-3">
+                                    <label htmlFor="message" className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Mensagem</label>
+                                    <textarea id="message" required placeholder="Como podemos ajudar?" className="w-full bg-white px-6 py-5 rounded-2xl border border-slate-200 focus:border-slate-300 focus:ring-4 focus:ring-slate-100 text-slate-900 outline-none transition h-40 resize-none font-medium placeholder:text-slate-300 text-lg"></textarea>
                                 </div>
                                 <button
                                     disabled={formStatus === 'sending'}
-                                    className="w-full py-5 bg-white text-slate-950 rounded-2xl font-black text-xs uppercase tracking-[0.3em] hover:bg-blue-500 hover:text-white transition-all shadow-xl disabled:opacity-50"
+                                    className="w-full py-6 bg-slate-900 text-white rounded-3xl font-black text-sm uppercase tracking-[0.2em] hover:bg-[#d4e720] hover:text-[#1a2e05] transition-all shadow-xl disabled:opacity-50 hover:shadow-2xl hover:shadow-lime-500/20 hover:scale-[1.02] relative overflow-hidden group"
                                 >
-                                    {formStatus === 'sending' ? 'ENVIANDO...' : 'SOLICITAR DEMO'}
+                                    <span className="relative z-10">{formStatus === 'sending' ? 'ENVIANDO...' : 'SOLICITAR DEMO'}</span>
+                                    <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
                                 </button>
                             </form>
                         )}
@@ -459,14 +513,62 @@ export function Home() {
                 </div>
             </section>
 
-            {/* Footer */}
-            <footer className="py-12 border-t border-white/5 bg-slate-950 relative z-10">
-                <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
-                    <div className="flex items-center gap-2">
-                        <Send className="w-4 h-4 text-blue-500" />
-                        <span className="text-sm font-black tracking-tighter text-white">FLASH<span className="text-blue-500">APP</span></span>
+            {/* Fat Footer - Enterprise Level */}
+            <footer className="py-20 bg-slate-50 border-t border-slate-200 relative z-10 text-sm">
+                <div className="max-w-7xl mx-auto px-6">
+                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-12 mb-16">
+                        <div className="col-span-2 lg:col-span-2 space-y-6">
+                            <div className="flex items-center gap-3">
+                                <Send className="w-6 h-6 text-slate-900" />
+                                <span className="text-xl font-black tracking-tighter text-slate-900">FLASH<span className="text-slate-400">APP</span></span>
+                            </div>
+                            <p className="text-slate-500 leading-relaxed max-w-xs">
+                                Plataforma unificada para operações de campo de alta performance. Sincronia perfeita, dados seguros e design invisível.
+                            </p>
+                            <div className="flex gap-4">
+                                <a href="#" className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-900 hover:border-slate-300 transition-all"><Twitter className="w-4 h-4" /></a>
+                                <a href="#" className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-900 hover:border-slate-300 transition-all"><Github className="w-4 h-4" /></a>
+                                <a href="#" className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-900 hover:border-slate-300 transition-all"><Linkedin className="w-4 h-4" /></a>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 className="font-black text-slate-900 mb-6 tracking-wide uppercase text-xs">Produto</h4>
+                            <ul className="space-y-4 text-slate-500">
+                                <li><a href="#" className="hover:text-[#d4e720] transition-colors">Neural Core</a></li>
+                                <li><a href="#" className="hover:text-[#d4e720] transition-colors">Offline First</a></li>
+                                <li><a href="#" className="hover:text-[#d4e720] transition-colors">Global Mesh</a></li>
+                                <li><a href="#" className="hover:text-[#d4e720] transition-colors">Changelog</a></li>
+                            </ul>
+                        </div>
+
+                        <div>
+                            <h4 className="font-black text-slate-900 mb-6 tracking-wide uppercase text-xs">Empresa</h4>
+                            <ul className="space-y-4 text-slate-500">
+                                <li><a href="#" className="hover:text-[#d4e720] transition-colors">Sobre</a></li>
+                                <li><a href="#" className="hover:text-[#d4e720] transition-colors">Carreiras</a></li>
+                                <li><a href="#" className="hover:text-[#d4e720] transition-colors">Blog</a></li>
+                                <li><a href="#" className="hover:text-[#d4e720] transition-colors">Contato</a></li>
+                            </ul>
+                        </div>
+
+                        <div>
+                            <h4 className="font-black text-slate-900 mb-6 tracking-wide uppercase text-xs">Legal</h4>
+                            <ul className="space-y-4 text-slate-500">
+                                <li><a href="#" className="hover:text-[#d4e720] transition-colors">Privacidade</a></li>
+                                <li><a href="#" className="hover:text-[#d4e720] transition-colors">Termos</a></li>
+                                <li><a href="#" className="hover:text-[#d4e720] transition-colors">Compliance</a></li>
+                            </ul>
+                        </div>
                     </div>
-                    <p className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">© 2026 Daniel de Almeida.</p>
+
+                    <div className="pt-8 border-t border-slate-200 flex flex-col md:flex-row justify-between items-center gap-4">
+                        <p className="text-slate-400 font-medium text-xs">© 2026 Daniel de Almeida Inc. Todos os direitos reservados.</p>
+                        <div className="flex gap-2 items-center text-xs font-bold text-slate-400 bg-white px-3 py-1 rounded-full border border-slate-200">
+                            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                            All Systems Normal
+                        </div>
+                    </div>
                 </div>
             </footer>
         </div>

@@ -2,9 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
-import { Header } from '../components/ui/Header';
-import { Button } from '../components/ui/Button';
-import { GlassCard } from '../components/ui/GlassCard';
+import { Button, Card } from '../components/ui';
+import { DashboardLayout } from '../layouts/DashboardLayout';
 import { Camera, Save, User, Mail, Shield, Briefcase, MessageSquare } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
@@ -91,37 +90,32 @@ export function Profile() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
-            <Header
-                user={{
-                    name: user?.name,
-                    avatarUrl: user?.avatarUrl
-                }}
-                onLogout={signOut}
-            />
-
-            <main className="flex-1 p-6 md:p-12 max-w-4xl mx-auto w-full">
+        <DashboardLayout
+            user={{ name: user?.name, avatarUrl: user?.avatarUrl, role: user?.role }}
+            onLogout={signOut}
+        >
+            <div className="max-w-4xl mx-auto w-full animate-in fade-in duration-500">
                 <div className="mb-8">
-                    <h1 className="text-3xl font-black text-gray-900 tracking-tight uppercase">Meu Perfil</h1>
-                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-1">Gerencie sua identidade no Flash</p>
+                    <h1 className="text-2xl font-bold text-[var(--text-primary)] uppercase tracking-tight">Meu Perfil</h1>
+                    <p className="text-xs text-[var(--text-tertiary)] font-bold uppercase tracking-widest mt-1">Gerencie sua identidade no Flash</p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     {/* Coluna da Esquerda: Avatar e Status */}
                     <div className="md:col-span-1 space-y-6">
-                        <GlassCard className="p-6 flex flex-col items-center text-center">
-                            <div className={`relative group ${user?.role === 'ADMIN' ? 'cursor-not-allowed opacity-80' : 'cursor-pointer'}`} onClick={() => user?.role !== 'ADMIN' && fileInputRef.current?.click()}>
-                                <div className="w-32 h-32 rounded-full overflow-hidden ring-4 ring-blue-50 group-hover:ring-blue-200 transition-all shadow-xl">
+                        <Card variant="white" className="p-6 flex flex-col items-center text-center border-[var(--border-subtle)] h-full">
+                            <div className="relative group cursor-pointer" onClick={() => user?.role !== 'ADMIN' && fileInputRef.current?.click()}>
+                                <div className={`w-32 h-32 rounded-full overflow-hidden ring-4 transition-all shadow-sm ${user?.role === 'ADMIN' ? 'ring-[var(--border-subtle)] opacity-80 cursor-not-allowed' : 'ring-[var(--bg-tertiary)] group-hover:ring-[var(--accent-secondary)]'}`}>
                                     {avatarPreview ? (
                                         <img src={avatarPreview} alt="Avatar" className="w-full h-full object-cover" />
                                     ) : (
-                                        <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-4xl font-black">
+                                        <div className="w-full h-full bg-[var(--bg-tertiary)] flex items-center justify-center text-[var(--text-secondary)] text-4xl font-bold">
                                             {user?.name.charAt(0)}
                                         </div>
                                     )}
                                 </div>
                                 {user?.role !== 'ADMIN' && (
-                                    <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all backdrop-blur-sm">
                                         <Camera className="w-8 h-8 text-white" />
                                     </div>
                                 )}
@@ -135,19 +129,19 @@ export function Profile() {
                                 />
                             </div>
 
-                            <h2 className="mt-4 text-xl font-bold text-gray-900">{user?.name}</h2>
-                            <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-[10px] font-black uppercase tracking-wider mt-2">
+                            <h2 className="mt-4 text-lg font-bold text-[var(--text-primary)]">{user?.name}</h2>
+                            <span className="px-3 py-1 bg-[var(--bg-tertiary)] text-[var(--text-secondary)] rounded-full text-[10px] font-bold uppercase tracking-wider mt-2 border border-[var(--border-subtle)]">
                                 {user?.role}
                             </span>
-                        </GlassCard>
+                        </Card>
                     </div>
 
                     {/* Coluna da Direita: Formulário e Detalhes */}
                     <div className="md:col-span-2 space-y-6">
-                        <GlassCard className="p-8">
+                        <Card variant="white" className="p-6 border-[var(--border-subtle)]">
                             <form onSubmit={handleSave} className="space-y-6">
                                 <div>
-                                    <label htmlFor="status-phrase" className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2 flex items-center gap-2">
+                                    <label htmlFor="status-phrase" className="block text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wide mb-2 flex items-center gap-2">
                                         <MessageSquare className="w-4 h-4" />
                                         Frase de Status
                                     </label>
@@ -158,42 +152,42 @@ export function Profile() {
                                         onChange={(e) => setStatusPhrase(e.target.value)}
                                         disabled={user?.role === 'ADMIN'}
                                         placeholder={user?.role === 'ADMIN' ? 'Alterações desativadas para administradores' : 'O que você está pensando ou fazendo...'}
-                                        className={`w-full px-4 py-3 border rounded-xl outline-none transition-all font-medium ${user?.role === 'ADMIN' ? 'bg-gray-100 text-gray-400 border-gray-100 cursor-not-allowed' : 'bg-gray-50 border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 placeholder:text-gray-400'}`}
+                                        className={`w-full px-4 py-3 border rounded-xl outline-none transition-all font-medium text-sm ${user?.role === 'ADMIN' ? 'bg-[var(--bg-tertiary)] text-[var(--text-tertiary)] border-[var(--border-subtle)] cursor-not-allowed' : 'bg-[var(--bg-primary)] border-[var(--border-subtle)] focus:ring-2 focus:ring-[var(--accent-secondary)] focus:border-[var(--accent-secondary)] text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)]'}`}
                                     />
-                                    <p className="text-[10px] text-gray-400 mt-2">
+                                    <p className="text-[10px] text-[var(--text-tertiary)] mt-2 font-medium">
                                         {user?.role === 'ADMIN'
                                             ? 'Como Administrador, seu perfil é de sistema e não permite alterações diretas.'
                                             : 'Essa frase aparecerá abaixo do seu nome nos chats e lista de membros.'}
                                     </p>
                                 </div>
 
-                                <div className="pt-6 border-t border-gray-100 grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                <div className="pt-6 border-t border-[var(--border-subtle)] grid grid-cols-1 sm:grid-cols-2 gap-6">
                                     <div>
-                                        <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 flex items-center gap-2">
+                                        <label className="block text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-widest mb-1 flex items-center gap-2">
                                             <Mail className="w-3 h-3" /> Email
                                         </label>
-                                        <p className="text-sm font-semibold text-gray-700">{user?.email}</p>
+                                        <p className="text-sm font-semibold text-[var(--text-primary)]">{user?.email}</p>
                                     </div>
                                     <div>
-                                        <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 flex items-center gap-2">
+                                        <label className="block text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-widest mb-1 flex items-center gap-2">
                                             <Shield className="w-3 h-3" /> ID do Usuário
                                         </label>
-                                        <p className="text-xs font-mono text-gray-500 truncate" title={user?.id}>{user?.id}</p>
+                                        <p className="text-xs font-mono text-[var(--text-secondary)] truncate" title={user?.id}>{user?.id}</p>
                                     </div>
                                     {user?.departmentId && (
                                         <div>
-                                            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 flex items-center gap-2">
+                                            <label className="block text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-widest mb-1 flex items-center gap-2">
                                                 <Briefcase className="w-3 h-3" /> Departamento
                                             </label>
-                                            <p className="text-sm font-semibold text-gray-700">Setor {user.departmentId}</p>
+                                            <p className="text-sm font-semibold text-[var(--text-primary)]">Setor {user.departmentId}</p>
                                         </div>
                                     )}
                                     {user?.supervisorName && (
                                         <div>
-                                            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 flex items-center gap-2">
+                                            <label className="block text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-widest mb-1 flex items-center gap-2">
                                                 <User className="w-3 h-3" /> Supervisor
                                             </label>
-                                            <p className="text-sm font-semibold text-gray-700">{user.supervisorName}</p>
+                                            <p className="text-sm font-semibold text-[var(--text-primary)]">{user.supervisorName}</p>
                                         </div>
                                     )}
                                 </div>
@@ -202,7 +196,6 @@ export function Profile() {
                                     <Button
                                         type="submit"
                                         variant={user?.role === 'ADMIN' ? 'secondary' : 'primary'}
-                                        size="lg"
                                         isLoading={loading}
                                         disabled={user?.role === 'ADMIN'}
                                         className="px-8"
@@ -212,10 +205,10 @@ export function Profile() {
                                     </Button>
                                 </div>
                             </form>
-                        </GlassCard>
+                        </Card>
                     </div>
                 </div>
-            </main>
-        </div>
+            </div>
+        </DashboardLayout>
     );
 }

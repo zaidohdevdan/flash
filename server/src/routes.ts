@@ -68,7 +68,7 @@ routes.delete('/departments/:id', AuthMiddleware, AdminMiddleware, DepartmentCon
 
 // Perfil
 routes.get('/profile/me', AuthMiddleware, ProfileController.me);
-routes.patch('/profile', AuthMiddleware, ProfileController.update);
+routes.patch('/profile', AuthMiddleware, upload.single('avatar'), ProfileController.update);
 
 // Chat Media
 routes.post('/chat/media', AuthMiddleware, upload.single('file'), mediaController.uploadGeneric);

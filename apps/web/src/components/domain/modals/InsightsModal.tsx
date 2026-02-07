@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Copy, Check, Brain } from 'lucide-react';
-import { Modal, Button, GlassCard } from '../../ui';
+import { Modal, Button } from '../../ui';
 
 interface InsightData {
     bottlenecks: {
@@ -76,47 +76,52 @@ ${d.predictions.trend === 'UP'
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title="AI Executive Summary" maxWidth="lg" variant="dark">
-            <div className="p-6 space-y-6">
+        <Modal
+            isOpen={isOpen}
+            onClose={onClose}
+            title="Flash Intelligence"
+            subtitle="Análise Preditiva e Insights"
+            maxWidth="lg"
+            footer={
+                step === 'done' ? (
+                    <>
+                        <Button variant="ghost" onClick={onClose}>
+                            Fechar
+                        </Button>
+                        <Button
+                            variant="primary"
+                            onClick={handleCopy}
+                            className="min-w-[140px]"
+                            leftIcon={copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                        >
+                            {copied ? 'Copiado!' : 'Copiar Análise'}
+                        </Button>
+                    </>
+                ) : undefined
+            }
+        >
+            <div className="py-4">
                 {step === 'generating' ? (
-                    <div className="flex flex-col items-center justify-center py-12 space-y-4">
+                    <div className="flex flex-col items-center justify-center py-16 space-y-6">
                         <div className="relative">
-                            <div className="absolute inset-0 bg-blue-500/30 blur-xl rounded-full animate-pulse" />
-                            <Brain className="w-16 h-16 text-blue-400 relative z-10 animate-bounce" />
+                            <div className="absolute inset-0 bg-[var(--accent-primary)]/20 blur-xl rounded-full animate-pulse" />
+                            <Brain className="w-16 h-16 text-[var(--accent-secondary)] relative z-10 animate-bounce" />
                         </div>
-                        <p className="text-sm font-black text-blue-300 uppercase tracking-widest animate-pulse">
-                            Analisando padrões e gerando insights...
-                        </p>
+                        <div className="text-center space-y-2">
+                            <p className="text-sm font-bold text-[var(--text-primary)] uppercase tracking-widest animate-pulse">
+                                Processando Dados
+                            </p>
+                            <p className="text-xs text-[var(--text-tertiary)]">
+                                Analisando padrões operacionais...
+                            </p>
+                        </div>
                     </div>
                 ) : (
-                    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                        <GlassCard className="p-6 bg-slate-950/50 border-blue-500/20">
-                            <pre className="whitespace-pre-wrap font-mono text-sm text-slate-400 leading-relaxed">
+                    <div className="space-y-6 animate-in slide-in-from-bottom-2 duration-500">
+                        <div className="p-6 bg-[var(--bg-tertiary)] rounded-2xl border border-[var(--border-subtle)]">
+                            <pre className="whitespace-pre-wrap font-sans text-sm text-[var(--text-secondary)] leading-relaxed">
                                 {insightText}
                             </pre>
-                        </GlassCard>
-
-                        <div className="flex gap-3 justify-end">
-                            <Button variant="ghost" onClick={onClose}>
-                                Fechar
-                            </Button>
-                            <Button
-                                variant="primary"
-                                onClick={handleCopy}
-                                className="min-w-[140px]"
-                            >
-                                {copied ? (
-                                    <>
-                                        <Check className="w-4 h-4 mr-2" />
-                                        Copiado!
-                                    </>
-                                ) : (
-                                    <>
-                                        <Copy className="w-4 h-4 mr-2" />
-                                        Copiar Texto
-                                    </>
-                                )}
-                            </Button>
                         </div>
                     </div>
                 )}
