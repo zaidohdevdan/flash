@@ -60,4 +60,43 @@ export class PrismaChatRepository implements IChatRepository {
             }
         });
     }
+
+    async markAsRead(room: string, userId: string): Promise<void> {
+        await prisma.chatMessage.updateMany({
+            where: {
+                room,
+                toId: userId,
+                read: false
+            },
+            data: {
+                read: true
+            }
+        });
+    }
+
+    async countUnread(userId: string): Promise<number> {
+        return prisma.chatMessage.count({
+            where: {
+                toId: userId,
+                read: false,
+                deletedForEveryone: false
+            }
+        });
+    }
+
+    async getUnreadSenders(userId: string): Promise<string[]> {
+        const unread = await prisma.chatMessage.findMany({
+            where: {
+                toId: userId,
+                read: false,
+                deletedForEveryone: false
+            },
+            select: {
+                fromId: true
+            },
+            distinct: ['fromId']
+        });
+
+        return unread.map(m => m.fromId);
+    }
 }

@@ -61,6 +61,18 @@ export class ChatService {
         }
     }
 
+    async markAsRead(room: string, userId: string) {
+        return this.chatRepository.markAsRead(room, userId);
+    }
+
+    async getUnreadCount(userId: string) {
+        return this.chatRepository.countUnread(userId);
+    }
+
+    async getUnreadSenders(userId: string) {
+        return this.chatRepository.getUnreadSenders(userId);
+    }
+
     async getMessageById(id: string) {
         return this.chatRepository.findById(id);
     }

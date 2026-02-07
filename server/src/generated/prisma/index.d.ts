@@ -354,7 +354,7 @@ export namespace Prisma {
 
   /**
    * Prisma Client JS version: 6.18.0
-   * Query Engine version: 34b5a692b7bd79939a9a2c3ef97d816e749cda2f
+   * Query Engine version: acc0b9dd43eb689cbd20c9470515d719db10d0b0
    */
   export type PrismaVersion = {
     client: string
@@ -7596,6 +7596,7 @@ export namespace Prisma {
     room: string | null
     createdAt: Date | null
     expiresAt: Date | null
+    read: boolean | null
     deletedForSender: boolean | null
     deletedForEveryone: boolean | null
   }
@@ -7610,6 +7611,7 @@ export namespace Prisma {
     room: string | null
     createdAt: Date | null
     expiresAt: Date | null
+    read: boolean | null
     deletedForSender: boolean | null
     deletedForEveryone: boolean | null
   }
@@ -7624,6 +7626,7 @@ export namespace Prisma {
     room: number
     createdAt: number
     expiresAt: number
+    read: number
     deletedForSender: number
     deletedForEveryone: number
     _all: number
@@ -7640,6 +7643,7 @@ export namespace Prisma {
     room?: true
     createdAt?: true
     expiresAt?: true
+    read?: true
     deletedForSender?: true
     deletedForEveryone?: true
   }
@@ -7654,6 +7658,7 @@ export namespace Prisma {
     room?: true
     createdAt?: true
     expiresAt?: true
+    read?: true
     deletedForSender?: true
     deletedForEveryone?: true
   }
@@ -7668,6 +7673,7 @@ export namespace Prisma {
     room?: true
     createdAt?: true
     expiresAt?: true
+    read?: true
     deletedForSender?: true
     deletedForEveryone?: true
     _all?: true
@@ -7755,6 +7761,7 @@ export namespace Prisma {
     room: string
     createdAt: Date
     expiresAt: Date | null
+    read: boolean
     deletedForSender: boolean
     deletedForEveryone: boolean
     _count: ChatMessageCountAggregateOutputType | null
@@ -7786,6 +7793,7 @@ export namespace Prisma {
     room?: boolean
     createdAt?: boolean
     expiresAt?: boolean
+    read?: boolean
     deletedForSender?: boolean
     deletedForEveryone?: boolean
   }, ExtArgs["result"]["chatMessage"]>
@@ -7802,11 +7810,12 @@ export namespace Prisma {
     room?: boolean
     createdAt?: boolean
     expiresAt?: boolean
+    read?: boolean
     deletedForSender?: boolean
     deletedForEveryone?: boolean
   }
 
-  export type ChatMessageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "fromId" | "toId" | "text" | "audioUrl" | "audioPublicId" | "room" | "createdAt" | "expiresAt" | "deletedForSender" | "deletedForEveryone", ExtArgs["result"]["chatMessage"]>
+  export type ChatMessageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "fromId" | "toId" | "text" | "audioUrl" | "audioPublicId" | "room" | "createdAt" | "expiresAt" | "read" | "deletedForSender" | "deletedForEveryone", ExtArgs["result"]["chatMessage"]>
 
   export type $ChatMessagePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "ChatMessage"
@@ -7821,6 +7830,7 @@ export namespace Prisma {
       room: string
       createdAt: Date
       expiresAt: Date | null
+      read: boolean
       deletedForSender: boolean
       deletedForEveryone: boolean
     }, ExtArgs["result"]["chatMessage"]>
@@ -8224,6 +8234,7 @@ export namespace Prisma {
     readonly room: FieldRef<"ChatMessage", 'String'>
     readonly createdAt: FieldRef<"ChatMessage", 'DateTime'>
     readonly expiresAt: FieldRef<"ChatMessage", 'DateTime'>
+    readonly read: FieldRef<"ChatMessage", 'Boolean'>
     readonly deletedForSender: FieldRef<"ChatMessage", 'Boolean'>
     readonly deletedForEveryone: FieldRef<"ChatMessage", 'Boolean'>
   }
@@ -12803,6 +12814,7 @@ export namespace Prisma {
     room: 'room',
     createdAt: 'createdAt',
     expiresAt: 'expiresAt',
+    read: 'read',
     deletedForSender: 'deletedForSender',
     deletedForEveryone: 'deletedForEveryone'
   };
@@ -13444,6 +13456,7 @@ export namespace Prisma {
     room?: StringFilter<"ChatMessage"> | string
     createdAt?: DateTimeFilter<"ChatMessage"> | Date | string
     expiresAt?: DateTimeNullableFilter<"ChatMessage"> | Date | string | null
+    read?: BoolFilter<"ChatMessage"> | boolean
     deletedForSender?: BoolFilter<"ChatMessage"> | boolean
     deletedForEveryone?: BoolFilter<"ChatMessage"> | boolean
   }
@@ -13458,6 +13471,7 @@ export namespace Prisma {
     room?: SortOrder
     createdAt?: SortOrder
     expiresAt?: SortOrder
+    read?: SortOrder
     deletedForSender?: SortOrder
     deletedForEveryone?: SortOrder
   }
@@ -13475,6 +13489,7 @@ export namespace Prisma {
     room?: StringFilter<"ChatMessage"> | string
     createdAt?: DateTimeFilter<"ChatMessage"> | Date | string
     expiresAt?: DateTimeNullableFilter<"ChatMessage"> | Date | string | null
+    read?: BoolFilter<"ChatMessage"> | boolean
     deletedForSender?: BoolFilter<"ChatMessage"> | boolean
     deletedForEveryone?: BoolFilter<"ChatMessage"> | boolean
   }, "id">
@@ -13489,6 +13504,7 @@ export namespace Prisma {
     room?: SortOrder
     createdAt?: SortOrder
     expiresAt?: SortOrder
+    read?: SortOrder
     deletedForSender?: SortOrder
     deletedForEveryone?: SortOrder
     _count?: ChatMessageCountOrderByAggregateInput
@@ -13509,6 +13525,7 @@ export namespace Prisma {
     room?: StringWithAggregatesFilter<"ChatMessage"> | string
     createdAt?: DateTimeWithAggregatesFilter<"ChatMessage"> | Date | string
     expiresAt?: DateTimeNullableWithAggregatesFilter<"ChatMessage"> | Date | string | null
+    read?: BoolWithAggregatesFilter<"ChatMessage"> | boolean
     deletedForSender?: BoolWithAggregatesFilter<"ChatMessage"> | boolean
     deletedForEveryone?: BoolWithAggregatesFilter<"ChatMessage"> | boolean
   }
@@ -14275,6 +14292,7 @@ export namespace Prisma {
     room: string
     createdAt?: Date | string
     expiresAt?: Date | string | null
+    read?: boolean
     deletedForSender?: boolean
     deletedForEveryone?: boolean
   }
@@ -14289,6 +14307,7 @@ export namespace Prisma {
     room: string
     createdAt?: Date | string
     expiresAt?: Date | string | null
+    read?: boolean
     deletedForSender?: boolean
     deletedForEveryone?: boolean
   }
@@ -14302,6 +14321,7 @@ export namespace Prisma {
     room?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    read?: BoolFieldUpdateOperationsInput | boolean
     deletedForSender?: BoolFieldUpdateOperationsInput | boolean
     deletedForEveryone?: BoolFieldUpdateOperationsInput | boolean
   }
@@ -14315,6 +14335,7 @@ export namespace Prisma {
     room?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    read?: BoolFieldUpdateOperationsInput | boolean
     deletedForSender?: BoolFieldUpdateOperationsInput | boolean
     deletedForEveryone?: BoolFieldUpdateOperationsInput | boolean
   }
@@ -14329,6 +14350,7 @@ export namespace Prisma {
     room: string
     createdAt?: Date | string
     expiresAt?: Date | string | null
+    read?: boolean
     deletedForSender?: boolean
     deletedForEveryone?: boolean
   }
@@ -14342,6 +14364,7 @@ export namespace Prisma {
     room?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    read?: BoolFieldUpdateOperationsInput | boolean
     deletedForSender?: BoolFieldUpdateOperationsInput | boolean
     deletedForEveryone?: BoolFieldUpdateOperationsInput | boolean
   }
@@ -14355,6 +14378,7 @@ export namespace Prisma {
     room?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    read?: BoolFieldUpdateOperationsInput | boolean
     deletedForSender?: BoolFieldUpdateOperationsInput | boolean
     deletedForEveryone?: BoolFieldUpdateOperationsInput | boolean
   }
@@ -15234,6 +15258,7 @@ export namespace Prisma {
     room?: SortOrder
     createdAt?: SortOrder
     expiresAt?: SortOrder
+    read?: SortOrder
     deletedForSender?: SortOrder
     deletedForEveryone?: SortOrder
   }
@@ -15248,6 +15273,7 @@ export namespace Prisma {
     room?: SortOrder
     createdAt?: SortOrder
     expiresAt?: SortOrder
+    read?: SortOrder
     deletedForSender?: SortOrder
     deletedForEveryone?: SortOrder
   }
@@ -15262,6 +15288,7 @@ export namespace Prisma {
     room?: SortOrder
     createdAt?: SortOrder
     expiresAt?: SortOrder
+    read?: SortOrder
     deletedForSender?: SortOrder
     deletedForEveryone?: SortOrder
   }

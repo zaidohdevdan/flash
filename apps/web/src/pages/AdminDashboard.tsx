@@ -1,7 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
 import { toast } from 'react-hot-toast';
+import { useDashboardSocket } from '../hooks/useDashboardSocket';
+import { db } from '../services/db';
+import { useLiveQuery } from 'dexie-react-hooks';
 import {
     UserPlus,
     Shield,
@@ -55,6 +58,7 @@ export function AdminDashboard() {
     const [roleFilter, setRoleFilter] = useState('');
 
     // Form State
+    const hasShownSummaryRef = useRef(false);
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -66,7 +70,106 @@ export function AdminDashboard() {
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
 
+    // Dexie Notifications
+    const notifications = useLiveQuery(() => db.notifications.orderBy('createdAt').reverse().toArray()) || [];
 
+    const socketUser = React.useMemo(() => user ? {
+        id: user.id || '',
+        name: user.name || '',
+        role: user.role || ''
+    } : null, [user]);
+
+    const {
+        playNotificationSound
+    } = useDashboardSocket({
+        user: socketUser,
+        onNotification: (data) => {
+            toast(`Mensagem: ${data.text}`, {
+                icon: '💬',
+                duration: 5000,
+            });
+            playNotificationSound();
+        }
+    });
+
+    const fetchNotifications = useCallback(async () => {
+        if (hasShownSummaryRef.current) return;
+        hasShownSummaryRef.current = true;
+
+        try {
+            const res = await api.get('/notifications');
+            const remoteNotifications = res.data;
+            let unreadCount = 0;
+
+            // Upsert remote notifications into Dexie
+            await db.transaction('rw', db.notifications, async () => {
+                for (const notif of remoteNotifications) {
+                    if (!notif.read) unreadCount++;
+                    await db.notifications.put({
+                        id: String(notif.id),
+                        title: notif.title,
+                        message: notif.message,
+                        type: notif.type || 'system',
+                        read: !!notif.read,
+                        createdAt: notif.createdAt,
+                        link: notif.link || undefined
+                    });
+                }
+            });
+
+            if (unreadCount > 0) {
+                toast(`Você tem ${unreadCount} ${unreadCount === 1 ? 'notificação não lida' : 'notificações não lidas'}`, {
+                    icon: '🔔',
+                    duration: 4000
+                });
+            }
+
+            // Also check for unread chat messages
+            const chatRes = await api.get('/chat/unread-count');
+            const unreadChatCount = chatRes.data.count;
+
+            if (unreadChatCount > 0) {
+                toast(`Você tem ${unreadChatCount} ${unreadChatCount === 1 ? 'mensagem não lida' : 'mensagens não lidas'} no chat`, {
+                    icon: '💬',
+                    duration: 5000,
+                    style: {
+                        borderRadius: '1.5rem',
+                        background: '#333',
+                        color: '#fff',
+                        fontSize: '12px',
+                        fontWeight: 'bold'
+                    }
+                });
+            }
+        } catch {
+            console.error('Erro ao buscar notificações');
+        }
+    }, []);
+
+    const handleMarkAsRead = async (id: string) => {
+        try {
+            await api.patch(`/notifications/${id}/read`);
+            await db.notifications.update(id, { read: true });
+        } catch {
+            await db.notifications.update(id, { read: true });
+            toast.error('Erro ao sincronizar com servidor');
+        }
+    };
+
+    const handleMarkAllAsRead = async () => {
+        try {
+            await api.post('/notifications/read-all');
+            const allLocal = await db.notifications.toArray();
+            await db.transaction('rw', db.notifications, async () => {
+                for (const n of allLocal) {
+                    await db.notifications.update(n.id, { read: true });
+                }
+            });
+            toast.success('Todas marcadas como lidas');
+        } catch {
+            toast.error('Erro ao marcar todas');
+        }
+    };
 
     const fetchUsers = useCallback(async () => {
         try {
@@ -101,7 +204,8 @@ export function AdminDashboard() {
         fetchSupervisors();
         fetchDepartments();
         fetchUsers();
-    }, [fetchUsers, fetchSupervisors, fetchDepartments]);
+        fetchNotifications();
+    }, [fetchUsers, fetchSupervisors, fetchDepartments, fetchNotifications]);
 
     async function handleProcessUser(e: React.FormEvent) {
         e.preventDefault();
@@ -221,6 +325,9 @@ export function AdminDashboard() {
         <DashboardLayout
             user={{ name: user?.name, avatarUrl: user?.avatarUrl, role: user?.role }}
             onLogout={signOut}
+            notifications={notifications}
+            onMarkAsRead={handleMarkAsRead}
+            onMarkAllAsRead={handleMarkAllAsRead}
         >
             <div className="flex flex-col lg:flex-row gap-8 animate-in fade-in duration-500">
                 <aside className="w-full lg:w-72 shrink-0 space-y-4">

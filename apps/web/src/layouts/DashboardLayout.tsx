@@ -1,15 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     LayoutDashboard,
     LogOut,
     Bell,
     Menu,
     Search,
-    ArrowRight
+    ArrowRight,
+    Wifi,
+    WifiOff
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { NotificationDrawer } from '../components/ui/NotificationDrawer';
+import { syncAll } from '../services/offlineSync';
 import type { Notification } from '../types';
 
 interface DashboardLayoutProps {
@@ -37,8 +40,30 @@ export function DashboardLayout({
 }: DashboardLayoutProps) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+    const [isOnline, setIsOnline] = useState(navigator.onLine);
     const navigate = useNavigate();
     const location = useLocation();
+
+    useEffect(() => {
+        const handleOnline = () => {
+            setIsOnline(true);
+            syncAll();
+        };
+        const handleOffline = () => setIsOnline(false);
+
+        window.addEventListener('online', handleOnline);
+        window.addEventListener('offline', handleOffline);
+
+        // Initial sync check
+        if (navigator.onLine) {
+            syncAll();
+        }
+
+        return () => {
+            window.removeEventListener('online', handleOnline);
+            window.removeEventListener('offline', handleOffline);
+        };
+    }, []);
 
     const menuItems = [
         { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
@@ -165,6 +190,17 @@ export function DashboardLayout({
                     </div>
 
                     <div className="flex items-center gap-2">
+                        <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all duration-500 shadow-sm border ${isOnline
+                            ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
+                            : 'bg-red-50 text-red-600 border-red-100 animate-pulse'
+                            }`}>
+                            {isOnline ? (
+                                <><Wifi className="w-3 h-3" /> Online</>
+                            ) : (
+                                <><WifiOff className="w-3 h-3" /> Offline</>
+                            )}
+                        </div>
+
                         <Button
                             variant="ghost"
                             size="sm"

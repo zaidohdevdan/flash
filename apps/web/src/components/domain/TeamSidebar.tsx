@@ -43,7 +43,7 @@ const MemberItem = React.memo(({ member, onClick }: { member: TeamMember, onClic
                 className="group-hover/item:scale-105 transition-transform"
             />
             {member.hasUnread && (
-                <span className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full border-2 border-white" />
+                <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white" />
             )}
         </div>
 
@@ -128,7 +128,7 @@ export const TeamSidebar: React.FC<TeamSidebarProps> = React.memo(({
                         </div>
                         <div>
                             <h3 className="text-sm font-semibold text-[var(--text-primary)]">{title}</h3>
-                            <p className="text-xs text-[var(--text-tertiary)]">{currentMembers.length} online</p>
+                            <p className="text-xs text-[var(--text-tertiary)]">{currentMembers.filter(m => m.isOnline).length} online</p>
                         </div>
                     </div>
                 ) : (
@@ -148,9 +148,12 @@ export const TeamSidebar: React.FC<TeamSidebarProps> = React.memo(({
                                     `}
                                 >
                                     {group.icon || (group.id === 'contacts' ? <Shield className="w-3.5 h-3.5" /> : <Users className="w-3.5 h-3.5" />)}
-                                    <span className="hidden sm:inline">{group.title}</span>
+                                    <span className="hidden sm:inline">
+                                        {group.title}
+                                        <span className="ml-1 opacity-60 text-[10px]">({group.members.filter(m => m.isOnline).length})</span>
+                                    </span>
                                     {unread && (
-                                        <span className="absolute top-1 right-1 w-2 h-2 bg-blue-500 rounded-full" />
+                                        <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
                                     )}
                                 </button>
                             );

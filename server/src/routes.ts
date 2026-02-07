@@ -74,7 +74,10 @@ routes.patch('/profile', AuthMiddleware, upload.single('avatar'), ProfileControl
 routes.post('/chat/media', AuthMiddleware, upload.single('file'), mediaController.uploadGeneric);
 
 // Chat History
+routes.get('/chat/unread-count', AuthMiddleware, ChatController.unreadCount);
+routes.get('/chat/unread-senders', AuthMiddleware, ChatController.unreadSenders);
 routes.get('/chat/history/:room', AuthMiddleware, ChatController.listHistory);
+routes.patch('/chat/history/:room/read', AuthMiddleware, ChatController.markRoomAsRead);
 routes.delete('/chat/history/:room', AuthMiddleware, ChatController.clearHistory);
 routes.patch('/chat/messages/:id', AuthMiddleware, ChatController.updateMessage);
 routes.delete('/chat/messages/:id', AuthMiddleware, ChatController.deleteMessage);

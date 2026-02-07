@@ -23,6 +23,15 @@ export function Profile() {
         }
     }, [user]);
 
+    // Cleanup blob URLs to prevent memory leaks
+    useEffect(() => {
+        return () => {
+            if (avatarPreview && avatarPreview.startsWith('blob:')) {
+                URL.revokeObjectURL(avatarPreview);
+            }
+        };
+    }, [avatarPreview]);
+
     const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {

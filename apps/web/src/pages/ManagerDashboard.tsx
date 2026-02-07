@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useCallback } from 'react';
+import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
@@ -23,7 +23,9 @@ import { ExportReportsModal } from '../components/domain/modals/ExportReportsMod
 import { ConferenceModal } from '../components/domain/modals/ConferenceModal';
 import { ProfileSettingsModal } from '../components/domain/modals/ProfileSettingsModal';
 import { ConferenceInviteNotification } from '../components/ui/ConferenceInviteNotification';
-import type { Report, Stats, Department, UserContact, Notification } from '../types';
+import { db } from '../services/db';
+import { useLiveQuery } from 'dexie-react-hooks';
+import type { Report, Stats, Department, UserContact } from '../types';
 
 const KPI_CONFIGS = [
     { label: 'Recebidos', status: 'SENT', icon: AlertCircle, color: 'blue' as const },
@@ -48,6 +50,7 @@ export function ManagerDashboard() {
 
     const [reports, setReports] = useState<Report[]>([]);
     const [stats, setStats] = useState<Stats[]>([]);
+    const hasShownSummaryRef = useRef(false);
     const [contacts, setContacts] = useState<UserContact[]>([]);
     const [departments, setDepartments] = useState<Department[]>([]);
 
@@ -56,7 +59,9 @@ export function ManagerDashboard() {
     const [analyzingReport, setAnalyzingReport] = useState<Report | null>(null);
     const [targetStatus, setTargetStatus] = useState<'IN_REVIEW' | 'FORWARDED' | 'RESOLVED'>('RESOLVED');
     const [isExportModalOpen, setIsExportModalOpen] = useState(false);
-    const [notifications, setNotifications] = useState<Notification[]>([]);
+
+    // Dexie Notifications
+    const notifications = useLiveQuery(() => db.notifications.orderBy('createdAt').reverse().toArray()) || [];
 
     // Conference State from URL
     const activeRoom = searchParams.get('conference');
@@ -126,9 +131,54 @@ export function ManagerDashboard() {
     }, [user?.departmentId]);
 
     const fetchNotifications = useCallback(async () => {
+        if (hasShownSummaryRef.current) return;
+        hasShownSummaryRef.current = true;
+
         try {
             const res = await api.get('/notifications');
-            setNotifications(res.data);
+            const remoteNotifications = res.data;
+            let unreadCount = 0;
+
+            // Upsert remote notifications into Dexie
+            await db.transaction('rw', db.notifications, async () => {
+                for (const notif of remoteNotifications) {
+                    if (!notif.read) unreadCount++;
+                    await db.notifications.put({
+                        id: String(notif.id),
+                        title: notif.title,
+                        message: notif.message,
+                        type: notif.type || 'system',
+                        read: !!notif.read,
+                        createdAt: notif.createdAt,
+                        link: notif.link || undefined
+                    });
+                }
+            });
+
+            if (unreadCount > 0) {
+                toast(`Você tem ${unreadCount} ${unreadCount === 1 ? 'notificação não lida' : 'notificações não lidas'}`, {
+                    icon: '🔔',
+                    duration: 4000
+                });
+            }
+
+            // Also check for unread chat messages
+            const chatRes = await api.get('/chat/unread-count');
+            const unreadChatCount = chatRes.data.count;
+
+            if (unreadChatCount > 0) {
+                toast(`Você tem ${unreadChatCount} ${unreadChatCount === 1 ? 'mensagem não lida' : 'mensagens não lidas'} no chat`, {
+                    icon: '💬',
+                    duration: 5000,
+                    style: {
+                        borderRadius: '1.5rem',
+                        background: '#333',
+                        color: '#fff',
+                        fontSize: '12px',
+                        fontWeight: 'bold'
+                    }
+                });
+            }
         } catch {
             console.error('Erro ao buscar notificações');
         }
@@ -207,18 +257,6 @@ export function ManagerDashboard() {
             });
             playNotificationSound();
         },
-        onNewNotification: (payload) => {
-            const notif: Notification = {
-                id: (payload.id as string) || Date.now().toString(),
-                title: payload.title,
-                message: payload.message,
-                type: (payload.type as string) || 'system',
-                read: false,
-                createdAt: (payload.createdAt as string) || new Date().toISOString(),
-                link: payload.link as string | undefined
-            };
-            setNotifications(prev => [notif, ...prev]);
-        }
     });
 
     useEffect(() => {
@@ -232,16 +270,22 @@ export function ManagerDashboard() {
     const handleMarkAsRead = async (id: string) => {
         try {
             await api.patch(`/notifications/${id}/read`);
-            setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+            await db.notifications.update(id, { read: true });
         } catch {
-            toast.error('Erro ao marcar como lida');
+            await db.notifications.update(id, { read: true });
+            toast.error('Erro ao sincronizar leitura com servidor');
         }
     };
 
     const handleMarkAllAsRead = async () => {
         try {
             await api.post('/notifications/read-all');
-            setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+            const allLocal = await db.notifications.toArray();
+            await db.transaction('rw', db.notifications, async () => {
+                for (const n of allLocal) {
+                    await db.notifications.update(n.id, { read: true });
+                }
+            });
             toast.success('Todas as notificações marcadas como lidas');
         } catch {
             toast.error('Erro ao marcar todas como lidas');

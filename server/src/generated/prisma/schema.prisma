@@ -127,6 +127,7 @@ model ChatMessage {
   room               String // e.g., "chat:professionalUserId"
   createdAt          DateTime  @default(now())
   expiresAt          DateTime?
+  read               Boolean   @default(false)
   deletedForSender   Boolean   @default(false)
   deletedForEveryone Boolean   @default(false)
 

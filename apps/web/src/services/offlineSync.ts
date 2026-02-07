@@ -50,3 +50,48 @@ export async function syncPendingReports() {
         }
     }
 }
+
+export async function syncPendingMessages() {
+    const pending = await db.pendingMessages.toArray();
+
+    if (pending.length === 0) return;
+
+    console.log(`[OfflineSync] Tentando sincronizar ${pending.length} mensagens...`);
+
+    for (const msg of pending) {
+        try {
+            let audioUrl = '';
+
+            // Se for áudio, primeiro faz upload para o Cloudinary
+            if (msg.audioBlob) {
+                const formData = new FormData();
+                formData.append('file', msg.audioBlob, 'audio-message.webm');
+
+                const response = await api.post('/chat/media', formData);
+                audioUrl = response.data.secureUrl;
+            }
+
+            // Envia a mensagem via API
+            await api.post('/chat/messages', {
+                targetUserId: msg.toId,
+                text: msg.text,
+                audioUrl,
+                createdAt: new Date(msg.createdAt).toISOString()
+            });
+
+            // Remove do banco local se deu certo
+            await db.pendingMessages.delete(msg.id!);
+
+        } catch (error) {
+            console.error('[OfflineSync] Erro ao sincronizar mensagem:', error);
+            // Mantém na fila para tentar novamente depois
+        }
+    }
+}
+
+export async function syncAll() {
+    await Promise.all([
+        syncPendingReports(),
+        syncPendingMessages()
+    ]);
+}

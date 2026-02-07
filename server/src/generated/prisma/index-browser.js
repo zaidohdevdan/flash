@@ -21,11 +21,11 @@ exports.$Enums = {}
 
 /**
  * Prisma Client JS version: 6.18.0
- * Query Engine version: 34b5a692b7bd79939a9a2c3ef97d816e749cda2f
+ * Query Engine version: acc0b9dd43eb689cbd20c9470515d719db10d0b0
  */
 Prisma.prismaVersion = {
   client: "6.18.0",
-  engine: "34b5a692b7bd79939a9a2c3ef97d816e749cda2f"
+  engine: "acc0b9dd43eb689cbd20c9470515d719db10d0b0"
 }
 
 Prisma.PrismaClientKnownRequestError = () => {
@@ -185,6 +185,7 @@ exports.Prisma.ChatMessageScalarFieldEnum = {
   room: 'room',
   createdAt: 'createdAt',
   expiresAt: 'expiresAt',
+  read: 'read',
   deletedForSender: 'deletedForSender',
   deletedForEveryone: 'deletedForEveryone'
 };

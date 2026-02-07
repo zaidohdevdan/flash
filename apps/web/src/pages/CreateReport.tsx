@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
@@ -30,10 +30,10 @@ import { ProfileSettingsModal } from '../components/domain/modals/ProfileSetting
 import { ConferenceModal } from '../components/domain/modals/ConferenceModal';
 import { ConferenceInviteNotification } from '../components/ui/ConferenceInviteNotification';
 import { db } from '../services/db';
-import { syncPendingReports } from '../services/offlineSync';
+import { syncAll } from '../services/offlineSync';
 import { useLiveQuery } from 'dexie-react-hooks';
 
-import type { Report, Notification } from '../types';
+import type { Report } from '../types';
 
 export function CreateReport() {
     const { user, signOut, updateUser } = useAuth();
@@ -45,8 +45,9 @@ export function CreateReport() {
     const [image, setImage] = useState<File | null>(null);
     const [preview, setPreview] = useState<string | null>(null);
     const [sending, setSending] = useState(false);
-    const [success, setSuccess] = useState(false);
     const [history, setHistory] = useState<Report[]>([]);
+    const [success, setSuccess] = useState(false);
+    const hasShownSummaryRef = useRef(false);
     const [page, setPage] = useState(1);
     const [statusFilter, setStatusFilter] = useState<string>('');
     const [hasMore, setHasMore] = useState(true);
@@ -54,7 +55,8 @@ export function CreateReport() {
     const [loadingHistory, setLoadingHistory] = useState(false);
     const [selectedReport, setSelectedReport] = useState<Report | null>(null);
 
-    const [notifications, setNotifications] = useState<Notification[]>([]);
+    // Dexie Notifications
+    const notifications = useLiveQuery(() => db.notifications.orderBy('createdAt').reverse().toArray()) || [];
 
     const LIMIT = 4;
 
@@ -97,18 +99,6 @@ export function CreateReport() {
             });
             playNotificationSound();
         },
-        onNewNotification: (payload) => {
-            const notif: Notification = {
-                id: (payload.id as string) || Date.now().toString(),
-                title: payload.title,
-                message: payload.message,
-                type: (payload.type as string) || 'system',
-                read: false,
-                createdAt: (payload.createdAt as string) || new Date().toISOString(),
-                link: payload.link as string | undefined
-            };
-            setNotifications(prev => [notif, ...prev]);
-        }
     });
 
     const hasUnreadMessages = useMemo(() =>
@@ -117,14 +107,58 @@ export function CreateReport() {
 
 
     const fetchNotifications = useCallback(async () => {
-        if (!user?.id) return;
+        if (hasShownSummaryRef.current) return;
+        hasShownSummaryRef.current = true;
+
         try {
             const res = await api.get('/notifications');
-            setNotifications(res.data);
+            const remoteNotifications = res.data;
+            let unreadCount = 0;
+
+            // Upsert remote notifications into Dexie
+            await db.transaction('rw', db.notifications, async () => {
+                for (const notif of remoteNotifications) {
+                    if (!notif.read) unreadCount++;
+                    await db.notifications.put({
+                        id: String(notif.id),
+                        title: notif.title,
+                        message: notif.message,
+                        type: notif.type || 'system',
+                        read: !!notif.read,
+                        createdAt: notif.createdAt,
+                        link: notif.link || undefined
+                    });
+                }
+            });
+
+            if (unreadCount > 0) {
+                toast(`Você tem ${unreadCount} ${unreadCount === 1 ? 'notificação não lida' : 'notificações não lidas'} `, {
+                    icon: '🔔',
+                    duration: 4000
+                });
+            }
+
+            // Also check for unread chat messages
+            const chatRes = await api.get('/chat/unread-count');
+            const unreadChatCount = chatRes.data.count;
+
+            if (unreadChatCount > 0) {
+                toast(`Você tem ${unreadChatCount} ${unreadChatCount === 1 ? 'mensagem não lida' : 'mensagens não lidas'} no chat`, {
+                    icon: '💬',
+                    duration: 5000,
+                    style: {
+                        borderRadius: '1.5rem',
+                        background: '#333',
+                        color: '#fff',
+                        fontSize: '12px',
+                        fontWeight: 'bold'
+                    }
+                });
+            }
         } catch {
-            console.warn('Erro ao buscar notificações');
+            console.error('Erro ao buscar notificações');
         }
-    }, [user?.id]);
+    }, []);
 
     useEffect(() => {
         if (!socket) return;
@@ -183,12 +217,12 @@ export function CreateReport() {
 
         // Sincronização automática inicial
         if (navigator.onLine) {
-            syncPendingReports();
+            syncAll();
         }
 
         const handleOnline = () => {
             toast.success('Conexão restabelecida! Sincronizando dados...', { icon: '🌐' });
-            syncPendingReports();
+            syncAll();
         };
 
         const handleOffline = () => {
@@ -215,6 +249,15 @@ export function CreateReport() {
         return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
     }, [statusFilter, loadHistory]);
 
+    // Blob URL Cleanup
+    useEffect(() => {
+        return () => {
+            if (preview) {
+                URL.revokeObjectURL(preview);
+            }
+        };
+    }, [preview]);
+
     const handleOpenChat = () => {
         if (!user?.supervisorId) {
             toast.error('Você ainda não possui um supervisor atribuído.', { icon: '⚠️' });
@@ -238,17 +281,23 @@ export function CreateReport() {
 
     const handleMarkAsRead = async (id: string) => {
         try {
-            await api.patch(`/notifications/${id}/read`);
-            setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+            await api.patch(`/ notifications / ${id}/read`);
+            await db.notifications.update(id, { read: true });
         } catch {
-            toast.error('Erro ao marcar como lida');
+            await db.notifications.update(id, { read: true });
+            toast.error('Erro ao sincronizar leitura com servidor');
         }
     };
 
     const handleMarkAllAsRead = async () => {
         try {
             await api.post('/notifications/read-all');
-            setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+            const allLocal = await db.notifications.toArray();
+            await db.transaction('rw', db.notifications, async () => {
+                for (const n of allLocal) {
+                    await db.notifications.update(n.id, { read: true });
+                }
+            });
             toast.success('Todas as notificações marcadas como lidas');
         } catch {
             toast.error('Erro ao marcar todas como lidas');
@@ -414,7 +463,7 @@ export function CreateReport() {
                                 <Button
                                     variant="ghost"
                                     size="sm"
-                                    onClick={() => syncPendingReports()}
+                                    onClick={() => syncAll()}
                                     className="!text-amber-800 hover:bg-amber-100 !px-4"
                                 >
                                     <RefreshCw className="w-4 h-4 mr-2" />
@@ -495,11 +544,6 @@ export function CreateReport() {
                                 <ReportShimmer />
                                 <ReportShimmer />
                             </div>
-                        ) : history.length === 0 ? (
-                            <Card variant="white" className="py-20 flex flex-col items-center justify-center text-[var(--text-tertiary)] border-[var(--border-dashed)]">
-                                <History className="w-12 h-12 mb-4 opacity-20" />
-                                <p className="text-xs font-bold uppercase tracking-widest opacity-60">Nenhum evento registrado</p>
-                            </Card>
                         ) : (
                             <div className="grid gap-6">
                                 {history.filter(r =>

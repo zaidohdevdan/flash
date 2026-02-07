@@ -9,4 +9,7 @@ export interface IChatRepository {
     deleteById(id: string): Promise<void>;
     update(id: string, text: string): Promise<ChatMessage>;
     softDelete(id: string, type: 'me' | 'everyone'): Promise<ChatMessage>;
+    markAsRead(room: string, userId: string): Promise<void>;
+    countUnread(userId: string): Promise<number>;
+    getUnreadSenders(userId: string): Promise<string[]>;
 }

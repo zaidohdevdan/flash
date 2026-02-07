@@ -63,5 +63,39 @@ export const ChatController = {
             console.error('Erro ao deletar mensagem:', error);
             return res.status(500).json({ error: 'Erro ao deletar mensagem.' });
         }
+    },
+
+    async unreadCount(req: Request, res: Response) {
+        try {
+            const userId = req.userId!;
+            const count = await chatService.getUnreadCount(userId);
+            return res.json({ count });
+        } catch (error) {
+            console.error('Erro ao buscar contador de não lidas:', error);
+            return res.status(500).json({ error: 'Erro ao buscar contador.' });
+        }
+    },
+
+    async markRoomAsRead(req: Request, res: Response) {
+        try {
+            const { room } = req.params;
+            const userId = req.userId!;
+            await chatService.markAsRead(room as string, userId);
+            return res.status(204).send();
+        } catch (error) {
+            console.error('Erro ao marcar sala como lida:', error);
+            return res.status(500).json({ error: 'Erro ao marcar sala.' });
+        }
+    },
+
+    async unreadSenders(req: Request, res: Response) {
+        try {
+            const userId = req.userId!;
+            const senders = await chatService.getUnreadSenders(userId);
+            return res.json(senders);
+        } catch (error) {
+            console.error('Erro ao buscar remetentes de não lidas:', error);
+            return res.status(500).json({ error: 'Erro ao buscar remetentes.' });
+        }
     }
 }

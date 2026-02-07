@@ -1,7 +1,10 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { Socket } from 'socket.io-client';
-import { Send, Mic, X, MessageSquare, Square, Trash2, Hourglass, Pencil, Check, Trash, User, Zap } from 'lucide-react';
+import { Send, Mic, X, MessageSquare, Square, Trash2, Hourglass, Pencil, Check, Trash, User, Zap, RefreshCw } from 'lucide-react';
 import { api } from '../services/api';
+import { db } from '../services/db';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { toast } from 'react-hot-toast';
 
 const getRoomName = (id1: string, id2: string) => {
     return `private-${[id1, id2].map(id => id.trim().toLowerCase()).sort().join('-')}`;
@@ -25,7 +28,6 @@ interface ChatWidgetProps {
 }
 
 export function ChatWidget({ currentUser, targetUser, onClose, socket }: ChatWidgetProps) {
-    const [messages, setMessages] = useState<Message[]>([]);
     const [inputText, setInputText] = useState('');
     const [isRecording, setIsRecording] = useState(false);
     const [recordingTime, setRecordingTime] = useState(0);
@@ -39,9 +41,37 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket }: ChatWid
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const chunksRef = useRef<Blob[]>([]);
     const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    const notificationAudioRef = useRef<HTMLAudioElement | null>(null);
 
     // Identificador único da sala baseado em IDs ordenados
-    const chatRoom = currentUser?.id && targetUser?.id ? getRoomName(currentUser.id, targetUser.id) : '';
+    const chatRoom = useMemo(() =>
+        currentUser?.id && targetUser?.id ? getRoomName(currentUser.id, targetUser.id) : '',
+        [currentUser.id, targetUser.id]);
+
+    // Dexie: Fetch persistent messages
+    const dexieMessagesQuery = useLiveQuery(
+        () => db.chatMessages
+            .where('roomName')
+            .equals(chatRoom)
+            .sortBy('createdAt'),
+        [chatRoom]
+    );
+
+    const dexieMessages = useMemo(() => dexieMessagesQuery || [], [dexieMessagesQuery]);
+
+    const markRoomAsRead = useCallback(async () => {
+        if (!chatRoom) return;
+        try {
+            await api.patch(`/chat/history/${chatRoom}/read`);
+        } catch (error) {
+            console.error('Erro ao marcar mensagens como lidas:', error);
+        }
+    }, [chatRoom]);
+
+    const allMessages = useMemo(() => {
+        const combined = [...dexieMessages];
+        return combined.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+    }, [dexieMessages]);
 
     useEffect(() => {
         if (!chatRoom || !socket) return;
@@ -50,45 +80,58 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket }: ChatWid
         async function fetchHistory() {
             try {
                 const response = await api.get(`/chat/history/${encodeURIComponent(chatRoom)}`);
-                if (isMounted) {
-                    setMessages(response.data);
+                // Import history into Dexie (upsert)
+                for (const msg of response.data) {
+                    await db.chatMessages.put({
+                        id: msg.id,
+                        fromId: msg.fromId || msg.from,
+                        toId: (msg.fromId || msg.from) === currentUser.id ? targetUser.id : currentUser.id,
+                        roomName: chatRoom,
+                        text: msg.text,
+                        audioUrl: msg.audioUrl,
+                        createdAt: msg.createdAt
+                    });
                 }
             } catch (error) {
                 console.error('Error fetching chat history:', error);
             }
         }
 
-        // Initial fetch
         fetchHistory();
 
-        const handlePrivateMessage = (msg: Message) => {
+        const handlePrivateMessage = async (msg: Message) => {
             if (isMounted) {
-                const senderId = msg.from || msg.fromId;
-
-                setMessages(prev => {
-                    // Evita duplicatas
-                    const exists = prev.some(m => m.createdAt === msg.createdAt && (m.from === msg.from || m.fromId === msg.fromId) && m.text === msg.text);
-                    if (exists) return prev;
-                    return [...prev, msg];
+                await db.chatMessages.put({
+                    id: msg.id,
+                    fromId: msg.fromId || msg.from || '',
+                    toId: (msg.fromId || msg.from) === currentUser.id ? targetUser.id : currentUser.id,
+                    roomName: chatRoom,
+                    text: msg.text,
+                    audioUrl: msg.audioUrl,
+                    createdAt: msg.createdAt
                 });
 
+                const senderId = msg.from || msg.fromId;
                 if (senderId !== currentUser.id) {
-                    const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
-                    // Silenciamos o erro se o usuário ainda não interagiu com a página
-                    audio.play().catch(() => { });
+                    if (!notificationAudioRef.current) {
+                        notificationAudioRef.current = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+                    }
+                    notificationAudioRef.current.play().catch(() => { });
+                    // Se estou com o chat aberto, marco como lida imediatamente no servidor
+                    markRoomAsRead();
                 }
             }
         };
 
-        const handleMessageEdited = (data: { messageId: string, newText: string }) => {
+        const handleMessageEdited = async (data: { messageId: string, newText: string }) => {
             if (isMounted) {
-                setMessages(prev => prev.map(m => m.id === data.messageId ? { ...m, text: data.newText } : m));
+                await db.chatMessages.update(data.messageId, { text: data.newText });
             }
         };
 
-        const handleMessageDeleted = (data: { messageId: string }) => {
+        const handleMessageDeleted = async (data: { messageId: string }) => {
             if (isMounted) {
-                setMessages(prev => prev.filter(m => m.id !== data.messageId));
+                await db.chatMessages.delete(data.messageId);
             }
         };
 
@@ -103,7 +146,7 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket }: ChatWid
             socket.off('message_edited', handleMessageEdited);
             socket.off('message_deleted', handleMessageDeleted);
         };
-    }, [currentUser.id, targetUser.id, chatRoom, socket]);
+    }, [currentUser.id, targetUser.id, chatRoom, socket, markRoomAsRead]);
 
     useEffect(() => {
         const interval = setInterval(() => setNow(Date.now()), 1000);
@@ -116,10 +159,30 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket }: ChatWid
 
     useEffect(() => {
         scrollToBottom();
-    }, [messages]);
+    }, [allMessages]);
 
-    const handleSendMessage = () => {
-        if (!inputText.trim() || !socket) return;
+    const handleSendMessage = async () => {
+        if (!inputText.trim()) return;
+
+        const messageData = {
+            fromId: currentUser.id,
+            toId: targetUser.id,
+            roomName: chatRoom,
+            text: inputText,
+            createdAt: new Date().toISOString()
+        };
+
+        if (!navigator.onLine || !socket) {
+            await db.chatMessages.add(messageData);
+            await db.pendingMessages.add({
+                toId: targetUser.id,
+                text: inputText,
+                createdAt: Date.now()
+            });
+            setInputText('');
+            toast.success('Mensagem salva offline', { icon: '💾' });
+            return;
+        }
 
         socket.emit('private_message', {
             targetUserId: targetUser.id,
@@ -160,8 +223,6 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket }: ChatWid
             mediaRecorderRef.current.stop();
             setIsRecording(false);
             if (timerRef.current) clearInterval(timerRef.current);
-
-            // Stop all tracks
             mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
         }
     };
@@ -191,29 +252,28 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket }: ChatWid
 
     const handleClearHistory = async () => {
         if (!window.confirm('Você tem certeza que deseja excluir todo o histórico desta conversa?')) return;
-
         try {
             await api.delete(`/chat/history/${encodeURIComponent(chatRoom)}`);
-            setMessages([]);
+            await db.chatMessages.where('roomName').equals(chatRoom).delete();
         } catch (error) {
             console.error('Error clearing chat history:', error);
             alert('Erro ao excluir histórico.');
         }
     };
 
-    const handleStartEdit = (msg: Message) => {
-        setEditingMessageId(msg.id!);
+    const handleStartEdit = (msg: { id?: string; text?: string }) => {
+        if (!msg.id) return;
+        setEditingMessageId(msg.id);
         setEditText(msg.text || '');
         setSelectedMessageId(null);
     };
 
     const handleUpdateMessage = async () => {
         if (!editText.trim() || !editingMessageId) return;
-
         try {
             await api.patch(`/chat/messages/${editingMessageId}`, { text: editText });
             socket?.emit('edit_message', { messageId: editingMessageId, newText: editText, roomName: chatRoom });
-            setMessages(prev => prev.map(m => m.id === editingMessageId ? { ...m, text: editText } : m));
+            await db.chatMessages.update(editingMessageId, { text: editText });
             setEditingMessageId(null);
         } catch (error) {
             console.error('Error updating message:', error);
@@ -221,22 +281,13 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket }: ChatWid
         }
     };
 
-    const handleDeleteClick = (msgId: string) => {
-        // Toggle menu
-        if (showDeleteMenuFor === msgId) setShowDeleteMenuFor(null);
-        else setShowDeleteMenuFor(msgId);
-    };
-
     const confirmDelete = async (messageId: string, type: 'me' | 'everyone') => {
         try {
             await api.delete(`/chat/messages/${messageId}?type=${type}`);
-
             if (type === 'everyone') {
                 socket?.emit('delete_message', { messageId, roomName: chatRoom });
             }
-
-            // Sempre removemos visualmente para quem deletou
-            setMessages(prev => prev.filter(m => m.id !== messageId));
+            await db.chatMessages.delete(messageId);
             setSelectedMessageId(null);
             setShowDeleteMenuFor(null);
         } catch (error) {
@@ -275,7 +326,6 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket }: ChatWid
                         onClick={handleClearHistory}
                         className="p-1.5 hover:bg-[var(--bg-secondary)] rounded-lg transition hover:text-[var(--text-primary)]"
                         title="Excluir Histórico"
-                        aria-label="Excluir Histórico"
                     >
                         <Trash2 className="w-4 h-4" />
                     </button>
@@ -284,7 +334,6 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket }: ChatWid
                         onClick={onClose}
                         className="p-1 hover:bg-[var(--bg-secondary)] rounded-full transition hover:text-[var(--text-primary)]"
                         title="Fechar"
-                        aria-label="Fechar"
                     >
                         <X className="w-5 h-5" />
                     </button>
@@ -293,18 +342,18 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket }: ChatWid
 
             {/* Messages Area */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4 overscroll-contain scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
-                {messages.length === 0 && (
+                {allMessages.length === 0 && (
                     <div className="flex flex-col items-center justify-center h-full text-[var(--text-tertiary)] opacity-50">
                         <MessageSquare className="w-12 h-12 mb-2" />
                         <p className="text-xs font-medium">Inicie a conversa...</p>
                     </div>
                 )}
 
-                {messages.map((msg, idx) => {
-                    const senderId = msg.from || msg.fromId;
-                    const isMe = senderId === currentUser.id;
+                {allMessages.map((msg, idx) => {
+                    const isMe = msg.fromId === currentUser.id;
                     const isSelected = selectedMessageId === msg.id;
                     const isEditing = editingMessageId === msg.id;
+                    const isPending = !msg.id;
 
                     return (
                         <div key={idx} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
@@ -330,7 +379,7 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket }: ChatWid
                                                 type="button"
                                                 onClick={() => setEditingMessageId(null)}
                                                 className="p-1 hover:bg-black/5 rounded text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-                                                title="Cancelar Edição"
+                                                title="Cancelar edição"
                                             >
                                                 <X className="w-3.5 h-3.5" />
                                             </button>
@@ -338,7 +387,7 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket }: ChatWid
                                                 type="button"
                                                 onClick={handleUpdateMessage}
                                                 className="p-1 bg-white text-[var(--accent-primary)] rounded hover:bg-white/90 border border-[var(--border-subtle)]"
-                                                title="Confirmar Edição"
+                                                title="Salvar alteração"
                                             >
                                                 <Check className="w-3.5 h-3.5" />
                                             </button>
@@ -370,12 +419,15 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket }: ChatWid
                                             <span className={`text-[9px] font-bold opacity-60 ${isMe ? 'text-[var(--accent-text)]' : 'text-[var(--text-tertiary)]'}`}>
                                                 {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                             </span>
-                                            <Zap className={`w-3 h-3 shrink-0 ${isMe ? 'text-[#d4e720] fill-[#d4e720] drop-shadow-[0_0_3px_rgba(212,231,32,0.4)]' : 'text-[var(--text-tertiary)] opacity-30 group-hover:opacity-60 transition-opacity'}`} />
+                                            {isPending ? (
+                                                <RefreshCw className="w-3 h-3 text-[var(--accent-text)] opacity-40 animate-spin" />
+                                            ) : (
+                                                <Zap className={`w-3 h-3 shrink-0 ${isMe ? 'text-[var(--accent-text)] fill-[var(--accent-text)] opacity-40' : 'text-[var(--text-tertiary)] opacity-30 group-hover:opacity-60 transition-opacity'}`} />
+                                            )}
                                         </div>
                                     </>
                                 )}
 
-                                {/* Action Buttons Overlay */}
                                 {isSelected && isMe && !isEditing && (
                                     <div className="absolute -left-12 top-0 flex flex-col gap-1 animate-in slide-in-from-right-2 fade-in z-20">
                                         <button
@@ -383,22 +435,19 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket }: ChatWid
                                             onClick={(e) => { e.stopPropagation(); handleStartEdit(msg); }}
                                             className="p-2 bg-white shadow-md border border-[var(--border-subtle)] rounded-full text-[var(--text-tertiary)] hover:text-[var(--accent-primary)] hover:bg-[var(--bg-secondary)] transition"
                                             title="Editar"
-                                            aria-label="Editar"
                                         >
                                             <Pencil className="w-3.5 h-3.5" />
                                         </button>
                                         <div className="relative">
                                             <button
                                                 type="button"
-                                                onClick={(e) => { e.stopPropagation(); handleDeleteClick(msg.id!); }}
+                                                onClick={(e) => { e.stopPropagation(); if (showDeleteMenuFor === msg.id) setShowDeleteMenuFor(null); else setShowDeleteMenuFor(msg.id!); }}
                                                 className="p-2 bg-white shadow-md border border-[var(--border-subtle)] rounded-full text-[var(--text-tertiary)] hover:text-red-500 hover:bg-[var(--bg-secondary)] transition"
                                                 title="Excluir"
-                                                aria-label="Excluir"
                                             >
                                                 <Trash className="w-3.5 h-3.5" />
                                             </button>
 
-                                            {/* Delete Menu */}
                                             {showDeleteMenuFor === msg.id && (
                                                 <div className="absolute right-full mr-2 top-0 bg-white shadow-xl rounded-xl border border-[var(--border-subtle)] p-1 min-w-[140px] flex flex-col z-50 animate-in zoom-in-95 duration-200">
                                                     <button
@@ -438,10 +487,9 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket }: ChatWid
                         <span className="text-xs text-red-500 font-medium">Gravando áudio...</span>
                         <button
                             type="button"
+                            title="Parar gravação"
                             onClick={stopRecording}
                             className="p-2 bg-red-100/50 text-red-600 rounded-full hover:bg-red-100 transition border border-red-200"
-                            title="Parar Gravação"
-                            aria-label="Parar Gravação"
                         >
                             <Square className="w-4 h-4 fill-current" />
                         </button>
@@ -453,7 +501,6 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket }: ChatWid
                             onClick={startRecording}
                             className="p-3 bg-[var(--bg-secondary)] text-[var(--text-secondary)] rounded-xl hover:bg-red-50 hover:text-red-500 hover:border-red-200 transition-all active:scale-95 border border-[var(--border-subtle)]"
                             title="Gravar áudio"
-                            aria-label="Gravar áudio"
                         >
                             <Mic className="w-5 h-5" />
                         </button>
@@ -471,7 +518,6 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket }: ChatWid
                             disabled={!inputText.trim()}
                             className="p-3 bg-[var(--accent-primary)] text-[var(--accent-text)] rounded-xl shadow-lg shadow-[var(--accent-primary)]/20 hover:bg-[var(--accent-primary)]/90 disabled:opacity-50 disabled:shadow-none transition active:scale-95"
                             title="Enviar"
-                            aria-label="Enviar"
                         >
                             <Send className="w-4 h-4" />
                         </button>

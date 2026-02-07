@@ -1,6 +1,8 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { toast } from 'react-hot-toast';
+import { db } from '../services/db';
+import { api } from '../services/api';
 
 const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
@@ -34,9 +36,12 @@ export const useDashboardSocket = ({ user, onNotification, onConferenceInvite, o
     // Using ref for unread state to access in handlers without re-firing effects
     const unreadMessagesRef = useRef<Record<string, boolean>>({});
 
+    const notificationAudioRef = useRef<HTMLAudioElement | null>(null);
     const playNotificationSound = useCallback(() => {
-        const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
-        audio.play().catch(e => console.error('Erro ao tocar som:', e));
+        if (!notificationAudioRef.current) {
+            notificationAudioRef.current = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+        }
+        notificationAudioRef.current.play().catch(e => console.error('Erro ao tocar som:', e));
     }, []);
 
     // Use a ref for the callback to avoid re-triggering the socket connection effect
@@ -84,7 +89,19 @@ export const useDashboardSocket = ({ user, onNotification, onConferenceInvite, o
             setOnlineUserIds(prev => prev.filter(id => id !== userId));
         });
 
-        const handleChatNotification = (data: { from: string; fromName?: string; text: string }) => {
+        const handleChatNotification = async (data: { from: string; fromName?: string; text: string; roomName?: string }) => {
+            // Persist message metadata for offline visibility
+            if (data.roomName) {
+                await db.chatMessages.put({
+                    fromId: data.from,
+                    toId: user.id,
+                    roomName: data.roomName,
+                    text: data.text,
+                    createdAt: new Date().toISOString(),
+                    read: false
+                }).catch(e => console.error('Error persisting chat notification:', e));
+            }
+
             // Always update internal unread state
             setUnreadMessages(prev => {
                 const next = { ...prev, [data.from]: true };
@@ -118,7 +135,19 @@ export const useDashboardSocket = ({ user, onNotification, onConferenceInvite, o
             }
         });
 
-        newSocket.on('new_notification', (data: NotificationPayload) => {
+        newSocket.on('new_notification', async (data: NotificationPayload) => {
+            // Persist to Dexie for offline access
+            const notifId = (data.id as string) || `local-${Date.now()}`;
+            await db.notifications.put({
+                id: notifId,
+                title: data.title,
+                message: data.message,
+                type: (data.type as string) || 'system',
+                read: false,
+                createdAt: (data.createdAt as string) || new Date().toISOString(),
+                link: data.link as string | undefined
+            }).catch(e => console.error('Error persisting notification:', e));
+
             if (onNewNotificationRef.current) {
                 onNewNotificationRef.current(data);
             } else {
@@ -152,10 +181,42 @@ export const useDashboardSocket = ({ user, onNotification, onConferenceInvite, o
         });
 
         return () => {
+            newSocket.off('connect');
+            newSocket.off('disconnect');
+            newSocket.off('initial_presence_list');
+            newSocket.off('user_online');
+            newSocket.off('user_offline');
+            newSocket.off('new_chat_notification');
+            newSocket.off('conference_invite');
+            newSocket.off('new_notification');
+            newSocket.off('new_report_to_review');
+            newSocket.off('report_status_updated_for_supervisor');
             newSocket.disconnect();
             setSocket(null);
         };
     }, [user?.id, user?.name, user?.role, playNotificationSound]);
+
+    // Fetch initial unread status on mount/reconnect
+    useEffect(() => {
+        if (!user?.id || !isConnected) return;
+
+        const fetchUnread = async () => {
+            try {
+                const res = await api.get('/chat/unread-senders');
+                const senderIds = res.data; // Array of IDs
+                const unreadMap: Record<string, boolean> = {};
+                senderIds.forEach((id: string) => {
+                    unreadMap[id] = true;
+                });
+                setUnreadMessages(unreadMap);
+                unreadMessagesRef.current = unreadMap;
+            } catch (error) {
+                console.error('Erro ao buscar estados de não lidas:', error);
+            }
+        };
+
+        fetchUnread();
+    }, [user?.id, isConnected]);
 
     const markAsRead = useCallback((userId: string) => {
         setUnreadMessages(prev => {

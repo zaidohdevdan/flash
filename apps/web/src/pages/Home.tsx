@@ -304,7 +304,7 @@ export function Home() {
                             {/* Layer 3: Floating Elements - High Definition */}
                             <motion.div
                                 style={{ z: zLayer3, opacity: opacityLayer3 }}
-                                className="absolute top-[15%] right-[-40px] bg-white border border-slate-100 p-5 rounded-[1.5rem] shadow-[0_20px_40px_-10px_rgba(0,0,0,0.1)] flex items-center gap-5 transform-style-3d translate-z-[80px]"
+                                className="absolute top-[10%] right-4 md:right-[-40px] bg-white border border-slate-100 p-4 md:p-5 rounded-[1.5rem] shadow-[0_20px_40px_-10px_rgba(0,0,0,0.1)] flex items-center gap-4 md:gap-5 transform-style-3d translate-z-[80px]"
                             >
                                 <div className="w-12 h-12 rounded-full bg-emerald-500 flex items-center justify-center text-white shadow-xl shadow-emerald-500/30">
                                     <CheckCircle2 className="w-6 h-6" />
@@ -317,7 +317,7 @@ export function Home() {
 
                             <motion.div
                                 style={{ z: zLayer3, opacity: opacityLayer3 }}
-                                className="absolute bottom-[15%] left-[-40px] bg-slate-900 backdrop-blur-md border border-slate-800 p-5 rounded-[1.5rem] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)] flex items-center gap-5 transform-style-3d translate-z-[120px]"
+                                className="absolute bottom-[10%] left-4 md:left-[-40px] bg-slate-900 backdrop-blur-md border border-slate-800 p-4 md:p-5 rounded-[1.5rem] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)] flex items-center gap-4 md:gap-5 transform-style-3d translate-z-[120px]"
                             >
                                 <div className="w-12 h-12 rounded-full bg-[#d4e720] flex items-center justify-center text-[#1a2e05] shadow-xl shadow-lime-500/20 animate-pulse">
                                     <WifiOff className="w-6 h-6" />
@@ -406,7 +406,7 @@ export function Home() {
             </section>
 
             {/* Developer Section */}
-            <section id="about" className="py-40 bg-slate-100 relative overflow-hidden">
+            <section id="about" className="py-24 md:py-40 bg-slate-100 relative overflow-hidden">
                 <div className="max-w-7xl mx-auto px-6 relative z-10">
                     <div className="flex flex-col lg:flex-row items-center gap-24">
                         <motion.div
@@ -415,10 +415,10 @@ export function Home() {
                             viewport={{ once: true }}
                             className="flex-1 w-full"
                         >
-                            <div className="p-12 bg-white rounded-[3rem] border border-slate-200 shadow-2xl shadow-slate-200/50 relative overflow-hidden group hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.1)] transition-all duration-500">
-                                <Code2 className="w-64 h-64 text-slate-50 absolute top-[-40px] right-[-40px] group-hover:rotate-12 transition-transform duration-1000" />
-                                <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-6">Engenharia de Software</h3>
-                                <h2 className="text-5xl font-black mb-8 text-slate-900 tracking-tight">Daniel de Almeida</h2>
+                            <div className="p-8 md:p-12 bg-white rounded-[3rem] border border-slate-200 shadow-2xl shadow-slate-200/50 relative overflow-hidden group hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.1)] transition-all duration-500">
+                                <Code2 className="w-32 h-32 md:w-64 md:h-64 text-slate-50 absolute top-[-20px] right-[-20px] md:top-[-40px] md:right-[-40px] group-hover:rotate-12 transition-transform duration-1000" />
+                                <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-6 relative z-10">Engenharia de Software</h3>
+                                <h2 className="text-3xl md:text-5xl font-black mb-8 text-slate-900 tracking-tight relative z-10">Daniel de Almeida</h2>
                                 <p className="text-slate-500 text-lg leading-relaxed mb-10 relative z-10">
                                     Especialista em criar sistemas que unem estética refinada com arquitetura robusta. O FLASH é o resultado dessa filosofia: invisível na complexidade, poderoso na entrega.
                                 </p>
