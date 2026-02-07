@@ -86,7 +86,7 @@ export function Dashboard() {
     const [endDate, setEndDate] = useState<string>('');
     const [hasMore, setHasMore] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
-    const LIMIT = 6;
+    const LIMIT = 4;
 
     // Modals & UI State
     // const [selectedReport, setSelectedReport] = useState<Report | null>(null);

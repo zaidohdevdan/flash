@@ -21,6 +21,7 @@ import { ReportHistoryModal } from '../components/domain/modals/ReportHistoryMod
 import { AnalysisModal } from '../components/domain/modals/AnalysisModal';
 import { ExportReportsModal } from '../components/domain/modals/ExportReportsModal';
 import { ConferenceModal } from '../components/domain/modals/ConferenceModal';
+import { ProfileSettingsModal } from '../components/domain/modals/ProfileSettingsModal';
 import { ConferenceInviteNotification } from '../components/ui/ConferenceInviteNotification';
 import type { Report, Stats, Department, UserContact, Notification } from '../types';
 
@@ -41,7 +42,7 @@ const FILTER_OPTIONS = [
 
 export function ManagerDashboard() {
     const navigate = useNavigate();
-    const { user, signOut } = useAuth();
+    const { user, signOut, updateUser } = useAuth();
     const [searchParams, setSearchParams] = useSearchParams();
     const activeChatId = searchParams.get('chat');
 
@@ -78,7 +79,7 @@ export function ManagerDashboard() {
     const [statusFilter, setStatusFilter] = useState<string>('FORWARDED');
     const [searchTerm, setSearchTerm] = useState('');
     const [hasMore, setHasMore] = useState(true);
-    const LIMIT = 6;
+    const LIMIT = 4;
 
     const loadReports = useCallback(async (pageNum: number, reset: boolean = false, status?: string) => {
         try {
@@ -132,6 +133,17 @@ export function ManagerDashboard() {
             console.error('Erro ao buscar notificações');
         }
     }, []);
+
+    const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const [profilePhrase, setProfilePhrase] = useState(user?.statusPhrase || '');
+    const [profileAvatar, setProfileAvatar] = useState<File | null>(null);
+    const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
+
+    useEffect(() => {
+        if (user?.statusPhrase) {
+            setProfilePhrase(user.statusPhrase);
+        }
+    }, [user?.statusPhrase]);
 
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -257,6 +269,31 @@ export function ManagerDashboard() {
         }
     };
 
+    const handleUpdateProfile = async () => {
+        if (!user) return;
+        setIsUpdatingProfile(true);
+        try {
+            const formData = new FormData();
+            formData.append('statusPhrase', profilePhrase);
+            if (profileAvatar) {
+                formData.append('avatar', profileAvatar);
+            }
+
+            const response = await api.patch('/profile', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+
+            updateUser(response.data);
+            toast.success('Perfil atualizado!');
+            setIsProfileOpen(false);
+            setProfileAvatar(null);
+        } catch {
+            toast.error('Erro ao atualizar perfil.');
+        } finally {
+            setIsUpdatingProfile(false);
+        }
+    };
+
     const resetAnalysisForm = () => {
         setFormFeedback('');
         setSelectedDeptId('');
@@ -270,6 +307,7 @@ export function ManagerDashboard() {
             notifications={notifications}
             onMarkAsRead={handleMarkAsRead}
             onMarkAllAsRead={handleMarkAllAsRead}
+            onProfileClick={() => setIsProfileOpen(true)}
         >
             <div className="flex flex-col lg:flex-row gap-8 animate-in fade-in duration-500">
                 <div className="flex-1 space-y-8">
@@ -398,6 +436,17 @@ export function ManagerDashboard() {
                     setPendingInvite(null);
                 }}
                 onDecline={() => setPendingInvite(null)}
+            />
+
+            <ProfileSettingsModal
+                isOpen={isProfileOpen}
+                onClose={() => setIsProfileOpen(false)}
+                onSave={handleUpdateProfile}
+                isLoading={isUpdatingProfile}
+                profilePhrase={profilePhrase}
+                setProfilePhrase={setProfilePhrase}
+                onAvatarChange={setProfileAvatar}
+                avatarUrl={user?.avatarUrl}
             />
         </DashboardLayout>
     );

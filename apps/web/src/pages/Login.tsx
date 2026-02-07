@@ -20,7 +20,7 @@ export function Login() {
         try {
             await signIn(email, password);
             // Navigation handled by AuthContext or useEffect, but we can double check
-        } catch (err) {
+        } catch {
             setError('Credenciais inválidas. Verifique e tente novamente.');
         } finally {
             setLoading(false);
@@ -70,7 +70,7 @@ export function Login() {
                             </div>
                             <h2 className="text-2xl font-black text-slate-900 tracking-tight mb-2">Acesso Restrito</h2>
                             <p className="text-slate-500 text-sm font-medium">
-                                Identifique-se para acessar o comando.
+                                Identifique-se para acessar o dashboard.
                             </p>
                         </div>
 
@@ -141,7 +141,7 @@ export function Login() {
                             </button>
                         </form>
 
-                        <div className="mt-8 text-center">
+                        <div className="mt-8 text-center invisible">
                             <p className="text-xs font-medium text-slate-400">
                                 Esqueceu sua senha? <a href="#" className="text-slate-900 underline hover:text-blue-600 transition-colors">Recuperar acesso</a>
                             </p>

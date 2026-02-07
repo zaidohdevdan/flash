@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Socket } from 'socket.io-client';
-import { Send, Mic, X, MessageSquare, Square, Trash2, Hourglass, Pencil, Check, Trash, User } from 'lucide-react';
+import { Send, Mic, X, MessageSquare, Square, Trash2, Hourglass, Pencil, Check, Trash, User, Zap } from 'lucide-react';
 import { api } from '../services/api';
 
 const getRoomName = (id1: string, id2: string) => {
@@ -366,9 +366,14 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket }: ChatWid
                                                 )}
                                             </div>
                                         )}
-                                        <span className={`text-[9px] block mt-1.5 text-right font-bold opacity-60 ${isMe ? 'text-[var(--accent-text)]' : 'text-[var(--text-tertiary)]'}`}>
-                                            {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                        </span>
+                                        <div className="flex items-center justify-end gap-1.5 mt-1.5">
+                                            <span className={`text-[9px] font-bold opacity-60 ${isMe ? 'text-[var(--accent-text)]' : 'text-[var(--text-tertiary)]'}`}>
+                                                {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                            </span>
+                                            {isMe && (
+                                                <Zap className="w-2.5 h-2.5 text-[#d4e720] fill-[#d4e720] drop-shadow-[0_0_2px_rgba(212,231,32,0.5)]" />
+                                            )}
+                                        </div>
                                     </>
                                 )}
 

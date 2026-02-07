@@ -1,7 +1,11 @@
-// Build timestamp: 2026-02-07T14:00:00Z
-// This file forces Railway to rebuild with latest visual and profile updates
+// Build timestamp: 2026-02-07T19:10:00Z
+// This file forces Railway to rebuild with latest enhancements:
+// - Manager Profile fix
+// - LIMIT=4 standardization
+// - Chat read indicator (Zap icon)
+// - Premium Logout button
 export const BUILD_INFO = {
-    timestamp: '2026-02-07T14:00:00Z',
-    commit: 'Premium Visual Overhaul & Profile Fixes',
-    version: '1.0.2'
+    timestamp: '2026-02-07T19:10:00Z',
+    commit: 'Premium UI/UX Enhancements & Manager Fix',
+    version: '1.0.3'
 };

@@ -4,7 +4,8 @@ import {
     LogOut,
     Bell,
     Menu,
-    Search
+    Search,
+    ArrowRight
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
@@ -119,13 +120,20 @@ export function DashboardLayout({
                     </nav>
 
                     {/* Bottom Actions */}
-                    <div className="p-4 border-t border-[var(--border-subtle)]">
+                    <div className="p-4 border-t border-[var(--border-subtle)] space-y-2">
                         <button
                             onClick={onLogout}
-                            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-[var(--text-secondary)] hover:bg-red-50 hover:text-red-600 transition-colors"
+                            className="w-full flex items-center justify-between group px-4 py-3 rounded-2xl bg-slate-50 hover:bg-red-50 text-slate-600 hover:text-red-600 transition-all duration-300 border border-slate-100 hover:border-red-100 shadow-sm hover:shadow-md"
                         >
-                            <LogOut className="w-4 h-4" />
-                            Sair
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-white rounded-lg shadow-inner group-hover:scale-110 transition-transform">
+                                    <LogOut className="w-4 h-4" />
+                                </div>
+                                <span className="text-xs font-black uppercase tracking-widest">Sair</span>
+                            </div>
+                            <div className="opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all">
+                                <ArrowRight className="w-3 h-3" />
+                            </div>
                         </button>
                     </div>
                 </div>
