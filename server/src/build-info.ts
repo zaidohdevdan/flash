@@ -1,11 +1,10 @@
-// Build timestamp: 2026-02-07T19:15:00Z
-// This file forces Railway to rebuild with latest enhancements:
-// - Manager Profile fix
-// - LIMIT=4 standardization
-// - Refined Chat read indicator (Zap icon w-3)
-// - Premium Logout button
+// Build timestamp: 2026-02-07T19:20:00Z
+// v1.0.5: 
+// - Improved Login Error Reporting (handles rate limit & server errors)
+// - Added diagnostic script in /scripts/check-users.ts
+// - Previous: Premium UI/UX, Manager Profile fix, LIMIT=4, etc.
 export const BUILD_INFO = {
-    timestamp: '2026-02-07T19:15:00Z',
-    commit: 'Final UI Refinements & Chat Fix',
-    version: '1.0.4'
+    timestamp: '2026-02-07T19:20:00Z',
+    commit: 'Improved Login Error Reporting & Diagnostics',
+    version: '1.0.5'
 };
