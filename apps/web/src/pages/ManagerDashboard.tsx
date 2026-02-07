@@ -146,13 +146,11 @@ export function ManagerDashboard() {
     }, [user?.statusPhrase]);
 
     useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         loadReports(1, true, statusFilter);
         loadStats();
     }, [statusFilter, selectedDeptId, loadReports, loadStats]);
 
     useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         loadContacts();
         loadDepartments();
         fetchNotifications();

@@ -20,8 +20,9 @@ export function Login() {
         try {
             await signIn(email, password);
             // Navigation handled by AuthContext or useEffect, but we can double check
-        } catch (err: any) {
-            const message = err.response?.data?.error || 'Credenciais inválidas. Verifique e tente novamente.';
+        } catch (err: unknown) {
+            const error = err as { response?: { data?: { error?: string } } };
+            const message = error.response?.data?.error || 'Credenciais inválidas. Verifique e tente novamente.';
             setError(message);
         } finally {
             setLoading(false);
