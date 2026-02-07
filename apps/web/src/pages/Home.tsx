@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { motion, useScroll, useTransform, useReducedMotion, useSpring } from 'framer-motion';
@@ -16,10 +16,7 @@ import {
     BarChart3,
     Globe2,
     Smartphone,
-    Twitter,
-    Mail,
-    MapPin,
-    Shield
+    Twitter
 } from 'lucide-react';
 import { ProcessTimeline } from '../components/home/ProcessTimeline';
 import { TechSpecs } from '../components/home/TechSpecs';
@@ -426,9 +423,9 @@ export function Home() {
                                     Especialista em criar sistemas que unem estética refinada com arquitetura robusta. O FLASH é o resultado dessa filosofia: invisível na complexidade, poderoso na entrega.
                                 </p>
                                 <div className="flex gap-4 relative z-10">
-                                    <a href="#" className="p-4 bg-slate-50 border border-slate-200 rounded-2xl hover:bg-slate-900 hover:border-slate-800 hover:text-white transition-all text-slate-500 hover:shadow-lg hover:-translate-y-1"><Linkedin className="w-6 h-6" /></a>
-                                    <a href="#" className="p-4 bg-slate-50 border border-slate-200 rounded-2xl hover:bg-pink-600 hover:border-pink-500 hover:text-white transition-all text-slate-500 hover:shadow-lg hover:-translate-y-1"><Instagram className="w-6 h-6" /></a>
-                                    <a href="#" className="p-4 bg-slate-50 border border-slate-200 rounded-2xl hover:bg-slate-900 hover:border-slate-800 hover:text-white transition-all text-slate-500 hover:shadow-lg hover:-translate-y-1"><Github className="w-6 h-6" /></a>
+                                    <a href="#" aria-label="LinkedIn" className="p-4 bg-slate-50 border border-slate-200 rounded-2xl hover:bg-slate-900 hover:border-slate-800 hover:text-white transition-all text-slate-500 hover:shadow-lg hover:-translate-y-1"><Linkedin className="w-6 h-6" /></a>
+                                    <a href="#" aria-label="Instagram" className="p-4 bg-slate-50 border border-slate-200 rounded-2xl hover:bg-pink-600 hover:border-pink-500 hover:text-white transition-all text-slate-500 hover:shadow-lg hover:-translate-y-1"><Instagram className="w-6 h-6" /></a>
+                                    <a href="#" aria-label="GitHub" className="p-4 bg-slate-50 border border-slate-200 rounded-2xl hover:bg-slate-900 hover:border-slate-800 hover:text-white transition-all text-slate-500 hover:shadow-lg hover:-translate-y-1"><Github className="w-6 h-6" /></a>
                                 </div>
                             </div>
                         </motion.div>
@@ -526,9 +523,9 @@ export function Home() {
                                 Plataforma unificada para operações de campo de alta performance. Sincronia perfeita, dados seguros e design invisível.
                             </p>
                             <div className="flex gap-4">
-                                <a href="#" className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-900 hover:border-slate-300 transition-all"><Twitter className="w-4 h-4" /></a>
-                                <a href="#" className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-900 hover:border-slate-300 transition-all"><Github className="w-4 h-4" /></a>
-                                <a href="#" className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-900 hover:border-slate-300 transition-all"><Linkedin className="w-4 h-4" /></a>
+                                <a href="#" aria-label="Twitter" className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-900 hover:border-slate-300 transition-all"><Twitter className="w-4 h-4" /></a>
+                                <a href="#" aria-label="GitHub" className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-900 hover:border-slate-300 transition-all"><Github className="w-4 h-4" /></a>
+                                <a href="#" aria-label="LinkedIn" className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-900 hover:border-slate-300 transition-all"><Linkedin className="w-4 h-4" /></a>
                             </div>
                         </div>
 
