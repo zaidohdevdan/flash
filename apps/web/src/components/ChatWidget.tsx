@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { Socket } from 'socket.io-client';
+import { useTranslation } from 'react-i18next';
 import { Send, Mic, X, MessageSquare, Square, Trash2, Hourglass, Pencil, Check, CheckCheck, Trash, User, RefreshCw } from 'lucide-react';
 import { api } from '../services/api';
 import { db } from '../services/db';
@@ -30,6 +31,7 @@ interface ChatWidgetProps {
 }
 
 export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead }: ChatWidgetProps) {
+    const { t } = useTranslation();
     const [inputText, setInputText] = useState('');
     const [isRecording, setIsRecording] = useState(false);
     const [recordingTime, setRecordingTime] = useState(0);
@@ -199,7 +201,7 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead }:
                 createdAt: Date.now()
             });
             setInputText('');
-            toast.success('Mensagem salva offline', { icon: '💾' });
+            toast.success(t('chat.toasts.savedOffline'), { icon: '💾' });
             return;
         }
 
@@ -233,7 +235,7 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead }:
 
         } catch (err) {
             console.error('Error accessing microphone:', err);
-            alert('Erro ao acessar microfone. Verifique as permissões.');
+            alert('Error accessing microphone. Check permissions.');
         }
     };
 
@@ -265,18 +267,18 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead }:
             }
         } catch (error) {
             console.error('Error uploading audio:', error);
-            alert('Falha ao enviar áudio.');
+            alert(t('chat.toasts.uploadError'));
         }
     };
 
     const handleClearHistory = async () => {
-        if (!window.confirm('Você tem certeza que deseja excluir todo o histórico desta conversa?')) return;
+        if (!window.confirm(t('chat.confirm.clearHistory'))) return;
         try {
             await api.delete(`/chat/history/${encodeURIComponent(chatRoom)}`);
             await db.chatMessages.where('roomName').equals(chatRoom).delete();
         } catch (error) {
             console.error('Error clearing chat history:', error);
-            alert('Erro ao excluir histórico.');
+            alert(t('chat.toasts.historyError'));
         }
     };
 
@@ -296,7 +298,7 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead }:
             setEditingMessageId(null);
         } catch (error) {
             console.error('Error updating message:', error);
-            alert('Falha ao editar mensagem.');
+            alert(t('chat.toasts.editError'));
         }
     };
 
@@ -311,7 +313,7 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead }:
             setShowDeleteMenuFor(null);
         } catch (error) {
             console.error('Error deleting message:', error);
-            alert('Falha ao excluir mensagem.');
+            alert(t('chat.toasts.deleteError'));
         }
     };
 
@@ -332,10 +334,7 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead }:
                     <div>
                         <h3 className="font-bold text-sm text-[var(--text-primary)]">{targetUser.name}</h3>
                         <p className="text-[10px] text-[var(--text-tertiary)] uppercase tracking-wider">
-                            {targetUser.role === 'MANAGER' ? 'Gerente / Setor' :
-                                targetUser.role === 'SUPERVISOR' ? 'Supervisor' :
-                                    targetUser.role === 'PROFESSIONAL' ? 'Operacional' :
-                                        'Contato'}
+                            {t(`chat.roles.${targetUser.role?.toLowerCase() || 'contact'}`, { defaultValue: targetUser.role })}
                         </p>
                     </div>
                 </div>
@@ -344,7 +343,7 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead }:
                         type="button"
                         onClick={handleClearHistory}
                         className="p-1.5 hover:bg-[var(--bg-secondary)] rounded-lg transition hover:text-[var(--text-primary)]"
-                        title="Excluir Histórico"
+                        title={t('chat.actions.clearHistory')}
                     >
                         <Trash2 className="w-4 h-4" />
                     </button>
@@ -352,7 +351,7 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead }:
                         type="button"
                         onClick={onClose}
                         className="p-1 hover:bg-[var(--bg-secondary)] rounded-full transition hover:text-[var(--text-primary)]"
-                        title="Fechar"
+                        title={t('chat.actions.close')}
                     >
                         <X className="w-5 h-5" />
                     </button>
@@ -364,7 +363,7 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead }:
                 {allMessages.length === 0 && (
                     <div className="flex flex-col items-center justify-center h-full text-[var(--text-tertiary)] opacity-50">
                         <MessageSquare className="w-12 h-12 mb-2" />
-                        <p className="text-xs font-medium">Inicie a conversa...</p>
+                        <p className="text-xs font-medium">{t('chat.placeholders.start')}</p>
                     </div>
                 )}
 
@@ -391,14 +390,14 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead }:
                                             className="w-full bg-white text-[var(--text-primary)] placeholder-[var(--text-tertiary)] border border-[var(--border-medium)] outline-none rounded-lg p-2 text-xs resize-none focus:border-[var(--accent-primary)] transition-colors"
                                             rows={2}
                                             autoFocus
-                                            aria-label="Editar mensagem"
+                                            aria-label={t('chat.placeholders.edit')}
                                         />
                                         <div className="flex justify-end gap-2">
                                             <button
                                                 type="button"
                                                 onClick={() => setEditingMessageId(null)}
                                                 className="p-1 hover:bg-black/5 rounded text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-                                                title="Cancelar edição"
+                                                title={t('chat.actions.cancelEdit')}
                                             >
                                                 <X className="w-3.5 h-3.5" />
                                             </button>
@@ -406,7 +405,7 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead }:
                                                 type="button"
                                                 onClick={handleUpdateMessage}
                                                 className="p-1 bg-white text-[var(--accent-primary)] rounded hover:bg-white/90 border border-[var(--border-subtle)]"
-                                                title="Salvar alteração"
+                                                title={t('chat.actions.saveEdit')}
                                             >
                                                 <Check className="w-3.5 h-3.5" />
                                             </button>
@@ -424,7 +423,7 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead }:
                                                         <span>
                                                             {(() => {
                                                                 const diff = new Date(msg.expiresAt).getTime() - now;
-                                                                if (diff <= 0) return 'Expirando...';
+                                                                if (diff <= 0) return t('chat.status.expiring');
                                                                 const mins = Math.floor(diff / 60000);
                                                                 const secs = Math.floor((diff % 60000) / 1000);
                                                                 return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
@@ -457,7 +456,7 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead }:
                                             type="button"
                                             onClick={(e) => { e.stopPropagation(); handleStartEdit(msg); }}
                                             className="p-2 bg-white shadow-md border border-[var(--border-subtle)] rounded-full text-[var(--text-tertiary)] hover:text-[var(--accent-primary)] hover:bg-[var(--bg-secondary)] transition"
-                                            title="Editar"
+                                            title={t('chat.actions.edit')}
                                         >
                                             <Pencil className="w-3.5 h-3.5" />
                                         </button>
@@ -466,7 +465,7 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead }:
                                                 type="button"
                                                 onClick={(e) => { e.stopPropagation(); if (showDeleteMenuFor === msg.id) setShowDeleteMenuFor(null); else setShowDeleteMenuFor(msg.id!); }}
                                                 className="p-2 bg-white shadow-md border border-[var(--border-subtle)] rounded-full text-[var(--text-tertiary)] hover:text-red-500 hover:bg-[var(--bg-secondary)] transition"
-                                                title="Excluir"
+                                                title={t('chat.actions.delete')}
                                             >
                                                 <Trash className="w-3.5 h-3.5" />
                                             </button>
@@ -478,14 +477,14 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead }:
                                                         onClick={(e) => { e.stopPropagation(); confirmDelete(msg.id!, 'me'); }}
                                                         className="px-3 py-2 text-left text-xs font-bold text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] rounded-lg flex items-center gap-2 transition-colors"
                                                     >
-                                                        <User className="w-3 h-3" /> Para mim
+                                                        <User className="w-3 h-3" /> {t('chat.actions.deleteForMe')}
                                                     </button>
                                                     <button
                                                         type="button"
                                                         onClick={(e) => { e.stopPropagation(); confirmDelete(msg.id!, 'everyone'); }}
                                                         className="px-3 py-2 text-left text-xs font-bold text-red-500 hover:bg-red-50 rounded-lg flex items-center gap-2 transition-colors"
                                                     >
-                                                        <Trash2 className="w-3 h-3" /> Para todos
+                                                        <Trash2 className="w-3 h-3" /> {t('chat.actions.deleteForEveryone')}
                                                     </button>
                                                 </div>
                                             )}
@@ -507,10 +506,10 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead }:
                             <div className="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping" />
                             <span className="text-xs font-bold font-mono tracking-wider">{formatTime(recordingTime)}</span>
                         </div>
-                        <span className="text-xs text-red-500 font-medium">Gravando áudio...</span>
+                        <span className="text-xs text-red-500 font-medium">{t('chat.status.recording')}</span>
                         <button
                             type="button"
-                            title="Parar gravação"
+                            title={t('chat.actions.stopRecording')}
                             onClick={stopRecording}
                             className="p-2 bg-red-100/50 text-red-600 rounded-full hover:bg-red-100 transition border border-red-200"
                         >
@@ -523,7 +522,7 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead }:
                             type="button"
                             onClick={startRecording}
                             className="p-3 bg-[var(--bg-secondary)] text-[var(--text-secondary)] rounded-xl hover:bg-red-50 hover:text-red-500 hover:border-red-200 transition-all active:scale-95 border border-[var(--border-subtle)]"
-                            title="Gravar áudio"
+                            title={t('chat.actions.startRecording')}
                         >
                             <Mic className="w-5 h-5" />
                         </button>
@@ -532,7 +531,7 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead }:
                             value={inputText}
                             onChange={e => setInputText(e.target.value)}
                             onKeyDown={e => e.key === 'Enter' && handleSendMessage()}
-                            placeholder="Digite sua mensagem..."
+                            placeholder={t('chat.placeholders.type')}
                             className="flex-1 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] outline-none text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] px-4 py-3 rounded-xl focus:ring-2 focus:ring-[var(--accent-primary)]/40 focus:bg-white transition-all font-medium"
                         />
                         <button
@@ -540,7 +539,7 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead }:
                             onClick={handleSendMessage}
                             disabled={!inputText.trim()}
                             className="p-3 bg-[var(--accent-primary)] text-[var(--accent-text)] rounded-xl shadow-lg shadow-[var(--accent-primary)]/20 hover:bg-[var(--accent-primary)]/90 disabled:opacity-50 disabled:shadow-none transition active:scale-95"
-                            title="Enviar"
+                            title={t('chat.actions.send')}
                         >
                             <Send className="w-4 h-4" />
                         </button>

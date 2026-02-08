@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { MessageSquare } from 'lucide-react';
 import { Card, Button } from '../../ui';
 
@@ -15,6 +16,7 @@ export const SupervisorHighlight: React.FC<SupervisorHighlightProps> = ({
     hasUnread,
     onChatOpen
 }) => {
+    const { t } = useTranslation();
 
     return (
         <Card className="bg-white p-6 border border-[var(--border-subtle)] shadow-sm flex flex-col sm:flex-row items-center justify-between gap-6 mb-8 hover:border-[var(--accent-primary)] transition-all">
@@ -27,7 +29,7 @@ export const SupervisorHighlight: React.FC<SupervisorHighlightProps> = ({
                 </div>
                 <div>
                     <div className="flex items-center gap-2">
-                        <p className="text-[9px] font-black text-[var(--text-tertiary)] uppercase tracking-widest">Supervisor Direto</p>
+                        <p className="text-[9px] font-black text-[var(--text-tertiary)] uppercase tracking-widest">{t('reports.supervisor.label')}</p>
                         <div className={`w-1.5 h-1.5 rounded-full ${isOnline ? 'bg-emerald-500 animate-pulse' : 'bg-gray-300'}`} />
                     </div>
                     <h3 className={`text-lg font-bold transition-all duration-300 ${hasUnread ? 'text-amber-600' : 'text-[var(--text-primary)]'}`}>
@@ -40,7 +42,7 @@ export const SupervisorHighlight: React.FC<SupervisorHighlightProps> = ({
                 className={!hasUnread ? "!bg-[var(--bg-secondary)] hover:!bg-[var(--bg-tertiary)] border-[var(--border-subtle)]" : ""}
                 onClick={onChatOpen}
             >
-                {hasUnread ? 'NOVA MENSAGEM' : 'CONTATAR SUPERVISOR'}
+                {hasUnread ? t('reports.supervisor.newMessage') : t('reports.supervisor.contact')}
             </Button>
         </Card>
     );

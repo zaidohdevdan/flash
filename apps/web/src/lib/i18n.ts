@@ -262,14 +262,264 @@ i18n
                                 loadError: 'Error loading agenda data'
                             }
                         },
-                        notifications: {
-                            unread: 'You have {{count}} unread notification(s)',
-                            unreadChat: 'You have {{count}} unread message(s) in chat',
-                            profileUpdated: 'Profile updated!',
-                            profileError: 'Error updating profile.',
-                            warRoomStarted: 'War Room started! Invites sent.',
-                            warRoomError: 'Error starting War Room.',
-                            noParticipants: 'No online participants to invite.'
+                    },
+                    reports: {
+                        defaults: {
+                            professional: 'Professional',
+                            technicalLead: 'Technical Lead',
+                            supervisor: 'Supervisor'
+                        },
+                        header: {
+                            greeting: 'Hello, {{name}}!',
+                            subtitle: 'Your operational history'
+                        },
+                        create: {
+                            title: 'Create New Report',
+                            cancel: 'Cancel',
+                            details: 'Details',
+                            loadMore: 'Load More Activities',
+                            offlinePending: 'Pending Reports',
+                            offlineWaiting: '{{count}} files waiting for internet',
+                            tryNow: 'Try Now',
+                            clearDrafts: 'Clear offline drafts',
+                            confirmClear: 'Do you want to clear all offline drafts?',
+                            successLocal: 'Report saved locally! Will be sent once online.',
+                            errorUpload: 'Image upload failed',
+                            errorSend: 'Error sending report. Try again later.',
+                            photoRequired: 'Please take a photo for the report.'
+                        },
+                        form: {
+                            placeholder: 'DESCRIBE THE OCCURRENCE or OPERATIONAL UPDATE...',
+                            submit: 'CONFIRM OPERATION',
+                            sending: 'SENDING REPORT...',
+                            capture: 'Tap to capture evidence',
+                            captureHidden: 'Capture evidence',
+                            remove: 'Remove evidence'
+                        },
+                        success: {
+                            title: 'Report Sent!',
+                            subtitle: 'Your supervisor has been notified in real-time.',
+                            back: 'BACK TO HOME'
+                        },
+                        filters: {
+                            all: 'All',
+                            sent: 'Sent',
+                            inReview: 'In Review',
+                            forwarded: 'Dept',
+                            resolved: 'Resolved',
+                            archived: 'Archived'
+                        },
+                        supervisor: {
+                            label: 'Direct Supervisor',
+                            newMessage: 'NEW MESSAGE',
+                            contact: 'CONTACT SUPERVISOR',
+                            noneAssigned: 'You have no assigned supervisor.'
+                        },
+                        historyModal: {
+                            title: 'Operational Trail',
+                            subtitle: 'Protocol: #{{id}} • Full History',
+                            noObservation: 'No observation recorded.',
+                            by: 'By:'
+                        }
+                    },
+                    chat: {
+                        roles: {
+                            manager: 'Manager / Sector',
+                            supervisor: 'Supervisor',
+                            professional: 'Operational',
+                            contact: 'Contact'
+                        },
+                        actions: {
+                            clearHistory: 'Clear History',
+                            close: 'Close',
+                            edit: 'Edit',
+                            delete: 'Delete',
+                            cancelEdit: 'Cancel edit',
+                            saveEdit: 'Save changes',
+                            deleteForMe: 'For me',
+                            deleteForEveryone: 'For everyone',
+                            stopRecording: 'Stop recording',
+                            startRecording: 'Record audio',
+                            send: 'Send'
+                        },
+                        placeholders: {
+                            start: 'Start chatting...',
+                            type: 'Type your message...',
+                            edit: 'Edit message'
+                        },
+                        status: {
+                            expiring: 'Expiring...',
+                            recording: 'Recording audio...',
+                            online: 'Online',
+                            offline: 'Offline'
+                        },
+                        toasts: {
+                            savedOffline: 'Message saved offline',
+                            uploadError: 'Audio upload failed.',
+                            sendError: 'Error sending message.',
+                            editError: 'Failed to edit message.',
+                            deleteError: 'Failed to delete message.',
+                            historyCleared: 'History cleared.',
+                            historyError: 'Error clearing history.'
+                        },
+                        confirm: {
+                            clearHistory: 'Are you sure you want to delete all history for this conversation?'
+                        }
+                    },
+                    auth: {
+                        login: {
+                            accessRestricted: 'Access Restricted',
+                            identify: 'Please identify yourself to access the dashboard.',
+                            emailLabel: 'Operational ID / Email',
+                            passwordLabel: 'Access Key',
+                            submit: 'Enter System',
+                            forgotPassword: 'Forgot your password?',
+                            recover: 'Recover access',
+                            secureConnection: 'Secure Connection E2EE',
+                            error: 'Invalid credentials. Please check and try again.'
+                        },
+                        register: {
+                            title: 'Create Account',
+                            subtitle: 'Join the largest operational intelligence network.',
+                            backToLogin: 'Back to Login',
+                            labels: {
+                                name: 'Full Name',
+                                email: 'E-mail',
+                                password: 'Password',
+                                role: 'Access Type',
+                                supervisor: 'Technical Manager'
+                            },
+                            placeholders: {
+                                name: 'Ex: John Doe',
+                                email: 'you@flash.com',
+                                supervisor: 'Select your supervisor'
+                            },
+                            roles: {
+                                professional: 'Professional',
+                                supervisor: 'Supervisor'
+                            },
+                            submit: 'Complete Registration',
+                            secureSystem: 'Secure System',
+                            sslActive: 'SSL Connection Active',
+                            success: {
+                                title: 'Account Created!',
+                                subtitle: 'Welcome to Flash.',
+                                message: 'Your account has been successfully created.',
+                                redirecting: 'Redirecting to login...'
+                            },
+                            errors: {
+                                selectSupervisor: 'Please select a supervisor.',
+                                generic: 'Error creating account.'
+                            }
+                        }
+                    },
+                    notifications: {
+                        unread: 'You have {{count}} unread notification(s)',
+                        unreadChat: 'You have {{count}} unread message(s) in chat',
+                        profileUpdated: 'Profile updated!',
+                        profileError: 'Error updating profile.',
+                        warRoomStarted: 'War Room started! Invites sent.',
+                        warRoomError: 'Error starting War Room.',
+                        noParticipants: 'No online participants to invite.'
+                    },
+                    home: {
+                        nav: {
+                            features: 'Features',
+                            process: 'Process',
+                            specs: 'Technology',
+                            contact: 'Contact',
+                            login: 'Access System'
+                        },
+                        hero: {
+                            badge: 'Enterprise System v4.0',
+                            title: 'Management',
+                            subtitle: 'No Noise.',
+                            description: '<0>FLASH</0> unifies your field operation. Predictive intelligence, offline operation, and minimalist design for those leading the future.',
+                            start: 'Start Operation',
+                            docs: 'Read Documentation'
+                        },
+                        demo: {
+                            offline: 'Offline Mode',
+                            sync: 'Active Sync'
+                        },
+                        features: {
+                            overline: 'Core System',
+                            title: 'Expanded',
+                            subtitle: 'Capabilities',
+                            neural: {
+                                title: 'Neural Core AI',
+                                desc: 'Integrated predictive analysis identifying operational bottlenecks before they become crises. Automatic executive summarization.'
+                            },
+                            offline: {
+                                title: 'Offline First',
+                                desc: 'Robust PWA. Work in dead zones with automatic synchronization.'
+                            },
+                            mesh: {
+                                title: 'Global Mesh',
+                                desc: 'Active orbital network. Multi-region synchronization with < 20ms latency.'
+                            },
+                            analytics: {
+                                title: 'Deep Analytics',
+                                desc: 'Executive dashboards with data intelligence and real-time efficiency metrics.'
+                            }
+                        },
+                        developer: {
+                            role: 'Software Engineering',
+                            name: 'Daniel de Almeida',
+                            desc: 'Specialist in creating systems that unite refined aesthetics with robust architecture. FLASH is the result of this philosophy: invisible in complexity, powerful in delivery.',
+                            manifesto: {
+                                overline: 'Manifesto',
+                                title: '"Enterprise software',
+                                subtitle: 'doesn\'t have to be boring."',
+                                text: 'We believe that the quality of the tool defines the quality of the work. That\'s why we invest time in every pixel, every transition, and every millisecond of performance.'
+                            }
+                        },
+                        contact: {
+                            overline: 'Contact',
+                            title: 'Ready to transform',
+                            subtitle: 'your operation?',
+                            success: {
+                                title: 'Request Received!',
+                                desc: 'We will be in touch shortly.',
+                                reset: 'Send Another'
+                            },
+                            form: {
+                                name: 'Your Name',
+                                namePlaceholder: 'Ex: John Doe',
+                                company: 'Company',
+                                companyPlaceholder: 'Ex: Acme Corp',
+                                email: 'Corporate Email',
+                                emailPlaceholder: 'name@company.com',
+                                message: 'Message',
+                                messagePlaceholder: 'How can we help?',
+                                submit: 'REQUEST DEMO',
+                                sending: 'SENDING...'
+                            }
+                        },
+                        footer: {
+                            desc: 'Unified platform for high-performance field operations. Perfect sync, secure data, and invisible design.',
+                            product: {
+                                title: 'Product',
+                                neural: 'Neural Core',
+                                offline: 'Offline First',
+                                mesh: 'Global Mesh',
+                                changelog: 'Changelog'
+                            },
+                            company: {
+                                title: 'Company',
+                                about: 'About',
+                                careers: 'Careers',
+                                blog: 'Blog',
+                                contact: 'Contact'
+                            },
+                            legal: {
+                                title: 'Legal',
+                                privacy: 'Privacy',
+                                terms: 'Terms',
+                                compliance: 'Compliance'
+                            },
+                            copyright: '© 2026 Daniel de Almeida Inc. All rights reserved.',
+                            status: 'All Systems Normal'
                         }
                     }
                 }
@@ -437,8 +687,8 @@ i18n
                                 forward: 'Encaminhar Agora',
                                 update: 'Atualizar Status'
                             },
-                            feedbackLabel: 'Parecer Técnico / Resumo da Ação',
-                            feedbackPlaceholder: 'Descreva as providências ou análise técnica...',
+                            feedbackLabel: 'Technical Opinion / Action Summary',
+                            feedbackPlaceholder: 'Describe the measures or technical analysis...',
                             nextStep: 'Próxima Etapa',
                             status: {
                                 review: 'ANÁLISE',
@@ -521,20 +771,268 @@ i18n
                                 createError: 'Erro ao criar evento',
                                 deleteSuccess: 'Evento removido',
                                 deleteError: 'Erro ao remover evento',
-                                loadError: 'Erro ao carregar dados da agenda'
+                            },
+                        },
+                    },
+                    reports: {
+                        defaults: {
+                            professional: 'Profissional',
+                            technicalLead: 'Responsável Técnico',
+                            supervisor: 'Supervisor'
+                        },
+                        header: {
+                            greeting: 'Olá, {{name}}!',
+                            subtitle: 'Seu histórico operacional'
+                        },
+                        create: {
+                            title: 'Criar Nova Ocorrência',
+                            cancel: 'Cancelar',
+                            details: 'Detalhes',
+                            loadMore: 'Carregar Mais Atividades',
+                            offlinePending: 'Relatórios Pendentes',
+                            offlineWaiting: '{{count}} arquivos aguardando internet',
+                            tryNow: 'Tentar Agora',
+                            clearDrafts: 'Limpar rascunhos offline',
+                            confirmClear: 'Deseja limpar todos os rascunhos offline?',
+                            successLocal: 'Relatório salvo localmente! Será enviado assim que houver internet.',
+                            errorUpload: 'Falha no upload da imagem',
+                            errorSend: 'Erro ao enviar relatório. Tentaremos novamente depois.',
+                            photoRequired: 'Por favor, tire uma foto para o relatório.'
+                        },
+                        form: {
+                            placeholder: 'DESCREVA A OCORRÊNCIA OU ATUALIZAÇÃO OPERACIONAL...',
+                            submit: 'CONFIRMAR OPERAÇÃO',
+                            sending: 'ENVIANDO RELATÓRIO...',
+                            capture: 'Toque para capturar evidência',
+                            captureHidden: 'Capturar evidência',
+                            remove: 'Remover evidência'
+                        },
+                        success: {
+                            title: 'Relatório Enviado!',
+                            subtitle: 'O seu supervisor foi notificado em tempo real.',
+                            back: 'VOLTAR AO INÍCIO'
+                        },
+                        filters: {
+                            all: 'Tudo',
+                            sent: 'Enviados',
+                            inReview: 'Análise',
+                            forwarded: 'Depto',
+                            resolved: 'Finalizado',
+                            archived: 'Arquivado'
+                        },
+                        supervisor: {
+                            label: 'Supervisor Direto',
+                            newMessage: 'NOVA MENSAGEM',
+                            contact: 'CONTATAR SUPERVISOR',
+                            noneAssigned: 'Você ainda não possui um supervisor atribuído.'
+                        },
+                        historyModal: {
+                            title: 'Trilha Operacional',
+                            subtitle: 'Protocolo: #{{id}} • Histórico Completo',
+                            noObservation: 'Nenhuma observação registrada.',
+                            by: 'Por:'
+                        }
+                    },
+                    chat: {
+                        roles: {
+                            manager: 'Gerente / Setor',
+                            supervisor: 'Supervisor',
+                            professional: 'Operacional',
+                            contact: 'Contato'
+                        },
+                        actions: {
+                            clearHistory: 'Excluir Histórico',
+                            close: 'Fechar',
+                            edit: 'Editar',
+                            delete: 'Excluir',
+                            cancelEdit: 'Cancelar edição',
+                            saveEdit: 'Salvar alteração',
+                            deleteForMe: 'Para mim',
+                            deleteForEveryone: 'Para todos',
+                            stopRecording: 'Parar gravação',
+                            startRecording: 'Gravar áudio',
+                            send: 'Enviar'
+                        },
+                        placeholders: {
+                            start: 'Inicie a conversa...',
+                            type: 'Digite sua mensagem...',
+                            edit: 'Editar mensagem'
+                        },
+                        status: {
+                            expiring: 'Expirando...',
+                            recording: 'Gravando áudio...',
+                            online: 'Online',
+                            offline: 'Offline'
+                        },
+                        toasts: {
+                            savedOffline: 'Mensagem salva offline',
+                            uploadError: 'Falha ao enviar áudio.',
+                            sendError: 'Erro ao enviar mensagem.',
+                            editError: 'Falha ao editar mensagem.',
+                            deleteError: 'Falha ao excluir mensagem.',
+                            historyCleared: 'Histórico excluído.',
+                            historyError: 'Erro ao excluir histórico.'
+                        },
+                        confirm: {
+                            clearHistory: 'Você tem certeza que deseja excluir todo o histórico desta conversa?'
+                        }
+                    },
+                    auth: {
+                        login: {
+                            accessRestricted: 'Acesso Restrito',
+                            identify: 'Identifique-se para acessar o dashboard.',
+                            emailLabel: 'ID Operacional / E-mail',
+                            passwordLabel: 'Chave de Acesso',
+                            submit: 'Entrar no Sistema',
+                            forgotPassword: 'Esqueceu sua senha?',
+                            recover: 'Recuperar acesso',
+                            secureConnection: 'Conexão Segura E2EE',
+                            error: 'Credenciais inválidas. Verifique e tente novamente.'
+                        },
+                        register: {
+                            title: 'Criar Conta',
+                            subtitle: 'Junte-se à maior rede de inteligência operacional.',
+                            backToLogin: 'Voltar ao Login',
+                            labels: {
+                                name: 'Nome Completo',
+                                email: 'E-mail',
+                                password: 'Senha',
+                                role: 'Tipo de Acesso',
+                                supervisor: 'Responsável Técnico'
+                            },
+                            placeholders: {
+                                name: 'Ex: Carlos Oliveira',
+                                email: 'seu@flash.com',
+                                supervisor: 'Selecione seu supervisor'
+                            },
+                            roles: {
+                                professional: 'Profissional',
+                                supervisor: 'Supervisor'
+                            },
+                            submit: 'Finalizar Cadastro',
+                            secureSystem: 'Sistema Seguro',
+                            sslActive: 'Conexão SSL Ativa',
+                            success: {
+                                title: 'Conta Criada!',
+                                subtitle: 'Bem-vindo ao Flash.',
+                                message: 'Sua conta foi criada com sucesso.',
+                                redirecting: 'Redirecionando para o login...'
+                            },
+                            errors: {
+                                selectSupervisor: 'Por favor, selecione um supervisor.',
+                                generic: 'Erro ao realizar cadastro.'
+                            }
+                        }
+                    },
+                    notifications: {
+                        unread: 'Você tem {{count}} notificação(ões) não lida(s)',
+                        unreadChat: 'Você tem {{count}} mensagem(ns) não lida(s) no chat',
+                        profileUpdated: 'Perfil atualizado!',
+                        profileError: 'Erro ao atualizar perfil.',
+                        warRoomStarted: 'War Room iniciada! Convites enviados.',
+                        warRoomError: 'Erro ao iniciar War Room.',
+                        noParticipants: 'Nenhum participante online para convidar.'
+                    },
+                    home: {
+                        nav: {
+                            features: 'Recursos',
+                            process: 'Processo',
+                            specs: 'Tecnologia',
+                            contact: 'Contato',
+                            login: 'Acessar Sistema'
+                        },
+                        hero: {
+                            badge: 'Enterprise System v4.0',
+                            title: 'Gestão',
+                            subtitle: 'Sem Ruído.',
+                            description: 'O <0>FLASH</0> unifica sua operação de campo. Inteligência preditiva, operação offline e design minimalista para quem lidera o futuro.',
+                            start: 'Iniciar Operação',
+                            docs: 'Ver Documentação'
+                        },
+                        demo: {
+                            offline: 'Modo Offline',
+                            sync: 'Sincronização Ativa'
+                        },
+                        features: {
+                            overline: 'Core System',
+                            title: 'Capacidades',
+                            subtitle: 'Expandidas',
+                            neural: {
+                                title: 'Neural Core AI',
+                                desc: 'Análise preditiva integrada que identifica gargalos operacionais antes que eles virem crise. Sumarização executiva automática.'
+                            },
+                            offline: {
+                                title: 'Offline First',
+                                desc: 'PWA robusto. Trabalhe em zonas sem sinal com sincronização automática.'
+                            },
+                            mesh: {
+                                title: 'Global Mesh',
+                                desc: 'Rede orbital ativa. Sincronização multi-região com latência < 20ms.'
+                            },
+                            analytics: {
+                                title: 'Deep Analytics',
+                                desc: 'Dashboards executivos com inteligência de dados e métricas de eficiência em tempo real.'
                             }
                         },
-                        notifications: {
-                            unread: 'Você tem {{count}} notificação(ões) não lida(s)',
-                            unreadChat: 'Você tem {{count}} mensagem(ns) não lida(s) no chat',
-                            profileUpdated: 'Perfil atualizado!',
-                            profileError: 'Erro ao atualizar perfil.',
-                            warRoomStarted: 'War Room iniciada! Convites enviados.',
-                            warRoomError: 'Erro ao iniciar War Room.',
-                            noParticipants: 'Nenhum participante online para convidar.'
+                        developer: {
+                            role: 'Engenharia de Software',
+                            name: 'Daniel de Almeida',
+                            desc: 'Especialista em criar sistemas que unem estética refinada com arquitetura robusta. O FLASH é o resultado dessa filosofia: invisível na complexidade, poderoso na entrega.',
+                            manifesto: {
+                                overline: 'Manifesto',
+                                title: '"Software corporativo',
+                                subtitle: 'não precisa ser chato."',
+                                text: 'Acreditamos que a qualidade da ferramenta define a qualidade do trabalho. Por isso, investimos tempo em cada pixel, cada transição e cada milissegundo de performance.'
+                            }
+                        },
+                        contact: {
+                            overline: 'Contato',
+                            title: 'Pronto para transformar',
+                            subtitle: 'sua operação?',
+                            success: {
+                                title: 'Solicitação Recebida!',
+                                desc: 'Entraremos em contato em breve.',
+                                reset: 'Enviar Outra'
+                            },
+                            form: {
+                                name: 'Seu Nome',
+                                namePlaceholder: 'Ex: João Silva',
+                                company: 'Empresa',
+                                companyPlaceholder: 'Ex: Acme Corp',
+                                email: 'E-mail Corporativo',
+                                emailPlaceholder: 'nome@empresa.com',
+                                message: 'Mensagem',
+                                messagePlaceholder: 'Como podemos ajudar?',
+                                submit: 'SOLICITAR DEMO',
+                                sending: 'ENVIANDO...'
+                            }
+                        },
+                        footer: {
+                            desc: 'Plataforma unificada para operações de campo de alta performance. Sincronia perfeita, dados seguros e design invisível.',
+                            product: {
+                                title: 'Produto',
+                                neural: 'Neural Core',
+                                offline: 'Offline First',
+                                mesh: 'Global Mesh',
+                                changelog: 'Changelog'
+                            },
+                            company: {
+                                title: 'Empresa',
+                                about: 'Sobre',
+                                careers: 'Carreiras',
+                                blog: 'Blog',
+                                contact: 'Contato'
+                            },
+                            legal: {
+                                title: 'Legal',
+                                privacy: 'Privacidade',
+                                terms: 'Termos',
+                                compliance: 'Compliance'
+                            },
+                            copyright: '© 2026 Daniel de Almeida Inc. Todos os direitos reservados.',
+                            status: 'All Systems Normal'
                         }
                     }
-
                 }
             }
         }

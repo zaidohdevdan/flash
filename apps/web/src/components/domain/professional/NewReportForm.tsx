@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Camera, Send, X } from 'lucide-react';
 import { Button, TextArea } from '../../ui';
 
@@ -21,6 +22,8 @@ export const NewReportForm: React.FC<NewReportFormProps> = ({
     onSubmit,
     isSending
 }) => {
+    const { t } = useTranslation();
+
     return (
         <form onSubmit={onSubmit} className="space-y-6">
             <div className="relative aspect-video rounded-[2.5rem] bg-[var(--bg-secondary)] border border-[var(--border-subtle)] overflow-hidden group shadow-sm transition-all hover:border-[var(--accent-primary)]">
@@ -31,8 +34,8 @@ export const NewReportForm: React.FC<NewReportFormProps> = ({
                             type="button"
                             onClick={onClearImage}
                             className="absolute top-6 right-6 p-3 bg-white/90 hover:bg-white text-red-600 rounded-2xl backdrop-blur-md transition-all scale-90 opacity-0 group-hover:opacity-100 group-hover:scale-100 shadow-sm"
-                            title="Remover evidência"
-                            aria-label="Remover evidência"
+                            title={t('reports.form.remove')}
+                            aria-label={t('reports.form.remove')}
                         >
                             <X className="w-5 h-5" />
                         </button>
@@ -42,14 +45,14 @@ export const NewReportForm: React.FC<NewReportFormProps> = ({
                         <div className="p-4 bg-white rounded-full shadow-sm mb-4 group-hover:scale-110 transition-transform">
                             <Camera className="w-8 h-8 text-[var(--accent-primary)]" />
                         </div>
-                        <p className="text-[10px] text-[var(--text-secondary)] font-black uppercase tracking-widest">Toque para capturar evidência</p>
+                        <p className="text-[10px] text-[var(--text-secondary)] font-black uppercase tracking-widest">{t('reports.form.capture')}</p>
                         <input
                             type="file"
                             accept="image/*"
                             onChange={onImageChange}
                             className="hidden"
-                            title="Capturar evidência"
-                            aria-label="Capturar evidência"
+                            title={t('reports.form.captureHidden')}
+                            aria-label={t('reports.form.captureHidden')}
                         />
                     </label>
                 )}
@@ -57,7 +60,7 @@ export const NewReportForm: React.FC<NewReportFormProps> = ({
 
             <div className="space-y-6">
                 <TextArea
-                    placeholder="DESCREVA A OCORRÊNCIA OU ATUALIZAÇÃO OPERACIONAL..."
+                    placeholder={t('reports.form.placeholder')}
                     value={comment}
                     onChange={e => onCommentChange(e.target.value)}
                     className="!rounded-[2rem] p-6 text-sm font-bold text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] placeholder:uppercase placeholder:tracking-widest bg-[var(--bg-primary)] border-[var(--border-subtle)] focus:border-[var(--accent-primary)] focus:ring-[var(--accent-primary)]"
@@ -73,7 +76,7 @@ export const NewReportForm: React.FC<NewReportFormProps> = ({
                     className="h-16 !rounded-[2rem] text-sm shadow-xl shadow-[var(--accent-primary)]/20"
                 >
                     <Send className={`w-5 h-5 mr-3 ${isSending ? 'animate-ping' : ''}`} />
-                    {isSending ? 'ENVIANDO RELATÓRIO...' : 'CONFIRMAR OPERAÇÃO'}
+                    {isSending ? t('reports.form.sending') : t('reports.form.submit')}
                 </Button>
             </div>
         </form>

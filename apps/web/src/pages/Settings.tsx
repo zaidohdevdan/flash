@@ -25,6 +25,7 @@ import { db } from '../services/db';
 import toast from 'react-hot-toast';
 
 type Theme = 'light' | 'dark' | 'system';
+type Density = 'comfortable' | 'compact';
 
 interface AdminUser {
     id: string;
@@ -67,7 +68,10 @@ const GeneralSettings = () => {
 
     const handleLanguageChange = (lang: string) => {
         i18n.changeLanguage(lang);
-        localStorage.setItem('language', lang);
+        // Only update user specific setting
+        if (user?.id) {
+            localStorage.setItem(`settings_${user.id}_language`, lang);
+        }
     };
 
     return (
@@ -117,12 +121,27 @@ const GeneralSettings = () => {
 };
 
 const AppearanceSettings = () => {
+    const { user } = useAuth();
     const { t } = useTranslation();
-    const [theme, setTheme] = useState<Theme>((localStorage.getItem('theme') as Theme) || 'system');
+    const [theme, setTheme] = useState<Theme>(() => {
+        if (user?.id) {
+            return (localStorage.getItem(`settings_${user.id}_theme`) as Theme) || 'system';
+        }
+        return (localStorage.getItem('theme') as Theme) || 'system';
+    });
+    const [density, setDensity] = useState<Density>(() => {
+        if (user?.id) {
+            return (localStorage.getItem(`settings_${user.id}_density`) as Density) || 'comfortable';
+        }
+        return (localStorage.getItem('density') as Density) || 'comfortable';
+    });
 
     const applyTheme = (newTheme: Theme) => {
         setTheme(newTheme);
         localStorage.setItem('theme', newTheme);
+        if (user?.id) {
+            localStorage.setItem(`settings_${user.id}_theme`, newTheme);
+        }
 
         if (newTheme === 'dark') {
             document.documentElement.classList.add('dark');
@@ -135,6 +154,16 @@ const AppearanceSettings = () => {
                 document.documentElement.classList.remove('dark');
             }
         }
+    };
+
+    const applyDensity = (newDensity: Density) => {
+        setDensity(newDensity);
+        localStorage.setItem('density', newDensity);
+        if (user?.id) {
+            localStorage.setItem(`settings_${user.id}_density`, newDensity);
+        }
+        // Apply to document
+        document.documentElement.setAttribute('data-density', newDensity);
     };
 
     return (
@@ -175,8 +204,18 @@ const AppearanceSettings = () => {
                 <div className="pt-6 border-t border-[var(--border-subtle)] space-y-4">
                     <label className="text-xs font-bold text-[var(--text-tertiary)] uppercase tracking-wider">{t('settings.appearance.density')}</label>
                     <div className="flex bg-[var(--bg-tertiary)] p-1 rounded-lg w-fit">
-                        <button className="px-4 py-2 rounded-md text-xs font-bold uppercase tracking-wider bg-white shadow-sm text-[var(--text-primary)]">{t('settings.appearance.densities.comfortable')}</button>
-                        <button className="px-4 py-2 rounded-md text-xs font-bold uppercase tracking-wider text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]">{t('settings.appearance.densities.compact')}</button>
+                        <button
+                            onClick={() => applyDensity('comfortable')}
+                            className={`px-4 py-2 rounded-md text-xs font-bold uppercase tracking-wider transition-all ${density === 'comfortable' ? 'bg-white shadow-sm text-[var(--text-primary)]' : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'}`}
+                        >
+                            {t('settings.appearance.densities.comfortable')}
+                        </button>
+                        <button
+                            onClick={() => applyDensity('compact')}
+                            className={`px-4 py-2 rounded-md text-xs font-bold uppercase tracking-wider transition-all ${density === 'compact' ? 'bg-white shadow-sm text-[var(--text-primary)]' : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'}`}
+                        >
+                            {t('settings.appearance.densities.compact')}
+                        </button>
                     </div>
                 </div>
             </div>
@@ -446,44 +485,69 @@ const AdminSettings = () => {
             </div>
 
             <div className="bg-[var(--bg-primary)] border border-[var(--border-subtle)] rounded-2xl p-6 space-y-6">
-                <div className="flex gap-4">
-                    <input
-                        type="text"
-                        placeholder={t('settings.admin.searchPlaceholder')}
-                        value={searchTerm}
-                        onChange={e => setSearchTerm(e.target.value)}
-                        className="flex-1 p-3 bg-[var(--bg-secondary)] rounded-xl border border-[var(--border-subtle)] text-[var(--text-primary)] outline-none focus:ring-1 focus:ring-[var(--accent-primary)] text-sm"
-                    />
+                <div className="space-y-4">
+                    <h4 className="text-sm font-bold text-[var(--text-primary)] mb-4">{t('settings.admin.systemCustomization')}</h4>
+                    <div className="flex flex-col gap-1.5 max-w-xs">
+                        <label className="text-xs font-bold text-[var(--text-tertiary)] uppercase tracking-wider">{t('settings.admin.systemLanguage')}</label>
+                        <select
+                            title={t('settings.admin.systemLanguage')}
+                            value={localStorage.getItem('language') || 'pt'}
+                            onChange={(e) => {
+                                const lang = e.target.value;
+                                localStorage.setItem('language', lang);
+                                toast.success(t('settings.admin.systemLanguageSuccess'));
+                            }}
+                            className="p-3 bg-[var(--bg-secondary)] rounded-xl border border-[var(--border-subtle)] text-[var(--text-primary)] focus:ring-1 focus:ring-[var(--accent-primary)] outline-none"
+                        >
+                            <option value="pt">Português (Brasil)</option>
+                            <option value="en">English (US)</option>
+                        </select>
+                        <p className="text-[10px] text-[var(--text-tertiary)]">{t('settings.admin.systemLanguageDesc')}</p>
+                    </div>
                 </div>
 
-                <div className="space-y-2">
-                    {isLoading ? (
-                        <div className="flex justify-center p-8"><Loader2 className="w-6 h-6 animate-spin text-[var(--accent-primary)]" /></div>
-                    ) : (
-                        users.map(u => (
-                            <div key={u.id} className="flex items-center justify-between p-4 bg-[var(--bg-secondary)] rounded-xl border border-[var(--border-subtle)] group">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-10 h-10 rounded-full bg-[var(--bg-tertiary)] flex items-center justify-center overflow-hidden">
-                                        {u.avatarUrl ? <img src={u.avatarUrl} alt={u.name} className="w-full h-full object-cover" /> : <User className="w-5 h-5 text-[var(--text-tertiary)]" />}
+                <div className="pt-6 border-t border-[var(--border-subtle)] space-y-4">
+                    <h4 className="text-sm font-bold text-[var(--text-primary)]">{t('settings.admin.users')}</h4>
+
+                    <div className="flex gap-4">
+                        <input
+                            type="text"
+                            placeholder={t('settings.admin.searchPlaceholder')}
+                            value={searchTerm}
+                            onChange={e => setSearchTerm(e.target.value)}
+                            className="flex-1 p-3 bg-[var(--bg-secondary)] rounded-xl border border-[var(--border-subtle)] text-[var(--text-primary)] outline-none focus:ring-1 focus:ring-[var(--accent-primary)] text-sm"
+                        />
+                    </div>
+
+                    <div className="space-y-2">
+                        {isLoading ? (
+                            <div className="flex justify-center p-8"><Loader2 className="w-6 h-6 animate-spin text-[var(--accent-primary)]" /></div>
+                        ) : (
+                            users.map(u => (
+                                <div key={u.id} className="flex items-center justify-between p-4 bg-[var(--bg-secondary)] rounded-xl border border-[var(--border-subtle)] group">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-10 h-10 rounded-full bg-[var(--bg-tertiary)] flex items-center justify-center overflow-hidden">
+                                            {u.avatarUrl ? <img src={u.avatarUrl} alt={u.name} className="w-full h-full object-cover" /> : <User className="w-5 h-5 text-[var(--text-tertiary)]" />}
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-bold text-[var(--text-primary)]">{u.name}</p>
+                                            <p className="text-xs text-[var(--text-tertiary)]">{u.email} • <span className="uppercase">{u.role}</span></p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <p className="text-sm font-bold text-[var(--text-primary)]">{u.name}</p>
-                                        <p className="text-xs text-[var(--text-tertiary)]">{u.email} • <span className="uppercase">{u.role}</span></p>
-                                    </div>
+                                    <button
+                                        onClick={() => handleDeleteUser(u.id)}
+                                        className="p-2 text-red-500 hover:bg-red-500/10 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+                                        title="Remover Usuário"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </button>
                                 </div>
-                                <button
-                                    onClick={() => handleDeleteUser(u.id)}
-                                    className="p-2 text-red-500 hover:bg-red-500/10 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
-                                    title="Remover Usuário"
-                                >
-                                    <Trash2 className="w-4 h-4" />
-                                </button>
-                            </div>
-                        ))
-                    )}
-                    {!isLoading && users.length === 0 && (
-                        <p className="text-center text-sm text-[var(--text-tertiary)] py-8">{t('settings.admin.noUsers')}</p>
-                    )}
+                            ))
+                        )}
+                        {!isLoading && users.length === 0 && (
+                            <p className="text-center text-sm text-[var(--text-tertiary)] py-8">{t('settings.admin.noUsers')}</p>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>
@@ -576,4 +640,3 @@ export default function Settings() {
         </DashboardLayout>
     );
 }
-

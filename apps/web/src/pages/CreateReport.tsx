@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
@@ -35,6 +36,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import type { Report } from '../types';
 
 export function CreateReport() {
+    const { t } = useTranslation();
     const { user, signOut, updateUser } = useAuth();
     const [view, setView] = useState<'history' | 'form'>('history');
     const [searchParams, setSearchParams] = useSearchParams();
@@ -456,8 +458,8 @@ export function CreateReport() {
                                     <CloudOff className="w-5 h-5" />
                                 </div>
                                 <div>
-                                    <h4 className="text-xs font-black text-amber-900 uppercase tracking-tight">Relatórios Pendentes</h4>
-                                    <p className="text-[10px] font-bold text-amber-700 uppercase tracking-widest">{pendingReports.length} arquivos aguardando internet</p>
+                                    <h4 className="text-xs font-black text-amber-900 uppercase tracking-tight">{t('reports.create.offlinePending')}</h4>
+                                    <p className="text-[10px] font-bold text-amber-700 uppercase tracking-widest">{t('reports.create.offlineWaiting', { count: pendingReports.length })}</p>
                                 </div>
                             </div>
                             <div className="flex items-center gap-2">
@@ -468,18 +470,18 @@ export function CreateReport() {
                                     className="!text-amber-800 hover:bg-amber-100 !px-4"
                                 >
                                     <RefreshCw className="w-4 h-4 mr-2" />
-                                    Tentar Agora
+                                    {t('reports.create.tryNow')}
                                 </Button>
                                 <button
                                     type="button"
                                     onClick={async () => {
-                                        if (confirm('Deseja limpar todos os rascunhos offline?')) {
+                                        if (confirm(t('reports.create.confirmClear'))) {
                                             await db.pendingReports.clear();
                                         }
                                     }}
                                     className="p-2 text-amber-400 hover:text-red-500 transition-colors"
-                                    aria-label="Limpar rascunhos offline"
-                                    title="Limpar rascunhos offline"
+                                    aria-label={t('reports.create.clearDrafts')}
+                                    title={t('reports.create.clearDrafts')}
                                 >
                                     <History className="w-4 h-4" />
                                 </button>
@@ -491,13 +493,13 @@ export function CreateReport() {
                 {view === 'history' ? (
                     <div className="max-w-2xl mx-auto space-y-8 pb-24">
                         <ProfessionalHeader
-                            userName={user?.name || 'Profissional'}
+                            userName={user?.name || t('reports.defaults.professional')}
                             isConnected={isConnected}
                         />
 
                         {user?.supervisorId && (
                             <SupervisorHighlight
-                                supervisorName={user.supervisorName || 'Responsável Técnico'}
+                                supervisorName={user.supervisorName || t('reports.defaults.technicalLead')}
                                 isOnline={onlineUserIds.includes(user.supervisorId)}
                                 hasUnread={hasUnreadMessages || !!unreadMessages[user.supervisorId]}
                                 onChatOpen={handleOpenChat}
@@ -508,11 +510,11 @@ export function CreateReport() {
 
                             <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
                                 {[
-                                    { id: '', label: 'Tudo' },
-                                    { id: 'SENT', label: 'Enviados' },
-                                    { id: 'IN_REVIEW', label: 'Análise' },
-                                    { id: 'FORWARDED', label: 'Depto' },
-                                    { id: 'RESOLVED', label: 'Finalizado' },
+                                    { id: '', label: t('reports.filters.all') },
+                                    { id: 'SENT', label: t('reports.filters.sent') },
+                                    { id: 'IN_REVIEW', label: t('reports.filters.inReview') },
+                                    { id: 'FORWARDED', label: t('reports.filters.forwarded') },
+                                    { id: 'RESOLVED', label: t('reports.filters.resolved') },
                                 ].map(filter => (
                                     <button
                                         type="button"
@@ -546,7 +548,7 @@ export function CreateReport() {
                                         report={item}
                                         actions={
                                             <Button variant="ghost" size="sm" onClick={() => setSelectedReport(item)}>
-                                                Detalhes
+                                                {t('reports.create.details')}
                                             </Button>
                                         }
                                     />
@@ -554,7 +556,7 @@ export function CreateReport() {
 
                                 {hasMore && (
                                     <Button variant="secondary" size="lg" fullWidth onClick={handleLoadMore} className="mt-4">
-                                        Carregar Mais Atividades
+                                        {t('reports.create.loadMore')}
                                     </Button>
                                 )}
                             </div>
@@ -564,11 +566,11 @@ export function CreateReport() {
                     <div className="max-w-xl mx-auto space-y-8 animate-in slide-in-from-bottom-5 duration-500 pb-24">
                         <div className="flex items-center justify-between">
                             <ProfessionalHeader
-                                userName={user?.name || 'Profissional'}
+                                userName={user?.name || t('reports.defaults.professional')}
                                 isConnected={isConnected}
                             />
                             <Button variant="ghost" size="sm" onClick={() => setView('history')}>
-                                Cancelar
+                                {t('reports.create.cancel')}
                             </Button>
                         </div>
 
@@ -590,8 +592,8 @@ export function CreateReport() {
                     type="button"
                     onClick={() => setView('form')}
                     className="fixed bottom-8 right-6 w-14 h-14 bg-[var(--accent-primary)] rounded-2xl flex items-center justify-center text-white shadow-xl shadow-[var(--accent-primary)]/30 active:scale-95 transition-all hover:-translate-y-1 z-30 group"
-                    aria-label="Criar nova ocorrência"
-                    title="Criar nova ocorrência"
+                    aria-label={t('reports.create.title')}
+                    title={t('reports.create.title')}
                 >
                     <Plus className="w-7 h-7 group-hover:rotate-90 transition-transform" />
                 </button>
@@ -602,7 +604,7 @@ export function CreateReport() {
                     currentUser={{ id: user.id || '', name: user.name || '', role: user.role || '' }}
                     targetUser={{
                         id: user.supervisorId || 'supervisor',
-                        name: user.supervisorName || 'Supervisor',
+                        name: user.supervisorName || t('reports.defaults.supervisor'),
                         role: 'SUPERVISOR'
                     }}
                     onClose={handleCloseChat}

@@ -169,6 +169,17 @@ export class AuthService {
         return user;
     }
 
+    async changePassword(userId: string, currentPassword: string, newPassword: string) {
+        const user = await this.userRepository.findById(userId);
+
+        if (!user || !(await bcrypt.compare(currentPassword, user.passwordHash))) {
+            throw new Error('INVALID_CURRENT_PASSWORD');
+        }
+
+        const passwordHash = await bcrypt.hash(newPassword, 10);
+        await this.userRepository.update(userId, { passwordHash });
+    }
+
     async deleteUser(id: string) {
         // Para uma exclusão limpa, poderíamos tratar subordinados aqui.
         // Por hora, executamos a exclusão direta conforme o repositório.

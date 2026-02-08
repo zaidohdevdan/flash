@@ -71,6 +71,10 @@
 }
 
 @layer base {
+  html[data-density="compact"] {
+    font-size: 14px;
+  }
+
   body {
     @apply bg-[var(--bg-secondary)] text-[var(--text-primary)] font-['Inter'] antialiased;
     font-feature-settings: "cv11", "ss01";

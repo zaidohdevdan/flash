@@ -1,7 +1,8 @@
-import { lazy, Suspense, useEffect } from 'react';
+import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { Toaster } from 'react-hot-toast';
+import { UserSettingsEffects } from './components/UserSettingsEffects';
 
 // Lazy loaded pages
 const Login = lazy(() => import('./pages/Login').then(m => ({ default: m.Login })));
@@ -120,28 +121,10 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from './lib/queryClient';
 
 function App() {
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') || 'system';
-    const applyTheme = (t: string) => {
-      if (t === 'dark') {
-        document.documentElement.classList.add('dark');
-      } else if (t === 'light') {
-        document.documentElement.classList.remove('dark');
-      } else {
-        // System
-        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-          document.documentElement.classList.add('dark');
-        } else {
-          document.documentElement.classList.remove('dark');
-        }
-      }
-    };
-    applyTheme(savedTheme);
-  }, []);
-
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
+        <UserSettingsEffects />
         <Toaster position="top-center" reverseOrder={false} />
         <BrowserRouter>
           <Suspense fallback={<PageLoader />}>

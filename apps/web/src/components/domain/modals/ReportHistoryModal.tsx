@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Modal, Badge } from '../../ui';
 
 interface HistoryStep {
@@ -25,14 +26,16 @@ export const ReportHistoryModal: React.FC<ReportHistoryModalProps> = ({
     isOpen,
     onClose
 }) => {
+    const { t } = useTranslation();
+
     if (!report) return null;
 
     return (
         <Modal
             isOpen={isOpen}
             onClose={onClose}
-            title="Trilha Operacional"
-            subtitle={`Protocolo: #${report.id.slice(-6).toUpperCase()} • Histórico Completo`}
+            title={t('reports.historyModal.title')}
+            subtitle={t('reports.historyModal.subtitle', { id: report.id.slice(-6).toUpperCase() })}
             maxWidth="lg"
         >
             <div className="space-y-8 py-4 px-2 relative before:absolute before:left-[19px] before:top-4 before:bottom-4 before:w-[2px] before:bg-[var(--border-subtle)]">
@@ -52,12 +55,12 @@ export const ReportHistoryModal: React.FC<ReportHistoryModalProps> = ({
                                 <Badge status={step.status as import('../../../types').ReportStatus} />
                             </div>
                             <p className="text-sm font-medium text-[var(--text-secondary)] leading-relaxed mb-4">
-                                {step.comment || 'Nenhuma observação registrada.'}
+                                {step.comment || t('reports.historyModal.noObservation')}
                             </p>
                             <div className="flex justify-between items-center pt-3 border-t border-[var(--bg-secondary)]">
                                 <div className="flex items-center gap-2">
                                     <p className="text-[9px] text-[var(--text-tertiary)] font-black uppercase">
-                                        Por: <span className="text-[var(--text-primary)]">{step.userName}</span>
+                                        {t('reports.historyModal.by')} <span className="text-[var(--text-primary)]">{step.userName}</span>
                                     </p>
                                 </div>
                                 {step.departmentName && (

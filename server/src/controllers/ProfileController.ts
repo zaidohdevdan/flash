@@ -13,7 +13,7 @@ const mediaService = new MediaService(mediaRepository);
 export const ProfileController = {
     async update(req: Request, res: Response) {
         const userId = req.userId!;
-        let { statusPhrase, avatarUrl } = req.body;
+        let { name, statusPhrase, avatarUrl } = req.body;
 
         try {
             if (req.file) {
@@ -29,6 +29,7 @@ export const ProfileController = {
             }
 
             const user = await authService.updateUser(userId, {
+                name,
                 statusPhrase,
                 avatarUrl
             });
@@ -67,6 +68,22 @@ export const ProfileController = {
             });
         } catch (error) {
             return res.status(500).json({ error: "Erro ao buscar perfil" });
+        }
+    },
+
+    async changePassword(req: Request, res: Response) {
+        const userId = req.userId!;
+        const { currentPassword, newPassword } = req.body;
+
+        try {
+            await authService.changePassword(userId, currentPassword, newPassword);
+            return res.status(204).send();
+        } catch (error: any) {
+            if (error.message === 'INVALID_CURRENT_PASSWORD') {
+                return res.status(401).json({ error: 'Senha atual incorreta.' });
+            }
+            console.error('Erro ao trocar senha:', error);
+            return res.status(500).json({ error: 'Erro ao trocar senha.' });
         }
     }
 }
