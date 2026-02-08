@@ -2,7 +2,8 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, X, CheckCircle2, ExternalLink, Calendar, Video, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { ptBR, enUS } from 'date-fns/locale';
+import { useTranslation } from 'react-i18next';
 import { Badge } from './';
 import type { Notification } from '../../types';
 
@@ -21,6 +22,8 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
     onMarkAsRead,
     onMarkAllAsRead
 }) => {
+    const { t, i18n } = useTranslation();
+    const currentLocale = i18n.language === 'en' ? enUS : ptBR;
     const unreadCount = notifications.filter(n => !n.read).length;
 
     return (
@@ -51,10 +54,10 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
                                     <Bell className="w-5 h-5" />
                                 </div>
                                 <div>
-                                    <h3 className="text-lg font-black text-gray-900 uppercase tracking-tighter">Notificações</h3>
+                                    <h3 className="text-lg font-black text-gray-900 uppercase tracking-tighter">{t('layout.notificationDrawer.title')}</h3>
                                     {unreadCount > 0 && (
                                         <p className="text-[10px] text-blue-600 font-bold uppercase tracking-widest">
-                                            {unreadCount} novas mensagens
+                                            {unreadCount} {t('layout.notificationDrawer.newMessages')}
                                         </p>
                                     )}
                                 </div>
@@ -62,8 +65,8 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
                             <button
                                 type="button"
                                 onClick={onClose}
-                                title="Fechar notificações"
-                                aria-label="Fechar notificações"
+                                title={t('layout.notificationDrawer.close')}
+                                aria-label={t('layout.notificationDrawer.close')}
                                 className="p-2 hover:bg-gray-100 rounded-full transition-all"
                             >
                                 <X className="w-6 h-6 text-gray-400" />
@@ -78,7 +81,7 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
                                     onClick={onMarkAllAsRead}
                                     className="flex items-center gap-1.5 text-[10px] font-black text-gray-500 hover:text-blue-600 uppercase tracking-widest transition-all"
                                 >
-                                    Limpar todas <CheckCircle2 className="w-3 h-3" />
+                                    {t('layout.notificationDrawer.clearAll')} <CheckCircle2 className="w-3 h-3" />
                                 </button>
                             </div>
                         )}
@@ -117,7 +120,7 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
 
                                                 <div className="flex justify-between items-center mt-3">
                                                     <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
-                                                        {format(new Date(notif.createdAt), "HH:mm • dd MMM", { locale: ptBR })}
+                                                        {format(new Date(notif.createdAt), "HH:mm • dd MMM", { locale: currentLocale })}
                                                     </span>
 
                                                     {notif.link && (
@@ -133,15 +136,15 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
                             ) : (
                                 <div className="flex flex-col items-center justify-center h-full text-center opacity-30 select-none">
                                     <Bell className="w-16 h-16 mb-4" />
-                                    <h4 className="text-lg font-black uppercase tracking-tighter">Sem notificações</h4>
-                                    <p className="text-sm font-bold opacity-60">Tudo limpo por aqui!</p>
+                                    <h4 className="text-lg font-black uppercase tracking-tighter">{t('layout.notificationDrawer.emptyTitle')}</h4>
+                                    <p className="text-sm font-bold opacity-60">{t('layout.notificationDrawer.emptyMsg')}</p>
                                 </div>
                             )}
                         </div>
 
                         <div className="p-6 bg-gray-50 border-t border-gray-100">
                             <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest text-center">
-                                Flash Notification System v2.0
+                                {t('layout.notificationDrawer.footer')}
                             </p>
                         </div>
                     </motion.div>

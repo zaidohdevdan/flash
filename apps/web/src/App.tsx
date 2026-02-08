@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { Toaster } from 'react-hot-toast';
@@ -13,6 +13,7 @@ const ManagerDashboard = lazy(() => import('./pages/ManagerDashboard').then(m =>
 const Home = lazy(() => import('./pages/Home').then(m => ({ default: m.Home })));
 const Analytics = lazy(() => import('./pages/Analytics').then(m => ({ default: m.Analytics })));
 const Profile = lazy(() => import('./pages/Profile').then(m => ({ default: m.Profile })));
+const Settings = lazy(() => import('./pages/Settings'));
 
 // Loading Component
 const PageLoader = () => (
@@ -100,6 +101,12 @@ function AppRoutes() {
         </PrivateRoute>
       } />
 
+      <Route path="/settings" element={
+        <PrivateRoute role={['SUPERVISOR', 'MANAGER', 'PROFESSIONAL', 'ADMIN']}>
+          <Settings />
+        </PrivateRoute>
+      } />
+
       <Route path="/profile" element={
         <PrivateRoute role={['SUPERVISOR', 'MANAGER', 'PROFESSIONAL', 'ADMIN']}>
           <Profile />
@@ -113,6 +120,25 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from './lib/queryClient';
 
 function App() {
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme') || 'system';
+    const applyTheme = (t: string) => {
+      if (t === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else if (t === 'light') {
+        document.documentElement.classList.remove('dark');
+      } else {
+        // System
+        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+      }
+    };
+    applyTheme(savedTheme);
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>

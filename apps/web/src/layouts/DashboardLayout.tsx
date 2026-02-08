@@ -7,9 +7,11 @@ import {
     Search,
     ArrowRight,
     Wifi,
-    WifiOff
+    WifiOff,
+    Settings as SettingsIcon
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Button } from '../components/ui/Button';
 import { NotificationDrawer } from '../components/ui/NotificationDrawer';
 import { syncAll } from '../services/offlineSync';
@@ -47,6 +49,7 @@ export function DashboardLayout({
     const [isOnline, setIsOnline] = useState(navigator.onLine);
     const navigate = useNavigate();
     const location = useLocation();
+    const { t } = useTranslation();
 
     useEffect(() => {
         const handleOnline = () => {
@@ -70,9 +73,9 @@ export function DashboardLayout({
     }, []);
 
     const menuItems = [
-        { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
+        { icon: LayoutDashboard, label: t('layout.sidebar.dashboard'), path: '/dashboard' },
         // { icon: Users, label: 'Equipe', path: '/team' },
-        // { icon: Settings, label: 'Configurações', path: '/settings' },
+        { icon: SettingsIcon, label: t('layout.sidebar.settings'), path: '/settings' },
     ];
 
     const isActive = (path: string) => location.pathname === path;
@@ -120,10 +123,10 @@ export function DashboardLayout({
                             </div>
                             <div className="flex-1 min-w-0">
                                 <p className="text-sm font-medium text-[var(--text-primary)] truncate">
-                                    {user?.name || 'Usuário'}
+                                    {user?.name || t('layout.sidebar.defaultUser')}
                                 </p>
                                 <p className="text-xs text-[var(--text-tertiary)] truncate capitalize">
-                                    {user?.role?.toLowerCase() || 'Membro'}
+                                    {user?.role?.toLowerCase() || t('layout.sidebar.defaultRole')}
                                 </p>
                             </div>
                         </div>
@@ -158,7 +161,7 @@ export function DashboardLayout({
                                 <div className="p-2 bg-[var(--bg-primary)] rounded-lg shadow-inner group-hover:scale-110 transition-transform">
                                     <LogOut className="w-4 h-4" />
                                 </div>
-                                <span className="text-[10px] font-bold uppercase tracking-widest">Sair</span>
+                                <span className="text-[10px] font-bold uppercase tracking-widest">{t('layout.sidebar.logout')}</span>
                             </div>
                             <div className="opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all">
                                 <ArrowRight className="w-3 h-3" />
@@ -187,7 +190,7 @@ export function DashboardLayout({
                                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-tertiary)]" />
                                     <input
                                         type="text"
-                                        placeholder="Buscar..."
+                                        placeholder={t('layout.header.search')}
                                         value={searchTerm || ''}
                                         onChange={(e) => onSearchChange(e.target.value)}
                                         className="w-full pl-9 pr-4 py-1.5 bg-[var(--bg-secondary)] border-none rounded-lg text-sm focus:ring-1 focus:ring-[var(--border-medium)] placeholder:text-[var(--text-tertiary)] text-[var(--text-primary)]"
@@ -203,9 +206,9 @@ export function DashboardLayout({
                             : 'bg-red-50 text-red-600 border-red-100 animate-pulse'
                             }`}>
                             {isOnline ? (
-                                <><Wifi className="w-3 h-3" /> Online</>
+                                <><Wifi className="w-3 h-3" /> {t('layout.header.online')}</>
                             ) : (
-                                <><WifiOff className="w-3 h-3" /> Offline</>
+                                <><WifiOff className="w-3 h-3" /> {t('layout.header.offline')}</>
                             )}
                         </div>
 

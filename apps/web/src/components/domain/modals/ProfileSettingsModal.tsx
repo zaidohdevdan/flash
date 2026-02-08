@@ -1,4 +1,5 @@
 import React, { useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Camera } from 'lucide-react';
 import { Modal, Button, Avatar, Input } from '../../ui';
 
@@ -23,14 +24,15 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
     onAvatarChange,
     avatarUrl
 }) => {
+    const { t } = useTranslation();
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     return (
         <Modal
             isOpen={isOpen}
             onClose={onClose}
-            title="Perfil de Usuário"
-            subtitle="Personalize sua identificação na rede"
+            title={t('dashboard.profileModal.title')}
+            subtitle={t('dashboard.profileModal.subtitle')}
             maxWidth="sm"
             footer={
                 <div className="flex gap-3">
@@ -39,7 +41,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
                         onClick={onClose}
                         className="flex-1"
                     >
-                        Cancelar
+                        {t('dashboard.profileModal.cancel')}
                     </Button>
                     <Button
                         variant="primary"
@@ -47,7 +49,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
                         onClick={onSave}
                         className="flex-1"
                     >
-                        Salvar
+                        {t('dashboard.profileModal.save')}
                     </Button>
                 </div>
             }
@@ -79,17 +81,17 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
                     />
 
                     <div className="text-center">
-                        <p className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest mb-1">Foto de Perfil</p>
-                        <p className="text-[10px] text-[var(--text-tertiary)]">Clique na imagem para alterar</p>
+                        <p className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest mb-1">{t('dashboard.profileModal.photoLabel')}</p>
+                        <p className="text-[10px] text-[var(--text-tertiary)]">{t('dashboard.profileModal.photoHint')}</p>
                     </div>
                 </div>
 
                 <div className="space-y-4 px-1">
                     <Input
-                        label="Status Operacional"
+                        label={t('dashboard.profileModal.statusLabel')}
                         value={profilePhrase}
                         onChange={e => setProfilePhrase(e.target.value)}
-                        placeholder="Ex: Em operação / Disponível"
+                        placeholder={t('dashboard.profileModal.statusPlaceholder')}
                         className="text-center"
                     />
                 </div>

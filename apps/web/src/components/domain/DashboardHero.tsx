@@ -1,4 +1,5 @@
 import { BarChart3, AlertCircle, Download, Video, Calendar, type LucideIcon } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '../ui';
 import { KpiCard } from './KpiCard';
 
@@ -56,6 +57,7 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
     onAgendaClick,
     children
 }) => {
+    const { t } = useTranslation();
     return (
         <div className="pb-8 animate-in">
             <div className="flex flex-col gap-6 mb-8">
@@ -72,7 +74,7 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
                                 onClick={onAnalyticsClick}
                                 leftIcon={<BarChart3 className="w-4 h-4" />}
                             >
-                                Analytics
+                                {t('dashboard.actions.analytics')}
                             </Button>
                         )}
                         {onExportClick && (
@@ -81,7 +83,7 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
                                 onClick={onExportClick}
                                 leftIcon={<Download className="w-4 h-4" />}
                             >
-                                Exportar
+                                {t('dashboard.actions.export')}
                             </Button>
                         )}
                         {onConferenceClick && (
@@ -90,7 +92,7 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
                                 onClick={onConferenceClick}
                                 leftIcon={<Video className="w-4 h-4" />}
                             >
-                                War Room
+                                {t('dashboard.actions.warRoom')}
                             </Button>
                         )}
                         {onAgendaClick && (
@@ -99,7 +101,7 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
                                 onClick={onAgendaClick}
                                 leftIcon={<Calendar className="w-4 h-4" />}
                             >
-                                Agenda
+                                {t('dashboard.actions.agenda')}
                             </Button>
                         )}
                         {children}
@@ -135,7 +137,7 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
                                 <div className="flex items-center gap-2 px-4 py-2 hover:bg-[var(--bg-secondary)] rounded-lg transition-colors cursor-pointer border-r border-[var(--border-subtle)]">
                                     <Calendar className="w-4 h-4 text-[var(--accent-secondary)]" />
                                     <div className="flex flex-col">
-                                        <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase leading-none">De</span>
+                                        <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase leading-none">{t('dashboard.filters.from')}</span>
                                         <input
                                             type="date"
                                             value={startDate}
@@ -150,7 +152,7 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
                                 <div className="flex items-center gap-2 px-4 py-2 hover:bg-[var(--bg-secondary)] rounded-lg transition-colors cursor-pointer">
                                     <Calendar className="w-4 h-4 text-[var(--accent-secondary)]" />
                                     <div className="flex flex-col">
-                                        <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase leading-none">Até</span>
+                                        <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase leading-none">{t('dashboard.filters.to')}</span>
                                         <input
                                             type="date"
                                             value={endDate}
@@ -166,7 +168,7 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
                                     type="button"
                                     onClick={onClearDates}
                                     className="p-2 hover:bg-red-50 text-red-400 hover:text-red-500 rounded-lg transition-colors mx-1"
-                                    title="Limpar datas"
+                                    title={t('dashboard.filters.clear')}
                                 >
                                     <AlertCircle className="w-4 h-4" />
                                 </button>

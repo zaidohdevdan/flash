@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { MessageSquare } from 'lucide-react';
 import { Card, Button } from '../ui';
 import { ReportCard } from './ReportCard';
@@ -21,9 +22,12 @@ export const ReportFeed: React.FC<ReportFeedProps> = ({
     hasMore,
     onLoadMore,
     renderReportActions,
-    emptyMessage = "Nenhum reporte encontrado",
+    emptyMessage,
     isLoading = false
 }) => {
+    const { t } = useTranslation();
+    const displayMessage = emptyMessage || t('dashboard.feed.emptyMsg');
+
     return (
         <div className="flex-1 space-y-6">
             {/* Busca interna removida para evitar duplicidade com a busca global do Dashboard */}
@@ -31,7 +35,7 @@ export const ReportFeed: React.FC<ReportFeedProps> = ({
             {reports.length === 0 && !isLoading ? (
                 <Card variant="glass" className="p-20 flex flex-col items-center justify-center text-gray-400">
                     <MessageSquare className="w-12 h-12 mb-4 opacity-20" />
-                    <p className="font-bold uppercase tracking-widest text-[10px] text-gray-600">{emptyMessage}</p>
+                    <p className="font-bold uppercase tracking-widest text-[10px] text-gray-600">{displayMessage}</p>
                 </Card>
             ) : (
                 <div className="grid gap-6">
@@ -49,7 +53,7 @@ export const ReportFeed: React.FC<ReportFeedProps> = ({
             {hasMore && reports.length > 0 && (
                 <div className="flex justify-center pt-8">
                     <Button variant="secondary" size="lg" onClick={onLoadMore} className="bg-white px-10">
-                        Carregar Mais
+                        {t('dashboard.actions.loadMore')}
                     </Button>
                 </div>
             )}

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Users, MessageSquare, Shield } from 'lucide-react';
 import { Avatar, Card } from '../ui';
 
@@ -30,57 +31,61 @@ export interface TeamSidebarProps {
     isLoading?: boolean;
 }
 
-const MemberItem = React.memo(({ member, onClick }: { member: TeamMember, onClick: (m: TeamMember) => void }) => (
-    <div
-        onClick={() => onClick(member)}
-        className="flex items-center gap-3 p-3 rounded-xl hover:bg-[var(--bg-tertiary)] transition-all cursor-pointer group/item relative border border-transparent hover:border-[var(--border-subtle)]"
-    >
-        <div className="relative">
-            <Avatar
-                src={member.avatarUrl}
-                size="md"
-                isOnline={member.isOnline}
-                className="group-hover/item:scale-105 transition-transform"
-            />
-            {member.hasUnread && (
-                <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white" />
-            )}
-        </div>
-
-        <div className="flex-1 min-w-0">
-            <div className="flex justify-between items-start">
-                <h4 className={`text-sm font-semibold truncate transition-colors ${member.hasUnread ? 'text-[var(--text-primary)] font-bold' : 'text-[var(--text-primary)]'}`}>
-                    {member.name}
-                </h4>
+const MemberItem = React.memo(({ member, onClick }: { member: TeamMember, onClick: (m: TeamMember) => void }) => {
+    const { t } = useTranslation();
+    return (
+        <div
+            onClick={() => onClick(member)}
+            className="flex items-center gap-3 p-3 rounded-xl hover:bg-[var(--bg-tertiary)] transition-all cursor-pointer group/item relative border border-transparent hover:border-[var(--border-subtle)]"
+        >
+            <div className="relative">
+                <Avatar
+                    src={member.avatarUrl}
+                    size="md"
+                    isOnline={member.isOnline}
+                    className="group-hover/item:scale-105 transition-transform"
+                />
+                {member.hasUnread && (
+                    <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white" />
+                )}
             </div>
 
-            <div className="flex items-center gap-1.5">
-                <span className="text-xs text-[var(--text-tertiary)] truncate capitalize">
-                    {member.role === 'MANAGER' ? (member.departmentName || 'Gerente') : member.role.toLowerCase()}
-                </span>
+            <div className="flex-1 min-w-0">
+                <div className="flex justify-between items-start">
+                    <h4 className={`text-sm font-semibold truncate transition-colors ${member.hasUnread ? 'text-[var(--text-primary)] font-bold' : 'text-[var(--text-primary)]'}`}>
+                        {member.name}
+                    </h4>
+                </div>
+
+                <div className="flex items-center gap-1.5">
+                    <span className="text-xs text-[var(--text-tertiary)] truncate capitalize">
+                        {member.role === 'MANAGER' ? (member.departmentName || t('layout.teamSidebar.manager')) : member.role.toLowerCase()}
+                    </span>
+                </div>
+
+                {member.statusPhrase && (
+                    <p className="text-xs text-[var(--text-secondary)] italic truncate mt-0.5">
+                        "{member.statusPhrase}"
+                    </p>
+                )}
             </div>
 
-            {member.statusPhrase && (
-                <p className="text-xs text-[var(--text-secondary)] italic truncate mt-0.5">
-                    "{member.statusPhrase}"
-                </p>
-            )}
+            <div className="opacity-0 group-hover/item:opacity-100 transition-opacity">
+                <MessageSquare className="w-4 h-4 text-[var(--text-tertiary)]" />
+            </div>
         </div>
-
-        <div className="opacity-0 group-hover/item:opacity-100 transition-opacity">
-            <MessageSquare className="w-4 h-4 text-[var(--text-tertiary)]" />
-        </div>
-    </div>
-));
+    );
+});
 
 export const TeamSidebar: React.FC<TeamSidebarProps> = React.memo(({
     groups,
     members,
     onMemberClick,
-    title = "Equipe",
+    title,
     icon,
     isLoading = false
 }) => {
+    const { t } = useTranslation();
     const [activeGroupId, setActiveGroupId] = React.useState<string | null>(
         groups && groups.length > 0 ? groups[0].id : null
     );
@@ -127,8 +132,8 @@ export const TeamSidebar: React.FC<TeamSidebarProps> = React.memo(({
                             {icon || <Users className="w-5 h-5 text-[var(--text-secondary)]" />}
                         </div>
                         <div>
-                            <h3 className="text-sm font-semibold text-[var(--text-primary)]">{title}</h3>
-                            <p className="text-xs text-[var(--text-tertiary)]">{currentMembers.filter(m => m.isOnline).length} online</p>
+                            <h3 className="text-sm font-semibold text-[var(--text-primary)]">{title || t('layout.teamSidebar.title')}</h3>
+                            <p className="text-xs text-[var(--text-tertiary)]">{currentMembers.filter(m => m.isOnline).length} {t('layout.teamSidebar.online')}</p>
                         </div>
                     </div>
                 ) : (
@@ -177,7 +182,7 @@ export const TeamSidebar: React.FC<TeamSidebarProps> = React.memo(({
                         <div className="w-12 h-12 bg-[var(--bg-tertiary)] rounded-full flex items-center justify-center mx-auto mb-3">
                             <Users className="w-6 h-6 text-[var(--text-tertiary)]" />
                         </div>
-                        <p className="text-xs text-[var(--text-tertiary)] font-medium">Nenhum membro ativo</p>
+                        <p className="text-xs text-[var(--text-tertiary)] font-medium">{t('layout.teamSidebar.noMembers')}</p>
                     </div>
                 )}
             </div>
