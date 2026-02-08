@@ -18,6 +18,16 @@ import { NotificationController } from './controllers/NotificationController';
 
 const routes = Router();
 
+// Health check to verify deployment
+routes.get('/health', (req, res) => {
+    res.json({
+        status: 'ok',
+        version: '4.0.10',
+        timestamp: new Date().toISOString(),
+        env: process.env.NODE_ENV
+    });
+});
+
 // Cloudinay
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 20 * 1024 * 1024 } })
 
