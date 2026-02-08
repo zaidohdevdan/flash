@@ -60,7 +60,7 @@ export const NewReportForm: React.FC<NewReportFormProps> = ({
                     placeholder="DESCREVA A OCORRÊNCIA OU ATUALIZAÇÃO OPERACIONAL..."
                     value={comment}
                     onChange={e => onCommentChange(e.target.value)}
-                    className="!rounded-[2rem] p-6 text-sm font-bold text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] placeholder:uppercase placeholder:tracking-widest bg-white border-[var(--border-subtle)] focus:border-[var(--accent-primary)] focus:ring-[var(--accent-primary)]"
+                    className="!rounded-[2rem] p-6 text-sm font-bold text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] placeholder:uppercase placeholder:tracking-widest bg-[var(--bg-primary)] border-[var(--border-subtle)] focus:border-[var(--accent-primary)] focus:ring-[var(--accent-primary)]"
                     rows={4}
                     aria-label="Descrição da ocorrência"
                 />

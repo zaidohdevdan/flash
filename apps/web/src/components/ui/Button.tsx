@@ -36,12 +36,13 @@ export const Button: React.FC<ButtonProps> = ({
     const baseStyles = 'btn-base font-medium transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed';
 
     const variants = {
-        primary: 'bg-[var(--text-primary)] text-white hover:bg-black/90 shadow-sm',
+        primary: 'bg-[var(--accent-primary)] text-[var(--accent-text)] hover:bg-[var(--accent-secondary)] font-bold shadow-md shadow-[var(--accent-primary)]/10',
         secondary: 'bg-white border border-[var(--border-medium)] text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] shadow-sm',
         glass: 'bg-white/80 backdrop-blur-sm border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-white',
         ghost: 'text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)]',
         danger: 'bg-[var(--error)] text-white hover:bg-red-600 shadow-sm',
-        success: 'bg-[var(--accent-primary)] text-[var(--accent-text)] hover:bg-[var(--accent-secondary)] font-semibold shadow-sm'
+        success: 'bg-emerald-500 text-white hover:bg-emerald-600 font-semibold shadow-sm',
+        dark: 'bg-[var(--text-primary)] text-white hover:bg-black/90 shadow-sm'
     };
 
     const sizes = {

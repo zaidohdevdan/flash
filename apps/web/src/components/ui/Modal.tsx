@@ -61,14 +61,14 @@ export const Modal: React.FC<ModalProps> = ({
 
     const styles = {
         light: {
-            container: 'bg-white/60 border-white/50 ring-white/20',
-            title: 'text-gray-900',
-            subtitle: 'text-gray-600',
-            close: 'text-gray-500 hover:text-gray-900 hover:bg-gray-100/50',
-            footer: 'bg-gray-50/50 border-gray-50'
+            container: 'bg-[var(--bg-primary)] border-[var(--border-subtle)] ring-[var(--border-medium)]/5',
+            title: 'text-[var(--text-primary)]',
+            subtitle: 'text-[var(--text-secondary)]',
+            close: 'text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)]',
+            footer: 'bg-[var(--bg-secondary)] border-[var(--border-subtle)]'
         },
         dark: {
-            container: 'bg-slate-900/80 border-white/10 ring-white/5',
+            container: 'bg-slate-900/80 border-slate-800 ring-white/5',
             title: 'text-white',
             subtitle: 'text-slate-400',
             close: 'text-slate-400 hover:text-white hover:bg-white/10',

@@ -148,7 +148,7 @@ export function Home() {
 
                     <button
                         onClick={() => navigate('/login')}
-                        className="bg-slate-900 text-white px-8 py-4 rounded-2xl font-black text-[11px] uppercase tracking-[0.15em] hover:bg-slate-800 transition-all shadow-xl hover:shadow-2xl hover:scale-[1.02] active:scale-95 group relative overflow-hidden"
+                        className="bg-[#d4e720] text-[#1a2e05] border border-[#bed20e] px-8 py-4 rounded-2xl font-black text-[11px] uppercase tracking-[0.15em] hover:bg-[#a3b60b] transition-all shadow-xl hover:shadow-2xl hover:shadow-lime-500/10 hover:scale-[1.02] active:scale-95 group relative overflow-hidden"
                     >
                         <span className="relative z-10">Acessar Sistema</span>
                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
@@ -499,7 +499,7 @@ export function Home() {
                                 </div>
                                 <button
                                     disabled={formStatus === 'sending'}
-                                    className="w-full py-6 bg-slate-900 text-white rounded-3xl font-black text-sm uppercase tracking-[0.2em] hover:bg-[#d4e720] hover:text-[#1a2e05] transition-all shadow-xl disabled:opacity-50 hover:shadow-2xl hover:shadow-lime-500/20 hover:scale-[1.02] relative overflow-hidden group"
+                                    className="w-full py-6 bg-[#d4e720] text-[#1a2e05] border border-[#bed20e] rounded-3xl font-black text-sm uppercase tracking-[0.2em] hover:bg-[#a3b60b] transition-all shadow-xl disabled:opacity-50 hover:shadow-2xl hover:shadow-lime-500/20 hover:scale-[1.02] relative overflow-hidden group"
                                 >
                                     <span className="relative z-10">{formStatus === 'sending' ? 'ENVIANDO...' : 'SOLICITAR DEMO'}</span>
                                     <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />

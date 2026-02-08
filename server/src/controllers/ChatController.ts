@@ -81,6 +81,10 @@ export const ChatController = {
             const { room } = req.params;
             const userId = req.userId!;
             await chatService.markAsRead(room as string, userId);
+
+            // Emitir evento para a sala avisando que as mensagens foram lidas
+            req.io.to(room as string).emit('messages_read', { room, readBy: userId });
+
             return res.status(204).send();
         } catch (error) {
             console.error('Erro ao marcar sala como lida:', error);

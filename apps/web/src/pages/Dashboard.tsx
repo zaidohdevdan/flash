@@ -459,6 +459,8 @@ export function Dashboard() {
             onMarkAsRead={handleMarkAsRead}
             onMarkAllAsRead={handleMarkAllAsRead}
             onProfileClick={() => setIsProfileOpen(true)}
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
         >
             <DashboardHero
                 title="Dashboard Operacional"
@@ -497,16 +499,6 @@ export function Dashboard() {
 
             <div className="flex flex-col lg:flex-row gap-8">
                 <main className="flex-1 space-y-6">
-                    <div className="relative group">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-tertiary)] group-focus-within:text-[var(--text-primary)] transition-colors" />
-                        <input
-                            type="text"
-                            placeholder="Filtrar por protocolo ou descrição..."
-                            value={searchTerm}
-                            onChange={e => setSearchTerm(e.target.value)}
-                            className="w-full pl-10 pr-4 py-3 bg-[var(--bg-primary)] border border-[var(--border-medium)] rounded-xl outline-none focus:ring-2 focus:ring-[var(--border-subtle)] transition-all text-sm font-medium text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] shadow-sm"
-                        />
-                    </div>
 
                     {viewMode === 'list' ? (
                         <ReportFeed
@@ -593,6 +585,7 @@ export function Dashboard() {
                     targetUser={chatTarget}
                     onClose={handleCloseChat}
                     socket={socket}
+                    onRead={markAsRead}
                 />
             )}
 
@@ -628,11 +621,3 @@ export function Dashboard() {
     );
 }
 
-// Helper icon
-function Search({ className }: { className?: string }) {
-    return (
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-            <circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" />
-        </svg>
-    );
-}

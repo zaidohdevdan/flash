@@ -25,7 +25,7 @@ export const TextArea: React.FC<TextAreaProps> = ({
     return (
         <div className="space-y-1 w-full">
             {label && (
-                <label className="text-[10px] font-black text-slate-300 uppercase tracking-widest ml-1">
+                <label className="text-[10px] font-black text-[var(--text-tertiary)] uppercase tracking-widest ml-1">
                     {label}
                 </label>
             )}
@@ -33,20 +33,20 @@ export const TextArea: React.FC<TextAreaProps> = ({
                 className={`
           w-full 
           px-5 py-4 
-          bg-slate-900/50 
-          border border-white/5 
+          bg-[var(--bg-primary)]
+          border border-[var(--border-medium)]
           rounded-[1.5rem] 
           outline-none 
-          focus:bg-slate-900 
-          focus:border-blue-500/50 
-          focus:ring-4 
-          focus:ring-blue-500/10 
+          focus:bg-[var(--bg-primary)]
+          focus:border-[var(--accent-primary)]
+          focus:ring-2
+          focus:ring-[var(--accent-primary)]/10
           transition-all 
           font-medium 
           text-sm 
-          text-white
+          text-[var(--text-primary)]
           leading-relaxed
-          placeholder:text-slate-400
+          placeholder:text-[var(--text-tertiary)]
           ${noResize ? 'resize-none' : ''}
           ${error ? 'border-red-300 bg-red-50/50' : ''}
           ${className}

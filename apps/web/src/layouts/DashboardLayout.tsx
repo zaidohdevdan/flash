@@ -27,6 +27,8 @@ interface DashboardLayoutProps {
     onMarkAsRead?: (id: string) => void;
     onMarkAllAsRead?: () => void;
     onProfileClick?: () => void;
+    searchTerm?: string;
+    onSearchChange?: (value: string) => void;
 }
 
 export function DashboardLayout({
@@ -36,7 +38,9 @@ export function DashboardLayout({
     notifications = [],
     onMarkAsRead = () => { },
     onMarkAllAsRead = () => { },
-    onProfileClick
+    onProfileClick,
+    searchTerm,
+    onSearchChange
 }: DashboardLayoutProps) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -148,13 +152,13 @@ export function DashboardLayout({
                     <div className="p-4 border-t border-[var(--border-subtle)] space-y-2">
                         <button
                             onClick={onLogout}
-                            className="w-full flex items-center justify-between group px-4 py-3 rounded-2xl bg-slate-50 hover:bg-red-50 text-slate-600 hover:text-red-600 transition-all duration-300 border border-slate-100 hover:border-red-100 shadow-sm hover:shadow-md"
+                            className="w-full flex items-center justify-between group px-4 py-3 rounded-2xl bg-[var(--bg-secondary)] hover:bg-red-50 text-[var(--text-secondary)] hover:text-red-600 transition-all duration-300 border border-[var(--border-subtle)] hover:border-red-100 shadow-sm"
                         >
                             <div className="flex items-center gap-3">
-                                <div className="p-2 bg-white rounded-lg shadow-inner group-hover:scale-110 transition-transform">
+                                <div className="p-2 bg-[var(--bg-primary)] rounded-lg shadow-inner group-hover:scale-110 transition-transform">
                                     <LogOut className="w-4 h-4" />
                                 </div>
-                                <span className="text-xs font-black uppercase tracking-widest">Sair</span>
+                                <span className="text-[10px] font-bold uppercase tracking-widest">Sair</span>
                             </div>
                             <div className="opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all">
                                 <ArrowRight className="w-3 h-3" />
@@ -178,14 +182,18 @@ export function DashboardLayout({
                         </button>
 
                         <div className="hidden md:flex items-center max-w-md w-full">
-                            <div className="relative w-full max-w-xs">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-tertiary)]" />
-                                <input
-                                    type="text"
-                                    placeholder="Buscar..."
-                                    className="w-full pl-9 pr-4 py-1.5 bg-[var(--bg-secondary)] border-none rounded-lg text-sm focus:ring-1 focus:ring-[var(--border-medium)] placeholder:text-[var(--text-tertiary)] text-[var(--text-primary)]"
-                                />
-                            </div>
+                            {onSearchChange && (
+                                <div className="relative w-full max-w-xs">
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-tertiary)]" />
+                                    <input
+                                        type="text"
+                                        placeholder="Buscar..."
+                                        value={searchTerm || ''}
+                                        onChange={(e) => onSearchChange(e.target.value)}
+                                        className="w-full pl-9 pr-4 py-1.5 bg-[var(--bg-secondary)] border-none rounded-lg text-sm focus:ring-1 focus:ring-[var(--border-medium)] placeholder:text-[var(--text-tertiary)] text-[var(--text-primary)]"
+                                    />
+                                </div>
+                            )}
                         </div>
                     </div>
 

@@ -64,8 +64,8 @@ export const AnalysisModal: React.FC<AnalysisModalProps> = ({
                 />
 
                 <div className="space-y-4">
-                    <label className="text-[10px] font-black text-gray-700 uppercase tracking-widest ml-1">Próxima Etapa</label>
-                    <div className="flex items-center justify-between p-1 bg-blue-50/40 rounded-2xl border border-blue-50/60">
+                    <label className="text-[10px] font-black text-[var(--text-tertiary)] uppercase tracking-widest ml-1">Próxima Etapa</label>
+                    <div className="flex items-center justify-between p-1 bg-[var(--bg-secondary)] rounded-2xl border border-[var(--border-subtle)]">
                         {[
                             { id: 'IN_REVIEW', label: 'ANÁLISE', color: 'text-blue-600' },
                             { id: 'FORWARDED', label: 'DEPARTAMENTO', color: 'text-purple-600' },
@@ -75,7 +75,7 @@ export const AnalysisModal: React.FC<AnalysisModalProps> = ({
                                 type="button"
                                 key={opt.id}
                                 onClick={() => setTargetStatus(opt.id as AnalysisModalProps['targetStatus'])}
-                                className={`flex-1 py-3 text-[9px] font-black tracking-widest rounded-xl transition-all ${targetStatus === opt.id ? 'bg-white shadow-xl ' + opt.color : 'text-gray-400 hover:text-gray-600'}`}
+                                className={`flex-1 py-3 text-[9px] font-black tracking-widest rounded-xl transition-all ${targetStatus === opt.id ? 'bg-[var(--bg-primary)] shadow-xl ' + opt.color : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'}`}
                             >
                                 {opt.label}
                             </button>
@@ -85,11 +85,11 @@ export const AnalysisModal: React.FC<AnalysisModalProps> = ({
                     {targetStatus === 'FORWARDED' && (
                         <div className="space-y-4 animate-in slide-in-from-top-4 duration-500">
                             <div className="space-y-2">
-                                <label className="text-[10px] font-black text-gray-700 uppercase tracking-widest ml-1">Destinar para:</label>
+                                <label className="text-[10px] font-black text-[var(--text-tertiary)] uppercase tracking-widest ml-1">Destinar para:</label>
                                 <select
                                     value={selectedDeptId}
                                     onChange={e => setSelectedDeptId(e.target.value)}
-                                    className="w-full px-5 py-3.5 bg-gray-50/50 border border-gray-100 rounded-2xl outline-none focus:bg-white focus:border-purple-500/50 transition-all font-bold text-gray-700 appearance-none text-xs"
+                                    className="w-full px-5 py-3.5 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-2xl outline-none focus:bg-[var(--bg-primary)] focus:border-[var(--accent-primary)] transition-all font-bold text-[var(--text-primary)] appearance-none text-xs"
                                     title="Selecione o departamento de destino"
                                     aria-label="Selecione o departamento de destino"
                                 >

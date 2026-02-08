@@ -6,7 +6,6 @@ import { toast } from 'react-hot-toast';
 import {
     Plus,
     History,
-    Search,
     CloudOff,
     RefreshCw
 } from 'lucide-react';
@@ -444,6 +443,8 @@ export function CreateReport() {
             onMarkAsRead={handleMarkAsRead}
             onMarkAllAsRead={handleMarkAllAsRead}
             onProfileClick={() => setIsProfileOpen(true)}
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
         >
             <div className="relative h-full">
                 {/* Alerta de Modo Offline */}
@@ -504,16 +505,6 @@ export function CreateReport() {
                         )}
 
                         <div className="flex flex-col gap-4">
-                            <div className="relative group">
-                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-tertiary)] group-focus-within:text-[var(--text-primary)] transition-colors" />
-                                <input
-                                    type="text"
-                                    placeholder="Buscar por protocolo ou descrição..."
-                                    value={searchTerm}
-                                    onChange={e => setSearchTerm(e.target.value)}
-                                    className="w-full pl-10 pr-4 py-3 bg-[var(--bg-primary)] border border-[var(--border-subtle)] rounded-xl outline-none focus:ring-2 focus:ring-[var(--border-medium)] transition-all text-sm font-medium text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)]"
-                                />
-                            </div>
 
                             <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
                                 {[
@@ -616,6 +607,7 @@ export function CreateReport() {
                     }}
                     onClose={handleCloseChat}
                     socket={socket}
+                    onRead={markAsRead}
                 />
             )}
 

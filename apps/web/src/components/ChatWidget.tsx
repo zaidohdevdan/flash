@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { Socket } from 'socket.io-client';
-import { Send, Mic, X, MessageSquare, Square, Trash2, Hourglass, Pencil, Check, Trash, User, Zap, RefreshCw } from 'lucide-react';
+import { Send, Mic, X, MessageSquare, Square, Trash2, Hourglass, Pencil, Check, CheckCheck, Trash, User, RefreshCw } from 'lucide-react';
 import { api } from '../services/api';
 import { db } from '../services/db';
 import { useLiveQuery } from 'dexie-react-hooks';
@@ -18,6 +18,7 @@ interface Message {
     audioUrl?: string;
     createdAt: string;
     expiresAt?: string;
+    read?: boolean;
 }
 
 interface ChatWidgetProps {
@@ -25,9 +26,10 @@ interface ChatWidgetProps {
     targetUser: { id: string; name: string; role?: string }; // Who we are talking to
     onClose: () => void;
     socket: Socket | null;
+    onRead?: (userId: string) => void;
 }
 
-export function ChatWidget({ currentUser, targetUser, onClose, socket }: ChatWidgetProps) {
+export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead }: ChatWidgetProps) {
     const [inputText, setInputText] = useState('');
     const [isRecording, setIsRecording] = useState(false);
     const [recordingTime, setRecordingTime] = useState(0);
@@ -63,10 +65,11 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket }: ChatWid
         if (!chatRoom) return;
         try {
             await api.patch(`/chat/history/${chatRoom}/read`);
+            if (onRead) onRead(targetUser.id);
         } catch (error) {
             console.error('Erro ao marcar mensagens como lidas:', error);
         }
-    }, [chatRoom]);
+    }, [chatRoom, onRead, targetUser.id]);
 
     const allMessages = useMemo(() => {
         const combined = [...dexieMessages];
@@ -89,7 +92,8 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket }: ChatWid
                         roomName: chatRoom,
                         text: msg.text,
                         audioUrl: msg.audioUrl,
-                        createdAt: msg.createdAt
+                        createdAt: msg.createdAt,
+                        read: !!msg.read
                     });
                 }
             } catch (error) {
@@ -98,6 +102,7 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket }: ChatWid
         }
 
         fetchHistory();
+        markRoomAsRead();
 
         const handlePrivateMessage = async (msg: Message) => {
             if (isMounted) {
@@ -108,7 +113,8 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket }: ChatWid
                     roomName: chatRoom,
                     text: msg.text,
                     audioUrl: msg.audioUrl,
-                    createdAt: msg.createdAt
+                    createdAt: msg.createdAt,
+                    read: !!msg.read
                 });
 
                 const senderId = msg.from || msg.fromId;
@@ -135,16 +141,29 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket }: ChatWid
             }
         };
 
+        const handleMessagesRead = async (data: { room: string, readBy: string }) => {
+            if (isMounted && data.room === chatRoom && data.readBy === targetUser.id) {
+                // Se o destinatário leu as mensagens, atualizamos as nossas mensagens enviadas para 'read: true'
+                await db.chatMessages
+                    .where('roomName')
+                    .equals(chatRoom)
+                    .and(m => m.fromId === currentUser.id && !m.read)
+                    .modify({ read: true });
+            }
+        };
+
         socket.emit('join_private_chat', { targetUserId: targetUser.id });
         socket.on('private_message', handlePrivateMessage);
         socket.on('message_edited', handleMessageEdited);
         socket.on('message_deleted', handleMessageDeleted);
+        socket.on('messages_read', handleMessagesRead);
 
         return () => {
             isMounted = false;
             socket.off('private_message', handlePrivateMessage);
             socket.off('message_edited', handleMessageEdited);
             socket.off('message_deleted', handleMessageDeleted);
+            socket.off('messages_read', handleMessagesRead);
         };
     }, [currentUser.id, targetUser.id, chatRoom, socket, markRoomAsRead]);
 
@@ -421,9 +440,13 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket }: ChatWid
                                             </span>
                                             {isPending ? (
                                                 <RefreshCw className="w-3 h-3 text-[var(--accent-text)] opacity-40 animate-spin" />
-                                            ) : (
-                                                <Zap className={`w-3 h-3 shrink-0 ${isMe ? 'text-[var(--accent-text)] fill-[var(--accent-text)] opacity-40' : 'text-[var(--text-tertiary)] opacity-30 group-hover:opacity-60 transition-opacity'}`} />
-                                            )}
+                                            ) : isMe ? (
+                                                msg.read ? (
+                                                    <CheckCheck className="w-3.5 h-3.5 text-white fill-white" />
+                                                ) : (
+                                                    <Check className="w-3.5 h-3.5 text-white opacity-60" />
+                                                )
+                                            ) : null}
                                         </div>
                                     </>
                                 )}

@@ -130,7 +130,7 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
 
                     {/* Date Filters */}
                     {showDateFilters && (
-                        <div className="flex items-center bg-white border border-[var(--border-subtle)] p-1 rounded-xl shadow-sm">
+                        <div className="flex items-center bg-[var(--bg-primary)] border border-[var(--border-subtle)] p-1 rounded-xl shadow-[var(--shadow-sm)]">
                             <div className="relative group">
                                 <div className="flex items-center gap-2 px-4 py-2 hover:bg-[var(--bg-secondary)] rounded-lg transition-colors cursor-pointer border-r border-[var(--border-subtle)]">
                                     <Calendar className="w-4 h-4 text-[var(--accent-secondary)]" />

@@ -87,7 +87,7 @@ export function Login() {
                                         type="email"
                                         value={email}
                                         onChange={e => setEmail(e.target.value)}
-                                        className="block w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-slate-100 focus:border-slate-300 transition-all font-medium text-sm"
+                                        className="block w-full pl-12 pr-4 py-4 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-2xl text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:outline-none focus:ring-4 focus:ring-[var(--bg-tertiary)] focus:border-[var(--border-medium)] transition-all font-medium text-sm"
                                         placeholder="agente@flash.com"
                                         required
                                         autoComplete="username"
@@ -96,16 +96,16 @@ export function Login() {
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Chave de Acesso</label>
+                                <label className="text-[10px] font-black text-[var(--text-tertiary)] uppercase tracking-widest ml-1">Chave de Acesso</label>
                                 <div className="relative group/input">
                                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                        <Lock className="h-5 w-5 text-slate-400 group-focus-within/input:text-slate-900 transition-colors" />
+                                        <Lock className="h-5 w-5 text-[var(--text-tertiary)] group-focus-within/input:text-[var(--text-primary)] transition-colors" />
                                     </div>
                                     <input
                                         type="password"
                                         value={password}
                                         onChange={e => setPassword(e.target.value)}
-                                        className="block w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-slate-100 focus:border-slate-300 transition-all font-medium text-sm"
+                                        className="block w-full pl-12 pr-4 py-4 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-2xl text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:outline-none focus:ring-4 focus:ring-[var(--bg-tertiary)] focus:border-[var(--border-medium)] transition-all font-medium text-sm"
                                         placeholder="••••••••"
                                         required
                                         autoComplete="current-password"
@@ -130,7 +130,7 @@ export function Login() {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="w-full flex items-center justify-center py-4 px-4 bg-slate-900 hover:bg-[#d4e720] text-white hover:text-[#1a2e05] rounded-2xl transition-all duration-300 font-bold text-sm tracking-wide shadow-xl hover:shadow-2xl hover:shadow-lime-500/20 hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:pointer-events-none group/btn"
+                                className="w-full flex items-center justify-center py-4 px-4 bg-[#d4e720] hover:bg-[#a3b60b] text-[#1a2e05] rounded-2xl transition-all duration-300 font-bold text-sm tracking-wide shadow-xl hover:shadow-2xl hover:shadow-lime-500/20 hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:pointer-events-none group/btn"
                             >
                                 {loading ? (
                                     <Loader2 className="w-5 h-5 animate-spin" />
