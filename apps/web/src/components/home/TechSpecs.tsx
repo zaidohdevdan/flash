@@ -1,52 +1,55 @@
+import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { Shield, Lock, Server, Cpu, Database, Eye } from 'lucide-react';
 
-const specs = [
-    {
-        icon: <Lock className="w-5 h-5 text-slate-700" />,
-        category: "SEGURANÇA",
-        title: "Criptografia End-to-End",
-        desc: "Todas as transmissões são protegidas via TLS 1.3. Dados sensíveis de usuários são hasheados com Argon2.",
-        delay: 0
-    },
-    {
-        icon: <Eye className="w-5 h-5 text-slate-700" />,
-        category: "AUDITORIA",
-        title: "Imutabilidade de Logs",
-        desc: "Cada ação crítica gera um registro de auditoria inalterável (AuditLog), garantindo total rastreabilidade.",
-        delay: 0.1
-    },
-    {
-        icon: <Server className="w-5 h-5 text-slate-700" />,
-        category: "INFRAESTRUTURA",
-        title: "Escalabilidade Horizontal",
-        desc: "Backend Node.js/Bun preparado para escalar via clusters, com balanceamento de carga nativo.",
-        delay: 0.2
-    },
-    {
-        icon: <Database className="w-5 h-5 text-slate-700" />,
-        category: "DADOS",
-        title: "MongoDB Cluster",
-        desc: "Armazenamento distribuído com réplicas para alta disponibilidade e tolerância a falhas.",
-        delay: 0.3
-    },
-    {
-        icon: <Cpu className="w-5 h-5 text-slate-700" />,
-        category: "PERFORMANCE",
-        title: "Real-time WebSockets",
-        desc: "Comunicação bidirecional com latência sub-100ms para atualizações instantâneas de dashboard.",
-        delay: 0.4
-    },
-    {
-        icon: <Shield className="w-5 h-5 text-slate-700" />,
-        category: "COMPLIANCE",
-        title: "RBAC Estrito",
-        desc: "Controle de Acesso Baseado em Funções garante que cada usuário acesse apenas o permitido.",
-        delay: 0.5
-    }
-];
-
 export const TechSpecs = () => {
+    const { t } = useTranslation();
+
+    const specs = [
+        {
+            icon: <Lock className="w-5 h-5 text-slate-700" />,
+            category: t('home.specs.categories.security'),
+            title: t('home.specs.items.security.title'),
+            desc: t('home.specs.items.security.desc'),
+            delay: 0
+        },
+        {
+            icon: <Eye className="w-5 h-5 text-slate-700" />,
+            category: t('home.specs.categories.audit'),
+            title: t('home.specs.items.audit.title'),
+            desc: t('home.specs.items.audit.desc'),
+            delay: 0.1
+        },
+        {
+            icon: <Server className="w-5 h-5 text-slate-700" />,
+            category: t('home.specs.categories.infra'),
+            title: t('home.specs.items.infra.title'),
+            desc: t('home.specs.items.infra.desc'),
+            delay: 0.2
+        },
+        {
+            icon: <Database className="w-5 h-5 text-slate-700" />,
+            category: t('home.specs.categories.data'),
+            title: t('home.specs.items.data.title'),
+            desc: t('home.specs.items.data.desc'),
+            delay: 0.3
+        },
+        {
+            icon: <Cpu className="w-5 h-5 text-slate-700" />,
+            category: t('home.specs.categories.performance'),
+            title: t('home.specs.items.performance.title'),
+            desc: t('home.specs.items.performance.desc'),
+            delay: 0.4
+        },
+        {
+            icon: <Shield className="w-5 h-5 text-slate-700" />,
+            category: t('home.specs.categories.compliance'),
+            title: t('home.specs.items.compliance.title'),
+            desc: t('home.specs.items.compliance.desc'),
+            delay: 0.5
+        }
+    ];
+
     return (
         <section className="py-32 bg-white relative">
             <div className="max-w-7xl mx-auto px-6">
@@ -60,7 +63,7 @@ export const TechSpecs = () => {
                             viewport={{ once: true }}
                             className="text-xs font-black text-slate-400 uppercase tracking-[0.3em] mb-4"
                         >
-                            Especificações Técnicas
+                            {t('home.specs.overline')}
                         </motion.h2>
                         <motion.h3
                             initial={{ opacity: 0, x: -20 }}
@@ -69,7 +72,7 @@ export const TechSpecs = () => {
                             transition={{ delay: 0.1 }}
                             className="text-4xl font-black text-slate-900 tracking-tight mb-6"
                         >
-                            Engenharia de precisão para missões críticas.
+                            {t('home.specs.title')}
                         </motion.h3>
                         <motion.p
                             initial={{ opacity: 0, x: -20 }}
@@ -78,7 +81,7 @@ export const TechSpecs = () => {
                             transition={{ delay: 0.2 }}
                             className="text-slate-500 leading-relaxed"
                         >
-                            O Flash não é apenas bonito. Por baixo do capô, existe uma arquitetura desenhada para resistir ao caos operacional e garantir a integridade da informação.
+                            {t('home.specs.description')}
                         </motion.p>
                     </div>
 

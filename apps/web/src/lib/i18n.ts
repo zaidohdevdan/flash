@@ -428,7 +428,8 @@ i18n
                             process: 'Process',
                             specs: 'Technology',
                             contact: 'Contact',
-                            login: 'Access System'
+                            login: 'Access System',
+                            logoPart: 'APP'
                         },
                         hero: {
                             badge: 'Enterprise System v4.0',
@@ -520,6 +521,94 @@ i18n
                             },
                             copyright: '© 2026 Daniel de Almeida Inc. All rights reserved.',
                             status: 'All Systems Normal'
+                        },
+                        process: {
+                            overline: 'Operational Flow',
+                            title: 'Light speed,',
+                            subtitle: 'literally.',
+                            steps: {
+                                capture: {
+                                    title: 'Capture',
+                                    desc: 'The professional records the occurrence with photo and automatic GPS.'
+                                },
+                                transmission: {
+                                    title: 'Transmission',
+                                    desc: 'Encrypted data via Socket.io in < 100ms.'
+                                },
+                                triage: {
+                                    title: 'Triage',
+                                    desc: 'Supervisors receive instant visual and audible alerts.'
+                                },
+                                resolution: {
+                                    title: 'Resolution',
+                                    desc: 'Forwarding to department or audited archiving.'
+                                }
+                            }
+                        },
+                        specs: {
+                            overline: 'Technical Specifications',
+                            title: 'Precision engineering for critical missions.',
+                            description: 'Flash isn\'t just beautiful. Under the hood, there is an architecture designed to withstand operational chaos and ensure information integrity.',
+                            categories: {
+                                security: 'SECURITY',
+                                audit: 'AUDIT',
+                                infra: 'INFRASTRUCTURE',
+                                data: 'DATA',
+                                performance: 'PERFORMANCE',
+                                compliance: 'COMPLIANCE'
+                            },
+                            items: {
+                                security: {
+                                    title: 'End-to-End Encryption',
+                                    desc: 'All transmissions are protected via TLS 1.3. User sensitive data is hashed with Argon2.'
+                                },
+                                audit: {
+                                    title: 'Immutable Logs',
+                                    desc: 'Every critical action generates an unalterable audit record (AuditLog), ensuring total traceability.'
+                                },
+                                infra: {
+                                    title: 'Horizontal Scalability',
+                                    desc: 'Node.js/Bun backend prepared to scale via clusters, with native load balancing.'
+                                },
+                                data: {
+                                    title: 'MongoDB Cluster',
+                                    desc: 'Distributed storage with replicas for high availability and fault tolerance.'
+                                },
+                                performance: {
+                                    title: 'Real-time WebSockets',
+                                    desc: 'Two-way communication with sub-100ms latency for instant dashboard updates.'
+                                },
+                                compliance: {
+                                    title: 'Strict RBAC',
+                                    desc: 'Role-Based Access Control ensures each user accesses only what is permitted.'
+                                }
+                            }
+                        },
+                        faq: {
+                            overline: 'FAQ',
+                            title: 'Questions from those who demand excellence.',
+                            items: {
+                                offline: {
+                                    q: 'Does Flash work fully offline?',
+                                    a: 'Yes. Our "Offline-First" architecture stores data locally on the device and syncs automatically once connection is re-established, ensuring zero data loss.'
+                                },
+                                security: {
+                                    q: 'How is data security handled?',
+                                    a: 'We use End-to-End Encryption (E2EE) in transit and at rest. Immutable audit logs ensure total traceability of all system actions.'
+                                },
+                                custom: {
+                                    q: 'Is it possible to customize workflows?',
+                                    a: 'Absolutely. Flash is modular. Supervisors can create specific report types and SLAs for each department without code.'
+                                },
+                                scale: {
+                                    q: 'How many users does the system support?',
+                                    a: 'Our Kubernetes cluster architecture scales horizontally. We currently support operations with +50,000 simultaneous users with latency < 100ms.'
+                                }
+                            },
+                            testimonial: {
+                                text: '"It radically changed our field operation. What used to take hours of alignment is now automatic and visible."',
+                                author: 'João Pereira • Director of Logistics Operations'
+                            }
                         }
                     }
                 }
@@ -939,7 +1028,8 @@ i18n
                             process: 'Processo',
                             specs: 'Tecnologia',
                             contact: 'Contato',
-                            login: 'Acessar Sistema'
+                            login: 'Acessar Sistema',
+                            logoPart: 'APP'
                         },
                         hero: {
                             badge: 'Enterprise System v4.0',
@@ -1030,7 +1120,95 @@ i18n
                                 compliance: 'Compliance'
                             },
                             copyright: '© 2026 Daniel de Almeida Inc. Todos os direitos reservados.',
-                            status: 'All Systems Normal'
+                            status: 'Sistemas Operantes'
+                        },
+                        process: {
+                            overline: 'Fluxo Operacional',
+                            title: 'Velocidade da luz,',
+                            subtitle: 'literalmente.',
+                            steps: {
+                                capture: {
+                                    title: 'Captura',
+                                    desc: 'O profissional registra a ocorrência com foto e GPS automático.'
+                                },
+                                transmission: {
+                                    title: 'Transmissão',
+                                    desc: 'Dados criptografados via Socket.io em < 100ms.'
+                                },
+                                triage: {
+                                    title: 'Triagem',
+                                    desc: 'Supervisores recebem alertas visuais e sonoros instantâneos.'
+                                },
+                                resolution: {
+                                    title: 'Resolução',
+                                    desc: 'Encaminhamento para setor ou arquivamento auditado.'
+                                }
+                            }
+                        },
+                        specs: {
+                            overline: 'Especificações Técnicas',
+                            title: 'Engenharia de precisão para missões críticas.',
+                            description: 'O Flash não é apenas bonito. Por baixo do capô, existe uma arquitetura desenhada para resistir ao caos operacional e garantir a integridade da informação.',
+                            categories: {
+                                security: 'SEGURANÇA',
+                                audit: 'AUDITORIA',
+                                infra: 'INFRAESTRUTURA',
+                                data: 'DADOS',
+                                performance: 'PERFORMANCE',
+                                compliance: 'COMPLIANCE'
+                            },
+                            items: {
+                                security: {
+                                    title: 'Criptografia End-to-End',
+                                    desc: 'Todas as transmissões são protegidas via TLS 1.3. Dados sensíveis de usuários são hasheados com Argon2.'
+                                },
+                                audit: {
+                                    title: 'Imutabilidade de Logs',
+                                    desc: 'Cada ação crítica gera um registro de auditoria inalterável (AuditLog), garantindo total rastreabilidade.'
+                                },
+                                infra: {
+                                    title: 'Escalabilidade Horizontal',
+                                    desc: 'Backend Node.js/Bun preparado para escalar via clusters, com balanceamento de carga nativo.'
+                                },
+                                data: {
+                                    title: 'MongoDB Cluster',
+                                    desc: 'Armazenamento distribuído com réplicas para alta disponibilidade e tolerância a falhas.'
+                                },
+                                performance: {
+                                    title: 'Real-time WebSockets',
+                                    desc: 'Comunicação bidirecional com latência sub-100ms para atualizações instantâneas de dashboard.'
+                                },
+                                compliance: {
+                                    title: 'RBAC Estrito',
+                                    desc: 'Controle de Acesso Baseado em Funções garante que cada usuário acesse apenas o permitido.'
+                                }
+                            }
+                        },
+                        faq: {
+                            overline: 'Dúvidas Frequentes',
+                            title: 'Perguntas de quem exige excelência.',
+                            items: {
+                                offline: {
+                                    q: 'O Flash funciona totalmente offline?',
+                                    a: 'Sim. Nossa arquitetura "Offline-First" armazena dados localmente no dispositivo e sincroniza automaticamente assim que a conexão é restabelecida, garantindo zero perda de dados.'
+                                },
+                                security: {
+                                    q: 'Como é feita a segurança dos dados?',
+                                    a: 'Utilizamos criptografia de ponta a ponta (E2EE) em trânsito e em repouso. Logs de auditoria imutáveis garantem total rastreabilidade de todas as ações no sistema.'
+                                },
+                                custom: {
+                                    q: 'É possível personalizar os fluxos de trabalho?',
+                                    a: 'Absolutamente. O Flash é modular. Supervisores podem criar tipos de relatórios e SLAs específicos para cada departamento sem necessidade de código.'
+                                },
+                                scale: {
+                                    q: 'Quantos usuários o sistema suporta?',
+                                    a: 'Nossa arquitetura em cluster no Kubernetes escala horizontalmente. Atualmente suportamos operações com +50.000 usuários simultâneos com latência < 100ms.'
+                                }
+                            },
+                            testimonial: {
+                                text: '"Mudou radicalmente nossa operação de campo. O que levava horas de alinhamento, agora é automático e visível."',
+                                author: 'João Pereira • Diretor de Operações Logísticas'
+                            }
                         }
                     }
                 }

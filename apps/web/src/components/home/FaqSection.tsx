@@ -1,35 +1,37 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Minus, MessageCircle } from 'lucide-react';
 
-const FAQS = [
-    {
-        q: "O Flash funciona totalmente offline?",
-        a: "Sim. Nossa arquitetura 'Offline-First' armazena dados localmente no dispositivo e sincroniza automaticamente assim que a conexão é restabelecida, garantindo zero perda de dados."
-    },
-    {
-        q: "Como é feita a segurança dos dados?",
-        a: "Utilizamos criptografia de ponta a ponta (E2EE) em trânsito e em repouso. Logs de auditoria imutáveis garantem total rastreabilidade de todas as ações no sistema."
-    },
-    {
-        q: "É possível personalizar os fluxos de trabalho?",
-        a: "Absolutamente. O Flash é modular. Supervisores podem criar tipos de relatórios e SLAs específicos para cada departamento sem necessidade de código."
-    },
-    {
-        q: "Quantos usuários o sistema suporta?",
-        a: "Nossa arquitetura em cluster no Kubernetes escala horizontalmente. Atualmente suportamos operações com +50.000 usuários simultâneos com latência < 100ms."
-    }
-];
-
 export const FaqSection = () => {
+    const { t } = useTranslation();
     const [openIndex, setOpenIndex] = useState<number | null>(0);
+
+    const FAQS = [
+        {
+            q: t('home.faq.items.offline.q'),
+            a: t('home.faq.items.offline.a')
+        },
+        {
+            q: t('home.faq.items.security.q'),
+            a: t('home.faq.items.security.a')
+        },
+        {
+            q: t('home.faq.items.custom.q'),
+            a: t('home.faq.items.custom.a')
+        },
+        {
+            q: t('home.faq.items.scale.q'),
+            a: t('home.faq.items.scale.a')
+        }
+    ];
 
     return (
         <section className="py-32 relative z-10 bg-slate-50 border-t border-slate-100">
             <div className="max-w-4xl mx-auto px-6">
                 <div className="text-center mb-16">
-                    <h2 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-4">Dúvidas Frequentes</h2>
-                    <h3 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">Perguntas de quem exige excelência.</h3>
+                    <h2 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-4">{t('home.faq.overline')}</h2>
+                    <h3 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">{t('home.faq.title')}</h3>
                 </div>
 
                 <div className="space-y-4">
@@ -86,8 +88,8 @@ export const FaqSection = () => {
                             <div className="flex gap-1 mb-2">
                                 {[1, 2, 3, 4, 5].map(i => <div key={i} className="w-4 h-4 bg-[#d4e720] rounded-sm" />)}
                             </div>
-                            <p className="text-xl font-medium text-slate-900 mb-4 italic">"Mudou radicalmente nossa operação de campo. O que levava horas de alinhamento, agora é automático e visível."</p>
-                            <p className="text-xs font-black text-slate-400 uppercase tracking-widest">João Pereira • Diretor de Operações Logísticas</p>
+                            <p className="text-xl font-medium text-slate-900 mb-4 italic">{t('home.faq.testimonial.text')}</p>
+                            <p className="text-xs font-black text-slate-400 uppercase tracking-widest">{t('home.faq.testimonial.author')}</p>
                         </div>
                     </div>
                 </motion.div>

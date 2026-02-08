@@ -10,6 +10,9 @@ export default {
       fontFamily: {
         sans: ['Outfit', 'sans-serif'],
       },
+      screens: {
+        'xs': '400px',
+      },
     },
   },
   plugins: [],
