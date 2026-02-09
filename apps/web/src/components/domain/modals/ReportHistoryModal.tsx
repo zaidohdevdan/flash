@@ -38,7 +38,7 @@ export const ReportHistoryModal: React.FC<ReportHistoryModalProps> = ({
             <div className="space-y-8 py-4 px-2 relative before:absolute before:left-[19px] before:top-4 before:bottom-4 before:w-[2px] before:bg-[var(--border-subtle)]">
                 {report.history?.map((step, idx) => (
                     <div key={idx} className="relative pl-12 group">
-                        <div className={`absolute left-0 top-1 w-10 h-10 rounded-2xl border-4 border-white shadow-md flex items-center justify-center z-10 transition-transform group-hover:scale-110 ${step.status === 'SENT' ? 'bg-yellow-400' :
+                        <div className={`absolute left-0 top-1 w-10 h-10 rounded-2xl border-4 border-[var(--bg-primary)] shadow-md flex items-center justify-center z-10 transition-transform group-hover:scale-110 ${step.status === 'SENT' ? 'bg-yellow-400' :
                             step.status === 'IN_REVIEW' ? 'bg-blue-500' :
                                 step.status === 'FORWARDED' ? 'bg-purple-500' :
                                     step.status === 'RESOLVED' ? 'bg-emerald-500' : 'bg-gray-400'

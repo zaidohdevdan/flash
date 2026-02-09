@@ -50,7 +50,7 @@ export const ReportFeed: React.FC<ReportFeedProps> = ({
 
             {hasMore && reports.length > 0 && (
                 <div className="flex justify-center pt-8">
-                    <Button variant="secondary" size="lg" onClick={onLoadMore} className="bg-white px-10">
+                    <Button variant="secondary" size="lg" onClick={onLoadMore} className="bg-[var(--bg-primary)] px-10">
                         Carregar Mais
                     </Button>
                 </div>

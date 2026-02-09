@@ -29,7 +29,7 @@ export const NewReportForm: React.FC<NewReportFormProps> = ({
                         <button
                             type="button"
                             onClick={onClearImage}
-                            className="absolute top-6 right-6 p-3 bg-white/90 hover:bg-white text-red-600 rounded-2xl backdrop-blur-md transition-all scale-90 opacity-0 group-hover:opacity-100 group-hover:scale-100 shadow-sm"
+                            className="absolute top-6 right-6 p-3 bg-[var(--bg-primary)]/90 hover:bg-[var(--bg-primary)] text-red-600 rounded-2xl backdrop-blur-md transition-all scale-90 opacity-0 group-hover:opacity-100 group-hover:scale-100 shadow-sm border border-[var(--border-subtle)]"
                             title="Remover foto"
                             aria-label="Remover foto"
                         >
@@ -38,7 +38,7 @@ export const NewReportForm: React.FC<NewReportFormProps> = ({
                     </>
                 ) : (
                     <label className="w-full h-full flex flex-col items-center justify-center cursor-pointer hover:bg-[var(--bg-tertiary)] transition-colors">
-                        <div className="p-4 bg-white rounded-full shadow-sm mb-4 group-hover:scale-110 transition-transform">
+                        <div className="p-4 bg-[var(--bg-primary)] rounded-full shadow-sm mb-4 group-hover:scale-110 transition-transform border border-[var(--border-subtle)]">
                             <Camera className="w-8 h-8 text-[var(--accent-primary)]" />
                         </div>
                         <p className="text-[10px] text-[var(--text-secondary)] font-black uppercase tracking-widest">Capturar Evidência</p>

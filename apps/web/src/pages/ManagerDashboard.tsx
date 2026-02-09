@@ -23,9 +23,18 @@ import { ExportReportsModal } from '../components/domain/modals/ExportReportsMod
 import { ConferenceModal } from '../components/domain/modals/ConferenceModal';
 import { ProfileSettingsModal } from '../components/domain/modals/ProfileSettingsModal';
 import { ConferenceInviteNotification } from '../components/ui/ConferenceInviteNotification';
+import { InviteConferenceModal } from '../components/domain/modals/InviteConferenceModal';
 import { db } from '../services/db';
 import { useLiveQuery } from 'dexie-react-hooks';
 import type { Report, Stats, Department, UserContact } from '../types';
+
+interface Subordinate {
+    id: string;
+    name: string;
+    role: string;
+    avatarUrl?: string | null;
+    statusPhrase?: string;
+}
 
 const KPI_CONFIGS = [
     { label: 'Recebidos', status: 'SENT', icon: AlertCircle, color: 'blue' as const },
@@ -44,7 +53,15 @@ const FILTER_OPTIONS = [
 
 export function ManagerDashboard() {
     const navigate = useNavigate();
-    const { user, signOut, updateUser } = useAuth();
+    const {
+        user,
+        signOut,
+        updateUser,
+        notificationsEnabled,
+        setNotificationsEnabled,
+        desktopNotificationsEnabled,
+        setDesktopNotificationsEnabled
+    } = useAuth();
     const [searchParams, setSearchParams] = useSearchParams();
     const activeChatId = searchParams.get('chat');
 
@@ -59,6 +76,15 @@ export function ManagerDashboard() {
     const [analyzingReport, setAnalyzingReport] = useState<Report | null>(null);
     const [targetStatus, setTargetStatus] = useState<'IN_REVIEW' | 'FORWARDED' | 'RESOLVED'>('RESOLVED');
     const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+    const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
+    const [profilePhrase, setProfilePhrase] = useState(user?.statusPhrase || '');
+    const [profileAvatar, setProfileAvatar] = useState<File | null>(null);
+
+    // War Room
+    const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+    const [subordinates, setSubordinates] = useState<Subordinate[]>([]);
+    const [roomParticipants, setRoomParticipants] = useState<string[]>([]);
 
     // Dexie Notifications
     const notifications = useLiveQuery(() => db.notifications.orderBy('createdAt').reverse().toArray()) || [];
@@ -120,6 +146,15 @@ export function ManagerDashboard() {
             console.error('Erro ao buscar contatos');
         }
     }, [user?.id]);
+
+    const loadSubordinates = useCallback(async () => {
+        try {
+            const response = await api.get('/subordinates');
+            setSubordinates(response.data);
+        } catch {
+            console.error('Erro ao buscar subordinados');
+        }
+    }, []);
 
     const loadDepartments = useCallback(async () => {
         try {
@@ -184,37 +219,6 @@ export function ManagerDashboard() {
         }
     }, []);
 
-    const [isProfileOpen, setIsProfileOpen] = useState(false);
-    const [profilePhrase, setProfilePhrase] = useState(user?.statusPhrase || '');
-    const [profileAvatar, setProfileAvatar] = useState<File | null>(null);
-    const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
-
-    useEffect(() => {
-        if (user?.statusPhrase) {
-            setProfilePhrase(user.statusPhrase);
-        }
-    }, [user?.statusPhrase]);
-
-    useEffect(() => {
-        loadReports(1, true, statusFilter);
-        loadStats();
-    }, [statusFilter, selectedDeptId, loadReports, loadStats]);
-
-    useEffect(() => {
-        loadContacts();
-        loadDepartments();
-        fetchNotifications();
-    }, [loadContacts, loadDepartments, fetchNotifications]);
-
-    const chatTarget = useMemo(() => {
-        if (!activeChatId) return null;
-        return contacts.find(c => c.id === activeChatId) || null;
-    }, [activeChatId, contacts]);
-
-    const handleCloseChat = () => {
-        setSearchParams({}, { replace: true });
-    };
-
     const socketUser = useMemo(() => user ? {
         id: user.id || '',
         name: user.name || '',
@@ -229,6 +233,7 @@ export function ManagerDashboard() {
         playNotificationSound
     } = useDashboardSocket({
         user: socketUser,
+        notificationsEnabled,
         onNotification: (data) => {
             if (activeChatId !== data.from) {
                 toast(`Mensagem de ${data.fromName || 'Contato'}: ${data.text}`, {
@@ -260,12 +265,37 @@ export function ManagerDashboard() {
     });
 
     useEffect(() => {
+        if (user?.statusPhrase) {
+            setProfilePhrase(user.statusPhrase);
+        }
+    }, [user?.statusPhrase]);
+
+    useEffect(() => {
+        loadReports(1, true, statusFilter);
+        loadStats();
+    }, [statusFilter, selectedDeptId, loadReports, loadStats]);
+
+    useEffect(() => {
+        loadContacts();
+        loadSubordinates();
+        loadDepartments();
+        fetchNotifications();
+    }, [loadContacts, loadSubordinates, loadDepartments, fetchNotifications]);
+
+    useEffect(() => {
         if (activeChatId) {
             markAsRead(activeChatId);
         }
     }, [activeChatId, markAsRead]);
 
+    const chatTarget = useMemo(() => {
+        if (!activeChatId) return null;
+        return contacts.find(c => c.id === activeChatId) || null;
+    }, [activeChatId, contacts]);
 
+    const handleCloseChat = () => {
+        setSearchParams({}, { replace: true });
+    };
 
     const handleMarkAsRead = async (id: string) => {
         try {
@@ -342,6 +372,27 @@ export function ManagerDashboard() {
         setTargetStatus('RESOLVED');
     };
 
+    const handleConfirmInvite = async (participantIds: string[]) => {
+        try {
+            if (activeRoom) {
+                await api.post('/conference/invite', {
+                    roomId: activeRoom,
+                    participants: participantIds
+                });
+                toast.success('Convites adicionais enviados!');
+            } else {
+                const response = await api.post('/conference/create', {
+                    participants: participantIds
+                });
+                toast.success('War Room iniciada! Convites enviados.');
+                setActiveRoom(response.data.roomId);
+            }
+            setIsInviteModalOpen(false);
+        } catch {
+            toast.error(activeRoom ? 'Erro ao enviar convites adicionais.' : 'Erro ao iniciar War Room.');
+        }
+    };
+
     return (
         <DashboardLayout
             user={{ name: user?.name, avatarUrl: user?.avatarUrl, role: user?.role }}
@@ -350,6 +401,8 @@ export function ManagerDashboard() {
             onMarkAsRead={handleMarkAsRead}
             onMarkAllAsRead={handleMarkAllAsRead}
             onProfileClick={() => setIsProfileOpen(true)}
+            activeRoom={activeRoom}
+            onRejoinRoom={setActiveRoom}
         >
             <div className="flex flex-col lg:flex-row gap-8 animate-in fade-in duration-500">
                 <div className="flex-1 space-y-8">
@@ -468,6 +521,9 @@ export function ManagerDashboard() {
                 onClose={() => setActiveRoom(null)}
                 roomName={activeRoom || ''}
                 userName={user?.name}
+                userId={user?.id}
+                onInviteClick={() => setIsInviteModalOpen(true)}
+                onParticipantsUpdate={setRoomParticipants}
             />
 
             <ConferenceInviteNotification
@@ -480,6 +536,26 @@ export function ManagerDashboard() {
                 onDecline={() => setPendingInvite(null)}
             />
 
+            <InviteConferenceModal
+                isOpen={isInviteModalOpen}
+                onClose={() => setIsInviteModalOpen(false)}
+                participants={useMemo(() => {
+                    const all = [...subordinates, ...contacts];
+                    const unique = Array.from(new Map(all.map(m => [m.id, m])).values());
+                    return unique
+                        .filter(m => onlineUserIds.includes(m.id) && !roomParticipants.includes(m.id))
+                        .map(m => ({
+                            id: m.id,
+                            name: m.name,
+                            role: m.role,
+                            avatarUrl: m.avatarUrl,
+                            isOnline: true
+                        }));
+                }, [subordinates, contacts, onlineUserIds, roomParticipants])}
+                onConfirm={handleConfirmInvite}
+                isAdding={!!activeRoom}
+            />
+
             <ProfileSettingsModal
                 isOpen={isProfileOpen}
                 onClose={() => setIsProfileOpen(false)}
@@ -489,6 +565,10 @@ export function ManagerDashboard() {
                 setProfilePhrase={setProfilePhrase}
                 onAvatarChange={setProfileAvatar}
                 avatarUrl={user?.avatarUrl}
+                notificationsEnabled={notificationsEnabled}
+                setNotificationsEnabled={setNotificationsEnabled}
+                desktopNotificationsEnabled={desktopNotificationsEnabled}
+                setDesktopNotificationsEnabled={setDesktopNotificationsEnabled}
             />
         </DashboardLayout>
     );

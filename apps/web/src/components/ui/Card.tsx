@@ -24,7 +24,7 @@ export const Card: React.FC<CardProps> = ({
 }) => {
     const variants = {
         white: 'card-base bg-[var(--bg-primary)]',
-        glass: 'bg-white/80 backdrop-blur-md border border-[var(--border-subtle)] shadow-sm',
+        glass: 'bg-[var(--bg-primary)]/80 backdrop-blur-md border border-[var(--border-subtle)] shadow-sm',
         blue: 'bg-[var(--info)] text-white shadow-xl shadow-blue-500/10',
         dark: 'bg-[var(--text-primary)] text-white border border-[var(--border-subtle)] shadow-xl',
         outline: 'bg-transparent border border-[var(--border-medium)] border-dashed'

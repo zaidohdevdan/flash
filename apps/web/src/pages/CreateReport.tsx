@@ -443,6 +443,8 @@ export function CreateReport() {
             onMarkAsRead={handleMarkAsRead}
             onMarkAllAsRead={handleMarkAllAsRead}
             onProfileClick={() => setIsProfileOpen(true)}
+            activeRoom={activeRoom}
+            onRejoinRoom={setActiveRoom}
             searchTerm={searchTerm}
             onSearchChange={setSearchTerm}
         >
@@ -450,14 +452,14 @@ export function CreateReport() {
                 {/* Alerta de Modo Offline */}
                 <div className="max-w-2xl mx-auto pt-4 mb-6">
                     {pendingReports && pendingReports.length > 0 && (
-                        <Card variant="outline" className="p-4 border-amber-200 bg-amber-50 flex items-center justify-between animate-in slide-in-from-top-4 duration-500">
+                        <Card variant="outline" className="p-4 border-amber-500/30 bg-amber-500/10 flex items-center justify-between animate-in slide-in-from-top-4 duration-500">
                             <div className="flex items-center gap-3">
-                                <div className="p-2 bg-amber-100 text-amber-600 rounded-xl">
+                                <div className="p-2 bg-amber-500/20 text-amber-500 rounded-xl">
                                     <CloudOff className="w-5 h-5" />
                                 </div>
                                 <div>
-                                    <h4 className="text-xs font-black text-amber-900 uppercase tracking-tight">Relatórios Offline</h4>
-                                    <p className="text-[10px] font-bold text-amber-700 uppercase tracking-widest">{pendingReports.length} {pendingReports.length === 1 ? 'relatório aguardando' : 'relatórios aguardando'} conexão</p>
+                                    <h4 className="text-xs font-black text-amber-500 uppercase tracking-tight">Relatórios Offline</h4>
+                                    <p className="text-[10px] font-bold text-amber-500/80 uppercase tracking-widest">{pendingReports.length} {pendingReports.length === 1 ? 'relatório aguardando' : 'relatórios aguardando'} conexão</p>
                                 </div>
                             </div>
                             <div className="flex items-center gap-2">
@@ -465,7 +467,7 @@ export function CreateReport() {
                                     variant="ghost"
                                     size="sm"
                                     onClick={() => syncAll()}
-                                    className="!text-amber-800 hover:bg-amber-100 !px-4"
+                                    className="!text-amber-500 hover:bg-amber-500/10 !px-4"
                                 >
                                     <RefreshCw className="w-4 h-4 mr-2" />
                                     Tentar Agora
@@ -477,7 +479,7 @@ export function CreateReport() {
                                             await db.pendingReports.clear();
                                         }
                                     }}
-                                    className="p-2 text-amber-400 hover:text-red-500 transition-colors"
+                                    className="p-2 text-amber-500/50 hover:text-red-500 transition-colors"
                                     aria-label="Limpar rascunhos"
                                     title="Limpar rascunhos"
                                 >
@@ -519,7 +521,7 @@ export function CreateReport() {
                                         key={filter.id}
                                         onClick={() => { setStatusFilter(filter.id); setPage(1); }}
                                         className={`px-4 py-2 rounded-lg text-xs font-semibold uppercase tracking-wide transition-all border shrink-0 whitespace-nowrap ${statusFilter === filter.id
-                                            ? 'bg-[var(--accent-primary)] text-white border-[var(--accent-primary)] shadow-sm'
+                                            ? 'bg-[var(--accent-primary)] text-[var(--accent-text)] border-[var(--accent-primary)] shadow-sm'
                                             : 'bg-[var(--bg-primary)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:bg-[var(--bg-tertiary)]'
                                             }`}
                                     >
@@ -589,7 +591,7 @@ export function CreateReport() {
                 <button
                     type="button"
                     onClick={() => setView('form')}
-                    className="fixed bottom-8 right-6 w-14 h-14 bg-[var(--accent-primary)] rounded-2xl flex items-center justify-center text-white shadow-xl shadow-[var(--accent-primary)]/30 active:scale-95 transition-all hover:-translate-y-1 z-30 group"
+                    className="fixed bottom-8 right-6 w-14 h-14 bg-[var(--accent-primary)] rounded-2xl flex items-center justify-center text-[var(--accent-text)] shadow-xl shadow-[var(--accent-primary)]/30 active:scale-95 transition-all hover:-translate-y-1 z-30 group"
                     aria-label="Novo Relatório"
                     title="Novo Relatório"
                 >

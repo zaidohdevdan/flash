@@ -25,6 +25,7 @@ import { AnalysisModal } from '../components/domain/modals/AnalysisModal';
 import { ProfileSettingsModal } from '../components/domain/modals/ProfileSettingsModal';
 import { ExportReportsModal } from '../components/domain/modals/ExportReportsModal';
 import { ConferenceModal } from '../components/domain/modals/ConferenceModal';
+import { InviteConferenceModal } from '../components/domain/modals/InviteConferenceModal';
 import { AgendaModal } from '../components/domain/modals/AgendaModal';
 import { ConferenceInviteNotification } from '../components/ui/ConferenceInviteNotification';
 import { db } from '../services/db';
@@ -45,7 +46,15 @@ interface Subordinate {
 
 export function Dashboard() {
     const navigate = useNavigate();
-    const { user, signOut, updateUser } = useAuth();
+    const {
+        user,
+        signOut,
+        updateUser,
+        notificationsEnabled,
+        setNotificationsEnabled,
+        desktopNotificationsEnabled,
+        setDesktopNotificationsEnabled
+    } = useAuth();
 
     const KPI_CONFIGS = useMemo(() => [
         { label: 'Recebidos', status: 'SENT', icon: AlertCircle, color: 'blue' as const },
@@ -102,6 +111,8 @@ export function Dashboard() {
     const [selectedDeptId, setSelectedDeptId] = useState('');
     const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
     const [isAgendaOpen, setIsAgendaOpen] = useState(false);
+    const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+    const [roomParticipants, setRoomParticipants] = useState<string[]>([]);
     const hasShownSummaryRef = useRef(false);
 
     // Dexie Notifications
@@ -127,6 +138,7 @@ export function Dashboard() {
         playNotificationSound
     } = useDashboardSocket({
         user: socketUser,
+        notificationsEnabled,
         onNotification: (data) => {
             if (activeChatId !== data.from) {
                 toast(`Nova mensagem: ${data.text} `, {
@@ -384,31 +396,30 @@ export function Dashboard() {
         setTargetStatus('IN_REVIEW');
     };
 
-    const handleStartConference = async () => {
+    const handleStartConference = () => {
+        setIsInviteModalOpen(true);
+    };
+
+    const handleConfirmInvite = async (participantIds: string[]) => {
         try {
-            const onlineParticipants = subordinates
-                .filter(s => onlineUserIds.includes(s.id))
-                .map(s => s.id);
-
-            const onlineContacts = contacts
-                .filter(c => onlineUserIds.includes(c.id))
-                .map(c => c.id);
-
-            const allParticipants = Array.from(new Set([...onlineParticipants, ...onlineContacts]));
-
-            if (allParticipants.length === 0) {
-                toast.error('Nenhum participante online para convidar.');
-                return;
+            if (activeRoom) {
+                // Se já houver uma sala ativa, convidamos mais pessoas para a mesma sala
+                await api.post('/conference/invite', {
+                    roomId: activeRoom,
+                    participants: participantIds
+                });
+                toast.success('Convites adicionais enviados!');
+            } else {
+                // Se não houver, criamos uma nova sala
+                const response = await api.post('/conference/create', {
+                    participants: participantIds
+                });
+                toast.success('War Room iniciada! Convites enviados.');
+                setActiveRoom(response.data.roomId);
             }
-
-            const response = await api.post('/conference/create', {
-                participants: allParticipants
-            });
-
-            toast.success('War Room iniciada! Convites enviados.');
-            setActiveRoom(response.data.roomId);
+            setIsInviteModalOpen(false);
         } catch {
-            toast.error('Erro ao iniciar War Room.');
+            toast.error(activeRoom ? 'Erro ao enviar convites adicionais.' : 'Erro ao iniciar War Room.');
         }
     };
 
@@ -463,6 +474,8 @@ export function Dashboard() {
             onProfileClick={() => setIsProfileOpen(true)}
             searchTerm={searchTerm}
             onSearchChange={setSearchTerm}
+            activeRoom={activeRoom}
+            onRejoinRoom={setActiveRoom}
         >
             <DashboardHero
                 title="Painel de Controle"
@@ -488,7 +501,7 @@ export function Dashboard() {
                         title='Lista'
                         type='button'
                         onClick={() => setViewMode('list')}
-                        className={`px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider transition-all ${viewMode === 'list' ? 'bg-white text-[var(--text-primary)] shadow-sm' : 'text-[var(--text-tertiary)] hover:bg-[var(--bg-primary)]'}`}
+                        className={`px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider transition-all border ${viewMode === 'list' ? 'bg-[var(--bg-primary)] border-[var(--border-medium)] text-[var(--text-primary)] shadow-sm' : 'border-transparent text-[var(--text-tertiary)] hover:bg-[var(--bg-primary)]'}`}
                     >
                         Lista
                     </button>
@@ -496,7 +509,7 @@ export function Dashboard() {
                         title='Mapa'
                         type='button'
                         onClick={() => setViewMode('map')}
-                        className={`px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider transition-all ${viewMode === 'map' ? 'bg-white text-[var(--text-primary)] shadow-sm' : 'text-[var(--text-tertiary)] hover:bg-[var(--bg-primary)]'}`}
+                        className={`px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider transition-all border ${viewMode === 'map' ? 'bg-[var(--bg-primary)] border-[var(--border-medium)] text-[var(--text-primary)] shadow-sm' : 'border-transparent text-[var(--text-tertiary)] hover:bg-[var(--bg-primary)]'}`}
                     >
                         Mapa
                     </button>
@@ -583,6 +596,10 @@ export function Dashboard() {
                 setProfilePhrase={setProfilePhrase}
                 onAvatarChange={setProfileAvatar}
                 avatarUrl={user?.avatarUrl}
+                notificationsEnabled={notificationsEnabled}
+                setNotificationsEnabled={setNotificationsEnabled}
+                desktopNotificationsEnabled={desktopNotificationsEnabled}
+                setDesktopNotificationsEnabled={setDesktopNotificationsEnabled}
             />
 
             {chatTarget && user && (
@@ -607,6 +624,9 @@ export function Dashboard() {
                 onClose={() => setActiveRoom(null)}
                 roomName={activeRoom || ''}
                 userName={user?.name}
+                userId={user?.id}
+                onInviteClick={user?.role === 'SUPERVISOR' ? () => setIsInviteModalOpen(true) : undefined}
+                onParticipantsUpdate={setRoomParticipants}
             />
 
             <ConferenceInviteNotification
@@ -623,7 +643,24 @@ export function Dashboard() {
                 isOpen={isAgendaOpen}
                 onClose={() => setIsAgendaOpen(false)}
             />
+
+            <InviteConferenceModal
+                isOpen={isInviteModalOpen}
+                onClose={() => setIsInviteModalOpen(false)}
+                participants={useMemo(() => {
+                    const all = [...subordinates, ...contacts];
+                    return all.filter(m => onlineUserIds.includes(m.id) && !roomParticipants.includes(m.id))
+                        .map(m => ({
+                            id: m.id,
+                            name: m.name,
+                            role: m.role,
+                            avatarUrl: m.avatarUrl,
+                            isOnline: true
+                        }));
+                }, [subordinates, contacts, onlineUserIds, roomParticipants])}
+                onConfirm={handleConfirmInvite}
+                isAdding={!!activeRoom}
+            />
         </DashboardLayout>
     );
 }
-

@@ -25,9 +25,10 @@ interface UseDashboardSocketOptions {
     onNewNotification?: (data: NotificationPayload) => void;
     onNewReport?: () => void;
     onReportStatusUpdate?: () => void;
+    notificationsEnabled?: boolean;
 }
 
-export const useDashboardSocket = ({ user, onNotification, onConferenceInvite, onNewNotification, onNewReport, onReportStatusUpdate }: UseDashboardSocketOptions) => {
+export const useDashboardSocket = ({ user, onNotification, onConferenceInvite, onNewNotification, onNewReport, onReportStatusUpdate, notificationsEnabled = true }: UseDashboardSocketOptions) => {
     const [socket, setSocket] = useState<Socket | null>(null);
     const [onlineUserIds, setOnlineUserIds] = useState<string[]>([]);
     const [unreadMessages, setUnreadMessages] = useState<Record<string, boolean>>({});
@@ -38,11 +39,12 @@ export const useDashboardSocket = ({ user, onNotification, onConferenceInvite, o
 
     const notificationAudioRef = useRef<HTMLAudioElement | null>(null);
     const playNotificationSound = useCallback(() => {
+        if (!notificationsEnabled) return;
         if (!notificationAudioRef.current) {
             notificationAudioRef.current = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
         }
         notificationAudioRef.current.play().catch(e => console.error('Erro ao tocar som:', e));
-    }, []);
+    }, [notificationsEnabled]);
 
     // Use a ref for the callback to avoid re-triggering the socket connection effect
     const onNotificationRef = useRef(onNotification);

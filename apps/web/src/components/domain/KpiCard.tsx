@@ -30,11 +30,11 @@ export const KpiCard: React.FC<KpiCardProps> = ({
     return (
         <Card className="p-5 flex flex-col justify-between h-full hover:shadow-md transition-shadow">
             <div className="flex justify-between items-start mb-4">
-                <div className={`p-2 rounded-xl ${colors.bg}`}>
+                <div className={`p-2 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-subtle)]`}>
                     <Icon className={`w-5 h-5 ${colors.icon}`} />
                 </div>
                 {trend && (
-                    <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">
+                    <span className="text-[10px] font-black text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded-full uppercase tracking-widest border border-emerald-500/20">
                         {trend}
                     </span>
                 )}

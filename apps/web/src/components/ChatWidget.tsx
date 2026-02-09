@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { Socket } from 'socket.io-client';
 import { Send, Mic, X, MessageSquare, Square, Trash2, Hourglass, Pencil, Check, CheckCheck, Trash, User, RefreshCw } from 'lucide-react';
 import { api } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 import { db } from '../services/db';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { toast } from 'react-hot-toast';
@@ -30,6 +31,7 @@ interface ChatWidgetProps {
 }
 
 export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead }: ChatWidgetProps) {
+    const { notificationsEnabled } = useAuth();
     const [inputText, setInputText] = useState('');
     const [isRecording, setIsRecording] = useState(false);
     const [recordingTime, setRecordingTime] = useState(0);
@@ -119,10 +121,12 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead }:
 
                 const senderId = msg.from || msg.fromId;
                 if (senderId !== currentUser.id) {
-                    if (!notificationAudioRef.current) {
-                        notificationAudioRef.current = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+                    if (notificationsEnabled) {
+                        if (!notificationAudioRef.current) {
+                            notificationAudioRef.current = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+                        }
+                        notificationAudioRef.current.play().catch(() => { });
                     }
-                    notificationAudioRef.current.play().catch(() => { });
                     // Se estou com o chat aberto, marco como lida imediatamente no servidor
                     markRoomAsRead();
                 }
@@ -322,9 +326,9 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead }:
     };
 
     return (
-        <div className="fixed inset-0 sm:top-auto sm:left-auto sm:bottom-6 sm:right-6 w-full sm:w-[400px] md:w-[440px] h-[100dvh] sm:h-[650px] sm:max-h-[calc(100vh-4rem)] bg-white/90 backdrop-blur-[32px] sm:rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden sm:border border-[var(--border-subtle)] ring-1 ring-black/5 z-[60] animate-in slide-in-from-bottom-5 fade-in duration-500">
+        <div className="fixed inset-0 sm:top-auto sm:left-auto sm:bottom-6 sm:right-6 w-full sm:w-[400px] md:w-[440px] h-[100dvh] sm:h-[650px] sm:max-h-[calc(100vh-4rem)] bg-[var(--bg-primary)]/90 backdrop-blur-[32px] sm:rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden sm:border border-[var(--border-subtle)] ring-1 ring-black/5 z-[60] animate-in slide-in-from-bottom-5 fade-in duration-500">
             {/* Header */}
-            <div className="p-4 bg-white/80 backdrop-blur-xl text-[var(--text-primary)] flex justify-between items-center border-b border-[var(--border-subtle)]">
+            <div className="p-4 bg-[var(--bg-primary)]/80 backdrop-blur-xl text-[var(--text-primary)] flex justify-between items-center border-b border-[var(--border-subtle)]">
                 <div className="flex items-center gap-3">
                     <div className="bg-[var(--accent-primary)]/10 p-2 rounded-full text-[var(--accent-primary)]">
                         <MessageSquare className="w-5 h-5" />
@@ -360,7 +364,7 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead }:
             </div>
 
             {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 overscroll-contain scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+            <div className="flex-1 overflow-y-auto p-4 space-y-4 overscroll-contain scrollbar-thin scrollbar-thumb-[var(--border-medium)] scrollbar-track-transparent">
                 {allMessages.length === 0 && (
                     <div className="flex flex-col items-center justify-center h-full text-[var(--text-tertiary)] opacity-50">
                         <MessageSquare className="w-12 h-12 mb-2" />
@@ -381,14 +385,14 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead }:
                                 className={`group relative max-w-[85%] p-3.5 rounded-2xl shadow-sm text-sm transition-all cursor-pointer ${isMe
                                     ? 'bg-[var(--accent-primary)] text-[var(--accent-text)] rounded-tr-none'
                                     : 'bg-[var(--bg-secondary)] border border-[var(--border-subtle)] text-[var(--text-primary)] rounded-tl-none'
-                                    } ${isSelected ? 'ring-2 ring-[var(--accent-primary)] ring-offset-2 ring-offset-white' : ''}`}
+                                    } ${isSelected ? 'ring-2 ring-[var(--accent-primary)] ring-offset-2 ring-offset-[var(--bg-primary)]' : ''}`}
                             >
                                 {isEditing ? (
                                     <div className="flex flex-col gap-2 min-w-[200px]">
                                         <textarea
                                             value={editText}
                                             onChange={e => setEditText(e.target.value)}
-                                            className="w-full bg-white text-[var(--text-primary)] placeholder-[var(--text-tertiary)] border border-[var(--border-medium)] outline-none rounded-lg p-2 text-xs resize-none focus:border-[var(--accent-primary)] transition-colors"
+                                            className="w-full bg-[var(--bg-primary)] text-[var(--text-primary)] placeholder-[var(--text-tertiary)] border border-[var(--border-medium)] outline-none rounded-lg p-2 text-xs resize-none focus:border-[var(--accent-primary)] transition-colors"
                                             rows={2}
                                             autoFocus
                                             placeholder="Editar mensagem..."
@@ -405,7 +409,7 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead }:
                                             <button
                                                 type="button"
                                                 onClick={handleUpdateMessage}
-                                                className="p-1 bg-white text-[var(--accent-primary)] rounded hover:bg-white/90 border border-[var(--border-subtle)]"
+                                                className="p-1 bg-[var(--bg-primary)] text-[var(--accent-primary)] rounded hover:bg-[var(--bg-secondary)] border border-[var(--border-subtle)]"
                                                 title="Salvar"
                                             >
                                                 <Check className="w-3.5 h-3.5" />
@@ -456,7 +460,7 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead }:
                                         <button
                                             type="button"
                                             onClick={(e) => { e.stopPropagation(); handleStartEdit(msg); }}
-                                            className="p-2 bg-white shadow-md border border-[var(--border-subtle)] rounded-full text-[var(--text-tertiary)] hover:text-[var(--accent-primary)] hover:bg-[var(--bg-secondary)] transition"
+                                            className="p-2 bg-[var(--bg-primary)] shadow-md border border-[var(--border-subtle)] rounded-full text-[var(--text-tertiary)] hover:text-[var(--accent-primary)] hover:bg-[var(--bg-secondary)] transition"
                                             title="Editar"
                                         >
                                             <Pencil className="w-3.5 h-3.5" />
@@ -465,14 +469,14 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead }:
                                             <button
                                                 type="button"
                                                 onClick={(e) => { e.stopPropagation(); if (showDeleteMenuFor === msg.id) setShowDeleteMenuFor(null); else setShowDeleteMenuFor(msg.id!); }}
-                                                className="p-2 bg-white shadow-md border border-[var(--border-subtle)] rounded-full text-[var(--text-tertiary)] hover:text-red-500 hover:bg-[var(--bg-secondary)] transition"
+                                                className="p-2 bg-[var(--bg-primary)] shadow-md border border-[var(--border-subtle)] rounded-full text-[var(--text-tertiary)] hover:text-red-500 hover:bg-[var(--bg-secondary)] transition"
                                                 title="Excluir"
                                             >
                                                 <Trash className="w-3.5 h-3.5" />
                                             </button>
 
                                             {showDeleteMenuFor === msg.id && (
-                                                <div className="absolute right-full mr-2 top-0 bg-white shadow-xl rounded-xl border border-[var(--border-subtle)] p-1 min-w-[140px] flex flex-col z-50 animate-in zoom-in-95 duration-200">
+                                                <div className="absolute right-full mr-2 top-0 bg-[var(--bg-primary)] shadow-xl rounded-xl border border-[var(--border-subtle)] p-1 min-w-[140px] flex flex-col z-50 animate-in zoom-in-95 duration-200">
                                                     <button
                                                         type="button"
                                                         onClick={(e) => { e.stopPropagation(); confirmDelete(msg.id!, 'me'); }}
@@ -500,7 +504,7 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead }:
             </div>
 
             {/* Input Area */}
-            <div className="p-3 bg-white/80 border-t border-[var(--border-subtle)] backdrop-blur-md">
+            <div className="p-3 bg-[var(--bg-primary)]/80 border-t border-[var(--border-subtle)] backdrop-blur-md">
                 {isRecording ? (
                     <div className="flex items-center justify-between bg-red-50 p-3 rounded-xl border border-red-200 animate-pulse">
                         <div className="flex items-center gap-3 text-red-500">
@@ -533,7 +537,7 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead }:
                             onChange={e => setInputText(e.target.value)}
                             onKeyDown={e => e.key === 'Enter' && handleSendMessage()}
                             placeholder="Digite sua mensagem..."
-                            className="flex-1 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] outline-none text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] px-4 py-3 rounded-xl focus:ring-2 focus:ring-[var(--accent-primary)]/40 focus:bg-white transition-all font-medium"
+                            className="flex-1 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] outline-none text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] px-4 py-3 rounded-xl focus:ring-2 focus:ring-[var(--accent-primary)]/40 focus:bg-[var(--bg-primary)] transition-all font-medium"
                         />
                         <button
                             type="button"

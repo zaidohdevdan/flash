@@ -8,7 +8,7 @@ interface SuccessViewProps {
 export const SuccessView: React.FC<SuccessViewProps> = ({ onBack }) => {
     return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-[var(--bg-primary)] p-6 text-center">
-            <div className="bg-emerald-50 mb-8 p-8 rounded-[3rem] border border-emerald-100 shadow-sm animate-in zoom-in-50 duration-500">
+            <div className="bg-emerald-500/10 mb-8 p-8 rounded-[3rem] border border-emerald-500/20 shadow-sm animate-in zoom-in-50 duration-500">
                 <Send className="w-20 h-20 text-emerald-500" />
             </div>
             <h2 className="text-3xl font-black text-[var(--text-primary)] mb-2 tracking-tight uppercase">Missão Cumprida!</h2>

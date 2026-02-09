@@ -16,12 +16,12 @@ export const SupervisorHighlight: React.FC<SupervisorHighlightProps> = ({
     onChatOpen
 }) => {
     return (
-        <Card className="bg-white p-6 border border-[var(--border-subtle)] shadow-sm flex flex-col sm:flex-row items-center justify-between gap-6 mb-8 hover:border-[var(--accent-primary)] transition-all">
+        <Card className="bg-[var(--bg-primary)] p-6 border border-[var(--border-subtle)] shadow-sm flex flex-col sm:flex-row items-center justify-between gap-6 mb-8 hover:border-[var(--accent-primary)] transition-all">
             <div className="flex items-center gap-4">
-                <div className={`p-3 rounded-2xl transition-all duration-500 ${hasUnread ? 'bg-amber-50 animate-pulse border border-amber-200' : 'bg-[var(--bg-secondary)]'}`}>
+                <div className={`p-3 rounded-2xl transition-all duration-500 relative ${hasUnread ? 'bg-amber-500/10 animate-pulse border border-amber-500/20' : 'bg-[var(--bg-secondary)]'}`}>
                     <MessageSquare className={`w-6 h-6 ${hasUnread ? 'text-amber-500' : 'text-[var(--text-tertiary)]'}`} />
                     {hasUnread && (
-                        <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-white animate-bounce" />
+                        <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-[var(--bg-primary)] animate-bounce" />
                     )}
                 </div>
                 <div>

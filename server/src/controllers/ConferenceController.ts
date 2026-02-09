@@ -10,8 +10,8 @@ export const ConferenceController = {
         const { userRole, userId, io } = req;
         const { participants } = req.body; // Array de IDs de usuários
 
-        if (userRole !== 'SUPERVISOR') {
-            return res.status(403).json({ error: 'Apenas supervisores podem abrir uma sala de conferência.' });
+        if (userRole !== 'SUPERVISOR' && userRole !== 'MANAGER') {
+            return res.status(403).json({ error: 'Apenas supervisores ou gestores podem abrir uma sala de conferência.' });
         }
 
         if (!participants || !Array.isArray(participants) || participants.length === 0) {
@@ -38,6 +38,41 @@ export const ConferenceController = {
         return res.json({
             roomId,
             message: 'Sala de conferência criada e convites enviados.'
+        });
+    },
+
+    /**
+     * Convida participantes adicionais para uma sala já existente.
+     */
+    async invite(req: Request, res: Response) {
+        const { userRole, userId, io } = req;
+        const { participants, roomId } = req.body;
+
+        if (userRole !== 'SUPERVISOR' && userRole !== 'MANAGER') {
+            return res.status(403).json({ error: 'Apenas supervisores ou gestores podem convidar para a sala.' });
+        }
+
+        if (!roomId) {
+            return res.status(400).json({ error: 'O ID da sala é obrigatório.' });
+        }
+
+        if (!participants || !Array.isArray(participants) || participants.length === 0) {
+            return res.status(400).json({ error: 'Nenhum participante selecionado.' });
+        }
+
+        // Enviar convites via Socket
+        participants.forEach((participantId: string) => {
+            io.to(participantId).emit('conference_invite', {
+                roomId,
+                hostId: userId,
+                hostRole: userRole,
+                timestamp: new Date(),
+                isAdditionalInvite: true // Flag para diferenciar de uma nova sala
+            });
+        });
+
+        return res.json({
+            message: 'Convites adicionais enviados com sucesso.'
         });
     }
 };

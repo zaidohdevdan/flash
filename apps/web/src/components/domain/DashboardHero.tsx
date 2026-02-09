@@ -118,7 +118,7 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
                                 className={`
                                     flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-semibold uppercase tracking-wide transition-all whitespace-nowrap
                                     ${statusFilter === filter.id
-                                        ? 'bg-white text-[var(--text-primary)] shadow-sm'
+                                        ? 'bg-[var(--bg-primary)] text-[var(--text-primary)] shadow-sm border border-[var(--border-medium)]'
                                         : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'
                                     }
                                 `}

@@ -61,7 +61,7 @@ export const ReportCard: React.FC<ReportCardProps> = React.memo(({
                     />
                 </button>
                 <div className="absolute top-2 right-2 pointer-events-none">
-                    <Badge status={report.status} className="shadow-sm bg-white/90 backdrop-blur-sm" />
+                    <Badge status={report.status} className="shadow-sm bg-[var(--bg-primary)]/90 backdrop-blur-sm" />
                 </div>
             </div>
 
@@ -100,9 +100,9 @@ export const ReportCard: React.FC<ReportCardProps> = React.memo(({
                     </h4>
 
                     {report.status === 'FORWARDED' && report.department?.name && (
-                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-purple-50 rounded-full border border-purple-100 mb-3">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-purple-500/10 rounded-full border border-purple-500/20 mb-3">
                             <div className="w-1.5 h-1.5 bg-purple-500 rounded-full" />
-                            <span className="text-xs font-medium text-purple-700">
+                            <span className="text-xs font-bold text-purple-500 uppercase tracking-tight">
                                 No Setor: {report.department.name}
                             </span>
                         </div>

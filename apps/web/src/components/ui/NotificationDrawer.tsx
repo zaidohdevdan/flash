@@ -43,16 +43,16 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
                         animate={{ x: 0 }}
                         exit={{ x: '100%' }}
                         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                        className="fixed right-0 top-0 bottom-0 w-full sm:w-[400px] bg-white border-l border-gray-100 shadow-2xl z-[60] flex flex-col"
+                        className="fixed right-0 top-0 bottom-0 w-full sm:w-[400px] bg-[var(--bg-primary)] border-l border-[var(--border-subtle)] shadow-2xl z-[60] flex flex-col"
                     >
                         {/* Header */}
-                        <div className="p-6 border-b border-gray-100 flex justify-between items-center">
+                        <div className="p-6 border-b border-[var(--border-subtle)] flex justify-between items-center">
                             <div className="flex items-center gap-3">
-                                <div className="p-2 bg-blue-50 text-blue-600 rounded-xl">
+                                <div className="p-2 bg-blue-500/10 text-blue-500 rounded-xl">
                                     <Bell className="w-5 h-5" />
                                 </div>
                                 <div>
-                                    <h3 className="text-lg font-black text-gray-900 uppercase tracking-tighter">Central de Alertas</h3>
+                                    <h3 className="text-lg font-black text-[var(--text-primary)] uppercase tracking-tighter">Central de Alertas</h3>
                                     {unreadCount > 0 && (
                                         <p className="text-[10px] text-blue-600 font-bold uppercase tracking-widest">
                                             {unreadCount} {unreadCount === 1 ? 'Nova Notificação' : 'Novas Notificações'}
@@ -65,19 +65,19 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
                                 onClick={onClose}
                                 title="Fechar"
                                 aria-label="Fechar"
-                                className="p-2 hover:bg-gray-100 rounded-full transition-all"
+                                className="p-2 hover:bg-[var(--bg-secondary)] rounded-full transition-all"
                             >
-                                <X className="w-6 h-6 text-gray-400" />
+                                <X className="w-6 h-6 text-[var(--text-tertiary)]" />
                             </button>
                         </div>
 
                         {/* Actions */}
                         {unreadCount > 0 && (
-                            <div className="px-6 py-3 bg-gray-50/50 flex justify-end items-center">
+                            <div className="px-6 py-3 bg-[var(--bg-secondary)]/50 flex justify-end items-center">
                                 <button
                                     type="button"
                                     onClick={onMarkAllAsRead}
-                                    className="flex items-center gap-1.5 text-[10px] font-black text-gray-500 hover:text-blue-600 uppercase tracking-widest transition-all"
+                                    className="flex items-center gap-1.5 text-[10px] font-black text-[var(--text-tertiary)] hover:text-blue-500 uppercase tracking-widest transition-all"
                                 >
                                     Limpar Tudo <CheckCircle2 className="w-3 h-3" />
                                 </button>
@@ -92,7 +92,7 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
                                         key={notif.id}
                                         layout
                                         className={`relative p-4 rounded-3xl border transition-all cursor-pointer group
-                                            ${notif.read ? 'bg-white border-gray-100' : 'bg-blue-50/30 border-blue-100/50 shelf-highlight'}
+                                            ${notif.read ? 'bg-[var(--bg-primary)] border-[var(--border-subtle)]' : 'bg-blue-500/5 border-blue-500/20 shelf-highlight'}
                                         `}
                                         onClick={() => !notif.read && onMarkAsRead(notif.id)}
                                     >
@@ -113,8 +113,8 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
                                             </div>
 
                                             <div className="flex-1">
-                                                <h4 className="text-sm font-black text-gray-900 leading-tight mb-1">{notif.title}</h4>
-                                                <p className="text-xs text-gray-600 font-medium leading-relaxed">{notif.message}</p>
+                                                <h4 className="text-sm font-black text-[var(--text-primary)] leading-tight mb-1">{notif.title}</h4>
+                                                <p className="text-xs text-[var(--text-secondary)] font-medium leading-relaxed">{notif.message}</p>
 
                                                 <div className="flex justify-between items-center mt-3">
                                                     <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
@@ -140,8 +140,8 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
                             )}
                         </div>
 
-                        <div className="p-6 bg-gray-50 border-t border-gray-100">
-                            <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest text-center">
+                        <div className="p-6 bg-[var(--bg-secondary)] border-t border-[var(--border-subtle)]">
+                            <p className="text-[10px] text-[var(--text-tertiary)] font-black uppercase tracking-widest text-center">
                                 Monitoramento de Operações Ativo
                             </p>
                         </div>

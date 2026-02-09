@@ -369,7 +369,7 @@ export function AdminDashboard() {
                             type='button'
                             onClick={() => { setView('list'); resetForm(); }}
                             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-xs uppercase tracking-wide transition-all ${view === 'list'
-                                ? 'bg-[var(--accent-primary)] text-white shadow-md'
+                                ? 'bg-[var(--accent-primary)] text-[var(--accent-text)] shadow-md'
                                 : 'text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]'
                                 }`}
                         >
@@ -380,7 +380,7 @@ export function AdminDashboard() {
                             type='button'
                             onClick={() => { setView('create'); resetForm(); }}
                             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-xs uppercase tracking-wide transition-all ${view === 'create'
-                                ? 'bg-[var(--accent-primary)] text-white shadow-md'
+                                ? 'bg-[var(--accent-primary)] text-[var(--accent-text)] shadow-md'
                                 : 'text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]'
                                 }`}
                         >
@@ -391,7 +391,7 @@ export function AdminDashboard() {
                             type='button'
                             onClick={() => { setView('departments'); resetForm(); }}
                             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-xs uppercase tracking-wide transition-all ${view === 'departments'
-                                ? 'bg-[var(--accent-primary)] text-white shadow-md'
+                                ? 'bg-[var(--accent-primary)] text-[var(--accent-text)] shadow-md'
                                 : 'text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]'
                                 }`}
                         >
@@ -403,22 +403,22 @@ export function AdminDashboard() {
                             type='button'
                             onClick={() => { setView('contacts'); resetForm(); }}
                             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-xs uppercase tracking-wide transition-all ${view === 'contacts'
-                                ? 'bg-[var(--accent-primary)] text-white shadow-md'
+                                ? 'bg-[var(--accent-primary)] text-[var(--accent-text)] shadow-md'
                                 : 'text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]'
                                 }`}
                         >
                             <Mail className="w-4 h-4" /> Mensagens
                             {contacts.filter(c => !c.read).length > 0 && (
-                                <span className="ml-auto bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full ring-2 ring-white">
+                                <span className="ml-auto bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full ring-2 ring-[var(--bg-primary)]">
                                     {contacts.filter(c => !c.read).length}
                                 </span>
                             )}
                         </button>
 
                         <div className="pt-4 mt-4 border-t border-[var(--border-subtle)] px-2 pb-2">
-                            <div className="bg-emerald-50 p-3 rounded-xl border border-emerald-100">
-                                <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest leading-none mb-1">Status do Sistema</p>
-                                <div className="flex items-center gap-2 text-emerald-700 font-bold text-xs">
+                            <div className="bg-emerald-500/10 p-3 rounded-xl border border-emerald-500/20">
+                                <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest leading-none mb-1">Status do Sistema</p>
+                                <div className="flex items-center gap-2 text-emerald-500 font-bold text-xs uppercase tracking-tight">
                                     <CheckCircle className="w-4 h-4" /> Operacional
                                 </div>
                             </div>
@@ -746,7 +746,7 @@ export function AdminDashboard() {
                                                     type="button"
                                                     onClick={() => setRole(r as 'PROFESSIONAL' | 'SUPERVISOR' | 'MANAGER')}
                                                     className={`py-2.5 rounded-lg text-[10px] font-black tracking-widest uppercase transition-all ${role === r
-                                                        ? 'bg-white text-[var(--accent-primary)] shadow-sm border border-[var(--border-subtle)]'
+                                                        ? 'bg-[var(--bg-primary)] text-[var(--accent-primary)] shadow-sm border border-[var(--border-medium)]'
                                                         : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'
                                                         }`}
                                                 >

@@ -87,6 +87,7 @@ routes.delete('/chat/messages/:id', AuthMiddleware, ChatController.deleteMessage
 
 // Videoconferência (War Room)
 routes.post('/conference/create', AuthMiddleware, ConferenceController.create);
+routes.post('/conference/invite', AuthMiddleware, ConferenceController.invite);
 
 // Agenda
 routes.get('/agenda', AuthMiddleware, AgendaController.index);

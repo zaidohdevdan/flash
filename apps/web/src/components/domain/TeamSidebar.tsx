@@ -44,7 +44,7 @@ const MemberItem = React.memo(({ member, onClick }: { member: TeamMember, onClic
                     className="group-hover/item:scale-105 transition-transform"
                 />
                 {member.hasUnread && (
-                    <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white" />
+                    <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-[var(--bg-primary)]" />
                 )}
             </div>
 
@@ -147,7 +147,7 @@ export const TeamSidebar: React.FC<TeamSidebarProps> = React.memo(({
                                     className={`
                                         flex-1 flex items-center justify-center gap-2 py-2 rounded-lg transition-all relative text-xs font-medium
                                         ${isActive
-                                            ? 'bg-white text-[var(--text-primary)] shadow-sm'
+                                            ? 'bg-[var(--bg-primary)] border border-[var(--border-medium)] text-[var(--text-primary)] shadow-sm'
                                             : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'}
                                     `}
                                 >

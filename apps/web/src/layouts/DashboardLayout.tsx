@@ -14,6 +14,7 @@ import {
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { NotificationDrawer } from '../components/ui/NotificationDrawer';
+import { ActiveConferenceBanner } from '../components/ui/ActiveConferenceBanner';
 import { syncAll } from '../services/offlineSync';
 import type { Notification } from '../types';
 
@@ -31,6 +32,8 @@ interface DashboardLayoutProps {
     onProfileClick?: () => void;
     searchTerm?: string;
     onSearchChange?: (value: string) => void;
+    activeRoom?: string | null;
+    onRejoinRoom?: (roomId: string) => void;
 }
 
 export function DashboardLayout({
@@ -42,11 +45,27 @@ export function DashboardLayout({
     onMarkAllAsRead = () => { },
     onProfileClick,
     searchTerm,
-    onSearchChange
+    onSearchChange,
+    activeRoom,
+    onRejoinRoom
 }: DashboardLayoutProps) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
     const [isOnline, setIsOnline] = useState(navigator.onLine);
+    const [persistentRoom, setPersistentRoom] = useState<string | null>(localStorage.getItem('flash_active_room'));
+
+    useEffect(() => {
+        if (activeRoom && activeRoom !== persistentRoom) {
+            localStorage.setItem('flash_active_room', activeRoom);
+            setPersistentRoom(activeRoom);
+        }
+    }, [activeRoom, persistentRoom]);
+
+    const handleDismissBanner = () => {
+        localStorage.removeItem('flash_active_room');
+        setPersistentRoom(null);
+    };
+
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -87,6 +106,13 @@ export function DashboardLayout({
 
     return (
         <div className="h-screen bg-[var(--bg-secondary)] flex overflow-hidden">
+            {persistentRoom && !activeRoom && (
+                <ActiveConferenceBanner
+                    roomName={persistentRoom}
+                    onRejoin={() => onRejoinRoom?.(persistentRoom)}
+                    onDismiss={handleDismissBanner}
+                />
+            )}
             {/* Mobile Sidebar Overlay */}
             {isSidebarOpen && (
                 <div

@@ -83,6 +83,34 @@ export function Logs() {
         return 'text-slate-500 bg-slate-500/10';
     };
 
+    const formatAction = (action: string) => {
+        const maps: Record<string, string> = {
+            'LOGIN': 'LOGIN',
+            'CREATE_USER': 'Criação de Usuário',
+            'UPDATE_USER': 'Edição de Usuário',
+            'DELETE_USER': 'Exclusão de Usuário',
+            'CREATE_REPORT': 'Novo Reporte Enviado',
+            'UPDATE_REPORT_STATUS': 'Alteração de Status',
+            'CREATE_AGENDA_EVENT': 'Evento Criado na Agenda',
+            'DELETE_AGENDA_EVENT': 'Evento Removido da Agenda',
+        };
+        return maps[action] || action;
+    };
+
+    const formatTarget = (target: string | null) => {
+        if (!target || target === '-' || target === '@') return 'Geral / Sistema';
+        if (target.startsWith('User:')) return `Usuário: ${target.split(':')[1]}`;
+        if (target.startsWith('Report:')) return `Reporte: ${target.split(':')[1]}`;
+        if (target.startsWith('Event:')) return `Evento: ${target.split(':')[1]}`;
+        return target;
+    };
+
+    const formatIP = (ip: string | null) => {
+        if (!ip) return 'Desconhecido';
+        if (ip === '::1' || ip === '127.0.0.1') return 'Interno (Sistema)';
+        return ip;
+    };
+
     const filteredLogs = logs.filter(log => {
         const search = searchTerm.toLowerCase();
         return (
@@ -213,19 +241,19 @@ export function Logs() {
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <span className={`px-2 py-1 rounded-md text-[10px] font-black tracking-wider ${getActionColor(log.action)}`}>
-                                                    {log.action}
+                                                    {formatAction(log.action)}
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-2 text-xs text-[var(--text-secondary)]">
-                                                    <Target className="w-3 h-3 opacity-50" />
-                                                    <span className="truncate max-w-[150px] font-mono">{log.target || '-'}</span>
+                                                    <Target className="w-3 h-3 text-[var(--accent-primary)]" />
+                                                    <span className="truncate max-w-[150px] font-bold">{formatTarget(log.target)}</span>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="flex items-center gap-2 text-[10px] text-[var(--text-tertiary)] font-mono">
                                                     <Globe className="w-3 h-3 opacity-50" />
-                                                    {log.ip || '0.0.0.0'}
+                                                    {formatIP(log.ip)}
                                                 </div>
                                             </td>
                                         </tr>

@@ -48,9 +48,9 @@ export const Avatar: React.FC<AvatarProps> = ({
         ${sizeClasses[size]} 
         rounded-xl md:rounded-2xl 
         overflow-hidden 
-        bg-gray-100 
+        bg-[var(--bg-tertiary)] 
         flex items-center justify-center 
-        border-2 border-white 
+        border-2 border-[var(--bg-primary)] 
         shadow-sm 
         group-hover:scale-105 
         transition-transform 
@@ -64,8 +64,8 @@ export const Avatar: React.FC<AvatarProps> = ({
                         onError={handleImageError}
                     />
                 ) : null}
-                <div className={`${src ? 'hidden' : ''} w-full h-full flex items-center justify-center bg-blue-50`}>
-                    <UserIcon className="w-1/2 h-1/2 text-blue-400" />
+                <div className={`${src ? 'hidden' : ''} w-full h-full flex items-center justify-center bg-[var(--accent-primary)]/10`}>
+                    <UserIcon className="w-1/2 h-1/2 text-[var(--accent-primary)]" />
                 </div>
             </div>
 
@@ -73,9 +73,9 @@ export const Avatar: React.FC<AvatarProps> = ({
                 <div className={`
           absolute -bottom-0.5 -right-0.5 
           ${size === 'sm' ? 'w-2.5 h-2.5' : 'w-3.5 h-3.5'} 
-          border-2 border-white 
+          border-2 border-[var(--bg-primary)] 
           rounded-full 
-          ${isOnline ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.4)]' : 'bg-gray-300'}
+          ${isOnline ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.4)]' : 'bg-[var(--text-tertiary)]'}
         `} />
             )}
         </div>

@@ -11,6 +11,10 @@ interface ProfileSettingsModalProps {
     setProfilePhrase: (val: string) => void;
     onAvatarChange: (file: File) => void;
     avatarUrl?: string | null;
+    notificationsEnabled?: boolean;
+    setNotificationsEnabled?: (enabled: boolean) => void;
+    desktopNotificationsEnabled?: boolean;
+    setDesktopNotificationsEnabled?: (enabled: boolean) => void;
 }
 
 export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
@@ -21,7 +25,11 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
     profilePhrase,
     setProfilePhrase,
     onAvatarChange,
-    avatarUrl
+    avatarUrl,
+    notificationsEnabled,
+    setNotificationsEnabled,
+    desktopNotificationsEnabled,
+    setDesktopNotificationsEnabled
 }) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -92,6 +100,46 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
                         placeholder="Ex: Em campo / QAP / Em deslocamento"
                         className="text-center"
                     />
+
+                    {setNotificationsEnabled && (
+                        <div className="flex items-center justify-between p-4 bg-[var(--bg-secondary)] rounded-2xl border border-[var(--border-subtle)] mt-2">
+                            <div className="flex flex-col gap-0.5">
+                                <span className="text-xs font-bold text-[var(--text-primary)] uppercase tracking-tight">Sons de Notificação</span>
+                                <span className="text-[10px] text-[var(--text-tertiary)] font-medium">Alertas sonoros para novas mensagens</span>
+                            </div>
+                            <button
+                                type="button"
+                                title={notificationsEnabled ? 'Desativar sons' : 'Ativar sons'}
+                                aria-label={notificationsEnabled ? 'Desativar sons de notificação' : 'Ativar sons de notificação'}
+                                onClick={() => setNotificationsEnabled(!notificationsEnabled)}
+                                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${notificationsEnabled ? 'bg-[var(--accent-primary)]' : 'bg-[var(--border-medium)]'}`}
+                            >
+                                <span
+                                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${notificationsEnabled ? 'translate-x-5' : 'translate-x-0'}`}
+                                />
+                            </button>
+                        </div>
+                    )}
+
+                    {setDesktopNotificationsEnabled && (
+                        <div className="flex items-center justify-between p-4 bg-[var(--bg-secondary)] rounded-2xl border border-[var(--border-subtle)] mt-2">
+                            <div className="flex flex-col gap-0.5">
+                                <span className="text-xs font-bold text-[var(--text-primary)] uppercase tracking-tight">Desktop Notificações</span>
+                                <span className="text-[10px] text-[var(--text-tertiary)] font-medium">Avisos do sistema via navegador</span>
+                            </div>
+                            <button
+                                type="button"
+                                title={desktopNotificationsEnabled ? 'Desativar notificações desktop' : 'Ativar notificações desktop'}
+                                aria-label={desktopNotificationsEnabled ? 'Desativar notificações desktop' : 'Ativar notificações desktop'}
+                                onClick={() => setDesktopNotificationsEnabled(!desktopNotificationsEnabled)}
+                                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${desktopNotificationsEnabled ? 'bg-[var(--accent-primary)]' : 'bg-[var(--border-medium)]'}`}
+                            >
+                                <span
+                                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${desktopNotificationsEnabled ? 'translate-x-5' : 'translate-x-0'}`}
+                                />
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
         </Modal>

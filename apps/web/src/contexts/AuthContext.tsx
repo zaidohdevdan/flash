@@ -20,6 +20,10 @@ interface AuthContextData {
     updateUser: (user: User) => void;
     isAuthenticated: boolean;
     loading: boolean;
+    notificationsEnabled: boolean;
+    setNotificationsEnabled: (enabled: boolean) => void;
+    desktopNotificationsEnabled: boolean;
+    setDesktopNotificationsEnabled: (enabled: boolean) => void;
 }
 
 interface LoginResponse {
@@ -40,6 +44,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         return null;
     });
+    const [notificationsEnabled, setNotificationsEnabledState] = useState<boolean>(() => {
+        const stored = localStorage.getItem('@flash:notifications_enabled');
+        return stored === null ? true : stored === 'true';
+    });
+
+    const [desktopNotificationsEnabled, setDesktopNotificationsEnabledState] = useState<boolean>(() => {
+        const stored = localStorage.getItem('@flash:desktop_notifications_enabled');
+        return stored === null ? true : stored === 'true';
+    });
+
+    const setNotificationsEnabled = (enabled: boolean) => {
+        localStorage.setItem('@flash:notifications_enabled', String(enabled));
+        setNotificationsEnabledState(enabled);
+    };
+
+    const setDesktopNotificationsEnabled = (enabled: boolean) => {
+        localStorage.setItem('@flash:desktop_notifications_enabled', String(enabled));
+        setDesktopNotificationsEnabledState(enabled);
+    };
+
     const [loading] = useState(false);
 
     async function signIn(email: string, password: string) {
@@ -69,7 +93,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     return (
-        <AuthContext.Provider value={{ user, signIn, signOut, updateUser, isAuthenticated: !!user, loading }}>
+        <AuthContext.Provider value={{
+            user,
+            signIn,
+            signOut,
+            updateUser,
+            isAuthenticated: !!user,
+            loading,
+            notificationsEnabled,
+            setNotificationsEnabled,
+            desktopNotificationsEnabled,
+            setDesktopNotificationsEnabled
+        }}>
             {children}
         </AuthContext.Provider>
     );

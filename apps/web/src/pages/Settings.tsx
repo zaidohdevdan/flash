@@ -187,7 +187,7 @@ const AppearanceSettings = () => {
                             title='Confortável'
                             type='button'
                             onClick={() => applyDensity('comfortable')}
-                            className={`px-4 py-2 rounded-md text-xs font-bold uppercase tracking-wider transition-all ${density === 'comfortable' ? 'bg-white shadow-sm text-[var(--text-primary)]' : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'}`}
+                            className={`px-4 py-2 rounded-md text-xs font-bold uppercase tracking-wider transition-all border ${density === 'comfortable' ? 'bg-[var(--bg-primary)] border-[var(--border-medium)] shadow-sm text-[var(--text-primary)]' : 'border-transparent text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'}`}
                         >
                             Confortável
                         </button>
@@ -195,7 +195,7 @@ const AppearanceSettings = () => {
                             title='Compacto'
                             type='button'
                             onClick={() => applyDensity('compact')}
-                            className={`px-4 py-2 rounded-md text-xs font-bold uppercase tracking-wider transition-all ${density === 'compact' ? 'bg-white shadow-sm text-[var(--text-primary)]' : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'}`}
+                            className={`px-4 py-2 rounded-md text-xs font-bold uppercase tracking-wider transition-all border ${density === 'compact' ? 'bg-[var(--bg-primary)] border-[var(--border-medium)] shadow-sm text-[var(--text-primary)]' : 'border-transparent text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'}`}
                         >
                             Compacto
                         </button>
@@ -207,6 +207,13 @@ const AppearanceSettings = () => {
 };
 
 const NotificationSettings = () => {
+    const {
+        notificationsEnabled,
+        setNotificationsEnabled,
+        desktopNotificationsEnabled,
+        setDesktopNotificationsEnabled
+    } = useAuth();
+
     return (
         <div className="space-y-6 animate-in">
             <div>
@@ -224,7 +231,13 @@ const NotificationSettings = () => {
                                 <p className="text-[10px] text-[var(--text-tertiary)]">Reproduzir sons ao receber novas mensagens ou atualizações.</p>
                             </div>
                         </div>
-                        <input type="checkbox" title="Ativar sons" className="w-5 h-5 accent-[var(--accent-primary)] cursor-pointer" defaultChecked />
+                        <input
+                            type="checkbox"
+                            title="Ativar sons"
+                            className="w-5 h-5 accent-[var(--accent-primary)] cursor-pointer"
+                            checked={notificationsEnabled}
+                            onChange={(e) => setNotificationsEnabled(e.target.checked)}
+                        />
                     </div>
 
                     <div className="flex items-center justify-between p-4 bg-[var(--bg-secondary)] rounded-xl border border-[var(--border-subtle)]">
@@ -235,7 +248,13 @@ const NotificationSettings = () => {
                                 <p className="text-[10px] text-[var(--text-tertiary)]">Exibir avisos no navegador mesmo quando o FLASH está em segundo plano.</p>
                             </div>
                         </div>
-                        <input type="checkbox" title="Ativar notificações de desktop" className="w-5 h-5 accent-[var(--accent-primary)] cursor-pointer" defaultChecked />
+                        <input
+                            type="checkbox"
+                            title="Ativar notificações de desktop"
+                            className="w-5 h-5 accent-[var(--accent-primary)] cursor-pointer"
+                            checked={desktopNotificationsEnabled}
+                            onChange={(e) => setDesktopNotificationsEnabled(e.target.checked)}
+                        />
                     </div>
                 </div>
             </div>

@@ -37,8 +37,8 @@ export const Button: React.FC<ButtonProps> = ({
 
     const variants = {
         primary: 'bg-[var(--accent-primary)] text-[var(--accent-text)] hover:bg-[var(--accent-secondary)] font-bold shadow-md shadow-[var(--accent-primary)]/10',
-        secondary: 'bg-white border border-[var(--border-medium)] text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] shadow-sm',
-        glass: 'bg-white/80 backdrop-blur-sm border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-white',
+        secondary: 'bg-[var(--bg-primary)] border border-[var(--border-medium)] text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] shadow-sm',
+        glass: 'bg-[var(--bg-primary)]/80 backdrop-blur-sm border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-[var(--bg-primary)]',
         ghost: 'text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)]',
         danger: 'bg-[var(--error)] text-white hover:bg-red-600 shadow-sm',
         success: 'bg-emerald-500 text-white hover:bg-emerald-600 font-semibold shadow-sm',
