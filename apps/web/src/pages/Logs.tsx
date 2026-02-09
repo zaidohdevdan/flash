@@ -33,13 +33,16 @@ interface AuditLog {
 }
 
 export function Logs() {
-    const { user, signOut } = useAuth();
+    const { user, signOut, notificationsEnabled } = useAuth();
     const [logs, setLogs] = useState<AuditLog[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [filter, setFilter] = useState('all');
 
-    const { socket, isConnected } = useDashboardSocket({ user: user ? { id: user.id, name: user.name, role: user.role } : null });
+    const { socket, isConnected } = useDashboardSocket({
+        user: user ? { id: user.id, name: user.name, role: user.role } : null,
+        notificationsEnabled
+    });
 
     const fetchLogs = useCallback(async () => {
         try {

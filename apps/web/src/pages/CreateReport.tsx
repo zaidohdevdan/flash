@@ -35,7 +35,15 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import type { Report } from '../types';
 
 export function CreateReport() {
-    const { user, signOut, updateUser } = useAuth();
+    const {
+        user,
+        signOut,
+        updateUser,
+        notificationsEnabled,
+        setNotificationsEnabled,
+        desktopNotificationsEnabled,
+        setDesktopNotificationsEnabled
+    } = useAuth();
     const [view, setView] = useState<'history' | 'form'>('history');
     const [searchParams, setSearchParams] = useSearchParams();
     const activeChatId = searchParams.get('chat');
@@ -89,6 +97,7 @@ export function CreateReport() {
         playNotificationSound
     } = useDashboardSocket({
         user: socketUser,
+        notificationsEnabled,
         onConferenceInvite: (data) => {
             if (activeRoom) return;
             setPendingInvite({
@@ -628,6 +637,10 @@ export function CreateReport() {
                 setProfilePhrase={setProfilePhrase}
                 onAvatarChange={setProfileAvatar}
                 avatarUrl={user?.avatarUrl}
+                notificationsEnabled={notificationsEnabled}
+                setNotificationsEnabled={setNotificationsEnabled}
+                desktopNotificationsEnabled={desktopNotificationsEnabled}
+                setDesktopNotificationsEnabled={setDesktopNotificationsEnabled}
             />
 
             <ConferenceModal

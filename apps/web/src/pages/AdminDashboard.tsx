@@ -24,6 +24,7 @@ import {
     Badge
 } from '../components/ui';
 import { DashboardLayout } from '../layouts/DashboardLayout';
+import { ProfileSettingsModal } from '../components/domain/modals/ProfileSettingsModal';
 
 interface Supervisor {
     id: string;
@@ -58,7 +59,15 @@ interface ContactMessage {
 }
 
 export function AdminDashboard() {
-    const { user, signOut } = useAuth();
+    const {
+        user,
+        signOut,
+        updateUser,
+        notificationsEnabled,
+        setNotificationsEnabled,
+        desktopNotificationsEnabled,
+        setDesktopNotificationsEnabled
+    } = useAuth();
     const [view, setView] = useState<'list' | 'create' | 'edit' | 'departments' | 'contacts'>('list');
     const [users, setUsers] = useState<UserSummary[]>([]);
     const [supervisors, setSupervisors] = useState<Supervisor[]>([]);
@@ -83,6 +92,12 @@ export function AdminDashboard() {
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
 
+    // Profile Management State
+    const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const [profilePhrase, setProfilePhrase] = useState(user?.statusPhrase || '');
+    const [profileAvatar, setProfileAvatar] = useState<File | null>(null);
+    const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
+
     // Dexie Notifications
     const notifications = useLiveQuery(() => db.notifications.orderBy('createdAt').reverse().toArray()) || [];
 
@@ -96,6 +111,7 @@ export function AdminDashboard() {
         playNotificationSound
     } = useDashboardSocket({
         user: socketUser,
+        notificationsEnabled,
         onNotification: (data) => {
             toast(`Mensagem: ${data.text}`, {
                 icon: '💬',
@@ -353,6 +369,32 @@ export function AdminDashboard() {
         }
     }
 
+    const handleUpdateProfile = async () => {
+        if (!user) return;
+        setIsUpdatingProfile(true);
+        try {
+            const formData = new FormData();
+            formData.append('statusPhrase', profilePhrase);
+            if (profileAvatar) {
+                formData.append('avatar', profileAvatar);
+            }
+
+            const response = await api.patch('/profile', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+
+            updateUser(response.data);
+            setIsProfileOpen(false);
+            setProfileAvatar(null);
+            toast.success('Perfil atualizado com sucesso!');
+        } catch (error) {
+            console.error('Update profile error:', error);
+            toast.error('Erro ao atualizar perfil.');
+        } finally {
+            setIsUpdatingProfile(false);
+        }
+    };
+
     return (
         <DashboardLayout
             user={{ name: user?.name, avatarUrl: user?.avatarUrl, role: user?.role }}
@@ -360,6 +402,7 @@ export function AdminDashboard() {
             notifications={notifications}
             onMarkAsRead={handleMarkAsRead}
             onMarkAllAsRead={handleMarkAllAsRead}
+            onProfileClick={() => setIsProfileOpen(true)}
         >
             <div className="flex flex-col lg:flex-row gap-8 animate-in fade-in duration-500">
                 <aside className="w-full lg:w-72 shrink-0 space-y-4">
@@ -830,6 +873,21 @@ export function AdminDashboard() {
                     </Card>
                 </div>
             )}
+
+            <ProfileSettingsModal
+                isOpen={isProfileOpen}
+                onClose={() => setIsProfileOpen(false)}
+                onSave={handleUpdateProfile}
+                isLoading={isUpdatingProfile}
+                profilePhrase={profilePhrase}
+                setProfilePhrase={setProfilePhrase}
+                onAvatarChange={setProfileAvatar}
+                avatarUrl={user?.avatarUrl}
+                notificationsEnabled={notificationsEnabled}
+                setNotificationsEnabled={setNotificationsEnabled}
+                desktopNotificationsEnabled={desktopNotificationsEnabled}
+                setDesktopNotificationsEnabled={setDesktopNotificationsEnabled}
+            />
         </DashboardLayout>
     );
 }
