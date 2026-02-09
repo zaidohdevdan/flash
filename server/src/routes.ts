@@ -22,7 +22,7 @@ const routes = Router();
 routes.get('/health', (req, res) => {
     res.json({
         status: 'ok',
-        version: '4.0.10',
+        version: '4.0.11',
         timestamp: new Date().toISOString(),
         env: process.env.NODE_ENV
     });
