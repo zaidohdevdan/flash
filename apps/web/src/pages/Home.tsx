@@ -721,7 +721,7 @@ export function Home() {
                     </div>
 
                     <div className="pt-8 border-t border-slate-200 dark:border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4">
-                        <p className="text-slate-400 font-medium text-xs">{t('home.footer.copyright')}</p>
+                        <p className="text-slate-400 font-medium text-xs">{t('home.footer.copyright')} <span className="opacity-20 ml-2">v4.0.11-ui</span></p>
                         <div className="flex gap-2 items-center text-xs font-bold text-slate-400 bg-white dark:bg-slate-800 px-3 py-1 rounded-full border border-slate-200 dark:border-slate-700">
                             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
                             {t('home.footer.status')}
