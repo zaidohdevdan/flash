@@ -52,14 +52,17 @@ export function DashboardLayout({
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
     const [isOnline, setIsOnline] = useState(navigator.onLine);
-    const [persistentRoom, setPersistentRoom] = useState<string | null>(localStorage.getItem('flash_active_room'));
+    const [persistentRoom, setPersistentRoom] = useState<string | null>(() => localStorage.getItem('flash_active_room'));
+
+    if (activeRoom && activeRoom !== persistentRoom) {
+        setPersistentRoom(activeRoom);
+    }
 
     useEffect(() => {
-        if (activeRoom && activeRoom !== persistentRoom) {
+        if (activeRoom) {
             localStorage.setItem('flash_active_room', activeRoom);
-            setPersistentRoom(activeRoom);
         }
-    }, [activeRoom, persistentRoom]);
+    }, [activeRoom]);
 
     const handleDismissBanner = () => {
         localStorage.removeItem('flash_active_room');
