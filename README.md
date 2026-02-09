@@ -49,4 +49,4 @@ Configure as variáveis necessárias em `.env`:
 
 ---
 
-**Última atualização**: 2026-02-06
+**Última atualização**: 2026-02-09
