@@ -8,10 +8,10 @@ import {
     ArrowRight,
     Wifi,
     WifiOff,
-    Settings as SettingsIcon
+    Settings as SettingsIcon,
+    Activity
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import { Button } from '../components/ui/Button';
 import { NotificationDrawer } from '../components/ui/NotificationDrawer';
 import { syncAll } from '../services/offlineSync';
@@ -49,7 +49,6 @@ export function DashboardLayout({
     const [isOnline, setIsOnline] = useState(navigator.onLine);
     const navigate = useNavigate();
     const location = useLocation();
-    const { t } = useTranslation();
 
     useEffect(() => {
         const handleOnline = () => {
@@ -73,16 +72,21 @@ export function DashboardLayout({
     }, []);
 
     const menuItems = [
-        { icon: LayoutDashboard, label: t('layout.sidebar.dashboard'), path: '/dashboard' },
-        // { icon: Users, label: 'Equipe', path: '/team' },
-        { icon: SettingsIcon, label: t('layout.sidebar.settings'), path: '/settings' },
+        { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
+        { icon: Activity, label: 'Logs do Sistema', path: '/logs' },
+        { icon: SettingsIcon, label: 'Configurações', path: '/settings' },
     ];
+
+    // Filter menu items for non-admins
+    const filteredMenuItems = user?.role === 'ADMIN'
+        ? menuItems
+        : menuItems.filter(item => item.path !== '/logs');
 
     const isActive = (path: string) => location.pathname === path;
     const unreadCount = notifications.filter(n => !n.read).length;
 
     return (
-        <div className="min-h-screen bg-[var(--bg-secondary)] flex">
+        <div className="h-screen bg-[var(--bg-secondary)] flex overflow-hidden">
             {/* Mobile Sidebar Overlay */}
             {isSidebarOpen && (
                 <div
@@ -94,13 +98,13 @@ export function DashboardLayout({
             {/* Sidebar */}
             <aside className={`
         fixed inset-y-0 left-0 z-50 w-64 bg-[var(--bg-primary)] border-r border-[var(--border-subtle)]
-        transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static
+        transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:block
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
         print:hidden
       `}>
                 <div className="h-full flex flex-col">
                     {/* Logo Area */}
-                    <div className="h-16 flex items-center px-6 border-b border-[var(--border-subtle)]">
+                    <div className="h-16 flex-shrink-0 flex items-center px-6 border-b border-[var(--border-subtle)]">
                         <span className="text-xl font-bold tracking-tight text-[var(--text-primary)]">
                             Flash<span className="text-[var(--accent-primary)]">.</span>
                         </span>
@@ -109,7 +113,7 @@ export function DashboardLayout({
                     {/* User Profile Summary */}
                     <div
                         onClick={onProfileClick}
-                        className="p-4 border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)]/50 cursor-pointer hover:bg-[var(--bg-secondary)] transition-colors"
+                        className="p-4 flex-shrink-0 border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)]/50 cursor-pointer hover:bg-[var(--bg-secondary)] transition-colors"
                     >
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-full bg-[var(--bg-tertiary)] flex items-center justify-center overflow-hidden border border-[var(--border-subtle)]">
@@ -123,10 +127,10 @@ export function DashboardLayout({
                             </div>
                             <div className="flex-1 min-w-0">
                                 <p className="text-sm font-medium text-[var(--text-primary)] truncate">
-                                    {user?.name || t('layout.sidebar.defaultUser')}
+                                    {user?.name || 'Usuário'}
                                 </p>
                                 <p className="text-xs text-[var(--text-tertiary)] truncate capitalize">
-                                    {user?.role?.toLowerCase() || t('layout.sidebar.defaultRole')}
+                                    {user?.role?.toLowerCase() || 'Membro'}
                                 </p>
                             </div>
                         </div>
@@ -134,8 +138,10 @@ export function DashboardLayout({
 
                     {/* Navigation */}
                     <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-                        {menuItems.map((item) => (
+                        {filteredMenuItems.map((item) => (
                             <button
+                                title={item.label}
+                                type='button'
                                 key={item.path}
                                 onClick={() => navigate(item.path)}
                                 className={`
@@ -152,8 +158,10 @@ export function DashboardLayout({
                     </nav>
 
                     {/* Bottom Actions */}
-                    <div className="p-4 border-t border-[var(--border-subtle)] space-y-2">
+                    <div className="p-4 flex-shrink-0 border-t border-[var(--border-subtle)] space-y-2 bg-[var(--bg-primary)]">
                         <button
+                            title='Sair'
+                            type='button'
                             onClick={onLogout}
                             className="w-full flex items-center justify-between group px-4 py-3 rounded-2xl bg-[var(--bg-secondary)] hover:bg-red-50 text-[var(--text-secondary)] hover:text-red-600 transition-all duration-300 border border-[var(--border-subtle)] hover:border-red-100 shadow-sm"
                         >
@@ -161,7 +169,7 @@ export function DashboardLayout({
                                 <div className="p-2 bg-[var(--bg-primary)] rounded-lg shadow-inner group-hover:scale-110 transition-transform">
                                     <LogOut className="w-4 h-4" />
                                 </div>
-                                <span className="text-[10px] font-bold uppercase tracking-widest">{t('layout.sidebar.logout')}</span>
+                                <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-secondary)] group-hover:text-red-600">Sair do Sistema</span>
                             </div>
                             <div className="opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all">
                                 <ArrowRight className="w-3 h-3" />
@@ -174,9 +182,11 @@ export function DashboardLayout({
             {/* Main Content Area */}
             <div className="flex-1 flex flex-col min-w-0 overflow-hidden print:overflow-visible">
                 {/* Top Header */}
-                <header className="h-16 bg-[var(--bg-primary)] border-b border-[var(--border-subtle)] flex items-center justify-between px-4 lg:px-8 print:hidden">
+                <header className="h-16 flex-shrink-0 bg-[var(--bg-primary)] border-b border-[var(--border-subtle)] flex items-center justify-between px-4 lg:px-8 print:hidden">
                     <div className="flex items-center gap-4">
                         <button
+                            title='Abrir Menu'
+                            type='button'
                             onClick={() => setIsSidebarOpen(true)}
                             className="lg:hidden p-2 -ml-2 text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] rounded-lg"
                             aria-label="Toggle Sidebar"
@@ -190,7 +200,7 @@ export function DashboardLayout({
                                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-tertiary)]" />
                                     <input
                                         type="text"
-                                        placeholder={t('layout.header.search')}
+                                        placeholder="Pesquisar..."
                                         value={searchTerm || ''}
                                         onChange={(e) => onSearchChange(e.target.value)}
                                         className="w-full pl-9 pr-4 py-1.5 bg-[var(--bg-secondary)] border-none rounded-lg text-sm focus:ring-1 focus:ring-[var(--border-medium)] placeholder:text-[var(--text-tertiary)] text-[var(--text-primary)]"
@@ -206,9 +216,9 @@ export function DashboardLayout({
                             : 'bg-red-50 text-red-600 border-red-100 animate-pulse'
                             }`}>
                             {isOnline ? (
-                                <><Wifi className="w-3 h-3" /> {t('layout.header.online')}</>
+                                <><Wifi className="w-3 h-3" /> Online</>
                             ) : (
-                                <><WifiOff className="w-3 h-3" /> {t('layout.header.offline')}</>
+                                <><WifiOff className="w-3 h-3" /> Offline</>
                             )}
                         </div>
 

@@ -10,6 +10,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { routes } from './routes';
 import { ChatService } from './services/ChatService';
 import { startScheduler } from './jobs/scheduler';
+import { AuditService } from './services/AuditService';
 
 const chatService = new ChatService();
 
@@ -105,8 +106,12 @@ async function bootstrap() {
                         const deptRoom = `dept-${user.departmentId}`;
                         socket.join(deptRoom);
                         console.log(`[Socket] Usuário ${user.name} (${user.role}) entrou na sala ${deptRoom}. ID: ${userId}`);
-                    } else {
-                        console.log(`[Socket] Usuário ${user?.name || userId} não possui departamento vinculado.`);
+                    }
+
+                    // Se for ADMIN, entrar na sala de monitoramento de logs
+                    if (user?.role === 'ADMIN') {
+                        socket.join('admin-monitor');
+                        console.log(`[Socket] Admin ${user.name} entrou na sala admin-monitor.`);
                     }
                 } catch (err) {
                     console.error(`[Socket] Erro ao buscar dados do usuário ${userId} para entrar na sala:`, err);
@@ -220,6 +225,9 @@ async function bootstrap() {
 
             // Inicia o sistema de agendamento de tarefas
             startScheduler(io);
+
+            // Inicia o AuditService com o socket para transmissões em tempo real
+            AuditService.setIO(io);
         });
     } catch (error) {
         console.error('[CRITICAL]  Error connecting to the database:', error);

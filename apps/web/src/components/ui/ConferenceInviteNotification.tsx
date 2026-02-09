@@ -43,6 +43,8 @@ export const ConferenceInviteNotification: React.FC<ConferenceInviteNotification
 
                         <div className="flex gap-3 mt-6 relative z-10">
                             <button
+                                title='Recusar'
+                                type='button'
                                 onClick={onDecline}
                                 className="flex-1 py-3 px-4 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
                             >
@@ -53,6 +55,8 @@ export const ConferenceInviteNotification: React.FC<ConferenceInviteNotification
                             </button>
 
                             <button
+                                title='Entrar'
+                                type='button'
                                 onClick={onAccept}
                                 className="flex-1 py-3 px-4 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-blue-500/20"
                             >

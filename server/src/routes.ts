@@ -15,6 +15,8 @@ import { ChatController } from './controllers/ChatController';
 import { ConferenceController } from './controllers/ConferenceController';
 import { AgendaController } from './controllers/AgendaController';
 import { NotificationController } from './controllers/NotificationController';
+import { AuditController } from './controllers/AuditController';
+import { ContactController } from './controllers/ContactController';
 
 const routes = Router();
 
@@ -98,5 +100,13 @@ routes.post('/agenda/note', AuthMiddleware, AgendaController.saveNote);
 routes.get('/notifications', AuthMiddleware, NotificationController.index);
 routes.patch('/notifications/:id/read', AuthMiddleware, NotificationController.markRead);
 routes.post('/notifications/read-all', AuthMiddleware, NotificationController.markAllRead);
+
+// Auditoria (Admin Only)
+routes.get('/admin/logs', AuthMiddleware, AdminMiddleware, AuditController.index);
+
+// Contatos (Landing Page)
+routes.post('/contacts', ContactController.store);
+routes.get('/admin/contacts', AuthMiddleware, AdminMiddleware, ContactController.index);
+routes.patch('/admin/contacts/:id/read', AuthMiddleware, AdminMiddleware, ContactController.markAsRead);
 
 export { routes };

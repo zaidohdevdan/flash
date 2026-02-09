@@ -1,51 +1,49 @@
-import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { Shield, Lock, Server, Cpu, Database, Eye } from 'lucide-react';
 
 export const TechSpecs = () => {
-    const { t } = useTranslation();
 
     const specs = [
         {
             icon: <Lock className="w-5 h-5 text-slate-700" />,
-            category: t('home.specs.categories.security'),
-            title: t('home.specs.items.security.title'),
-            desc: t('home.specs.items.security.desc'),
+            category: "SEGURANÇA",
+            title: "Criptografia Ponta-a-Ponta",
+            desc: "Seus dados são protegidos por camadas militares de criptografia (AES-256) em repouso e em trânsito.",
             delay: 0
         },
         {
             icon: <Eye className="w-5 h-5 text-slate-700" />,
-            category: t('home.specs.categories.audit'),
-            title: t('home.specs.items.audit.title'),
-            desc: t('home.specs.items.audit.desc'),
+            category: "AUDITORIA",
+            title: "Rastreabilidade Total",
+            desc: "Cada ação no sistema gera um log imutável, permitindo auditorias precisas e total transparência operacional.",
             delay: 0.1
         },
         {
             icon: <Server className="w-5 h-5 text-slate-700" />,
-            category: t('home.specs.categories.infra'),
-            title: t('home.specs.items.infra.title'),
-            desc: t('home.specs.items.infra.desc'),
+            category: "INFRAESTRUTURA",
+            title: "Cloud Escalável",
+            desc: "Arquitetura serverless que escala automaticamente de acordo com o volume de dados da sua operação.",
             delay: 0.2
         },
         {
             icon: <Database className="w-5 h-5 text-slate-700" />,
-            category: t('home.specs.categories.data'),
-            title: t('home.specs.items.data.title'),
-            desc: t('home.specs.items.data.desc'),
+            category: "DADOS",
+            title: "Data Sovereignty",
+            desc: "Controle absoluto sobre onde seus dados residem, em conformidade com as leis locais e globais de proteção.",
             delay: 0.3
         },
         {
             icon: <Cpu className="w-5 h-5 text-slate-700" />,
-            category: t('home.specs.categories.performance'),
-            title: t('home.specs.items.performance.title'),
-            desc: t('home.specs.items.performance.desc'),
+            category: "PERFORMANCE",
+            title: "Edge Computing",
+            desc: "Processamento distribuído que garante latência próxima de zero, mesmo em operações globais complexas.",
             delay: 0.4
         },
         {
             icon: <Shield className="w-5 h-5 text-slate-700" />,
-            category: t('home.specs.categories.compliance'),
-            title: t('home.specs.items.compliance.title'),
-            desc: t('home.specs.items.compliance.desc'),
+            category: "COMPLIANCE",
+            title: "Padrões Enterprise",
+            desc: "Cumprimos rigorosamente os requisitos da LGPD, GDPR e normas técnicas internacionais de segurança.",
             delay: 0.5
         }
     ];
@@ -63,7 +61,7 @@ export const TechSpecs = () => {
                             viewport={{ once: true }}
                             className="text-xs font-black text-slate-400 uppercase tracking-[0.3em] mb-4"
                         >
-                            {t('home.specs.overline')}
+                            ESPECIFICAÇÕES TÉCNICAS
                         </motion.h2>
                         <motion.h3
                             initial={{ opacity: 0, x: -20 }}
@@ -72,7 +70,7 @@ export const TechSpecs = () => {
                             transition={{ delay: 0.1 }}
                             className="text-4xl font-black text-slate-900 tracking-tight mb-6"
                         >
-                            {t('home.specs.title')}
+                            Poder Líquido.
                         </motion.h3>
                         <motion.p
                             initial={{ opacity: 0, x: -20 }}
@@ -81,7 +79,7 @@ export const TechSpecs = () => {
                             transition={{ delay: 0.2 }}
                             className="text-slate-500 leading-relaxed"
                         >
-                            {t('home.specs.description')}
+                            Design não é apenas o que parece. É como funciona por dentro. O FLASH foi construído com as tecnologias mais resilientes do mercado moderno.
                         </motion.p>
                     </div>
 

@@ -36,12 +36,12 @@ describe('ChatService', () => {
         const data = { fromId: '1', toId: '2', audioUrl: 'http://audio.mp3', room: '1-2' };
         await chatService.saveMessage(data);
 
-        const callArgs = mockRepo.save.mock.calls[0][0];
-        expect(callArgs.audioUrl).toBe('http://audio.mp3');
-        expect(callArgs.expiresAt).toBeInstanceOf(Date);
+        const callArgs = mockRepo.save.mock.calls[0]?.[0];
+        expect(callArgs?.audioUrl).toBe('http://audio.mp3');
+        expect(callArgs?.expiresAt).toBeInstanceOf(Date);
 
         // Assert expiry is roughly 5 mins from now
-        const diff = callArgs.expiresAt.getTime() - Date.now();
+        const diff = callArgs!.expiresAt!.getTime() - Date.now();
         expect(diff).toBeGreaterThan(4 * 60 * 1000);
         expect(diff).toBeLessThan(6 * 60 * 1000);
     });
@@ -58,6 +58,6 @@ describe('ChatService', () => {
 
         const history = await chatService.getHistory('room-1', userId);
         expect(history).toHaveLength(1);
-        expect(history[0].id).toBe('1');
+        expect(history[0]?.id).toBe('1');
     });
 });

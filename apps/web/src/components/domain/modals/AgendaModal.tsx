@@ -29,8 +29,7 @@ import {
     subMonths,
     isToday
 } from 'date-fns';
-import { ptBR, enUS } from 'date-fns/locale';
-import { useTranslation } from 'react-i18next';
+import { ptBR } from 'date-fns/locale';
 import { Modal, Button, Card, Avatar } from '../../ui';
 import { api } from '../../../services/api';
 import { toast } from 'react-hot-toast';
@@ -42,8 +41,7 @@ interface AgendaModalProps {
 }
 
 export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => {
-    const { t, i18n } = useTranslation();
-    const dateLocale = i18n.language === 'en' ? enUS : ptBR;
+    const dateLocale = ptBR;
 
     // State
     const [currentDate, setCurrentDate] = useState(new Date());
@@ -77,11 +75,11 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
             setNote(noteRes.data.content || '');
         } catch (error) {
             console.error(error);
-            toast.error(t('dashboard.agenda.toast.loadError'));
+            toast.error("Erro ao carregar dados da agenda");
         } finally {
             setIsLoading(false);
         }
-    }, [t]);
+    }, []);
 
     useEffect(() => {
         if (isOpen) {
@@ -95,24 +93,24 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
         setIsSavingNote(true);
         try {
             await api.post('/agenda/note', { content: note });
-            toast.success(t('dashboard.agenda.toast.noteSaved'));
+            toast.success("Nota salva com sucesso");
         } catch (error) {
             console.error(error);
-            toast.error(t('dashboard.agenda.toast.noteError'));
+            toast.error("Erro ao salvar nota");
         } finally {
             setIsSavingNote(false);
         }
     };
 
     const handleCreateEvent = async () => {
-        if (!eventTitle) return toast.error(t('dashboard.agenda.toast.titleRequired'));
+        if (!eventTitle) return toast.error("O título do evento é obrigatório");
 
         const [hours, minutes] = eventStartTime.split(':').map(Number);
         const startTime = new Date(selectedDate);
         startTime.setHours(hours || 0, minutes || 0, 0, 0);
 
         if (startTime < new Date()) {
-            return toast.error(t('dashboard.agenda.toast.pastError'));
+            return toast.error("Não é possível agendar no passado");
         }
 
         try {
@@ -130,10 +128,10 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
             setIsCreatingEvent(false);
             setEventTitle('');
             setSelectedParticipants([]);
-            toast.success(t('dashboard.agenda.toast.eventCreated'));
+            toast.success("Agendamento criado com sucesso");
         } catch (error: unknown) {
             const err = error as { response?: { data?: { error?: string } } };
-            const msg = err.response?.data?.error || t('dashboard.agenda.toast.createError');
+            const msg = err.response?.data?.error || "Erro ao criar agendamento";
             toast.error(msg);
         }
     };
@@ -142,9 +140,9 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
         try {
             await api.delete(`/agenda/${id}`);
             setEvents(events.filter(e => e.id !== id));
-            toast.success(t('dashboard.agenda.toast.deleteSuccess'));
+            toast.success("Evento excluído");
         } catch {
-            toast.error(t('dashboard.agenda.toast.deleteError'));
+            toast.error("Erro ao excluir evento");
         }
     };
 
@@ -171,20 +169,20 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
         <Modal
             isOpen={isOpen}
             onClose={onClose}
-            title={t('dashboard.agenda.title')}
+            title="Agenda de Operações"
             maxWidth="6xl"
         >
             {isLoading ? (
                 <div className="flex flex-col items-center justify-center h-[600px] gap-4">
                     <Loader2 className="w-12 h-12 text-[var(--accent-primary)] animate-spin" />
-                    <p className="text-sm font-bold text-[var(--text-tertiary)] uppercase tracking-widest animate-pulse">{t('dashboard.agenda.loading')}</p>
+                    <p className="text-sm font-bold text-[var(--text-tertiary)] uppercase tracking-widest animate-pulse">Carregando Agenda...</p>
                 </div>
             ) : isCreatingEvent ? (
                 <div className="flex flex-col h-[600px] animate-in fade-in slide-in-from-bottom-4 duration-300">
                     <div className="flex justify-between items-center mb-6">
                         <div>
-                            <h3 className="text-xl font-bold text-[var(--text-primary)] uppercase tracking-tight">{t('dashboard.agenda.newEvent')}</h3>
-                            <p className="text-[10px] text-[var(--text-tertiary)] font-bold uppercase tracking-widest">{format(selectedDate, i18n.language === 'en' ? "EEEE, MMMM dd" : "EEEE, dd 'de' MMMM", { locale: dateLocale })}</p>
+                            <h3 className="text-xl font-bold text-[var(--text-primary)] uppercase tracking-tight">Novo Agendamento</h3>
+                            <p className="text-[10px] text-[var(--text-tertiary)] font-bold uppercase tracking-widest">{format(selectedDate, "EEEE, dd 'de' MMMM", { locale: dateLocale })}</p>
                         </div>
                         <button type="button" onClick={() => setIsCreatingEvent(false)} className="p-2 hover:bg-[var(--bg-secondary)] rounded-xl transition-all" title="Fechar novo agendamento" aria-label="Fechar novo agendamento">
                             <X className="w-6 h-6 text-[var(--text-secondary)] hover:text-[var(--error)]" />
@@ -195,41 +193,41 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
                         {/* Form Side */}
                         <div className="flex-1 space-y-6 overflow-y-auto pr-2 custom-scrollbar">
                             <div className="space-y-4">
-                                <label className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest pl-1">{t('dashboard.agenda.basicInfo')}</label>
+                                <label className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest pl-1">Informações Básicas</label>
                                 <div className="space-y-3">
                                     <input
                                         type="text"
                                         autoFocus
                                         className="w-full bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-xl px-4 py-3 text-sm font-medium text-[var(--text-primary)] focus:bg-white focus:border-[var(--accent-secondary)] outline-none transition-all placeholder:text-[var(--text-tertiary)]"
-                                        placeholder={t('dashboard.agenda.eventTitlePlaceholder')}
+                                        placeholder="Ex: Reunião Técnica / Vistoria Campo"
                                         value={eventTitle}
                                         onChange={(e) => setEventTitle(e.target.value)}
                                     />
 
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="space-y-1">
-                                            <span className="text-[9px] font-bold text-[var(--text-secondary)] uppercase tracking-widest ml-1">{t('dashboard.agenda.startTime')}</span>
+                                            <span className="text-[9px] font-bold text-[var(--text-secondary)] uppercase tracking-widest ml-1">Horário</span>
                                             <input
                                                 type="time"
                                                 className="w-full bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-xl px-4 py-3 text-sm font-medium text-[var(--text-primary)] focus:bg-white focus:border-[var(--accent-secondary)] outline-none transition-all"
                                                 value={eventStartTime}
                                                 onChange={(e) => setEventStartTime(e.target.value)}
-                                                title={t('dashboard.agenda.startTime')}
-                                                aria-label={t('dashboard.agenda.startTime')}
+                                                title="Início"
+                                                aria-label="Início"
                                             />
                                         </div>
                                         <div className="space-y-1">
-                                            <span className="text-[9px] font-bold text-[var(--text-secondary)] uppercase tracking-widest ml-1">{t('dashboard.agenda.eventType')}</span>
+                                            <span className="text-[9px] font-bold text-[var(--text-secondary)] uppercase tracking-widest ml-1">Tipo</span>
                                             <select
                                                 className="w-full bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-xl px-4 py-3 text-sm font-medium text-[var(--text-primary)] focus:bg-white focus:border-[var(--accent-secondary)] outline-none transition-all appearance-none cursor-pointer"
                                                 value={eventType}
                                                 onChange={(e) => setEventType(e.target.value as AgendaEventType)}
-                                                title={t('dashboard.agenda.eventType')}
-                                                aria-label={t('dashboard.agenda.eventType')}
+                                                title="Tipo de Evento"
+                                                aria-label="Tipo de Evento"
                                             >
-                                                <option value="TASK">{t('dashboard.agenda.types.TASK')}</option>
-                                                <option value="CONFERENCE">{t('dashboard.agenda.types.CONFERENCE')}</option>
-                                                <option value="FORWARDING">{t('dashboard.agenda.types.FORWARDING')}</option>
+                                                <option value="TASK">Tarefa / Ação</option>
+                                                <option value="CONFERENCE">Conferência / Briefing</option>
+                                                <option value="FORWARDING">Encaminhamento</option>
                                             </select>
                                         </div>
                                     </div>
@@ -238,7 +236,7 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
 
                             <div className="space-y-4">
                                 <label className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest pl-1">
-                                    {t('dashboard.agenda.confirmed')} ({selectedParticipants.length})
+                                    PARTICIPANTES ({selectedParticipants.length})
                                 </label>
                                 <div className="bg-[var(--bg-secondary)] rounded-2xl p-6 border border-dashed border-[var(--border-medium)] min-h-[160px]">
                                     <div className="flex flex-wrap gap-3">
@@ -263,7 +261,7 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
                                         {selectedParticipants.length === 0 && (
                                             <div className="flex flex-col items-center justify-center w-full py-4 text-[var(--text-tertiary)]">
                                                 <Users className="w-8 h-8 mb-2 opacity-50" />
-                                                <p className="text-[10px] font-bold uppercase tracking-widest">{t('dashboard.agenda.selectPeople')}</p>
+                                                <p className="text-[10px] font-black uppercase tracking-widest">Selecione contatos ao lado</p>
                                             </div>
                                         )}
                                     </div>
@@ -272,7 +270,7 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
 
                             <div className="flex gap-4 pt-4">
                                 <Button type="button" variant="ghost" size="lg" className="flex-1" onClick={() => setIsCreatingEvent(false)}>
-                                    {t('dashboard.agenda.pickDate')}
+                                    Voltar
                                 </Button>
                                 <Button
                                     type="button"
@@ -282,12 +280,12 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
                                     onClick={handleCreateEvent}
                                     disabled={!eventTitle || selectedParticipants.length === 0 || isPastSelection()}
                                 >
-                                    {t('dashboard.agenda.confirm')}
+                                    Confirmar Agendamento
                                 </Button>
                             </div>
                             {isPastSelection() && (
                                 <p className="text-[10px] text-red-500 font-bold uppercase tracking-widest text-center mt-2 animate-pulse">
-                                    {t('dashboard.agenda.pastError')}
+                                    Não é possível agendar no passado
                                 </p>
                             )}
                         </div>
@@ -298,7 +296,7 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
                                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-tertiary)]" />
                                 <input
                                     type="text"
-                                    placeholder={t('dashboard.agenda.searchPlaceholder')}
+                                    placeholder="Buscar contatos..."
                                     className="w-full bg-white border border-[var(--border-subtle)] rounded-xl pl-12 pr-4 py-3 text-sm font-medium text-[var(--text-primary)] focus:border-[var(--accent-secondary)] outline-none transition-all placeholder:text-[var(--text-tertiary)]"
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
@@ -369,11 +367,8 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
 
                             {/* Calendar Grid */}
                             <div className="grid grid-cols-7 gap-1 mb-2">
-                                {(i18n.language === 'en'
-                                    ? ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-                                    : ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
-                                ).map(day => (
-                                    <div key={day} className="text-center text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-widest pb-2">
+                                {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map(day => (
+                                    <div key={day} className="text-center text-[10px] font-black text-[var(--text-tertiary)] uppercase tracking-widest pb-2">
                                         {day}
                                     </div>
                                 ))}
@@ -413,14 +408,14 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
                         <div className="flex-1 overflow-y-auto pr-1">
                             <div className="flex justify-between items-center mb-3">
                                 <h4 className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest pl-1">
-                                    {t('dashboard.agenda.appointments')} • {format(selectedDate, i18n.language === 'en' ? "MMM dd" : "dd 'de' MMM", { locale: dateLocale })}
+                                    Compromissos • {format(selectedDate, "dd 'de' MMM", { locale: dateLocale })}
                                 </h4>
                                 <button
                                     type="button"
                                     onClick={() => setIsCreatingEvent(true)}
                                     className="flex items-center gap-1.5 text-[10px] font-bold text-[var(--accent-text)] hover:opacity-80 uppercase tracking-tight bg-[var(--accent-primary)] px-3 py-1.5 rounded-lg transition-all"
                                 >
-                                    <Plus className="w-3 h-3" /> {t('dashboard.agenda.schedule')}
+                                    <Plus className="w-3 h-3" /> AGENDAR
                                 </button>
                             </div>
 
@@ -459,7 +454,7 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
                                 ) : (
                                     <div className="text-center py-12 bg-[var(--bg-secondary)] rounded-3xl border-2 border-dashed border-[var(--border-subtle)]">
                                         <CalendarIcon className="w-8 h-8 text-[var(--text-tertiary)] mx-auto mb-2 opacity-50" />
-                                        <p className="text-xs text-[var(--text-tertiary)] font-bold uppercase tracking-widest">{t('dashboard.agenda.noEvents')}</p>
+                                        <p className="text-xs text-[var(--text-tertiary)] font-bold uppercase tracking-widest">Nenhum evento para este dia</p>
                                     </div>
                                 )}
                             </div>
@@ -478,7 +473,7 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
                                     <span className="text-xl text-[var(--text-tertiary)] ml-1 font-medium">{format(currentTime, 'ss')}</span>
                                 </h2>
                                 <p className="text-[10px] text-[var(--text-secondary)] font-bold uppercase tracking-[0.2em] opacity-80">
-                                    {format(currentTime, i18n.language === 'en' ? "EEEE, MMMM dd" : "EEEE, dd 'de' MMMM", { locale: dateLocale })}
+                                    {format(currentTime, "EEEE, dd 'de' MMMM", { locale: dateLocale })}
                                 </p>
                             </div>
                         </Card>
@@ -486,12 +481,12 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
                         {/* Bloco de Notas */}
                         <div className="flex-1 flex flex-col gap-3 min-h-[300px]">
                             <h4 className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest pl-1 mt-2">
-                                {t('dashboard.agenda.notepad')}
+                                Bloco de Notas
                             </h4>
                             <div className="flex-1 flex flex-col group">
                                 <textarea
                                     className="flex-1 bg-yellow-50 border border-yellow-200 rounded-2xl p-4 text-sm font-medium text-yellow-900 focus:bg-yellow-100/50 focus:border-yellow-400 outline-none transition-all resize-none placeholder:text-yellow-900/40"
-                                    placeholder={t('dashboard.agenda.notePlaceholder')}
+                                    placeholder="Rascunhos rápidos para o turno..."
                                     value={note}
                                     onChange={(e) => setNote(e.target.value)}
                                     aria-label="Bloco de notas"
@@ -504,7 +499,7 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
                                         className="text-[10px] font-bold text-yellow-700 uppercase tracking-widest hover:bg-yellow-100 px-3 py-1.5 rounded-lg transition-all flex items-center gap-2"
                                     >
                                         {isSavingNote ? <Loader2 className="w-3 h-3 animate-spin" /> : <StickyNote className="w-3 h-3" />}
-                                        {t('dashboard.agenda.saveNote')}
+                                        SALVAR NOTAS
                                     </button>
                                 </div>
                             </div>

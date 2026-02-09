@@ -1,39 +1,37 @@
 import { motion } from 'framer-motion';
-import { useTranslation } from 'react-i18next';
 import { Camera, Zap, LayoutDashboard, CheckCircle2, ArrowRight } from 'lucide-react';
 
 export const ProcessTimeline = () => {
-    const { t } = useTranslation();
 
     const steps = [
         {
             id: 1,
-            title: t('home.process.steps.capture.title'),
-            desc: t('home.process.steps.capture.desc'),
+            title: "Captura Inteligente",
+            desc: "Registro fotográfico e técnico instantâneo, mesmo sem sinal.",
             icon: <Camera className="w-6 h-6" />,
             color: "bg-slate-100 text-slate-700",
             shadow: "shadow-sm"
         },
         {
             id: 2,
-            title: t('home.process.steps.transmission.title'),
-            desc: t('home.process.steps.transmission.desc'),
+            title: "Sincronização",
+            desc: "Transmissão automática via rede mesh assim que disponível.",
             icon: <Zap className="w-6 h-6" />,
             color: "bg-[#d4e720]/20 text-[#1a2e05]",
             shadow: "shadow-sm"
         },
         {
             id: 3,
-            title: t('home.process.steps.triage.title'),
-            desc: t('home.process.steps.triage.desc'),
+            title: "Análise Central",
+            desc: "Triagem automatizada via IA para priorização de urgências.",
             icon: <LayoutDashboard className="w-6 h-6" />,
             color: "bg-blue-50/50 text-blue-700",
             shadow: "shadow-sm"
         },
         {
             id: 4,
-            title: t('home.process.steps.resolution.title'),
-            desc: t('home.process.steps.resolution.desc'),
+            title: "Resolução",
+            desc: "Fechamento de ciclo com relatório detalhado e auditável.",
             icon: <CheckCircle2 className="w-6 h-6" />,
             color: "bg-emerald-50/50 text-emerald-700",
             shadow: "shadow-sm"
@@ -50,7 +48,7 @@ export const ProcessTimeline = () => {
                         viewport={{ once: true }}
                         className="text-xs font-black text-slate-400 uppercase tracking-[0.3em] mb-4"
                     >
-                        {t('home.process.overline')}
+                        FLUXO DE TRABALHO
                     </motion.h2>
                     <motion.h3
                         initial={{ opacity: 0, y: 20 }}
@@ -59,7 +57,7 @@ export const ProcessTimeline = () => {
                         transition={{ delay: 0.1 }}
                         className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight"
                     >
-                        {t('home.process.title')} <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-700 to-slate-400">{t('home.process.subtitle')}</span>
+                        Simplicidade em <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-700 to-slate-400">4 Passos.</span>
                     </motion.h3>
                 </div>
 

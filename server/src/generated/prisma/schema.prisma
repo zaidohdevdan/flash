@@ -202,3 +202,13 @@ model Note {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model ContactMessage {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  email     String
+  company   String?
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}

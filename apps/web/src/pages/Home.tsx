@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { useTranslation, Trans } from 'react-i18next';
 import { motion, useScroll, useTransform, useReducedMotion, useSpring, AnimatePresence } from 'framer-motion';
 import {
     Send,
@@ -25,13 +24,16 @@ import { ProcessTimeline } from '../components/home/ProcessTimeline';
 import { TechSpecs } from '../components/home/TechSpecs';
 import { FaqSection } from '../components/home/FaqSection';
 import { Globe } from '../components/home/Globe';
+import { api } from '../services/api';
+import { DocsModal } from '../components/domain/modals/DocsModal';
+import { toast } from 'react-hot-toast';
 
 export function Home() {
     const navigate = useNavigate();
     const { isAuthenticated, user, loading } = useAuth();
-    const { t, i18n } = useTranslation();
     const [formStatus, setFormStatus] = useState<'idle' | 'sending' | 'sent'>('idle');
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [isDocsOpen, setIsDocsOpen] = useState(false);
     const { scrollY, scrollYProgress } = useScroll();
 
     // Theme Management
@@ -59,12 +61,6 @@ export function Home() {
         }
         localStorage.setItem('theme', newTheme);
         setIsDark(!isDark);
-    };
-
-    const toggleLanguage = () => {
-        const newLang = i18n.language === 'pt' ? 'en' : 'pt';
-        i18n.changeLanguage(newLang);
-        localStorage.setItem('language', newLang);
     };
 
     // Smooth progress bar
@@ -130,10 +126,40 @@ export function Home() {
         }
     }, [isAuthenticated, user, loading, navigate]);
 
-    const handleContactSubmit = (e: React.FormEvent) => {
+    const handleContactSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setFormStatus('sending');
-        setTimeout(() => setFormStatus('sent'), 1500);
+
+        const formData = new FormData(e.currentTarget);
+        const data = {
+            name: formData.get('name'),
+            email: formData.get('email'),
+            company: formData.get('company'),
+            message: formData.get('message'),
+        };
+
+        try {
+            // Hybrid solution: Save to DB AND send to Email via Formspree
+            // Replace 'xfoyonza' with your actual ID when you have it.
+            // Documentation: https://formspree.io
+            await Promise.all([
+                api.post('/contacts', data),
+                fetch('https://formspree.io/f/mvzbgbdk', {
+                    method: 'POST',
+                    body: JSON.stringify(data),
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
+                })
+            ]);
+
+            setFormStatus('sent');
+        } catch (error) {
+            console.error('Erro ao enviar contato:', error);
+            toast.error('Erro ao enviar mensagem. Tente novamente.');
+            setFormStatus('idle');
+        }
     };
 
     return (
@@ -164,26 +190,26 @@ export function Home() {
                             <Send className="w-4 h-4 sm:w-5 sm:h-5 text-[#1a2e05]" />
                         </div>
                         <span className="text-xl sm:text-2xl font-black tracking-tighter text-slate-900 dark:text-white">
-                            FLASH<span className="text-[#a3b60b] hidden sm:inline">{t('home.nav.logoPart')}</span>
+                            FLASH<span className="text-[#a3b60b] hidden sm:inline">APP</span>
                         </span>
                     </div>
 
                     {/* Desktop Navigation Links */}
                     <div className="hidden lg:flex items-center gap-8 xl:gap-10 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-[0.15em]">
                         <a href="#features" className="hover:text-slate-900 dark:hover:text-white transition-colors relative group">
-                            {t('home.nav.features')}
+                            Recursos
                             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#d4e720] transition-all group-hover:w-full" />
                         </a>
                         <a href="#process" className="hover:text-slate-900 dark:hover:text-white transition-colors relative group">
-                            {t('home.nav.process')}
+                            Processo
                             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#d4e720] transition-all group-hover:w-full" />
                         </a>
                         <a href="#specs" className="hover:text-slate-900 dark:hover:text-white transition-colors relative group">
-                            {t('home.nav.specs')}
+                            Tecnologia
                             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#d4e720] transition-all group-hover:w-full" />
                         </a>
                         <a href="#contact" className="hover:text-slate-900 dark:hover:text-white transition-colors relative group">
-                            {t('home.nav.contact')}
+                            Contato
                             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#d4e720] transition-all group-hover:w-full" />
                         </a>
                     </div>
@@ -193,28 +219,24 @@ export function Home() {
                         {/* Settings Toggles - Hidden on Mobile, shown on Desktop */}
                         <div className="hidden lg:flex items-center gap-1 sm:gap-2 border-r border-slate-200 dark:border-slate-800 pr-2 sm:pr-4">
                             <button
+                                title='Alternar Tema'
+                                type='button'
                                 onClick={toggleTheme}
                                 className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-slate-500 dark:text-slate-400"
-                                aria-label="Toggle Theme"
+                                aria-label="Alterar Tema"
                             >
                                 {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-                            </button>
-                            <button
-                                onClick={toggleLanguage}
-                                className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-slate-500 dark:text-slate-400 flex items-center gap-1 font-bold text-xs"
-                                aria-label="Toggle Language"
-                            >
-                                <Globe2 className="w-4 h-4" />
-                                <span className="hidden xl:inline">{i18n.language === 'pt' ? 'PT' : 'EN'}</span>
                             </button>
                         </div>
 
                         {/* CTA Button - Hidden on very small screens, compact on mid-mobile */}
                         <button
+                            title='Acessar Sistema'
+                            type='button'
                             onClick={() => navigate('/login')}
                             className="hidden sm:flex bg-[#d4e720] text-[#1a2e05] border border-[#bed20e] px-4 sm:px-8 py-2.5 sm:py-4 rounded-xl sm:rounded-2xl font-black text-[10px] sm:text-[11px] uppercase tracking-[0.1em] sm:tracking-[0.15em] hover:bg-[#a3b60b] transition-all shadow-xl hover:shadow-2xl hover:shadow-lime-500/10 hover:scale-[1.02] active:scale-95 group relative overflow-hidden whitespace-nowrap"
                         >
-                            <span className="relative z-10">{t('home.nav.login')}</span>
+                            <span className="relative z-10">Acessar Sistema</span>
                             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
                         </button>
 
@@ -251,60 +273,57 @@ export function Home() {
                                         onClick={() => setIsMobileMenuOpen(false)}
                                         className="hover:text-[#d4e720] transition-colors"
                                     >
-                                        {t('home.nav.features')}
+                                        Recursos
                                     </a>
                                     <a
                                         href="#process"
                                         onClick={() => setIsMobileMenuOpen(false)}
                                         className="hover:text-[#d4e720] transition-colors"
                                     >
-                                        {t('home.nav.process')}
+                                        Processo
                                     </a>
                                     <a
                                         href="#specs"
                                         onClick={() => setIsMobileMenuOpen(false)}
                                         className="hover:text-[#d4e720] transition-colors"
                                     >
-                                        {t('home.nav.specs')}
+                                        Tecnologia
                                     </a>
                                     <a
                                         href="#contact"
                                         onClick={() => setIsMobileMenuOpen(false)}
                                         className="hover:text-[#d4e720] transition-colors"
                                     >
-                                        {t('home.nav.contact')}
+                                        Contato
                                     </a>
                                 </div>
 
                                 <div className="h-px bg-slate-200 dark:bg-slate-800 w-full" />
 
                                 {/* Settings Toggles */}
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 gap-4">
                                     <button
+                                        title='Alternar Tema'
+                                        type='button'
                                         onClick={toggleTheme}
                                         className="flex items-center justify-center gap-3 p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold text-xs uppercase tracking-widest hover:bg-white dark:hover:bg-slate-700 transition-all"
                                     >
                                         {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-                                        <span className="text-[10px]">{isDark ? 'Light' : 'Dark'}</span>
-                                    </button>
-                                    <button
-                                        onClick={toggleLanguage}
-                                        className="flex items-center justify-center gap-3 p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold text-xs uppercase tracking-widest hover:bg-white dark:hover:bg-slate-700 transition-all"
-                                    >
-                                        <Globe2 className="w-4 h-4" />
-                                        <span className="text-[10px] uppercase">{i18n.language}</span>
+                                        <span className="text-[10px]">{isDark ? 'Tema Claro' : 'Tema Escuro'}</span>
                                     </button>
                                 </div>
 
                                 {/* Primary Phone Call / CTA */}
                                 <button
+                                    title='Acessar Sistema'
+                                    type='button'
                                     onClick={() => {
                                         setIsMobileMenuOpen(false);
                                         navigate('/login');
                                     }}
                                     className="w-full bg-[#d4e720] text-[#1a2e05] py-5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-lg shadow-lime-500/20 hover:scale-[1.02] active:scale-95 transition-all"
                                 >
-                                    {t('home.nav.login')}
+                                    Acessar Sistema
                                 </button>
                             </div>
                         </motion.div>
@@ -329,7 +348,7 @@ export function Home() {
                                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#d4e720] opacity-75"></span>
                                 <span className="relative inline-flex rounded-full h-2 sm:h-2.5 w-2 sm:w-2.5 bg-[#a3b60b]"></span>
                             </span>
-                            <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-500 group-hover:text-slate-900 dark:group-hover:text-slate-300 transition-colors">{t('home.hero.badge')}</span>
+                            <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-500 group-hover:text-slate-900 dark:group-hover:text-slate-300 transition-colors">Sistema Enterprise v4.0</span>
                         </motion.div>
 
                         <motion.h1
@@ -338,8 +357,8 @@ export function Home() {
                             transition={{ duration: 0.8, delay: 0.1, ease: "easeOut" }}
                             className="text-4xl sm:text-6xl md:text-7xl lg:text-[6.5rem] font-black tracking-tighter leading-[0.9] text-slate-900 dark:text-white relative"
                         >
-                            {t('home.hero.title')} <br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-800 via-slate-600 to-slate-400 dark:from-slate-100 dark:via-slate-400 dark:to-slate-600 bg-[length:200%_auto] animate-shimmer">{t('home.hero.subtitle')}</span>
+                            Gestão <br />
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-800 via-slate-600 to-slate-400 dark:from-slate-100 dark:via-slate-400 dark:to-slate-600 bg-[length:200%_auto] animate-shimmer">Sem Ruído.</span>
                         </motion.h1>
 
                         <motion.p
@@ -348,9 +367,7 @@ export function Home() {
                             transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
                             className="text-lg sm:text-xl text-slate-500 dark:text-slate-400 max-w-xl mx-auto lg:mx-0 leading-relaxed font-medium"
                         >
-                            <Trans i18nKey="home.hero.description">
-                                <span className="font-bold text-slate-900 dark:text-white">FLASH</span> unifica sua operação de campo. Inteligência preditiva, operação offline e design minimalista para quem lidera o futuro.
-                            </Trans>
+                            O <span className="font-bold text-slate-900 dark:text-white">FLASH</span> unifica sua operação de campo. Inteligência preditiva, operação offline e design minimalista para quem lidera o futuro.
                         </motion.p>
 
                         <motion.div
@@ -360,16 +377,21 @@ export function Home() {
                             className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 sm:gap-6 pt-4"
                         >
                             <button
+                                title='Iniciar Operação'
+                                type='button'
                                 onClick={() => navigate('/login')}
                                 className="w-full sm:w-auto px-10 py-5 sm:py-6 bg-[#d4e720] text-[#1a2e05] border border-[#bed20e] rounded-[1.25rem] font-black text-xs uppercase tracking-widest hover:bg-[#bfd40b] hover:shadow-2xl hover:scale-105 transition-all shadow-xl shadow-lime-500/20 flex items-center justify-center gap-3 group relative overflow-hidden"
                             >
                                 <span className="relative z-10 flex items-center gap-3">
-                                    {t('home.hero.start')} <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                    Iniciar Operação <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                                 </span>
                                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
                             </button>
-                            <button className="w-full sm:w-auto px-10 py-5 sm:py-6 bg-white dark:bg-slate-900 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 rounded-[1.25rem] font-black text-xs uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 transition-all flex items-center justify-center gap-3 hover:shadow-lg hover:-translate-y-0.5">
-                                {t('home.hero.docs')}
+                            <button
+                                onClick={() => setIsDocsOpen(true)}
+                                className="w-full sm:w-auto px-10 py-5 sm:py-6 bg-white dark:bg-slate-900 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 rounded-[1.25rem] font-black text-xs uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 transition-all flex items-center justify-center gap-3 hover:shadow-lg hover:-translate-y-0.5"
+                            >
+                                Ver Documentação
                             </button>
                         </motion.div>
                     </motion.div>
@@ -481,8 +503,8 @@ export function Home() {
                                     <WifiOff className="w-6 h-6" />
                                 </div>
                                 <div>
-                                    <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-1.5">{t('home.demo.offline')}</p>
-                                    <p className="text-sm font-bold text-white">{t('home.demo.sync')}</p>
+                                    <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-1.5">Modo Offline</p>
+                                    <p className="text-sm font-bold text-white">Sincronização Ativa</p>
                                 </div>
                             </motion.div>
                         </motion.div>
@@ -494,9 +516,9 @@ export function Home() {
             <section id="features" className="py-20 sm:py-40 relative z-10 bg-white dark:bg-slate-950 border-y border-slate-100 dark:border-slate-800/50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6">
                     <div className="mb-16 sm:mb-24 text-center max-w-2xl mx-auto">
-                        <h2 className="text-[10px] sm:text-xs font-black text-slate-400 uppercase tracking-[0.4em] mb-4 sm:mb-6">{t('home.features.overline')}</h2>
+                        <h2 className="text-[10px] sm:text-xs font-black text-slate-400 uppercase tracking-[0.4em] mb-4 sm:mb-6">SISTEMA CORE</h2>
                         <h3 className="text-3xl sm:text-4xl md:text-6xl font-black text-slate-900 dark:text-white tracking-tighter mb-4 sm:mb-6">
-                            {t('home.features.title')} <br className="hidden sm:block" />{t('home.features.subtitle')}
+                            Capacidades <br className="hidden sm:block" />Expandidas
                         </h3>
                     </div>
 
@@ -511,8 +533,8 @@ export function Home() {
                                     <Brain className="w-8 h-8 text-slate-800 dark:text-slate-200" />
                                 </div>
                                 <div>
-                                    <h4 className="text-3xl font-black text-slate-900 dark:text-white mb-4 tracking-tight">{t('home.features.neural.title')}</h4>
-                                    <p className="text-slate-500 dark:text-slate-400 text-lg leading-relaxed max-w-md">{t('home.features.neural.desc')}</p>
+                                    <h4 className="text-3xl font-black text-slate-900 dark:text-white mb-4 tracking-tight">IA Neural Core</h4>
+                                    <p className="text-slate-500 dark:text-slate-400 text-lg leading-relaxed max-w-md">Processamento inteligente de dados em tempo real para insights preditivos e automação de fluxo de trabalho.</p>
                                 </div>
                             </div>
                         </div>
@@ -525,8 +547,8 @@ export function Home() {
                                     <Smartphone className="w-8 h-8 text-slate-800 dark:text-slate-200" />
                                 </div>
                                 <div>
-                                    <h4 className="text-3xl font-black text-slate-900 dark:text-white mb-4 tracking-tight">{t('home.features.offline.title')}</h4>
-                                    <p className="text-slate-500 dark:text-slate-400 text-lg leading-relaxed">{t('home.features.offline.desc')}</p>
+                                    <h4 className="text-3xl font-black text-slate-900 dark:text-white mb-4 tracking-tight">Offline First</h4>
+                                    <p className="text-slate-500 dark:text-slate-400 text-lg leading-relaxed">Continue trabalhando mesmo sem conexão. O FLASH sincroniza seus dados automaticamente assim que o sinal retornar.</p>
                                 </div>
                             </div>
                         </div>
@@ -541,8 +563,8 @@ export function Home() {
                                     <Globe2 className="w-8 h-8 text-[#d4e720]" />
                                 </div>
                                 <div>
-                                    <h4 className="text-3xl font-black text-white mb-2 tracking-tight">{t('home.features.mesh.title')}</h4>
-                                    <p className="text-slate-400 leading-relaxed">{t('home.features.mesh.desc').replace('&lt;', '<')}</p>
+                                    <h4 className="text-3xl font-black text-white mb-2 tracking-tight">Mesh Global</h4>
+                                    <p className="text-slate-400 leading-relaxed">Conectividade resiliente e distribuída, garantindo que sua equipe esteja sempre sincronizada em qualquer lugar do mundo.</p>
                                 </div>
                             </div>
                         </div>
@@ -556,8 +578,8 @@ export function Home() {
                                     <BarChart3 className="w-8 h-8 text-slate-800 dark:text-slate-200" />
                                 </div>
                                 <div>
-                                    <h4 className="text-3xl font-black text-slate-900 dark:text-white mb-4 tracking-tight">{t('home.features.analytics.title')}</h4>
-                                    <p className="text-slate-500 dark:text-slate-400 text-lg leading-relaxed max-w-md">{t('home.features.analytics.desc')}</p>
+                                    <h4 className="text-3xl font-black text-slate-900 dark:text-white mb-4 tracking-tight">Deep Analytics</h4>
+                                    <p className="text-slate-500 dark:text-slate-400 text-lg leading-relaxed max-w-md">Visualize dados complexos com extrema clareza. Dashboards interativos projetados para decisões baseadas em evidências.</p>
                                 </div>
                             </div>
                         </div>
@@ -576,11 +598,11 @@ export function Home() {
                             className="flex-1 w-full"
                         >
                             <div className="p-8 md:p-12 bg-white dark:bg-slate-800 rounded-[3rem] border border-slate-200 dark:border-slate-700 shadow-2xl shadow-slate-200/50 dark:shadow-black/30 relative overflow-hidden group hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.1)] transition-all duration-500">
-                                <Code2 className="w-32 h-32 md:w-64 md:h-64 text-slate-50 dark:text-slate-700 absolute top-[-20px] right-[-20px] md:top-[-40px] md:right-[-40px] group-hover:rotate-12 transition-transform duration-1000" />
-                                <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-6 relative z-10">{t('home.developer.role')}</h3>
-                                <h2 className="text-3xl md:text-4xl lg:text-5xl font-black mb-8 text-slate-900 dark:text-white tracking-tight relative z-10">{t('home.developer.name')}</h2>
+                                <Code2 className="w-32 h-32 md:w-64 md:h-64 text-slate-50 dark:text-slate-700 absolute top-[-20px] right-[-20px] md:top-[-40px] md:right-[-40px] group-hover:rotate-6 transition-transform duration-1000" />
+                                <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-6 relative z-10">Engenharia de Software</h3>
+                                <h2 className="text-3xl md:text-4xl lg:text-5xl font-black mb-8 text-slate-900 dark:text-white tracking-tight relative z-10">Daniel de Almeida</h2>
                                 <p className="text-slate-500 dark:text-slate-400 text-lg leading-relaxed mb-10 relative z-10">
-                                    {t('home.developer.desc')}
+                                    Arquiteto de soluções focado em experiências digitais de alto impacto. Combinando design minimalista com engenharia de precisão para criar ferramentas que capacitam indivíduos e empresas.
                                 </p>
                                 <div className="flex gap-4 relative z-10">
                                     <a href="#" aria-label="LinkedIn" className="p-4 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-2xl hover:bg-slate-900 dark:hover:bg-black hover:border-slate-800 dark:hover:border-black hover:text-white transition-all text-slate-500 dark:text-slate-400 hover:shadow-lg hover:-translate-y-1"><Linkedin className="w-6 h-6" /></a>
@@ -591,13 +613,13 @@ export function Home() {
                         </motion.div>
 
                         <div className="flex-1 space-y-10">
-                            <h2 className="text-xs font-black text-slate-400 uppercase tracking-[0.4em]">{t('home.developer.manifesto.overline')}</h2>
+                            <h2 className="text-xs font-black text-slate-400 uppercase tracking-[0.4em]">NOSSO MANIFESTO</h2>
                             <h3 className="text-3xl md:text-5xl lg:text-7xl font-black tracking-tighter leading-[0.9] text-slate-900 dark:text-white">
-                                {t('home.developer.manifesto.title')} <br className="hidden sm:block" />
-                                {t('home.developer.manifesto.subtitle')}
+                                Simplicidade <br className="hidden sm:block" />
+                                é Poder.
                             </h3>
                             <p className="text-xl text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
-                                {t('home.developer.manifesto.text')}
+                                Acreditamos que a tecnologia deve ser invisível e potente. Menos cliques, mais resultados. Onde outros veem complexidade, nós entregamos clareza absoluta e performance implacável.
                             </p>
                         </div>
                     </div>
@@ -621,9 +643,9 @@ export function Home() {
                 <div className="max-w-5xl mx-auto">
                     <div className="bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-[3.5rem] shadow-2xl shadow-slate-200/50 dark:shadow-black/50 p-10 md:p-20 relative overflow-hidden">
                         <div className="text-center mb-12 sm:mb-16 space-y-4 sm:space-y-6">
-                            <h2 className="text-[10px] sm:text-xs font-black text-slate-400 uppercase tracking-[0.4em]">{t('home.contact.overline')}</h2>
+                            <h2 className="text-[10px] sm:text-xs font-black text-slate-400 uppercase tracking-[0.4em]">FALE CONOSCO</h2>
                             <h3 className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tighter text-slate-900 dark:text-white">
-                                {t('home.contact.title')} <br className="hidden sm:block" /> {t('home.contact.subtitle')}
+                                Vamos falar <br className="hidden sm:block" /> sobre o seu futuro.
                             </h3>
                         </div>
 
@@ -636,35 +658,40 @@ export function Home() {
                                 <div className="w-24 h-24 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center mx-auto mb-8 border border-emerald-100 dark:border-emerald-800 animate-bounce">
                                     <CheckCircle2 className="w-12 h-12" />
                                 </div>
-                                <h4 className="text-3xl font-black mb-4 text-slate-900 dark:text-white tracking-tight">{t('home.contact.success.title')}</h4>
-                                <p className="text-slate-500 dark:text-slate-400 text-lg">{t('home.contact.success.desc')}</p>
-                                <button onClick={() => setFormStatus('idle')} className="mt-10 text-blue-600 dark:text-blue-400 font-bold text-xs uppercase underline tracking-widest hover:text-blue-500 dark:hover:text-blue-300">{t('home.contact.success.reset')}</button>
+                                <h4 className="text-3xl font-black mb-4 text-slate-900 dark:text-white tracking-tight">Mensagem Enviada!</h4>
+                                <p className="text-slate-500 dark:text-slate-400 text-lg">Recebemos seu contato. Nossa equipe entrará em contato em breve.</p>
+                                <button
+                                    title='Enviar outra mensagem'
+                                    type='button'
+                                    onClick={() => setFormStatus('idle')} className="mt-10 text-blue-600 dark:text-blue-400 font-bold text-xs uppercase underline tracking-widest hover:text-blue-500 dark:hover:text-blue-300">Enviar outra mensagem</button>
                             </motion.div>
                         ) : (
                             <form onSubmit={handleContactSubmit} className="space-y-8 max-w-2xl mx-auto">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                     <div className="space-y-3">
-                                        <label htmlFor="name" className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">{t('home.contact.form.name')}</label>
-                                        <input id="name" required type="text" placeholder={t('home.contact.form.namePlaceholder')} className="w-full bg-white dark:bg-slate-900 px-6 py-5 rounded-2xl border border-slate-200 dark:border-slate-800 focus:border-slate-300 dark:focus:border-slate-700 focus:ring-4 focus:ring-slate-100 dark:focus:ring-slate-800 text-slate-900 dark:text-white outline-none transition font-medium placeholder:text-slate-300 dark:placeholder:text-slate-600 text-lg" />
+                                        <label htmlFor="name" className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Seu Nome</label>
+                                        <input id="name" name="name" required type="text" placeholder="Ex: João Silva" className="w-full bg-white dark:bg-slate-900 px-6 py-5 rounded-2xl border border-slate-200 dark:border-slate-800 focus:border-slate-300 dark:focus:border-slate-700 focus:ring-4 focus:ring-slate-100 dark:focus:ring-slate-800 text-slate-900 dark:text-white outline-none transition font-medium placeholder:text-slate-300 dark:placeholder:text-slate-600 text-lg" />
                                     </div>
                                     <div className="space-y-3">
-                                        <label htmlFor="company" className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">{t('home.contact.form.company')}</label>
-                                        <input id="company" required type="text" placeholder={t('home.contact.form.companyPlaceholder')} className="w-full bg-white dark:bg-slate-900 px-6 py-5 rounded-2xl border border-slate-200 dark:border-slate-800 focus:border-slate-300 dark:focus:border-slate-700 focus:ring-4 focus:ring-slate-100 dark:focus:ring-slate-800 text-slate-900 dark:text-white outline-none transition font-medium placeholder:text-slate-300 dark:placeholder:text-slate-600 text-lg" />
+                                        <label htmlFor="company" className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Empresa</label>
+                                        <input id="company" name="company" required type="text" placeholder="Nome da sua empresa" className="w-full bg-white dark:bg-slate-900 px-6 py-5 rounded-2xl border border-slate-200 dark:border-slate-800 focus:border-slate-300 dark:focus:border-slate-700 focus:ring-4 focus:ring-slate-100 dark:focus:ring-slate-800 text-slate-900 dark:text-white outline-none transition font-medium placeholder:text-slate-300 dark:placeholder:text-slate-600 text-lg" />
                                     </div>
                                 </div>
                                 <div className="space-y-3">
-                                    <label htmlFor="email" className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">{t('home.contact.form.email')}</label>
-                                    <input id="email" required type="email" placeholder={t('home.contact.form.emailPlaceholder')} className="w-full bg-white dark:bg-slate-900 px-6 py-5 rounded-2xl border border-slate-200 dark:border-slate-800 focus:border-slate-300 dark:focus:border-slate-700 focus:ring-4 focus:ring-slate-100 dark:focus:ring-slate-800 text-slate-900 dark:text-white outline-none transition font-medium placeholder:text-slate-300 dark:placeholder:text-slate-600 text-lg" />
+                                    <label htmlFor="email" className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">E-mail Corporativo</label>
+                                    <input id="email" name="email" required type="email" placeholder="email@empresa.com" className="w-full bg-white dark:bg-slate-900 px-6 py-5 rounded-2xl border border-slate-200 dark:border-slate-800 focus:border-slate-300 dark:focus:border-slate-700 focus:ring-4 focus:ring-slate-100 dark:focus:ring-slate-800 text-slate-900 dark:text-white outline-none transition font-medium placeholder:text-slate-300 dark:placeholder:text-slate-600 text-lg" />
                                 </div>
                                 <div className="space-y-3">
-                                    <label htmlFor="message" className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">{t('home.contact.form.message')}</label>
-                                    <textarea id="message" required placeholder={t('home.contact.form.messagePlaceholder')} className="w-full bg-white dark:bg-slate-900 px-6 py-5 rounded-2xl border border-slate-200 dark:border-slate-800 focus:border-slate-300 dark:focus:border-slate-700 focus:ring-4 focus:ring-slate-100 dark:focus:ring-slate-800 text-slate-900 dark:text-white outline-none transition h-40 resize-none font-medium placeholder:text-slate-300 dark:placeholder:text-slate-600 text-lg"></textarea>
+                                    <label htmlFor="message" className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Como podemos ajudar?</label>
+                                    <textarea id="message" name="message" required placeholder="Conte-nos brevemente sobre sua necessidade..." className="w-full bg-white dark:bg-slate-900 px-6 py-5 rounded-2xl border border-slate-200 dark:border-slate-800 focus:border-slate-300 dark:focus:border-slate-700 focus:ring-4 focus:ring-slate-100 dark:focus:ring-slate-800 text-slate-900 dark:text-white outline-none transition h-40 resize-none font-medium placeholder:text-slate-300 dark:placeholder:text-slate-600 text-lg"></textarea>
                                 </div>
                                 <button
+                                    title='Enviar Solicitação'
+                                    type='submit'
                                     disabled={formStatus === 'sending'}
                                     className="w-full py-6 bg-[#d4e720] text-[#1a2e05] border border-[#bed20e] rounded-3xl font-black text-sm uppercase tracking-[0.2em] hover:bg-[#a3b60b] transition-all shadow-xl disabled:opacity-50 hover:shadow-2xl hover:shadow-lime-500/20 hover:scale-[1.02] relative overflow-hidden group"
                                 >
-                                    <span className="relative z-10">{formStatus === 'sending' ? t('home.contact.form.sending') : t('home.contact.form.submit')}</span>
+                                    <span className="relative z-10">{formStatus === 'sending' ? 'Enviando...' : 'Enviar Solicitação'}</span>
                                     <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
                                 </button>
                             </form>
@@ -680,9 +707,9 @@ export function Home() {
                         <div className="col-span-2 lg:col-span-2 space-y-6">
                             <div className="flex items-center gap-3">
                                 <Send className="w-6 h-6 text-slate-900 dark:text-white" />
-                                <span className="text-xl font-black tracking-tighter text-slate-900 dark:text-white">FLASH<span className="text-slate-400">{t('home.nav.logoPart')}</span></span>
+                                <span className="text-xl font-black tracking-tighter text-slate-900 dark:text-white">FLASH<span className="text-slate-400">APP</span></span>
                             </div>
-                            <p className="text-slate-500 dark:text-slate-400 leading-relaxed max-w-xs">{t('home.footer.desc')}</p>
+                            <p className="text-slate-500 dark:text-slate-400 leading-relaxed max-w-xs">Elevando a gestão de campo ao próximo nível com inteligência e performance.</p>
                             <div className="flex gap-4">
                                 <a href="#" aria-label="Twitter" className="w-10 h-10 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-slate-600 transition-all"><Twitter className="w-4 h-4" /></a>
                                 <a href="#" aria-label="GitHub" className="w-10 h-10 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-slate-600 transition-all"><Github className="w-4 h-4" /></a>
@@ -691,93 +718,46 @@ export function Home() {
                         </div>
 
                         <div>
-                            <h4 className="font-black text-slate-900 dark:text-white mb-6 tracking-wide uppercase text-xs">{t('home.footer.product.title')}</h4>
+                            <h4 className="font-black text-slate-900 dark:text-white mb-6 tracking-wide uppercase text-xs">Produto</h4>
                             <ul className="space-y-4 text-slate-500 dark:text-slate-400">
-                                <li><a href="#" className="hover:text-[#d4e720] transition-colors">{t('home.footer.product.neural')}</a></li>
-                                <li><a href="#" className="hover:text-[#d4e720] transition-colors">{t('home.footer.product.offline')}</a></li>
-                                <li><a href="#" className="hover:text-[#d4e720] transition-colors">{t('home.footer.product.mesh')}</a></li>
-                                <li><a href="#" className="hover:text-[#d4e720] transition-colors">{t('home.footer.product.changelog')}</a></li>
+                                <li><a href="#" className="hover:text-[#d4e720] transition-colors">Neural Core</a></li>
+                                <li><a href="#" className="hover:text-[#d4e720] transition-colors">Offline First</a></li>
+                                <li><a href="#" className="hover:text-[#d4e720] transition-colors">Global Mesh</a></li>
+                                <li><a href="#" className="hover:text-[#d4e720] transition-colors">Changelog</a></li>
                             </ul>
                         </div>
 
                         <div>
-                            <h4 className="font-black text-slate-900 dark:text-white mb-6 tracking-wide uppercase text-xs">{t('home.footer.company.title')}</h4>
+                            <h4 className="font-black text-slate-900 dark:text-white mb-6 tracking-wide uppercase text-xs">Empresa</h4>
                             <ul className="space-y-4 text-slate-500 dark:text-slate-400">
-                                <li><a href="#" className="hover:text-[#d4e720] transition-colors">{t('home.footer.company.about')}</a></li>
-                                <li><a href="#" className="hover:text-[#d4e720] transition-colors">{t('home.footer.company.careers')}</a></li>
-                                <li><a href="#" className="hover:text-[#d4e720] transition-colors">{t('home.footer.company.blog')}</a></li>
-                                <li><a href="#" className="hover:text-[#d4e720] transition-colors">{t('home.footer.company.contact')}</a></li>
+                                <li><a href="#" className="hover:text-[#d4e720] transition-colors">Sobre Nós</a></li>
+                                <li><a href="#" className="hover:text-[#d4e720] transition-colors">Carreiras</a></li>
+                                <li><a href="#" className="hover:text-[#d4e720] transition-colors">Blog</a></li>
+                                <li><a href="#" className="hover:text-[#d4e720] transition-colors">Contato</a></li>
                             </ul>
                         </div>
 
                         <div>
-                            <h4 className="font-black text-slate-900 dark:text-white mb-6 tracking-wide uppercase text-xs">{t('home.footer.legal.title')}</h4>
+                            <h4 className="font-black text-slate-900 dark:text-white mb-6 tracking-wide uppercase text-xs">Jurídico</h4>
                             <ul className="space-y-4 text-slate-500 dark:text-slate-400">
-                                <li><a href="#" className="hover:text-[#d4e720] transition-colors">{t('home.footer.legal.privacy')}</a></li>
-                                <li><a href="#" className="hover:text-[#d4e720] transition-colors">{t('home.footer.legal.terms')}</a></li>
-                                <li><a href="#" className="hover:text-[#d4e720] transition-colors">{t('home.footer.legal.compliance')}</a></li>
+                                <li><a href="#" className="hover:text-[#d4e720] transition-colors">Privacidade</a></li>
+                                <li><a href="#" className="hover:text-[#d4e720] transition-colors">Termos</a></li>
+                                <li><a href="#" className="hover:text-[#d4e720] transition-colors">Compliance</a></li>
                             </ul>
                         </div>
                     </div>
 
                     <div className="pt-8 border-t border-slate-200 dark:border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4">
-                        <p className="text-slate-400 font-medium text-xs">{t('home.footer.copyright')}</p>
+                        <p className="text-slate-400 font-medium text-xs">© 2026 FLASH APP. Todos os direitos reservados.</p>
                         <div className="flex gap-2 items-center text-xs font-bold text-slate-400 bg-white dark:bg-slate-800 px-3 py-1 rounded-full border border-slate-200 dark:border-slate-700">
                             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                            {t('home.footer.status')}
+                            Sistemas Operantes
                         </div>
                     </div>
                 </div>
             </footer>
+
+            <DocsModal isOpen={isDocsOpen} onClose={() => setIsDocsOpen(false)} />
         </div>
     );
 }
-
-// Add these to i18n keys manually if they were missed previously to prevent runtime errors:
-// home.nav.features: 'Recursos'
-// home.nav.process: 'Processo'
-// home.nav.specs: 'Tecnologia'
-// home.nav.contact: 'Contato'
-// home.nav.login: 'Acessar Sistema'
-// home.hero.badge: 'Enterprise System v4.0'
-// home.hero.title: 'Gestão'
-// home.hero.subtitle: 'Sem Ruído.'
-// home.hero.description: 'O <1>FLASH</1> ...'
-// home.hero.start: 'Iniciar Operação'
-// home.hero.docs: 'Ver Documentação'
-// home.demo.offline: 'Modo Offline'
-// home.demo.sync: 'Sincronização Ativa'
-// home.features.overline: 'Core System'
-// home.features.title: 'Capacidades'
-// home.features.subtitle: 'Expandidas'
-// home.features.neural.title: 'Neural Core AI'
-// home.features.neural.desc: '...'
-// home.features.offline.title: 'Offline First'
-// home.features.offline.desc: '...'
-// home.features.mesh.title: 'Global Mesh'
-// home.features.mesh.desc: '...'
-// home.features.analytics.title: 'Deep Analytics'
-// home.features.analytics.desc: '...'
-// home.developer.role: 'Engenharia de Software'
-// home.developer.name: 'Daniel de Almeida'
-// home.developer.desc: '...'
-// home.developer.manifesto.overline
-// home.developer.manifesto.title
-// home.developer.manifesto.subtitle
-// home.developer.manifesto.text
-// home.contact.overline
-// home.contact.title
-// home.contact.subtitle
-// home.contact.success.title
-// home.contact.success.desc
-// home.contact.success.reset
-// home.contact.form.name
-// home.contact.form.namePlaceholder
-// home.contact.form.company
-// home.contact.form.companyPlaceholder
-// home.contact.form.email
-// home.contact.form.emailPlaceholder
-// home.contact.form.message
-// home.contact.form.messagePlaceholder
-// home.contact.form.submit
-// home.contact.form.sending

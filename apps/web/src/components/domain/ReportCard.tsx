@@ -1,5 +1,4 @@
 import React from 'react';
-import { useTranslation } from 'react-i18next';
 import { Calendar, MessageSquare, Hash } from 'lucide-react';
 import { Card, Avatar, Badge } from '../ui';
 import { formatUrl } from '../../services/api';
@@ -33,7 +32,6 @@ export const ReportCard: React.FC<ReportCardProps> = React.memo(({
     onClick,
     actions
 }) => {
-    const { t, i18n } = useTranslation();
     const [isZoomModalOpen, setIsZoomModalOpen] = React.useState(false);
 
     return (
@@ -80,7 +78,7 @@ export const ReportCard: React.FC<ReportCardProps> = React.memo(({
                         <div className="flex items-center gap-3">
                             <div className="flex items-center gap-1.5 text-xs text-[var(--text-tertiary)] font-medium">
                                 <Calendar className="w-3.5 h-3.5" />
-                                {new Date(report.createdAt).toLocaleDateString(i18n.language, { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                                {new Date(report.createdAt).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
                             </div>
                             <div className="flex items-center gap-1 px-2 py-0.5 bg-[var(--bg-tertiary)] rounded text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wide">
                                 <Hash className="w-2.5 h-2.5 opacity-60" />
@@ -105,7 +103,7 @@ export const ReportCard: React.FC<ReportCardProps> = React.memo(({
                         <div className="inline-flex items-center gap-2 px-3 py-1 bg-purple-50 rounded-full border border-purple-100 mb-3">
                             <div className="w-1.5 h-1.5 bg-purple-500 rounded-full" />
                             <span className="text-xs font-medium text-purple-700">
-                                {t('dashboard.card.inSector')}: {report.department.name}
+                                No Setor: {report.department.name}
                             </span>
                         </div>
                     )}
@@ -114,7 +112,7 @@ export const ReportCard: React.FC<ReportCardProps> = React.memo(({
                         <div className="bg-[var(--bg-tertiary)] rounded-lg p-3 border-l-4 border-[var(--accent-primary)] mb-2">
                             <div className="flex items-center gap-1.5 mb-1">
                                 <MessageSquare className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
-                                <span className="text-xs font-bold text-[var(--text-secondary)] uppercase">{t('dashboard.card.supervisor')}</span>
+                                <span className="text-xs font-bold text-[var(--text-secondary)] uppercase">Supervisor</span>
                             </div>
                             <p className="text-sm text-[var(--text-primary)] leading-normal line-clamp-2">
                                 {report.feedback}

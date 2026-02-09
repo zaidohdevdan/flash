@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
 import { AxiosError } from 'axios';
 import {
     User,
@@ -39,7 +38,6 @@ interface AdminUser {
 
 const GeneralSettings = () => {
     const { user, updateUser } = useAuth();
-    const { t, i18n } = useTranslation();
     const [displayName, setDisplayName] = useState(user?.name || '');
     const [isSaving, setIsSaving] = useState(false);
 
@@ -57,32 +55,24 @@ const GeneralSettings = () => {
                 updateUser({ ...user, name: displayName });
             }
 
-            toast.success(t('settings.general.success'));
+            toast.success('Perfil atualizado com sucesso!');
         } catch (error) {
             console.error(error);
-            toast.error(t('settings.general.error'));
+            toast.error('Ocorreu um erro ao atualizar o perfil.');
         } finally {
             setIsSaving(false);
-        }
-    };
-
-    const handleLanguageChange = (lang: string) => {
-        i18n.changeLanguage(lang);
-        // Only update user specific setting
-        if (user?.id) {
-            localStorage.setItem(`settings_${user.id}_language`, lang);
         }
     };
 
     return (
         <div className="space-y-6 animate-in">
             <div>
-                <h3 className="text-lg font-bold text-[var(--text-primary)]">{t('settings.general.title')}</h3>
-                <p className="text-sm text-[var(--text-tertiary)]">{t('settings.general.description')}</p>
+                <h3 className="text-lg font-bold text-[var(--text-primary)]">Perfil Geral</h3>
+                <p className="text-sm text-[var(--text-tertiary)]">Gerencie suas informações básicas de identificação na plataforma.</p>
             </div>
             <form onSubmit={handleSave} className="bg-[var(--bg-primary)] border border-[var(--border-subtle)] rounded-2xl p-6 space-y-6">
                 <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold text-[var(--text-tertiary)] uppercase tracking-wider">{t('settings.general.displayName')}</label>
+                    <label className="text-xs font-bold text-[var(--text-tertiary)] uppercase tracking-wider">Nome de Exibição</label>
                     <input
                         type="text"
                         value={displayName}
@@ -92,18 +82,6 @@ const GeneralSettings = () => {
                         required
                     />
                 </div>
-                <div className="flex flex-col gap-1.5">
-                    <label htmlFor="language-select" className="text-xs font-bold text-[var(--text-tertiary)] uppercase tracking-wider">{t('settings.general.language')}</label>
-                    <select
-                        id="language-select"
-                        value={i18n.language}
-                        onChange={e => handleLanguageChange(e.target.value)}
-                        className="p-3 bg-[var(--bg-secondary)] rounded-xl border border-[var(--border-subtle)] text-[var(--text-primary)] focus:ring-1 focus:ring-[var(--accent-primary)] outline-none"
-                    >
-                        <option value="pt">Português (Brasil)</option>
-                        <option value="en">English (US)</option>
-                    </select>
-                </div>
 
                 <div className="pt-6 border-t border-[var(--border-subtle)] flex justify-end">
                     <button
@@ -112,7 +90,7 @@ const GeneralSettings = () => {
                         className="flex items-center gap-2 px-6 py-2.5 bg-[var(--accent-primary)] text-[var(--accent-text)] rounded-xl font-bold text-sm hover:brightness-110 active:scale-95 transition-all disabled:opacity-50"
                     >
                         {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                        {isSaving ? t('settings.general.saving') : t('settings.general.save')}
+                        {isSaving ? 'Salvando...' : 'Salvar Alterações'}
                     </button>
                 </div>
             </form>
@@ -122,7 +100,6 @@ const GeneralSettings = () => {
 
 const AppearanceSettings = () => {
     const { user } = useAuth();
-    const { t } = useTranslation();
     const [theme, setTheme] = useState<Theme>(() => {
         if (user?.id) {
             return (localStorage.getItem(`settings_${user.id}_theme`) as Theme) || 'system';
@@ -169,20 +146,22 @@ const AppearanceSettings = () => {
     return (
         <div className="space-y-6 animate-in">
             <div>
-                <h3 className="text-lg font-bold text-[var(--text-primary)]">{t('settings.appearance.title')}</h3>
-                <p className="text-sm text-[var(--text-tertiary)]">{t('settings.appearance.description')}</p>
+                <h3 className="text-lg font-bold text-[var(--text-primary)]">Aparência da Interface</h3>
+                <p className="text-sm text-[var(--text-tertiary)]">Personalize como o FLASH aparece no seu dispositivo.</p>
             </div>
 
             <div className="bg-[var(--bg-primary)] border border-[var(--border-subtle)] rounded-2xl p-6 space-y-6">
                 <div className="space-y-4">
-                    <label className="text-xs font-bold text-[var(--text-tertiary)] uppercase tracking-wider">{t('settings.appearance.theme')}</label>
+                    <label className="text-xs font-bold text-[var(--text-tertiary)] uppercase tracking-wider">Tema do Sistema</label>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         {[
-                            { id: 'light', label: t('settings.appearance.themes.light'), icon: Sun },
-                            { id: 'dark', label: t('settings.appearance.themes.dark'), icon: Moon },
-                            { id: 'system', label: t('settings.appearance.themes.system'), icon: Monitor },
+                            { id: 'light', label: "Claro", icon: Sun },
+                            { id: 'dark', label: "Escuro", icon: Moon },
+                            { id: 'system', label: "Sistema", icon: Monitor },
                         ].map((tItem) => (
                             <button
+                                title={tItem.label}
+                                type='button'
                                 key={tItem.id}
                                 onClick={() => applyTheme(tItem.id as Theme)}
                                 className={`
@@ -202,19 +181,23 @@ const AppearanceSettings = () => {
                 </div>
 
                 <div className="pt-6 border-t border-[var(--border-subtle)] space-y-4">
-                    <label className="text-xs font-bold text-[var(--text-tertiary)] uppercase tracking-wider">{t('settings.appearance.density')}</label>
+                    <label className="text-xs font-bold text-[var(--text-tertiary)] uppercase tracking-wider">Densidade da Interface</label>
                     <div className="flex bg-[var(--bg-tertiary)] p-1 rounded-lg w-fit">
                         <button
+                            title='Confortável'
+                            type='button'
                             onClick={() => applyDensity('comfortable')}
                             className={`px-4 py-2 rounded-md text-xs font-bold uppercase tracking-wider transition-all ${density === 'comfortable' ? 'bg-white shadow-sm text-[var(--text-primary)]' : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'}`}
                         >
-                            {t('settings.appearance.densities.comfortable')}
+                            Confortável
                         </button>
                         <button
+                            title='Compacto'
+                            type='button'
                             onClick={() => applyDensity('compact')}
                             className={`px-4 py-2 rounded-md text-xs font-bold uppercase tracking-wider transition-all ${density === 'compact' ? 'bg-white shadow-sm text-[var(--text-primary)]' : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'}`}
                         >
-                            {t('settings.appearance.densities.compact')}
+                            Compacto
                         </button>
                     </div>
                 </div>
@@ -224,12 +207,11 @@ const AppearanceSettings = () => {
 };
 
 const NotificationSettings = () => {
-    const { t } = useTranslation();
     return (
         <div className="space-y-6 animate-in">
             <div>
-                <h3 className="text-lg font-bold text-[var(--text-primary)]">{t('settings.notifications.title')}</h3>
-                <p className="text-sm text-[var(--text-tertiary)]">{t('settings.notifications.description')}</p>
+                <h3 className="text-lg font-bold text-[var(--text-primary)]">Notificações e Alertas</h3>
+                <p className="text-sm text-[var(--text-tertiary)]">Gerencie como e quando você deseja receber alertas do sistema.</p>
             </div>
 
             <div className="bg-[var(--bg-primary)] border border-[var(--border-subtle)] rounded-2xl p-6 space-y-6">
@@ -238,8 +220,8 @@ const NotificationSettings = () => {
                         <div className="flex items-center gap-3">
                             <Volume2 className="w-5 h-5 text-[var(--text-tertiary)]" />
                             <div>
-                                <p className="text-sm font-bold text-[var(--text-primary)]">{t('settings.notifications.sound')}</p>
-                                <p className="text-[10px] text-[var(--text-tertiary)]">{t('settings.notifications.soundDesc')}</p>
+                                <p className="text-sm font-bold text-[var(--text-primary)]">Efeitos Sonoros</p>
+                                <p className="text-[10px] text-[var(--text-tertiary)]">Reproduzir sons ao receber novas mensagens ou atualizações.</p>
                             </div>
                         </div>
                         <input type="checkbox" title="Ativar sons" className="w-5 h-5 accent-[var(--accent-primary)] cursor-pointer" defaultChecked />
@@ -249,8 +231,8 @@ const NotificationSettings = () => {
                         <div className="flex items-center gap-3">
                             <Monitor className="w-5 h-5 text-[var(--text-tertiary)]" />
                             <div>
-                                <p className="text-sm font-bold text-[var(--text-primary)]">{t('settings.notifications.desktop')}</p>
-                                <p className="text-[10px] text-[var(--text-tertiary)]">{t('settings.notifications.desktopDesc')}</p>
+                                <p className="text-sm font-bold text-[var(--text-primary)]">Notificações de Desktop</p>
+                                <p className="text-[10px] text-[var(--text-tertiary)]">Exibir avisos no navegador mesmo quando o FLASH está em segundo plano.</p>
                             </div>
                         </div>
                         <input type="checkbox" title="Ativar notificações de desktop" className="w-5 h-5 accent-[var(--accent-primary)] cursor-pointer" defaultChecked />
@@ -262,7 +244,6 @@ const NotificationSettings = () => {
 };
 
 const SecuritySettings = () => {
-    const { t } = useTranslation();
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -271,19 +252,19 @@ const SecuritySettings = () => {
     const handlePasswordChange = async (e: React.FormEvent) => {
         e.preventDefault();
         if (newPassword !== confirmPassword) {
-            return toast.error(t('settings.security.mismatch'));
+            return toast.error('As senhas não coincidem.');
         }
 
         setIsLoading(true);
         try {
             await api.post('/profile/change-password', { currentPassword, newPassword });
-            toast.success(t('settings.security.success'));
+            toast.success('Senha alterada com sucesso!');
             setCurrentPassword('');
             setNewPassword('');
             setConfirmPassword('');
         } catch (error) {
             const err = error as AxiosError<{ error: string }>;
-            const message = err.response?.data?.error || t('settings.security.error');
+            const message = err.response?.data?.error || 'Ocorreu um erro ao alterar a senha.';
             toast.error(message);
         } finally {
             setIsLoading(false);
@@ -293,16 +274,16 @@ const SecuritySettings = () => {
     return (
         <div className="space-y-6 animate-in">
             <div>
-                <h3 className="text-lg font-bold text-[var(--text-primary)]">{t('settings.security.title')}</h3>
-                <p className="text-sm text-[var(--text-tertiary)]">{t('settings.security.description')}</p>
+                <h3 className="text-lg font-bold text-[var(--text-primary)]">Segurança</h3>
+                <p className="text-sm text-[var(--text-tertiary)]">Gerencie suas credenciais e mantenha sua conta protegida.</p>
             </div>
 
             <form onSubmit={handlePasswordChange} className="bg-[var(--bg-primary)] border border-[var(--border-subtle)] rounded-2xl p-6 space-y-6">
                 <div className="space-y-4">
-                    <label className="text-xs font-bold text-[var(--text-tertiary)] uppercase tracking-wider">{t('settings.security.changePassword')}</label>
+                    <label className="text-xs font-bold text-[var(--text-tertiary)] uppercase tracking-wider">Alterar Senha</label>
                     <div className="space-y-4">
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-black text-[var(--text-tertiary)] uppercase tracking-widest ml-1">{t('settings.security.currentPassword')}</label>
+                            <label className="text-[10px] font-black text-[var(--text-tertiary)] uppercase tracking-widest ml-1">Senha Atual</label>
                             <input
                                 type="password"
                                 value={currentPassword}
@@ -314,7 +295,7 @@ const SecuritySettings = () => {
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="space-y-1.5">
-                                <label className="text-[10px] font-black text-[var(--text-tertiary)] uppercase tracking-widest ml-1">{t('settings.security.newPassword')}</label>
+                                <label className="text-[10px] font-black text-[var(--text-tertiary)] uppercase tracking-widest ml-1">Nova Senha</label>
                                 <input
                                     type="password"
                                     value={newPassword}
@@ -325,7 +306,7 @@ const SecuritySettings = () => {
                                 />
                             </div>
                             <div className="space-y-1.5">
-                                <label className="text-[10px] font-black text-[var(--text-tertiary)] uppercase tracking-widest ml-1">{t('settings.security.confirmPassword')}</label>
+                                <label className="text-[10px] font-black text-[var(--text-tertiary)] uppercase tracking-widest ml-1">Confirmar Nova Senha</label>
                                 <input
                                     type="password"
                                     value={confirmPassword}
@@ -346,7 +327,7 @@ const SecuritySettings = () => {
                         className="flex items-center gap-2 px-6 py-2.5 bg-[var(--accent-primary)] text-[var(--accent-text)] rounded-xl font-bold text-sm hover:brightness-110 active:scale-95 transition-all disabled:opacity-50"
                     >
                         {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <KeyRound className="w-4 h-4" />}
-                        {t('settings.security.save')}
+                        Atualizar Senha
                     </button>
                 </div>
             </form>
@@ -355,7 +336,6 @@ const SecuritySettings = () => {
 };
 
 const OfflineSettings = () => {
-    const { t } = useTranslation();
     const [stats, setStats] = useState({
         pendingReports: 0,
         chatMessages: 0,
@@ -375,7 +355,7 @@ const OfflineSettings = () => {
     }, []);
 
     const handleClearCache = async () => {
-        if (!window.confirm(t('settings.offline.confirmClear'))) return;
+        if (!window.confirm('Tem certeza que deseja limpar todos os dados locais? Esta ação não pode ser desfeita.')) return;
 
         setIsLoading(true);
         try {
@@ -384,11 +364,11 @@ const OfflineSettings = () => {
             await db.pendingReports.where('status').equals('failed').delete();
             await db.pendingReports.clear();
 
-            toast.success(t('settings.offline.success'));
+            toast.success('Dados locais limpos com sucesso!');
             loadStats();
         } catch (error) {
             console.error(error);
-            toast.error(t('settings.offline.error'));
+            toast.error('Ocorreu um erro ao limpar os dados locais.');
         } finally {
             setIsLoading(false);
         }
@@ -397,31 +377,31 @@ const OfflineSettings = () => {
     return (
         <div className="space-y-6 animate-in">
             <div>
-                <h3 className="text-lg font-bold text-[var(--text-primary)]">{t('settings.offline.title')}</h3>
-                <p className="text-sm text-[var(--text-tertiary)]">{t('settings.offline.description')}</p>
+                <h3 className="text-lg font-bold text-[var(--text-primary)]">Sincronização e Offline</h3>
+                <p className="text-sm text-[var(--text-tertiary)]">Gerencie o armazenamento local e a persistência de dados no dispositivo.</p>
             </div>
 
             <div className="bg-[var(--bg-primary)] border border-[var(--border-subtle)] rounded-2xl p-6 space-y-6">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div className="p-4 bg-[var(--bg-secondary)] rounded-xl border border-[var(--border-subtle)] flex flex-col items-center gap-2">
                         <span className="text-3xl font-black text-[var(--text-primary)]">{stats.chatMessages}</span>
-                        <span className="text-xs font-bold text-[var(--text-tertiary)] uppercase tracking-wider text-center">{t('settings.offline.messages')}</span>
+                        <span className="text-xs font-bold text-[var(--text-tertiary)] uppercase tracking-wider text-center">Mensagens</span>
                     </div>
                     <div className="p-4 bg-[var(--bg-secondary)] rounded-xl border border-[var(--border-subtle)] flex flex-col items-center gap-2">
                         <span className="text-3xl font-black text-[var(--text-primary)]">{stats.pendingReports}</span>
-                        <span className="text-xs font-bold text-[var(--text-tertiary)] uppercase tracking-wider text-center">{t('settings.offline.reports')}</span>
+                        <span className="text-xs font-bold text-[var(--text-tertiary)] uppercase tracking-wider text-center">Relatórios</span>
                     </div>
                     <div className="p-4 bg-[var(--bg-secondary)] rounded-xl border border-[var(--border-subtle)] flex flex-col items-center gap-2">
                         <span className="text-3xl font-black text-[var(--text-primary)]">{stats.notifications}</span>
-                        <span className="text-xs font-bold text-[var(--text-tertiary)] uppercase tracking-wider text-center">{t('settings.offline.notifications')}</span>
+                        <span className="text-xs font-bold text-[var(--text-tertiary)] uppercase tracking-wider text-center">Alertas</span>
                     </div>
                 </div>
 
                 <div className="pt-6 border-t border-[var(--border-subtle)] space-y-4">
                     <div className="flex items-center justify-between">
                         <div>
-                            <h4 className="text-sm font-bold text-[var(--text-primary)]">{t('settings.offline.clearData')}</h4>
-                            <p className="text-[10px] text-[var(--text-tertiary)]">{t('settings.offline.clearDataDesc')}</p>
+                            <h4 className="text-sm font-bold text-[var(--text-primary)]">Limpar Cache Local</h4>
+                            <p className="text-[10px] text-[var(--text-tertiary)]">Remove todas as mensagens e relatórios armazenados neste dispositivo.</p>
                         </div>
                         <button
                             onClick={handleClearCache}
@@ -429,7 +409,7 @@ const OfflineSettings = () => {
                             className="flex items-center gap-2 px-4 py-2 bg-red-500/10 text-red-500 hover:bg-red-500/20 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors disabled:opacity-50"
                         >
                             {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-                            {t('settings.offline.clearButton')}
+                            Limpar Tudo
                         </button>
                     </div>
                 </div>
@@ -439,7 +419,6 @@ const OfflineSettings = () => {
 };
 
 const AdminSettings = () => {
-    const { t } = useTranslation();
     const [users, setUsers] = useState<AdminUser[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
@@ -464,15 +443,15 @@ const AdminSettings = () => {
     }, [loadUsers]);
 
     const handleDeleteUser = async (userId: string) => {
-        if (!window.confirm(t('settings.admin.confirmDelete'))) return;
+        if (!window.confirm('Tem certeza que deseja excluir este usuário? Esta ação é irreversível.')) return;
 
         try {
             await api.delete(`/users/${userId}`);
-            toast.success(t('settings.admin.deleteSuccess'));
+            toast.success('Usuário removido com sucesso!');
             loadUsers();
         } catch (error) {
             const err = error as AxiosError<{ error: string }>;
-            const message = err.response?.data?.error || t('settings.admin.deleteError');
+            const message = err.response?.data?.error || 'Erro ao excluir usuário.';
             toast.error(message);
         }
     };
@@ -480,39 +459,19 @@ const AdminSettings = () => {
     return (
         <div className="space-y-6 animate-in">
             <div>
-                <h3 className="text-lg font-bold text-[var(--text-primary)]">{t('settings.admin.title')}</h3>
-                <p className="text-sm text-[var(--text-tertiary)]">{t('settings.admin.description')}</p>
+                <h3 className="text-lg font-bold text-[var(--text-primary)]">Administrativo</h3>
+                <p className="text-sm text-[var(--text-tertiary)]">Gestão de usuários e permissões do sistema.</p>
             </div>
 
             <div className="bg-[var(--bg-primary)] border border-[var(--border-subtle)] rounded-2xl p-6 space-y-6">
-                <div className="space-y-4">
-                    <h4 className="text-sm font-bold text-[var(--text-primary)] mb-4">{t('settings.admin.systemCustomization')}</h4>
-                    <div className="flex flex-col gap-1.5 max-w-xs">
-                        <label className="text-xs font-bold text-[var(--text-tertiary)] uppercase tracking-wider">{t('settings.admin.systemLanguage')}</label>
-                        <select
-                            title={t('settings.admin.systemLanguage')}
-                            value={localStorage.getItem('language') || 'pt'}
-                            onChange={(e) => {
-                                const lang = e.target.value;
-                                localStorage.setItem('language', lang);
-                                toast.success(t('settings.admin.systemLanguageSuccess'));
-                            }}
-                            className="p-3 bg-[var(--bg-secondary)] rounded-xl border border-[var(--border-subtle)] text-[var(--text-primary)] focus:ring-1 focus:ring-[var(--accent-primary)] outline-none"
-                        >
-                            <option value="pt">Português (Brasil)</option>
-                            <option value="en">English (US)</option>
-                        </select>
-                        <p className="text-[10px] text-[var(--text-tertiary)]">{t('settings.admin.systemLanguageDesc')}</p>
-                    </div>
-                </div>
 
                 <div className="pt-6 border-t border-[var(--border-subtle)] space-y-4">
-                    <h4 className="text-sm font-bold text-[var(--text-primary)]">{t('settings.admin.users')}</h4>
+                    <h4 className="text-sm font-bold text-[var(--text-primary)]">Usuários do Sistema</h4>
 
                     <div className="flex gap-4">
                         <input
                             type="text"
-                            placeholder={t('settings.admin.searchPlaceholder')}
+                            placeholder="Buscar por nome ou e-mail..."
                             value={searchTerm}
                             onChange={e => setSearchTerm(e.target.value)}
                             className="flex-1 p-3 bg-[var(--bg-secondary)] rounded-xl border border-[var(--border-subtle)] text-[var(--text-primary)] outline-none focus:ring-1 focus:ring-[var(--accent-primary)] text-sm"
@@ -535,9 +494,10 @@ const AdminSettings = () => {
                                         </div>
                                     </div>
                                     <button
+                                        title='Remover Usuário'
+                                        type='button'
                                         onClick={() => handleDeleteUser(u.id)}
                                         className="p-2 text-red-500 hover:bg-red-500/10 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
-                                        title="Remover Usuário"
                                     >
                                         <Trash2 className="w-4 h-4" />
                                     </button>
@@ -545,7 +505,7 @@ const AdminSettings = () => {
                             ))
                         )}
                         {!isLoading && users.length === 0 && (
-                            <p className="text-center text-sm text-[var(--text-tertiary)] py-8">{t('settings.admin.noUsers')}</p>
+                            <p className="text-center text-sm text-[var(--text-tertiary)] py-8">Nenhum usuário encontrado.</p>
                         )}
                     </div>
                 </div>
@@ -560,19 +520,18 @@ type TabType = 'general' | 'notifications' | 'appearance' | 'security' | 'offlin
 
 export default function Settings() {
     const { user, signOut } = useAuth();
-    const { t } = useTranslation();
     const [activeTab, setActiveTab] = useState<TabType>('general');
 
     const tabs = [
-        { id: 'general', label: t('settings.tabs.general'), icon: User },
-        { id: 'notifications', label: t('settings.tabs.notifications'), icon: Bell },
-        { id: 'appearance', label: t('settings.tabs.appearance'), icon: Monitor },
-        { id: 'security', label: t('settings.tabs.security'), icon: Lock },
-        { id: 'offline', label: t('settings.tabs.offline'), icon: Database },
+        { id: 'general', label: "Geral", icon: User },
+        { id: 'notifications', label: "Notificações", icon: Bell },
+        { id: 'appearance', label: "Aparência", icon: Monitor },
+        { id: 'security', label: "Segurança", icon: Lock },
+        { id: 'offline', label: "Offline", icon: Database },
     ];
 
     if (user?.role === 'ADMIN') {
-        tabs.push({ id: 'admin', label: t('settings.tabs.admin'), icon: Users });
+        tabs.push({ id: 'admin', label: "Administrativo", icon: Users });
     }
 
     const renderContent = () => {
@@ -604,8 +563,8 @@ export default function Settings() {
         >
             <div className="max-w-5xl mx-auto py-8 px-4">
                 <div className="mb-10">
-                    <h2 className="text-3xl font-black text-[var(--text-primary)] tracking-tighter">{t('settings.title')}</h2>
-                    <p className="text-[var(--text-secondary)] font-medium">{t('settings.subtitle')}</p>
+                    <h2 className="text-3xl font-black text-[var(--text-primary)] tracking-tighter">Configurações</h2>
+                    <p className="text-[var(--text-secondary)] font-medium">Personalize sua experiência e gerencie sua conta.</p>
                 </div>
 
                 <div className="flex flex-col lg:flex-row gap-8">
@@ -613,6 +572,8 @@ export default function Settings() {
                     <aside className="w-full lg:w-64 space-y-1">
                         {tabs.map(tab => (
                             <button
+                                title={tab.label}
+                                type='button'
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id as TabType)}
                                 className={`

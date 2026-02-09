@@ -1,5 +1,4 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
 import { JitsiMeeting } from '@jitsi/react-sdk';
 import { X, Zap, CheckCircle2 } from 'lucide-react';
 
@@ -20,7 +19,6 @@ export const ConferenceModal: React.FC<ConferenceModalProps> = ({
     roomName,
     userName = 'Operador Flash'
 }) => {
-    const { t } = useTranslation();
     const [isTerminated, setIsTerminated] = useState(false);
     const terminateTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const userIntendsToLeaveRef = useRef(false);
@@ -95,15 +93,15 @@ export const ConferenceModal: React.FC<ConferenceModalProps> = ({
                 <div className="px-6 py-4 bg-[var(--bg-primary)] border-b border-[var(--border-subtle)] flex justify-between items-center shrink-0">
                     <div className="flex items-center gap-3">
                         <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                        <h2 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-widest">{t('dashboard.conference.title')}</h2>
-                        <span className="text-[10px] text-[var(--text-tertiary)] font-bold bg-[var(--bg-secondary)] px-2 py-1 rounded-md uppercase border border-[var(--border-subtle)]">{t('dashboard.conference.live')}</span>
+                        <h2 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-widest">War Room Operacional</h2>
+                        <span className="text-[10px] text-[var(--text-tertiary)] font-bold bg-[var(--bg-secondary)] px-2 py-1 rounded-md uppercase border border-[var(--border-subtle)]">AO VIVO</span>
                     </div>
 
                     <button
                         type="button"
                         onClick={onClose}
                         className="p-2 hover:bg-[var(--bg-secondary)] rounded-xl transition-colors text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
-                        title={t('dashboard.conference.leaveTitle')}
+                        title="Sair da Sala"
                     >
                         <X className="w-6 h-6" />
                     </button>
@@ -174,10 +172,10 @@ export const ConferenceModal: React.FC<ConferenceModalProps> = ({
                             </div>
 
                             <h3 className="text-2xl font-black text-[var(--text-primary)] uppercase tracking-tighter mb-2">
-                                {t('dashboard.conference.endedTitle')}
+                                Conferência Encerrada
                             </h3>
                             <p className="text-[var(--text-tertiary)] font-bold uppercase tracking-widest text-[10px] mb-8 max-w-xs">
-                                {t('dashboard.conference.endedDesc')}
+                                Todos os registros foram salvos e a sala foi liberada.
                             </p>
 
                             <button
@@ -185,7 +183,7 @@ export const ConferenceModal: React.FC<ConferenceModalProps> = ({
                                 onClick={onClose}
                                 className="px-8 py-3 bg-[var(--text-primary)] text-white rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-black/90 transition-all active:scale-95 shadow-xl shadow-black/5"
                             >
-                                {t('dashboard.conference.leave')}
+                                Sair da Sala
                             </button>
 
                             {/* Background Decorations */}

@@ -1,5 +1,4 @@
 import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
@@ -45,24 +44,23 @@ interface Subordinate {
 
 
 export function Dashboard() {
-    const { t } = useTranslation();
     const navigate = useNavigate();
     const { user, signOut, updateUser } = useAuth();
 
     const KPI_CONFIGS = useMemo(() => [
-        { label: t('dashboard.kpi.received'), status: 'SENT', icon: AlertCircle, color: 'blue' as const },
-        { label: t('dashboard.kpi.inReview'), status: 'IN_REVIEW', icon: Clock, color: 'purple' as const },
-        { label: t('dashboard.kpi.forwarded'), status: 'FORWARDED', icon: Folder, color: 'orange' as const },
-        { label: t('dashboard.kpi.finished'), status: 'RESOLVED', icon: CheckCircle, color: 'emerald' as const },
-    ], [t]);
+        { label: 'Recebidos', status: 'SENT', icon: AlertCircle, color: 'blue' as const },
+        { label: 'Em Análise', status: 'IN_REVIEW', icon: Clock, color: 'purple' as const },
+        { label: 'Encaminhados', status: 'FORWARDED', icon: Folder, color: 'orange' as const },
+        { label: 'Finalizados', status: 'RESOLVED', icon: CheckCircle, color: 'emerald' as const },
+    ], []);
 
     const FILTER_OPTIONS = useMemo(() => [
-        { id: '', label: t('dashboard.filters.all') },
-        { id: 'SENT', label: t('dashboard.filters.sent') },
-        { id: 'IN_REVIEW', label: t('dashboard.filters.inReview') },
-        { id: 'FORWARDED', label: t('dashboard.filters.forwarded') },
-        { id: 'RESOLVED', label: t('dashboard.filters.resolved') }
-    ], [t]);
+        { id: '', label: 'Todos os Status' },
+        { id: 'SENT', label: 'Enviados' },
+        { id: 'IN_REVIEW', label: 'Em Análise' },
+        { id: 'FORWARDED', label: 'Encaminhados' },
+        { id: 'RESOLVED', label: 'Resolvidos' }
+    ], []);
     const [searchParams, setSearchParams] = useSearchParams();
     const activeChatId = searchParams.get('chat');
 
@@ -131,7 +129,7 @@ export function Dashboard() {
         user: socketUser,
         onNotification: (data) => {
             if (activeChatId !== data.from) {
-                toast(`${t('dashboard.notifications.unreadChat', { count: 1 })}: ${data.text} `, {
+                toast(`Nova mensagem: ${data.text} `, {
                     icon: '💬',
                     duration: 5000,
                     style: {
@@ -246,7 +244,7 @@ export function Dashboard() {
             });
 
             if (unreadCount > 0) {
-                toast(t('dashboard.notifications.unread', { count: unreadCount }), {
+                toast(`Você tem ${unreadCount} ${unreadCount === 1 ? 'notificação pendente' : 'notificações pendentes'}`, {
                     icon: '🔔',
                     duration: 4000
                 });
@@ -257,7 +255,7 @@ export function Dashboard() {
             const unreadChatCount = chatRes.data.count;
 
             if (unreadChatCount > 0) {
-                toast(t('dashboard.notifications.unreadChat', { count: unreadChatCount }), {
+                toast(`Você tem ${unreadChatCount} ${unreadChatCount === 1 ? 'mensagem não lida' : 'mensagens não lidas'} no chat`, {
                     icon: '💬',
                     duration: 5000,
                     style: {
@@ -272,7 +270,7 @@ export function Dashboard() {
         } catch {
             console.error('Erro ao buscar notificações');
         }
-    }, [t]);
+    }, []);
 
     // Update reports state
     useEffect(() => {
@@ -351,7 +349,7 @@ export function Dashboard() {
             });
 
             updateUser(response.data);
-            toast.success(t('dashboard.notifications.profileUpdated'));
+            toast.success('Perfil atualizado com sucesso!');
             setIsProfileOpen(false);
             setProfileAvatar(null);
         } catch {
@@ -467,8 +465,8 @@ export function Dashboard() {
             onSearchChange={setSearchTerm}
         >
             <DashboardHero
-                title={t('dashboard.title')}
-                subtitle={t('dashboard.subtitle')}
+                title="Painel de Controle"
+                subtitle="Monitore e coordene as operações de campo em tempo real."
                 stats={stats}
                 kpiConfigs={KPI_CONFIGS}
                 statusFilter={statusFilter}
@@ -487,16 +485,20 @@ export function Dashboard() {
             >
                 <div className="flex bg-[var(--bg-tertiary)] p-1 rounded-lg border border-[var(--border-subtle)]">
                     <button
+                        title='Lista'
+                        type='button'
                         onClick={() => setViewMode('list')}
                         className={`px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider transition-all ${viewMode === 'list' ? 'bg-white text-[var(--text-primary)] shadow-sm' : 'text-[var(--text-tertiary)] hover:bg-[var(--bg-primary)]'}`}
                     >
-                        {t('dashboard.actions.list')}
+                        Lista
                     </button>
                     <button
+                        title='Mapa'
+                        type='button'
                         onClick={() => setViewMode('map')}
                         className={`px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider transition-all ${viewMode === 'map' ? 'bg-white text-[var(--text-primary)] shadow-sm' : 'text-[var(--text-tertiary)] hover:bg-[var(--bg-primary)]'}`}
                     >
-                        {t('dashboard.actions.map')}
+                        Mapa
                     </button>
                 </div>
             </DashboardHero>
@@ -525,7 +527,7 @@ export function Dashboard() {
                                             className="bg-[var(--bg-tertiary)] hover:bg-[var(--bg-primary)] border border-[var(--border-medium)]"
                                             onClick={() => { setAnalyzingReport(report); setTargetStatus('FORWARDED'); }}
                                         >
-                                            {t('dashboard.actions.process')}
+                                            Analisar
                                         </Button>
                                     )}
                                     <Button variant="ghost" size="sm" onClick={() => { /* setSelectedReport(report) */ }}>
@@ -563,7 +565,7 @@ export function Dashboard() {
                 selectedDeptId={selectedDeptId}
                 setSelectedDeptId={setSelectedDeptId}
                 departments={departments}
-                title={t('dashboard.analysis.title')}
+                title="Análise de Relatório"
             />
 
             {/* <ReportHistoryModal

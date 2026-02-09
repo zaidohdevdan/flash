@@ -1,5 +1,4 @@
 import React from 'react';
-import { useTranslation } from 'react-i18next';
 import { Modal, Button, TextArea } from '../../ui';
 
 interface Department {
@@ -34,50 +33,49 @@ export const AnalysisModal: React.FC<AnalysisModalProps> = ({
     departments,
     title
 }) => {
-    const { t } = useTranslation();
-    const modalTitle = title || t('dashboard.analysis.title');
+    const modalTitle = title || "Análise de Relatório";
 
     return (
         <Modal
             isOpen={isOpen}
             onClose={onClose}
             title={modalTitle}
-            subtitle={t('dashboard.analysisModal.subtitle')}
+            subtitle="Defina o próximo passo para este incidente"
             maxWidth="lg"
             footer={
                 <>
                     <Button variant="secondary" onClick={onClose}>
-                        {t('dashboard.analysisModal.cancel')}
+                        Cancelar
                     </Button>
                     <Button
                         variant={targetStatus === 'RESOLVED' ? 'success' : 'primary'}
                         onClick={onConfirm}
                     >
                         {targetStatus === 'RESOLVED'
-                            ? t('dashboard.analysisModal.confirm.resolve')
+                            ? 'Finalizar Relatório'
                             : targetStatus === 'FORWARDED'
-                                ? t('dashboard.analysisModal.confirm.forward')
-                                : t('dashboard.analysisModal.confirm.update')}
+                                ? 'Encaminhar para Setor'
+                                : 'Atualizar Status'}
                     </Button>
                 </>
             }
         >
             <div className="space-y-6 py-2">
                 <TextArea
-                    label={t('dashboard.analysisModal.feedbackLabel')}
+                    label="Parecer do Supervisor"
                     value={feedback}
                     onChange={e => setFeedback(e.target.value)}
-                    placeholder={t('dashboard.analysisModal.feedbackPlaceholder')}
+                    placeholder="Descreva a análise ou instruções para este reporte..."
                     rows={5}
                 />
 
                 <div className="space-y-4">
-                    <label className="text-[10px] font-black text-[var(--text-tertiary)] uppercase tracking-widest ml-1">{t('dashboard.analysisModal.nextStep')}</label>
+                    <label className="text-[10px] font-black text-[var(--text-tertiary)] uppercase tracking-widest ml-1">PRÓXIMA ETAPA</label>
                     <div className="flex items-center justify-between p-1 bg-[var(--bg-secondary)] rounded-2xl border border-[var(--border-subtle)]">
                         {[
-                            { id: 'IN_REVIEW', label: t('dashboard.analysisModal.status.review'), color: 'text-blue-600' },
-                            { id: 'FORWARDED', label: t('dashboard.analysisModal.status.department'), color: 'text-purple-600' },
-                            { id: 'RESOLVED', label: t('dashboard.analysisModal.status.resolved'), color: 'text-emerald-600' }
+                            { id: 'IN_REVIEW', label: 'EM ANÁLISE', color: 'text-blue-600' },
+                            { id: 'FORWARDED', label: 'ENCAMINHAR', color: 'text-purple-600' },
+                            { id: 'RESOLVED', label: 'RESOLVIDO', color: 'text-emerald-600' }
                         ].map(opt => (
                             <button
                                 type="button"
@@ -93,15 +91,15 @@ export const AnalysisModal: React.FC<AnalysisModalProps> = ({
                     {targetStatus === 'FORWARDED' && (
                         <div className="space-y-4 animate-in slide-in-from-top-4 duration-500">
                             <div className="space-y-2">
-                                <label className="text-[10px] font-black text-[var(--text-tertiary)] uppercase tracking-widest ml-1">{t('dashboard.analysisModal.forwardTo')}</label>
+                                <label className="text-[10px] font-black text-[var(--text-tertiary)] uppercase tracking-widest ml-1">Encaminhar para</label>
                                 <select
                                     value={selectedDeptId}
                                     onChange={e => setSelectedDeptId(e.target.value)}
                                     className="w-full px-5 py-3.5 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-2xl outline-none focus:bg-[var(--bg-primary)] focus:border-[var(--accent-primary)] transition-all font-bold text-[var(--text-primary)] appearance-none text-xs"
-                                    aria-label={t('dashboard.analysisModal.forwardTo')}
-                                    title={t('dashboard.analysisModal.forwardTo')}
+                                    aria-label="Encaminhar para"
+                                    title="Encaminhar para"
                                 >
-                                    <option value="">{t('dashboard.analysisModal.selectDest')}</option>
+                                    <option value="">Selecione o destino</option>
                                     {departments.map(d => (
                                         <option key={d.id} value={d.id}>{d.name}</option>
                                     ))}

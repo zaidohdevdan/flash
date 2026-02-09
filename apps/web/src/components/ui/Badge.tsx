@@ -1,4 +1,4 @@
-import { useTranslation } from 'react-i18next';
+import React from 'react';
 
 /** Tipos de status suportados pelo Badge. */
 export type BadgeStatus = 'SENT' | 'IN_REVIEW' | 'FORWARDED' | 'RESOLVED' | 'ARCHIVED' | 'default';
@@ -22,8 +22,6 @@ export interface BadgeProps {
  * Utiliza cores suaves e tipografia técnica.
  */
 export const Badge: React.FC<BadgeProps> = ({ status, label, className = '', children }) => {
-    const { t } = useTranslation();
-
     const styles = {
         SENT: 'bg-yellow-50 text-yellow-700 border-yellow-200',
         IN_REVIEW: 'bg-blue-50 text-blue-700 border-blue-200',
@@ -34,11 +32,11 @@ export const Badge: React.FC<BadgeProps> = ({ status, label, className = '', chi
     };
 
     const labels = {
-        SENT: t('reports.filters.sent'),
-        IN_REVIEW: t('reports.filters.inReview'),
-        FORWARDED: t('reports.filters.forwarded'),
-        RESOLVED: t('reports.filters.resolved'),
-        ARCHIVED: t('reports.filters.archived'),
+        SENT: 'Enviado',
+        IN_REVIEW: 'Em Análise',
+        FORWARDED: 'Encaminhado',
+        RESOLVED: 'Resolvido',
+        ARCHIVED: 'Arquivado',
         default: status
     };
 

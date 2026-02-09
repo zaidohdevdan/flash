@@ -13,7 +13,9 @@ import {
     Filter,
     Edit2,
     CheckCircle,
-    Trash2
+    Trash2,
+    Mail,
+    Eye
 } from 'lucide-react';
 import {
     Button,
@@ -45,12 +47,23 @@ interface UserSummary {
     departmentName?: string;
 }
 
+interface ContactMessage {
+    id: string;
+    name: string;
+    email: string;
+    company?: string;
+    message: string;
+    read: boolean;
+    createdAt: string;
+}
+
 export function AdminDashboard() {
     const { user, signOut } = useAuth();
-    const [view, setView] = useState<'list' | 'create' | 'edit' | 'departments'>('list');
+    const [view, setView] = useState<'list' | 'create' | 'edit' | 'departments' | 'contacts'>('list');
     const [users, setUsers] = useState<UserSummary[]>([]);
     const [supervisors, setSupervisors] = useState<Supervisor[]>([]);
     const [departments, setDepartments] = useState<Department[]>([]);
+    const [contacts, setContacts] = useState<ContactMessage[]>([]);
     const [editingUser, setEditingUser] = useState<UserSummary | null>(null);
 
     // Filters
@@ -200,12 +213,22 @@ export function AdminDashboard() {
         }
     }, []);
 
+    const fetchContacts = useCallback(async () => {
+        try {
+            const response = await api.get('/admin/contacts');
+            setContacts(response.data);
+        } catch {
+            console.error('Erro ao buscar contatos');
+        }
+    }, []);
+
     useEffect(() => {
         fetchSupervisors();
         fetchDepartments();
         fetchUsers();
         fetchNotifications();
-    }, [fetchUsers, fetchSupervisors, fetchDepartments, fetchNotifications]);
+        fetchContacts();
+    }, [fetchUsers, fetchSupervisors, fetchDepartments, fetchNotifications, fetchContacts]);
 
     async function handleProcessUser(e: React.FormEvent) {
         e.preventDefault();
@@ -321,6 +344,15 @@ export function AdminDashboard() {
         }
     }
 
+    async function handleMarkContactAsRead(id: string) {
+        try {
+            await api.patch(`/admin/contacts/${id}/read`);
+            setContacts(prev => prev.map(c => c.id === id ? { ...c, read: true } : c));
+        } catch {
+            toast.error('Erro ao marcar mensagem como lida');
+        }
+    }
+
     return (
         <DashboardLayout
             user={{ name: user?.name, avatarUrl: user?.avatarUrl, role: user?.role }}
@@ -333,6 +365,8 @@ export function AdminDashboard() {
                 <aside className="w-full lg:w-72 shrink-0 space-y-4">
                     <Card variant="white" className="p-2 space-y-1 shadow-sm sticky top-6">
                         <button
+                            title='Gestão de Usuários'
+                            type='button'
                             onClick={() => { setView('list'); resetForm(); }}
                             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-xs uppercase tracking-wide transition-all ${view === 'list'
                                 ? 'bg-[var(--accent-primary)] text-white shadow-md'
@@ -342,6 +376,8 @@ export function AdminDashboard() {
                             <Users className="w-4 h-4" /> Gestão de Usuários
                         </button>
                         <button
+                            title='Novo Cadastro'
+                            type='button'
                             onClick={() => { setView('create'); resetForm(); }}
                             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-xs uppercase tracking-wide transition-all ${view === 'create'
                                 ? 'bg-[var(--accent-primary)] text-white shadow-md'
@@ -351,6 +387,8 @@ export function AdminDashboard() {
                             <UserPlus className="w-4 h-4" /> Novo Cadastro
                         </button>
                         <button
+                            title='Gestão de Setores'
+                            type='button'
                             onClick={() => { setView('departments'); resetForm(); }}
                             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-xs uppercase tracking-wide transition-all ${view === 'departments'
                                 ? 'bg-[var(--accent-primary)] text-white shadow-md'
@@ -358,6 +396,23 @@ export function AdminDashboard() {
                                 }`}
                         >
                             <Filter className="w-4 h-4" /> Gestão de Setores
+                        </button>
+
+                        <button
+                            title='Mensagens de Contato'
+                            type='button'
+                            onClick={() => { setView('contacts'); resetForm(); }}
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-xs uppercase tracking-wide transition-all ${view === 'contacts'
+                                ? 'bg-[var(--accent-primary)] text-white shadow-md'
+                                : 'text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]'
+                                }`}
+                        >
+                            <Mail className="w-4 h-4" /> Mensagens
+                            {contacts.filter(c => !c.read).length > 0 && (
+                                <span className="ml-auto bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full ring-2 ring-white">
+                                    {contacts.filter(c => !c.read).length}
+                                </span>
+                            )}
                         </button>
 
                         <div className="pt-4 mt-4 border-t border-[var(--border-subtle)] px-2 pb-2">
@@ -548,6 +603,88 @@ export function AdminDashboard() {
                                                             >
                                                                 <Trash2 className="w-4 h-4" />
                                                             </Button>
+                                                        </td>
+                                                    </tr>
+                                                ))
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </Card>
+                        </div>
+                    ) : view === 'contacts' ? (
+                        <div className="animate-in slide-in-from-right-4 duration-500">
+                            <Card variant="white" className="overflow-hidden border-[var(--border-subtle)]">
+                                <div className="p-6 border-b border-[var(--border-subtle)] flex justify-between items-center bg-[var(--bg-primary)]">
+                                    <div>
+                                        <h2 className="text-lg font-bold text-[var(--text-primary)] uppercase tracking-tight">Mensagens de Contato</h2>
+                                        <p className="text-xs text-[var(--text-tertiary)] font-medium mt-1">Leads e solicitações da Landing Page</p>
+                                    </div>
+                                    <Badge status="IN_REVIEW" label={`${contacts.filter(c => !c.read).length} NÃO LIDAS`} />
+                                </div>
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left border-collapse">
+                                        <thead>
+                                            <tr className="bg-[var(--bg-tertiary)] text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest border-b border-[var(--border-subtle)]">
+                                                <th className="px-6 py-4">Remetente / Empresa</th>
+                                                <th className="px-6 py-4">Mensagem</th>
+                                                <th className="px-6 py-4">Data</th>
+                                                <th className="px-6 py-4 text-right">Ações</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-[var(--border-subtle)]">
+                                            {contacts.length === 0 ? (
+                                                <tr>
+                                                    <td colSpan={4} className="px-6 py-16 text-center text-[var(--text-tertiary)]">
+                                                        <Mail className="w-12 h-12 mx-auto mb-4 opacity-20" />
+                                                        <p className="text-xs font-bold uppercase tracking-widest">Nenhuma mensagem recebida</p>
+                                                    </td>
+                                                </tr>
+                                            ) : (
+                                                contacts.map(msg => (
+                                                    <tr key={msg.id} className={`hover:bg-[var(--bg-tertiary)]/50 transition-colors group ${!msg.read ? 'bg-blue-50/30' : ''}`}>
+                                                        <td className="px-6 py-4">
+                                                            <div className="flex flex-col">
+                                                                <span className="font-bold text-[var(--text-primary)] text-sm">{msg.name}</span>
+                                                                <span className="text-xs text-[var(--text-secondary)]">{msg.email}</span>
+                                                                {msg.company && (
+                                                                    <span className="text-[10px] font-black text-[var(--accent-primary)] uppercase tracking-tighter mt-1">{msg.company}</span>
+                                                                )}
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-6 py-4 max-w-md">
+                                                            <p className="text-xs text-[var(--text-secondary)] line-clamp-2 italic">
+                                                                "{msg.message}"
+                                                            </p>
+                                                        </td>
+                                                        <td className="px-6 py-4">
+                                                            <span className="text-[10px] font-bold text-[var(--text-tertiary)]">
+                                                                {new Date(msg.createdAt).toLocaleDateString('pt-BR')}
+                                                            </span>
+                                                        </td>
+                                                        <td className="px-6 py-4 text-right">
+                                                            <div className="flex items-center justify-end gap-2">
+                                                                {!msg.read && (
+                                                                    <Button
+                                                                        variant="ghost"
+                                                                        size="sm"
+                                                                        onClick={() => handleMarkContactAsRead(msg.id)}
+                                                                        title="Marcar como lida"
+                                                                    >
+                                                                        <CheckCircle className="w-4 h-4 text-emerald-500" />
+                                                                    </Button>
+                                                                )}
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    onClick={() => {
+                                                                        alert(`Detalhes da Mensagem:\n\nDe: ${msg.name}\nE-mail: ${msg.email}\nEmpresa: ${msg.company || 'N/A'}\n\n"${msg.message}"`);
+                                                                        if (!msg.read) handleMarkContactAsRead(msg.id);
+                                                                    }}
+                                                                >
+                                                                    <Eye className="w-4 h-4" />
+                                                                </Button>
+                                                            </div>
                                                         </td>
                                                     </tr>
                                                 ))

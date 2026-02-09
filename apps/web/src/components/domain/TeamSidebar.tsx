@@ -1,5 +1,4 @@
 import React from 'react';
-import { useTranslation } from 'react-i18next';
 import { Users, MessageSquare, Shield } from 'lucide-react';
 import { Avatar, Card } from '../ui';
 
@@ -32,7 +31,6 @@ export interface TeamSidebarProps {
 }
 
 const MemberItem = React.memo(({ member, onClick }: { member: TeamMember, onClick: (m: TeamMember) => void }) => {
-    const { t } = useTranslation();
     return (
         <div
             onClick={() => onClick(member)}
@@ -59,7 +57,7 @@ const MemberItem = React.memo(({ member, onClick }: { member: TeamMember, onClic
 
                 <div className="flex items-center gap-1.5">
                     <span className="text-xs text-[var(--text-tertiary)] truncate capitalize">
-                        {member.role === 'MANAGER' ? (member.departmentName || t('layout.teamSidebar.manager')) : member.role.toLowerCase()}
+                        {member.role === 'MANAGER' ? (member.departmentName || 'Gerente') : member.role.toLowerCase()}
                     </span>
                 </div>
 
@@ -85,7 +83,6 @@ export const TeamSidebar: React.FC<TeamSidebarProps> = React.memo(({
     icon,
     isLoading = false
 }) => {
-    const { t } = useTranslation();
     const [activeGroupId, setActiveGroupId] = React.useState<string | null>(
         groups && groups.length > 0 ? groups[0].id : null
     );
@@ -132,8 +129,8 @@ export const TeamSidebar: React.FC<TeamSidebarProps> = React.memo(({
                             {icon || <Users className="w-5 h-5 text-[var(--text-secondary)]" />}
                         </div>
                         <div>
-                            <h3 className="text-sm font-semibold text-[var(--text-primary)]">{title || t('layout.teamSidebar.title')}</h3>
-                            <p className="text-xs text-[var(--text-tertiary)]">{currentMembers.filter(m => m.isOnline).length} {t('layout.teamSidebar.online')}</p>
+                            <h3 className="text-sm font-semibold text-[var(--text-primary)]">{title || 'Minha Equipe'}</h3>
+                            <p className="text-xs text-[var(--text-tertiary)]">{currentMembers.filter(m => m.isOnline).length} Online</p>
                         </div>
                     </div>
                 ) : (
@@ -143,6 +140,8 @@ export const TeamSidebar: React.FC<TeamSidebarProps> = React.memo(({
                             const isActive = activeGroupId === group.id;
                             return (
                                 <button
+                                    title={group.title}
+                                    type='button'
                                     key={group.id}
                                     onClick={() => setActiveGroupId(group.id)}
                                     className={`
@@ -182,7 +181,7 @@ export const TeamSidebar: React.FC<TeamSidebarProps> = React.memo(({
                         <div className="w-12 h-12 bg-[var(--bg-tertiary)] rounded-full flex items-center justify-center mx-auto mb-3">
                             <Users className="w-6 h-6 text-[var(--text-tertiary)]" />
                         </div>
-                        <p className="text-xs text-[var(--text-tertiary)] font-medium">{t('layout.teamSidebar.noMembers')}</p>
+                        <p className="text-xs text-[var(--text-tertiary)] font-medium">Nenhum membro encontrado neste grupo.</p>
                     </div>
                 )}
             </div>

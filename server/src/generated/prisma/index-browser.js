@@ -21,11 +21,11 @@ exports.$Enums = {}
 
 /**
  * Prisma Client JS version: 6.18.0
- * Query Engine version: acc0b9dd43eb689cbd20c9470515d719db10d0b0
+ * Query Engine version: 34b5a692b7bd79939a9a2c3ef97d816e749cda2f
  */
 Prisma.prismaVersion = {
   client: "6.18.0",
-  engine: "acc0b9dd43eb689cbd20c9470515d719db10d0b0"
+  engine: "34b5a692b7bd79939a9a2c3ef97d816e749cda2f"
 }
 
 Prisma.PrismaClientKnownRequestError = () => {
@@ -236,6 +236,16 @@ exports.Prisma.NoteScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.ContactMessageScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  email: 'email',
+  company: 'company',
+  message: 'message',
+  read: 'read',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -276,7 +286,8 @@ exports.Prisma.ModelName = {
   AuditLog: 'AuditLog',
   AgendaEvent: 'AgendaEvent',
   Notification: 'Notification',
-  Note: 'Note'
+  Note: 'Note',
+  ContactMessage: 'ContactMessage'
 };
 
 /**

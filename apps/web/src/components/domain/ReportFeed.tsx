@@ -1,5 +1,4 @@
 import React from 'react';
-import { useTranslation } from 'react-i18next';
 import { MessageSquare } from 'lucide-react';
 import { Card, Button } from '../ui';
 import { ReportCard } from './ReportCard';
@@ -25,8 +24,7 @@ export const ReportFeed: React.FC<ReportFeedProps> = ({
     emptyMessage,
     isLoading = false
 }) => {
-    const { t } = useTranslation();
-    const displayMessage = emptyMessage || t('dashboard.feed.emptyMsg');
+    const displayMessage = emptyMessage || "Nenhum reporte encontrado.";
 
     return (
         <div className="flex-1 space-y-6">
@@ -53,7 +51,7 @@ export const ReportFeed: React.FC<ReportFeedProps> = ({
             {hasMore && reports.length > 0 && (
                 <div className="flex justify-center pt-8">
                     <Button variant="secondary" size="lg" onClick={onLoadMore} className="bg-white px-10">
-                        {t('dashboard.actions.loadMore')}
+                        Carregar Mais
                     </Button>
                 </div>
             )}

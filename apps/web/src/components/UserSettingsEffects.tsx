@@ -1,10 +1,8 @@
 import { useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 
 export function UserSettingsEffects() {
     const { user } = useAuth();
-    const { i18n } = useTranslation();
 
     useEffect(() => {
         const applyTheme = (theme: string) => {
@@ -29,7 +27,6 @@ export function UserSettingsEffects() {
         if (user) {
             // Load User Settings
             const savedTheme = localStorage.getItem(`settings_${user.id}_theme`);
-            const savedLang = localStorage.getItem(`settings_${user.id}_language`);
             const savedDensity = localStorage.getItem(`settings_${user.id}_density`);
 
             if (savedTheme) {
@@ -42,12 +39,6 @@ export function UserSettingsEffects() {
                 applyDensity(savedDensity);
             } else {
                 applyDensity('comfortable'); // Default
-            }
-
-            if (savedLang) {
-                if (i18n.language !== savedLang) {
-                    i18n.changeLanguage(savedLang);
-                }
             }
         } else {
             // No user - maintain current global settings or fallback to system
@@ -65,14 +56,8 @@ export function UserSettingsEffects() {
             } else {
                 applyDensity('comfortable');
             }
-
-            // Reset Language to System Default
-            const savedGlobalLang = localStorage.getItem('language') || 'pt';
-            if (i18n.language !== savedGlobalLang) {
-                i18n.changeLanguage(savedGlobalLang);
-            }
         }
-    }, [user, i18n]);
+    }, [user]);
 
     return null;
 }

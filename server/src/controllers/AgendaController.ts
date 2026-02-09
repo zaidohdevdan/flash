@@ -2,6 +2,7 @@ import type { Request, Response } from 'express';
 import { AgendaService } from '../services/AgendaService';
 import { NoteService } from '../services/NoteService';
 import { prisma } from '../lib/prisma';
+import { AuditService } from '../services/AuditService';
 
 const agendaService = new AgendaService();
 const noteService = new NoteService();
@@ -41,6 +42,16 @@ export const AgendaController = {
                 reportId
             }, req.io);
 
+            // Auditoria
+            await AuditService.log({
+                userId,
+                action: 'CREATE_AGENDA_EVENT',
+                target: `Event:${event.id}`,
+                details: { title, type },
+                ip: req.ip,
+                userAgent: req.get('user-agent')
+            });
+
             return res.status(201).json(event);
         } catch (error: any) {
             console.error('[AgendaController] Erro ao criar evento:', error);
@@ -56,6 +67,16 @@ export const AgendaController = {
         const { id } = req.params;
         try {
             await agendaService.deleteEvent(String(id));
+
+            // Auditoria
+            await AuditService.log({
+                userId: req.userId,
+                action: 'DELETE_AGENDA_EVENT',
+                target: `Event:${id}`,
+                ip: req.ip,
+                userAgent: req.get('user-agent')
+            });
+
             return res.status(204).send();
         } catch (error) {
             return res.status(500).json({ error: 'Erro ao deletar evento' });

@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { useTranslation } from 'react-i18next';
 import { Mail, Lock, ArrowRight, ShieldCheck, Send, Loader2, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export function Login() {
-    const { t } = useTranslation();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const { signIn } = useAuth();
@@ -21,10 +19,9 @@ export function Login() {
 
         try {
             await signIn(email, password);
-            // Navigation handled by AuthContext or useEffect, but we can double check
         } catch (err: unknown) {
             const error = err as { response?: { data?: { error?: string } } };
-            const message = error.response?.data?.error || t('auth.login.error');
+            const message = error.response?.data?.error || 'Falha na autenticação. Verifique suas credenciais.';
             setError(message);
         } finally {
             setLoading(false);
@@ -72,15 +69,15 @@ export function Login() {
                             <div className="inline-flex items-center justify-center p-3 bg-slate-50 dark:bg-slate-800 rounded-2xl mb-6 shadow-inner border border-slate-100 dark:border-slate-700">
                                 <ShieldCheck className="w-6 h-6 text-slate-400 dark:text-slate-500" />
                             </div>
-                            <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight mb-2">{t('auth.login.accessRestricted')}</h2>
+                            <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight mb-2">Acesso Restrito</h2>
                             <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">
-                                {t('auth.login.identify')}
+                                Identifique-se para acessar o painel operacional.
                             </p>
                         </div>
 
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="space-y-2">
-                                <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">{t('auth.login.emailLabel')}</label>
+                                <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">E-mail Corporativo</label>
                                 <div className="relative group/input">
                                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                         <Mail className="h-5 w-5 text-slate-400 dark:text-slate-500 group-focus-within/input:text-slate-900 dark:group-focus-within/input:text-white transition-colors" />
@@ -98,7 +95,7 @@ export function Login() {
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-[10px] font-black text-[var(--text-tertiary)] uppercase tracking-widest ml-1">{t('auth.login.passwordLabel')}</label>
+                                <label className="text-[10px] font-black text-[var(--text-tertiary)] uppercase tracking-widest ml-1">Senha</label>
                                 <div className="relative group/input">
                                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                         <Lock className="h-5 w-5 text-[var(--text-tertiary)] group-focus-within/input:text-[var(--text-primary)] transition-colors" />
@@ -138,7 +135,7 @@ export function Login() {
                                     <Loader2 className="w-5 h-5 animate-spin" />
                                 ) : (
                                     <span className="flex items-center gap-2">
-                                        {t('auth.login.submit')}
+                                        Entrar no Sistema
                                         <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
                                     </span>
                                 )}
@@ -147,7 +144,7 @@ export function Login() {
 
                         <div className="mt-8 text-center invisible">
                             <p className="text-xs font-medium text-slate-400 dark:text-slate-500">
-                                {t('auth.login.forgotPassword')} <a href="#" className="text-slate-900 dark:text-white underline hover:text-blue-600 dark:hover:text-blue-400 transition-colors">{t('auth.login.recover')}</a>
+                                Esqueceu a senha? <a href="#" className="text-slate-900 dark:text-white underline hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Recuperar acesso</a>
                             </p>
                         </div>
                     </div>
@@ -156,7 +153,7 @@ export function Login() {
                 <div className="mt-8 text-center">
                     <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/50 dark:bg-slate-900/50 backdrop-blur-md rounded-full border border-white/20 dark:border-white/5">
                         <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                        <span className="text-[10px] uppercase tracking-widest font-bold text-slate-500 dark:text-slate-400">{t('auth.login.secureConnection')}</span>
+                        <span className="text-[10px] uppercase tracking-widest font-bold text-slate-500 dark:text-slate-400">Conexão Segura Ativa</span>
                     </div>
                 </div>
             </motion.div>

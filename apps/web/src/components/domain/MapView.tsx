@@ -6,8 +6,7 @@ import 'leaflet/dist/leaflet.css';
 import 'react-leaflet-cluster/dist/assets/MarkerCluster.css';
 import 'react-leaflet-cluster/dist/assets/MarkerCluster.Default.css';
 import { format } from 'date-fns';
-import { ptBR, enUS } from 'date-fns/locale';
-import { useTranslation } from 'react-i18next';
+import { ptBR } from 'date-fns/locale';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { AlertCircle, Clock, CheckCircle, Folder, MapPin } from 'lucide-react';
 import type { Report } from '../../types';
@@ -77,8 +76,7 @@ function MapBounds({ markers }: { markers: Report[] }) {
 }
 
 export const MapView: React.FC<MapViewProps> = ({ reports, onMarkerClick }) => {
-    const { i18n } = useTranslation();
-    const dateLocale = i18n.language === 'en' ? enUS : ptBR;
+    const dateLocale = ptBR;
 
     // Filter reports with valid coordinates
     const validReports = useMemo(() =>

@@ -15,6 +15,7 @@ const Home = lazy(() => import('./pages/Home').then(m => ({ default: m.Home })))
 const Analytics = lazy(() => import('./pages/Analytics').then(m => ({ default: m.Analytics })));
 const Profile = lazy(() => import('./pages/Profile').then(m => ({ default: m.Profile })));
 const Settings = lazy(() => import('./pages/Settings'));
+const Logs = lazy(() => import('./pages/Logs').then(m => ({ default: m.Logs })));
 
 // Loading Component
 const PageLoader = () => (
@@ -111,6 +112,11 @@ function AppRoutes() {
       <Route path="/profile" element={
         <PrivateRoute role={['SUPERVISOR', 'MANAGER', 'PROFESSIONAL', 'ADMIN']}>
           <Profile />
+        </PrivateRoute>
+      } />
+      <Route path="/logs" element={
+        <PrivateRoute role="ADMIN">
+          <Logs />
         </PrivateRoute>
       } />
     </Routes>
