@@ -169,7 +169,7 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead }:
             socket.off('message_deleted', handleMessageDeleted);
             socket.off('messages_read', handleMessagesRead);
         };
-    }, [currentUser.id, targetUser.id, chatRoom, socket, markRoomAsRead]);
+    }, [currentUser.id, targetUser.id, chatRoom, socket, markRoomAsRead, notificationsEnabled]);
 
     useEffect(() => {
         const interval = setInterval(() => setNow(Date.now()), 1000);
