@@ -462,7 +462,7 @@ export function Home() {
                             {/* Layer 3: Floating Elements - High Definition */}
                             <motion.div
                                 style={{ z: zLayer3, opacity: opacityLayer3 }}
-                                className="absolute top-[10%] right-4 lg:right-[-40px] bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-4 md:p-5 rounded-[1.5rem] shadow-[0_20px_40px_-10px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_40px_-10px_rgba(0,0,0,0.5)] flex items-center gap-4 md:gap-5 transform-style-3d translate-z-[40px] md:translate-z-[80px] scale-90 md:scale-100"
+                                className="absolute top-[10%] right-4 lg:right-[-40px] bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-4 md:p-5 rounded-[1.5rem] shadow-[0_20px_40px_-10px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_40px_-10px_rgba(0,0,0,0.5)] flex items-center gap-4 md:gap-5 transform-style-3d translate-z-[40px] md:translate-z-[80px] scale-75 md:scale-90 lg:scale-100"
                             >
                                 <div className="w-12 h-12 rounded-full bg-emerald-500 flex items-center justify-center text-white shadow-xl shadow-emerald-500/30">
                                     <CheckCircle2 className="w-6 h-6" />
@@ -475,7 +475,7 @@ export function Home() {
 
                             <motion.div
                                 style={{ z: zLayer3, opacity: opacityLayer3 }}
-                                className="absolute bottom-[10%] left-4 lg:left-[-40px] bg-slate-900 dark:bg-slate-800 backdrop-blur-md border border-slate-800 p-4 md:p-5 rounded-[1.5rem] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)] flex items-center gap-4 md:gap-5 transform-style-3d translate-z-[60px] md:translate-z-[120px] scale-90 md:scale-100"
+                                className="absolute bottom-[10%] left-4 lg:left-[-40px] bg-slate-900 dark:bg-slate-800 backdrop-blur-md border border-slate-800 p-4 md:p-5 rounded-[1.5rem] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)] flex items-center gap-4 md:gap-5 transform-style-3d translate-z-[60px] md:translate-z-[120px] scale-75 md:scale-90 lg:scale-100"
                             >
                                 <div className="w-12 h-12 rounded-full bg-[#d4e720] flex items-center justify-center text-[#1a2e05] shadow-xl shadow-lime-500/20 animate-pulse">
                                     <WifiOff className="w-6 h-6" />
