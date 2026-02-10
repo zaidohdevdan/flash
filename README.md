@@ -9,6 +9,7 @@ Sistema de gestão operacional em tempo real para supervisão e coordenação de
 - **Real-time**: Socket.io
 - **Database**: PostgreSQL
 - **Deployment**: Vercel (Frontend) + Railway (Backend)
+- **Documentation**: [Arquitetura](docs/architecture.md), [Backend](docs/backend.md), [Frontend](docs/frontend.md), [Deployment](docs/deployment.md)
 
 ## 📦 Instalação
 
