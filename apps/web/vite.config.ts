@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
 // https://vite.dev/config/
-// Last deploy trigger: 2026-02-09
+// Trigger deploy fix i18n 2026-02-10 - Force Update 4
 export default defineConfig({
   clearScreen: false,
   logLevel: 'info',
