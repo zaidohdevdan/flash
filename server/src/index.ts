@@ -237,5 +237,5 @@ async function bootstrap() {
 
 // Force redeploy backend
 bootstrap();
-// Trigger deploy fix i18n 2026-02-08 - Force Update 3
+// Trigger deploy fix i18n 2026-02-10 - Force Update 4 (Deep Nudge)
 
