@@ -173,12 +173,12 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
             maxWidth="6xl"
         >
             {isLoading ? (
-                <div className="flex flex-col items-center justify-center h-[600px] gap-4">
+                <div className="flex flex-col items-center justify-center min-h-[400px] lg:h-[600px] gap-4">
                     <Loader2 className="w-12 h-12 text-[var(--accent-primary)] animate-spin" />
                     <p className="text-sm font-bold text-[var(--text-tertiary)] uppercase tracking-widest animate-pulse">Carregando Agenda...</p>
                 </div>
             ) : isCreatingEvent ? (
-                <div className="flex flex-col h-[600px] animate-in fade-in slide-in-from-bottom-4 duration-300">
+                <div className="flex flex-col min-h-[500px] max-h-[85vh] lg:h-[600px] animate-in fade-in slide-in-from-bottom-4 duration-300">
                     <div className="flex justify-between items-center mb-6">
                         <div>
                             <h3 className="text-xl font-bold text-[var(--text-primary)] uppercase tracking-tight">Novo Agendamento</h3>
@@ -198,7 +198,7 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
                                     <input
                                         type="text"
                                         autoFocus
-                                        className="w-full bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-xl px-4 py-3 text-sm font-medium text-[var(--text-primary)] focus:bg-white focus:border-[var(--accent-secondary)] outline-none transition-all placeholder:text-[var(--text-tertiary)]"
+                                        className="w-full bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-xl px-4 py-3 text-sm font-medium text-[var(--text-primary)] focus:bg-[var(--bg-tertiary)] focus:border-[var(--accent-secondary)] outline-none transition-all placeholder:text-[var(--text-tertiary)]"
                                         placeholder="Ex: Reunião Técnica / Vistoria Campo"
                                         value={eventTitle}
                                         onChange={(e) => setEventTitle(e.target.value)}
@@ -209,7 +209,7 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
                                             <span className="text-[9px] font-bold text-[var(--text-secondary)] uppercase tracking-widest ml-1">Horário</span>
                                             <input
                                                 type="time"
-                                                className="w-full bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-xl px-4 py-3 text-sm font-medium text-[var(--text-primary)] focus:bg-white focus:border-[var(--accent-secondary)] outline-none transition-all"
+                                                className="w-full bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-xl px-4 py-3 text-sm font-medium text-[var(--text-primary)] focus:bg-[var(--bg-tertiary)] focus:border-[var(--accent-secondary)] outline-none transition-all"
                                                 value={eventStartTime}
                                                 onChange={(e) => setEventStartTime(e.target.value)}
                                                 title="Início"
@@ -219,7 +219,7 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
                                         <div className="space-y-1">
                                             <span className="text-[9px] font-bold text-[var(--text-secondary)] uppercase tracking-widest ml-1">Tipo</span>
                                             <select
-                                                className="w-full bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-xl px-4 py-3 text-sm font-medium text-[var(--text-primary)] focus:bg-white focus:border-[var(--accent-secondary)] outline-none transition-all appearance-none cursor-pointer"
+                                                className="w-full bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-xl px-4 py-3 text-sm font-medium text-[var(--text-primary)] focus:bg-[var(--bg-tertiary)] focus:border-[var(--accent-secondary)] outline-none transition-all appearance-none cursor-pointer"
                                                 value={eventType}
                                                 onChange={(e) => setEventType(e.target.value as AgendaEventType)}
                                                 title="Tipo de Evento"
@@ -243,7 +243,7 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
                                         {selectedParticipants.map(pid => {
                                             const c = contacts.find(x => x.id === pid);
                                             return c ? (
-                                                <div key={pid} className="flex items-center gap-2 bg-white pl-1.5 pr-3 py-1.5 rounded-xl border border-[var(--border-subtle)] shadow-sm animate-in zoom-in-50">
+                                                <div key={pid} className="flex items-center gap-2 bg-[var(--bg-tertiary)] pl-1.5 pr-3 py-1.5 rounded-xl border border-[var(--border-subtle)] shadow-sm animate-in zoom-in-50">
                                                     <Avatar src={c.avatarUrl} size="sm" />
                                                     <span className="text-[11px] font-bold text-[var(--text-primary)]">{c.name}</span>
                                                     <button
@@ -297,7 +297,7 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
                                 <input
                                     type="text"
                                     placeholder="Buscar contatos..."
-                                    className="w-full bg-white border border-[var(--border-subtle)] rounded-xl pl-12 pr-4 py-3 text-sm font-medium text-[var(--text-primary)] focus:border-[var(--accent-secondary)] outline-none transition-all placeholder:text-[var(--text-tertiary)]"
+                                    className="w-full bg-[var(--bg-primary)] border border-[var(--border-subtle)] rounded-xl pl-12 pr-4 py-3 text-sm font-medium text-[var(--text-primary)] focus:border-[var(--accent-secondary)] outline-none transition-all placeholder:text-[var(--text-tertiary)]"
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                     aria-label="Filtrar contatos"
@@ -320,7 +320,7 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
                                                 }}
                                                 className={`
                                                     w-full flex items-center justify-between p-3 rounded-xl transition-all border
-                                                    ${isSelected ? 'bg-[var(--accent-primary)] border-[var(--accent-secondary)] text-[var(--accent-text)] shadow-sm' : 'bg-white border-transparent hover:border-[var(--border-subtle)] text-[var(--text-secondary)]'}
+                                                    ${isSelected ? 'bg-[var(--accent-primary)] border-[var(--accent-secondary)] text-[var(--accent-text)] shadow-sm' : 'bg-[var(--bg-primary)] border-transparent hover:border-[var(--border-subtle)] text-[var(--text-secondary)]'}
                                                 `}
                                                 title={`Selecionar ${contact.name}`}
                                                 aria-label={`Selecionar ${contact.name}`}
@@ -334,7 +334,7 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
                                                         </p>
                                                     </div>
                                                 </div>
-                                                <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-all ${isSelected ? 'bg-white text-[var(--accent-text)]' : 'bg-[var(--bg-tertiary)] text-[var(--text-tertiary)]'}`}>
+                                                <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-all ${isSelected ? 'bg-[var(--bg-primary)] text-[var(--accent-primary)]' : 'bg-[var(--bg-tertiary)] text-[var(--text-tertiary)]'}`}>
                                                     {isSelected ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
                                                 </div>
                                             </button>
@@ -346,10 +346,10 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
                     </div>
                 </div>
             ) : (
-                <div className="flex flex-col lg:flex-row gap-6 h-[600px]">
+                <div className="flex flex-col lg:flex-row gap-6 min-h-[500px] max-h-[85vh] lg:h-[600px]">
                     {/* Col 1: Calendar & Events */}
                     <div className="flex-1 flex flex-col gap-4 overflow-hidden">
-                        <Card className="p-4 bg-white border border-[var(--border-subtle)] shadow-sm">
+                        <Card className="p-4 bg-[var(--bg-primary)] border border-[var(--border-subtle)] shadow-sm">
                             {/* Calendar Header */}
                             <div className="flex justify-between items-center mb-6 px-2">
                                 <h3 className="font-bold text-[var(--text-primary)] uppercase tracking-tight text-lg">
@@ -386,7 +386,7 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
                                             key={idx}
                                             onClick={() => setSelectedDate(day)}
                                             className={`
-                                                relative h-10 flex flex-col items-center justify-center rounded-xl text-sm font-medium transition-all
+                                                relative h-10 w-full flex flex-col items-center justify-center rounded-xl text-sm font-medium transition-all
                                                 ${!isCurrentMonth ? 'text-[var(--text-tertiary)] opacity-40' : 'text-[var(--text-secondary)]'}
                                                 ${isSel ? 'bg-[var(--accent-primary)] !text-[var(--accent-text)] shadow-sm font-bold scale-105 z-10' : 'hover:bg-[var(--bg-secondary)]'}
                                                 ${isTod && !isSel ? 'text-[var(--accent-secondary)] !font-bold' : ''}
@@ -422,7 +422,7 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
                             <div className="space-y-2">
                                 {selectedDayEvents.length > 0 ? (
                                     selectedDayEvents.map(event => (
-                                        <Card key={event.id} className="p-3 !rounded-2xl border-[var(--border-subtle)] bg-white flex items-center justify-between group hover:border-[var(--border-medium)] transition-colors shadow-sm">
+                                        <Card key={event.id} className="p-3 !rounded-2xl border-[var(--border-subtle)] bg-[var(--bg-primary)] flex items-center justify-between group hover:border-[var(--border-medium)] transition-colors shadow-sm">
                                             <div className="flex items-center gap-3">
                                                 <div className={`p-2 rounded-xl bg-opacity-10 
                                                     ${event.type === 'CONFERENCE' ? 'bg-red-500 text-red-600' :
@@ -464,7 +464,7 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
                     {/* Col 2: Actions & Tools */}
                     <div className="w-full lg:w-[320px] flex flex-col gap-4 overflow-hidden">
                         {/* Clock & Quick Summary */}
-                        <Card className="p-6 bg-white shadow-md overflow-hidden relative group border-[var(--border-subtle)]">
+                        <Card className="p-6 bg-[var(--bg-primary)] shadow-md overflow-hidden relative group border-[var(--border-subtle)]">
                             <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--accent-primary)]/10 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-[var(--accent-primary)]/20 transition-all duration-700" />
                             <div className="relative z-10 flex flex-col items-center">
                                 <ClockIcon className="w-4 h-4 text-[var(--accent-secondary)] mb-2 animate-pulse" />
@@ -485,7 +485,7 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
                             </h4>
                             <div className="flex-1 flex flex-col group">
                                 <textarea
-                                    className="flex-1 bg-yellow-50 border border-yellow-200 rounded-2xl p-4 text-sm font-medium text-yellow-900 focus:bg-yellow-100/50 focus:border-yellow-400 outline-none transition-all resize-none placeholder:text-yellow-900/40"
+                                    className="flex-1 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-2xl p-4 text-sm font-medium text-[var(--text-primary)] focus:bg-[var(--bg-tertiary)] focus:border-[var(--accent-primary)] outline-none transition-all resize-none placeholder:text-[var(--text-tertiary)]"
                                     placeholder="Rascunhos rápidos para o turno..."
                                     value={note}
                                     onChange={(e) => setNote(e.target.value)}
@@ -496,7 +496,7 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
                                         type="button"
                                         onClick={handleSaveNote}
                                         disabled={isSavingNote}
-                                        className="text-[10px] font-bold text-yellow-700 uppercase tracking-widest hover:bg-yellow-100 px-3 py-1.5 rounded-lg transition-all flex items-center gap-2"
+                                        className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest hover:bg-[var(--bg-tertiary)] px-3 py-1.5 rounded-lg transition-all flex items-center gap-2"
                                     >
                                         {isSavingNote ? <Loader2 className="w-3 h-3 animate-spin" /> : <StickyNote className="w-3 h-3" />}
                                         SALVAR NOTAS
