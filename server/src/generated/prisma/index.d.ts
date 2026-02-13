@@ -369,7 +369,7 @@ export namespace Prisma {
 
   /**
    * Prisma Client JS version: 6.18.0
-   * Query Engine version: 34b5a692b7bd79939a9a2c3ef97d816e749cda2f
+   * Query Engine version: acc0b9dd43eb689cbd20c9470515d719db10d0b0
    */
   export type PrismaVersion = {
     client: string
@@ -5531,6 +5531,7 @@ export namespace Prisma {
     status: $Enums.ReportStatus | null
     comment: string | null
     userName: string | null
+    userRole: $Enums.Role | null
     departmentName: string | null
     createdAt: Date | null
   }
@@ -5541,6 +5542,7 @@ export namespace Prisma {
     status: $Enums.ReportStatus | null
     comment: string | null
     userName: string | null
+    userRole: $Enums.Role | null
     departmentName: string | null
     createdAt: Date | null
   }
@@ -5551,6 +5553,7 @@ export namespace Prisma {
     status: number
     comment: number
     userName: number
+    userRole: number
     departmentName: number
     createdAt: number
     _all: number
@@ -5563,6 +5566,7 @@ export namespace Prisma {
     status?: true
     comment?: true
     userName?: true
+    userRole?: true
     departmentName?: true
     createdAt?: true
   }
@@ -5573,6 +5577,7 @@ export namespace Prisma {
     status?: true
     comment?: true
     userName?: true
+    userRole?: true
     departmentName?: true
     createdAt?: true
   }
@@ -5583,6 +5588,7 @@ export namespace Prisma {
     status?: true
     comment?: true
     userName?: true
+    userRole?: true
     departmentName?: true
     createdAt?: true
     _all?: true
@@ -5666,6 +5672,7 @@ export namespace Prisma {
     status: $Enums.ReportStatus
     comment: string | null
     userName: string
+    userRole: $Enums.Role | null
     departmentName: string | null
     createdAt: Date
     _count: ReportHistoryCountAggregateOutputType | null
@@ -5693,6 +5700,7 @@ export namespace Prisma {
     status?: boolean
     comment?: boolean
     userName?: boolean
+    userRole?: boolean
     departmentName?: boolean
     createdAt?: boolean
     report?: boolean | ReportDefaultArgs<ExtArgs>
@@ -5706,11 +5714,12 @@ export namespace Prisma {
     status?: boolean
     comment?: boolean
     userName?: boolean
+    userRole?: boolean
     departmentName?: boolean
     createdAt?: boolean
   }
 
-  export type ReportHistoryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "reportId" | "status" | "comment" | "userName" | "departmentName" | "createdAt", ExtArgs["result"]["reportHistory"]>
+  export type ReportHistoryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "reportId" | "status" | "comment" | "userName" | "userRole" | "departmentName" | "createdAt", ExtArgs["result"]["reportHistory"]>
   export type ReportHistoryInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     report?: boolean | ReportDefaultArgs<ExtArgs>
   }
@@ -5726,6 +5735,7 @@ export namespace Prisma {
       status: $Enums.ReportStatus
       comment: string | null
       userName: string
+      userRole: $Enums.Role | null
       departmentName: string | null
       createdAt: Date
     }, ExtArgs["result"]["reportHistory"]>
@@ -6126,6 +6136,7 @@ export namespace Prisma {
     readonly status: FieldRef<"ReportHistory", 'ReportStatus'>
     readonly comment: FieldRef<"ReportHistory", 'String'>
     readonly userName: FieldRef<"ReportHistory", 'String'>
+    readonly userRole: FieldRef<"ReportHistory", 'Role'>
     readonly departmentName: FieldRef<"ReportHistory", 'String'>
     readonly createdAt: FieldRef<"ReportHistory", 'DateTime'>
   }
@@ -13823,6 +13834,7 @@ export namespace Prisma {
     status: 'status',
     comment: 'comment',
     userName: 'userName',
+    userRole: 'userRole',
     departmentName: 'departmentName',
     createdAt: 'createdAt'
   };
@@ -14345,6 +14357,7 @@ export namespace Prisma {
     status?: EnumReportStatusFilter<"ReportHistory"> | $Enums.ReportStatus
     comment?: StringNullableFilter<"ReportHistory"> | string | null
     userName?: StringFilter<"ReportHistory"> | string
+    userRole?: EnumRoleNullableFilter<"ReportHistory"> | $Enums.Role | null
     departmentName?: StringNullableFilter<"ReportHistory"> | string | null
     createdAt?: DateTimeFilter<"ReportHistory"> | Date | string
     report?: XOR<ReportScalarRelationFilter, ReportWhereInput>
@@ -14356,6 +14369,7 @@ export namespace Prisma {
     status?: SortOrder
     comment?: SortOrder
     userName?: SortOrder
+    userRole?: SortOrder
     departmentName?: SortOrder
     createdAt?: SortOrder
     report?: ReportOrderByWithRelationInput
@@ -14370,6 +14384,7 @@ export namespace Prisma {
     status?: EnumReportStatusFilter<"ReportHistory"> | $Enums.ReportStatus
     comment?: StringNullableFilter<"ReportHistory"> | string | null
     userName?: StringFilter<"ReportHistory"> | string
+    userRole?: EnumRoleNullableFilter<"ReportHistory"> | $Enums.Role | null
     departmentName?: StringNullableFilter<"ReportHistory"> | string | null
     createdAt?: DateTimeFilter<"ReportHistory"> | Date | string
     report?: XOR<ReportScalarRelationFilter, ReportWhereInput>
@@ -14381,6 +14396,7 @@ export namespace Prisma {
     status?: SortOrder
     comment?: SortOrder
     userName?: SortOrder
+    userRole?: SortOrder
     departmentName?: SortOrder
     createdAt?: SortOrder
     _count?: ReportHistoryCountOrderByAggregateInput
@@ -14397,6 +14413,7 @@ export namespace Prisma {
     status?: EnumReportStatusWithAggregatesFilter<"ReportHistory"> | $Enums.ReportStatus
     comment?: StringNullableWithAggregatesFilter<"ReportHistory"> | string | null
     userName?: StringWithAggregatesFilter<"ReportHistory"> | string
+    userRole?: EnumRoleNullableWithAggregatesFilter<"ReportHistory"> | $Enums.Role | null
     departmentName?: StringNullableWithAggregatesFilter<"ReportHistory"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"ReportHistory"> | Date | string
   }
@@ -15236,6 +15253,7 @@ export namespace Prisma {
     status: $Enums.ReportStatus
     comment?: string | null
     userName: string
+    userRole?: $Enums.Role | null
     departmentName?: string | null
     createdAt?: Date | string
     report: ReportCreateNestedOneWithoutHistoryInput
@@ -15247,6 +15265,7 @@ export namespace Prisma {
     status: $Enums.ReportStatus
     comment?: string | null
     userName: string
+    userRole?: $Enums.Role | null
     departmentName?: string | null
     createdAt?: Date | string
   }
@@ -15255,6 +15274,7 @@ export namespace Prisma {
     status?: EnumReportStatusFieldUpdateOperationsInput | $Enums.ReportStatus
     comment?: NullableStringFieldUpdateOperationsInput | string | null
     userName?: StringFieldUpdateOperationsInput | string
+    userRole?: NullableEnumRoleFieldUpdateOperationsInput | $Enums.Role | null
     departmentName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     report?: ReportUpdateOneRequiredWithoutHistoryNestedInput
@@ -15265,6 +15285,7 @@ export namespace Prisma {
     status?: EnumReportStatusFieldUpdateOperationsInput | $Enums.ReportStatus
     comment?: NullableStringFieldUpdateOperationsInput | string | null
     userName?: StringFieldUpdateOperationsInput | string
+    userRole?: NullableEnumRoleFieldUpdateOperationsInput | $Enums.Role | null
     departmentName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -15275,6 +15296,7 @@ export namespace Prisma {
     status: $Enums.ReportStatus
     comment?: string | null
     userName: string
+    userRole?: $Enums.Role | null
     departmentName?: string | null
     createdAt?: Date | string
   }
@@ -15283,6 +15305,7 @@ export namespace Prisma {
     status?: EnumReportStatusFieldUpdateOperationsInput | $Enums.ReportStatus
     comment?: NullableStringFieldUpdateOperationsInput | string | null
     userName?: StringFieldUpdateOperationsInput | string
+    userRole?: NullableEnumRoleFieldUpdateOperationsInput | $Enums.Role | null
     departmentName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -15292,6 +15315,7 @@ export namespace Prisma {
     status?: EnumReportStatusFieldUpdateOperationsInput | $Enums.ReportStatus
     comment?: NullableStringFieldUpdateOperationsInput | string | null
     userName?: StringFieldUpdateOperationsInput | string
+    userRole?: NullableEnumRoleFieldUpdateOperationsInput | $Enums.Role | null
     departmentName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -16273,6 +16297,14 @@ export namespace Prisma {
     createdAt?: SortOrder
   }
 
+  export type EnumRoleNullableFilter<$PrismaModel = never> = {
+    equals?: $Enums.Role | EnumRoleFieldRefInput<$PrismaModel> | null
+    in?: $Enums.Role[] | ListEnumRoleFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.Role[] | ListEnumRoleFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumRoleNullableFilter<$PrismaModel> | $Enums.Role | null
+    isSet?: boolean
+  }
+
   export type ReportScalarRelationFilter = {
     is?: ReportWhereInput
     isNot?: ReportWhereInput
@@ -16284,6 +16316,7 @@ export namespace Prisma {
     status?: SortOrder
     comment?: SortOrder
     userName?: SortOrder
+    userRole?: SortOrder
     departmentName?: SortOrder
     createdAt?: SortOrder
   }
@@ -16294,6 +16327,7 @@ export namespace Prisma {
     status?: SortOrder
     comment?: SortOrder
     userName?: SortOrder
+    userRole?: SortOrder
     departmentName?: SortOrder
     createdAt?: SortOrder
   }
@@ -16304,8 +16338,20 @@ export namespace Prisma {
     status?: SortOrder
     comment?: SortOrder
     userName?: SortOrder
+    userRole?: SortOrder
     departmentName?: SortOrder
     createdAt?: SortOrder
+  }
+
+  export type EnumRoleNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.Role | EnumRoleFieldRefInput<$PrismaModel> | null
+    in?: $Enums.Role[] | ListEnumRoleFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.Role[] | ListEnumRoleFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumRoleNullableWithAggregatesFilter<$PrismaModel> | $Enums.Role | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedEnumRoleNullableFilter<$PrismaModel>
+    _max?: NestedEnumRoleNullableFilter<$PrismaModel>
+    isSet?: boolean
   }
 
   export type IntNullableFilter<$PrismaModel = never> = {
@@ -17324,6 +17370,11 @@ export namespace Prisma {
     connect?: ReportWhereUniqueInput
   }
 
+  export type NullableEnumRoleFieldUpdateOperationsInput = {
+    set?: $Enums.Role | null
+    unset?: boolean
+  }
+
   export type ReportUpdateOneRequiredWithoutHistoryNestedInput = {
     create?: XOR<ReportCreateWithoutHistoryInput, ReportUncheckedCreateWithoutHistoryInput>
     connectOrCreate?: ReportCreateOrConnectWithoutHistoryInput
@@ -17709,6 +17760,25 @@ export namespace Prisma {
     _sum?: NestedFloatNullableFilter<$PrismaModel>
     _min?: NestedFloatNullableFilter<$PrismaModel>
     _max?: NestedFloatNullableFilter<$PrismaModel>
+    isSet?: boolean
+  }
+
+  export type NestedEnumRoleNullableFilter<$PrismaModel = never> = {
+    equals?: $Enums.Role | EnumRoleFieldRefInput<$PrismaModel> | null
+    in?: $Enums.Role[] | ListEnumRoleFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.Role[] | ListEnumRoleFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumRoleNullableFilter<$PrismaModel> | $Enums.Role | null
+    isSet?: boolean
+  }
+
+  export type NestedEnumRoleNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.Role | EnumRoleFieldRefInput<$PrismaModel> | null
+    in?: $Enums.Role[] | ListEnumRoleFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.Role[] | ListEnumRoleFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumRoleNullableWithAggregatesFilter<$PrismaModel> | $Enums.Role | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedEnumRoleNullableFilter<$PrismaModel>
+    _max?: NestedEnumRoleNullableFilter<$PrismaModel>
     isSet?: boolean
   }
 
@@ -18528,6 +18598,7 @@ export namespace Prisma {
     status: $Enums.ReportStatus
     comment?: string | null
     userName: string
+    userRole?: $Enums.Role | null
     departmentName?: string | null
     createdAt?: Date | string
   }
@@ -18537,6 +18608,7 @@ export namespace Prisma {
     status: $Enums.ReportStatus
     comment?: string | null
     userName: string
+    userRole?: $Enums.Role | null
     departmentName?: string | null
     createdAt?: Date | string
   }
@@ -18725,6 +18797,7 @@ export namespace Prisma {
     status?: EnumReportStatusFilter<"ReportHistory"> | $Enums.ReportStatus
     comment?: StringNullableFilter<"ReportHistory"> | string | null
     userName?: StringFilter<"ReportHistory"> | string
+    userRole?: EnumRoleNullableFilter<"ReportHistory"> | $Enums.Role | null
     departmentName?: StringNullableFilter<"ReportHistory"> | string | null
     createdAt?: DateTimeFilter<"ReportHistory"> | Date | string
   }
@@ -20082,6 +20155,7 @@ export namespace Prisma {
     status: $Enums.ReportStatus
     comment?: string | null
     userName: string
+    userRole?: $Enums.Role | null
     departmentName?: string | null
     createdAt?: Date | string
   }
@@ -20118,6 +20192,7 @@ export namespace Prisma {
     status?: EnumReportStatusFieldUpdateOperationsInput | $Enums.ReportStatus
     comment?: NullableStringFieldUpdateOperationsInput | string | null
     userName?: StringFieldUpdateOperationsInput | string
+    userRole?: NullableEnumRoleFieldUpdateOperationsInput | $Enums.Role | null
     departmentName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -20126,6 +20201,7 @@ export namespace Prisma {
     status?: EnumReportStatusFieldUpdateOperationsInput | $Enums.ReportStatus
     comment?: NullableStringFieldUpdateOperationsInput | string | null
     userName?: StringFieldUpdateOperationsInput | string
+    userRole?: NullableEnumRoleFieldUpdateOperationsInput | $Enums.Role | null
     departmentName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -20134,6 +20210,7 @@ export namespace Prisma {
     status?: EnumReportStatusFieldUpdateOperationsInput | $Enums.ReportStatus
     comment?: NullableStringFieldUpdateOperationsInput | string | null
     userName?: StringFieldUpdateOperationsInput | string
+    userRole?: NullableEnumRoleFieldUpdateOperationsInput | $Enums.Role | null
     departmentName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }

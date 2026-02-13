@@ -88,6 +88,7 @@ model ReportHistory {
   status         ReportStatus
   comment        String? // O feedback ou observação deste passo
   userName       String // Nome de quem registrou o passo para histórico rápido
+  userRole       Role? // NEW: Role de quem registrou o passo
   departmentName String? // NEW: Setor por onde passou
   createdAt      DateTime     @default(now())
 }

@@ -101,6 +101,10 @@ export const ReportController = {
 
         try {
             const reports = await reportService.listUserReports(
+                // Refinando a lógica conforme solicitação:
+                // "A timeline pode ser vista por todos... os comentários serão ocultos ao profissional."
+                // "O único comentário que o profissional pode ver... é quando o supervisor comenta após receber."
+
                 userId,
                 page ? Number(page) : undefined,
                 limit ? Number(limit) : undefined,
@@ -109,12 +113,54 @@ export const ReportController = {
                 endDate ? new Date(endDate as string) : undefined,
             );
 
-            // Filter history for professionals: only show steps with comments (feedbacks)
+            // Verifica se o usuário é Profissional. Se não for (Supervisor/Manager/Admin), vê tudo.
+            // req.userRole vem do middleware de autenticação.
+            const userRole = req.userRole;
+            const isProfessional = !userRole || userRole === 'PROFESSIONAL';
+
+            if (!isProfessional) {
+                return res.json(reports);
+            }
+
+            // Filter history for professionals
             const safeReports = reports.map(r => {
+                const history = r.history ? (r.history as any[]).map(h => {
+                    // Regra 1: Comentários de Gerentes/Admins são sempre ocultos (Internos)
+                    const isManagerial = ['MANAGER', 'ADMIN'].includes(h.userRole);
+
+                    // Regra 2: Encaminhamentos (FORWARDED) são trâmites internos (Sup -> Gerente ou Gerente -> Gerente)
+                    // O profissional vê que foi encaminhado, mas não o texto.
+                    const isForwarding = h.status === 'FORWARDED';
+
+                    // Se for interno, removemos o texto do comentário, mantendo o registro da ação na timeline.
+                    if (isManagerial || isForwarding) {
+                        return { ...h, comment: null };
+                    }
+
+                    // Caso contrário (SENT pelo profissional, IN_REVIEW do Supervisor, RESOLVED do Supervisor), mantém.
+                    return h;
+                }) : [];
+
+                // Agora aplicamos a mesma regra ao "feedback" (último comentário visível)
+                // Se o status atual é FORWARDED, o feedback deve ser oculto.
+                // Se o histórico mais recente foi ocultado (comment === null), o feedback também deve ser.
+                let feedback = r.feedback;
+
+                // Regra explícita: "nunca quando encaminhar"
+                if (r.status === 'FORWARDED') {
+                    feedback = null;
+                } else if (history.length > 0) {
+                    // Assumindo que o histórico vem ordenado do mais recente para o mais antigo (padrão)
+                    const latest = history[0];
+                    if (latest.comment === null) {
+                        feedback = null;
+                    }
+                }
+
                 return {
                     ...r,
-                    feedback: r.feedback || undefined,
-                    history: r.history ? (r.history as any[]).filter(h => !!h.comment) : []
+                    feedback,
+                    history
                 };
             });
 
@@ -125,7 +171,6 @@ export const ReportController = {
     },
 
     // Create a new report (imagem obrigatória + Cloudinary)
-    // controllers/ReportController.ts
     create: async (req: Request, res: Response) => {
         const { comment, imageUrl, latitude, longitude, createdAt } = req.body;
         const userId = req.userId!;
@@ -232,6 +277,7 @@ export const ReportController = {
                 feedback,
                 operatorName,
                 departmentId,
+                userRole // Passando a role para o histórico
             );
 
             // Auditoria

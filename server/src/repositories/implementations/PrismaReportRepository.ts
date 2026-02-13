@@ -4,8 +4,9 @@ import type { CreateReportDTO, IReportRepository, ReportWithUser } from '../inte
 
 export class PrismaReportRepository implements IReportRepository {
     async create({ comment, userId, imageUrl, latitude, longitude, createdAt }: CreateReportDTO): Promise<ReportWithUser> {
-        const user = await prisma.user.findUnique({ where: { id: userId }, select: { name: true } });
+        const user = await prisma.user.findUnique({ where: { id: userId }, select: { name: true, role: true } });
         const userName = user?.name || 'Operador';
+        const userRole = user?.role || 'PROFESSIONAL';
 
         return prisma.report.create({
             data: {
@@ -20,7 +21,8 @@ export class PrismaReportRepository implements IReportRepository {
                     create: {
                         status: 'SENT',
                         comment: 'Relatório enviado pelo profissional.',
-                        userName: userName
+                        userName: userName,
+                        userRole: userRole
                     }
                 }
             },
@@ -51,14 +53,24 @@ export class PrismaReportRepository implements IReportRepository {
                     },
                 },
                 history: {
+                    select: {
+                        id: true,
+                        reportId: true,
+                        status: true,
+                        comment: true,
+                        userName: true,
+                        userRole: true, // NEW
+                        departmentName: true,
+                        createdAt: true
+                    },
                     orderBy: { createdAt: 'desc' },
                 },
                 department: true
             },
-        }) as Promise<ReportWithUser | null>;
+        }) as any; // Cast for now due to strict type mismatch in intermediate steps
     }
 
-    async updateStatus(id: string, status: ReportStatus, feedback?: string, userName?: string, departmentId?: string): Promise<Report> {
+    async updateStatus(id: string, status: ReportStatus, feedback?: string, userName?: string, departmentId?: string, userRole?: string): Promise<Report> {
         let departmentName: string | null = null;
         if (departmentId) {
             const dept = await prisma.department.findUnique({ where: { id: departmentId } });
@@ -74,6 +86,7 @@ export class PrismaReportRepository implements IReportRepository {
                     status,
                     comment: feedback,
                     userName: userName || 'Sistema',
+                    userRole: userRole ? (userRole as any) : undefined,
                     departmentName
                 }
             }

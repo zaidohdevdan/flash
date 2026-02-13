@@ -27,6 +27,7 @@ import { ExportReportsModal } from '../components/domain/modals/ExportReportsMod
 import { ConferenceModal } from '../components/domain/modals/ConferenceModal';
 import { InviteConferenceModal } from '../components/domain/modals/InviteConferenceModal';
 import { AgendaModal } from '../components/domain/modals/AgendaModal';
+import { ReportHistoryModal } from '../components/domain/modals/ReportHistoryModal';
 import { ConferenceInviteNotification } from '../components/ui/ConferenceInviteNotification';
 import { db } from '../services/db';
 import { useLiveQuery } from 'dexie-react-hooks';
@@ -102,7 +103,7 @@ export function Dashboard() {
     const LIMIT = 4;
 
     // Modals & UI State
-    // const [selectedReport, setSelectedReport] = useState<Report | null>(null);
+    const [selectedReport, setSelectedReport] = useState<Report | null>(null);
     const [analyzingReport, setAnalyzingReport] = useState<Report | null>(null);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [isExportModalOpen, setIsExportModalOpen] = useState(false);
@@ -543,7 +544,7 @@ export function Dashboard() {
                                             Analisar
                                         </Button>
                                     )}
-                                    <Button variant="ghost" size="sm" onClick={() => { /* setSelectedReport(report) */ }}>
+                                    <Button variant="ghost" size="sm" onClick={() => setSelectedReport(report)}>
                                         <History className="w-4 h-4" />
                                     </Button>
                                 </div>
@@ -581,11 +582,11 @@ export function Dashboard() {
                 title="Análise de Relatório"
             />
 
-            {/* <ReportHistoryModal
+            <ReportHistoryModal
                 isOpen={!!selectedReport}
                 onClose={() => setSelectedReport(null)}
                 report={selectedReport}
-            /> */}
+            />
 
             <ProfileSettingsModal
                 isOpen={isProfileOpen}

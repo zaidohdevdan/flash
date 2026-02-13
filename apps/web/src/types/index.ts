@@ -6,6 +6,7 @@ export interface ReportHistory {
     comment: string;
     userName: string;
     departmentName?: string;
+    userRole?: 'PROFESSIONAL' | 'SUPERVISOR' | 'MANAGER' | 'ADMIN';
     createdAt: string;
 }
 

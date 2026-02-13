@@ -23,7 +23,7 @@ export type ReportWithUser = Report & {
 export interface IReportRepository {
     create(data: CreateReportDTO): Promise<ReportWithUser>;
     findById(id: string): Promise<ReportWithUser | null>;
-    updateStatus(id: string, status: ReportStatus, feedback?: string, userName?: string, departmentId?: string): Promise<Report>;
+    updateStatus(id: string, status: ReportStatus, feedback?: string, userName?: string, departmentId?: string, userRole?: string): Promise<Report>;
     findAll(supervisorId: string, page?: number, limit?: number, status?: ReportStatus, startDate?: Date, endDate?: Date): Promise<ReportWithUser[]>;
     findByUserId(userId: string, page?: number, limit?: number, status?: ReportStatus, startDate?: Date, endDate?: Date): Promise<ReportWithUser[]>;
     findByDepartment(departmentId: string, page?: number, limit?: number, status?: ReportStatus, startDate?: Date, endDate?: Date): Promise<ReportWithUser[]>;

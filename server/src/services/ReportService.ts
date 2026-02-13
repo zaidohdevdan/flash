@@ -17,8 +17,8 @@ export class ReportService {
         return this.reportRepository.findById(id);
     }
 
-    async updateStatus(id: string, status: ReportStatus, feedback?: string, operatorName?: string, departmentId?: string) {
-        return this.reportRepository.updateStatus(id, status, feedback, operatorName, departmentId);
+    async updateStatus(id: string, status: ReportStatus, feedback?: string, operatorName?: string, departmentId?: string, userRole?: string) {
+        return this.reportRepository.updateStatus(id, status, feedback, operatorName, departmentId, userRole);
     }
 
     async getDashboardStats(supervisorId: string) {

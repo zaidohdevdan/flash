@@ -99,7 +99,7 @@ export const ReportCard: React.FC<ReportCardProps> = React.memo(({
                         {report.comment}
                     </h4>
 
-                    {report.status === 'FORWARDED' && report.department?.name && (
+                    {report.department?.name && (
                         <div className="inline-flex items-center gap-2 px-3 py-1 bg-purple-500/10 rounded-full border border-purple-500/20 mb-3">
                             <div className="w-1.5 h-1.5 bg-purple-500 rounded-full" />
                             <span className="text-xs font-bold text-purple-500 uppercase tracking-tight">

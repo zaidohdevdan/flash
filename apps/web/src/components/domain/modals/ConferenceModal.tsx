@@ -42,72 +42,75 @@ export const ConferenceModal: React.FC<ConferenceModalProps> = ({
     const [isReconnecting, setIsReconnecting] = useState(false);
     const [mountKey, setMountKey] = useState(0);
     const terminateTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-    const userIntendsToLeaveRef = useRef(false);
+    const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const intentionalExitRef = useRef(false); // Flag única e soberana
 
-    // Resetar estado quando o modal abrir/fechar
+    // Resetar estado quando o modal abrir
     useEffect(() => {
-        if (!isOpen) {
+        if (isOpen) {
             // eslint-disable-next-line react-hooks/set-state-in-effect
             setIsTerminated(false);
-            userIntendsToLeaveRef.current = false;
-            if (terminateTimeoutRef.current) {
-                clearTimeout(terminateTimeoutRef.current);
-                terminateTimeoutRef.current = null;
-            }
-        } else {
-            // Garantir que ao abrir tudo esteja limpo
-            setIsTerminated(false);
-            userIntendsToLeaveRef.current = false;
+            setIsReconnecting(false);
+            intentionalExitRef.current = false;
         }
+
+        // LIMPEZA CRÍTICA: Matar todos os timers ao desmontar ou fechar
+        const termTimer = terminateTimeoutRef.current;
+        const recTimer = reconnectTimeoutRef.current;
+        return () => {
+            if (termTimer) clearTimeout(termTimer);
+            if (recTimer) clearTimeout(recTimer);
+        };
     }, [isOpen]);
 
-    // Efeito para recarregar a página em caso de oscilação (solicitação do usuário)
-    useEffect(() => {
-        if (isReconnecting) {
-            console.log('[Jitsi] Oscilação detectada. Recarregando a página em 2s...');
-            const reloadTimer = setTimeout(() => {
-                window.location.reload();
-            }, 2000);
-            return () => clearTimeout(reloadTimer);
-        }
-    }, [isReconnecting]);
+    const handleCleanExit = useCallback(() => {
+        console.log('[Jitsi] Saída limpa disparada.');
+        intentionalExitRef.current = true;
 
-    const handleReadyToHangup = useCallback(() => {
-        console.log('[Jitsi] Intenção de saída: Hangup clicado.');
-        userIntendsToLeaveRef.current = true;
+        // Limpar timers imediatamente
+        if (terminateTimeoutRef.current) clearTimeout(terminateTimeoutRef.current);
+        if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
+
+        // Forçar estados de sumiço do Jitsi e exibição da tela de término
+        setIsReconnecting(false);
+        setIsTerminated(true);
+
+        // O onClose() só será chamado agora no botão final da tela de término
     }, []);
 
+    const handleReadyToHangup = useCallback(() => {
+        console.log('[Jitsi] Evento Hangup (Botão Vermelho).');
+        handleCleanExit();
+    }, [handleCleanExit]);
+
     const handleLeave = useCallback((event: unknown) => {
-        console.log('[Jitsi] Evento left detectado:', event);
+        console.log('[Jitsi] Conferência finalizada com sucesso (videoConferenceLeft).', event);
+        handleCleanExit();
+    }, [handleCleanExit]);
 
-        if (terminateTimeoutRef.current) clearTimeout(terminateTimeoutRef.current);
+    const handleConnectionFailed = useCallback((event: unknown) => {
+        console.log('[Jitsi] Queda de conexão/Erro detectado (conferenceFailed).', event);
+        if (intentionalExitRef.current) return;
 
-        if (userIntendsToLeaveRef.current) {
-            console.log('[Jitsi] Encerramento confirmado (intencional)');
-            setIsTerminated(true);
-            setIsReconnecting(false);
-            return;
-        }
-
-        console.log('[Jitsi] Saída não intencional detectada. Tentando reconexão...');
         setIsReconnecting(true);
 
         terminateTimeoutRef.current = setTimeout(() => {
-            console.log('[Jitsi] Re-entry não detectado após 10s. Encerrando sessão.');
-            setIsReconnecting(false);
-            setIsTerminated(true);
+            if (!intentionalExitRef.current) {
+                setIsReconnecting(false);
+                setIsTerminated(true);
+            }
         }, 10000);
     }, []);
 
     const handleJoined = useCallback((event: unknown) => {
         console.log('[Jitsi] Usuário entrou/re-entrou:', event);
+        if (intentionalExitRef.current) return;
+
         setIsReconnecting(false);
         setIsTerminated(false);
-        if (terminateTimeoutRef.current) {
-            console.log('[Jitsi] Re-entry detectado. Cancelando timeout de finalização.');
-            clearTimeout(terminateTimeoutRef.current);
-            terminateTimeoutRef.current = null;
-        }
+
+        if (terminateTimeoutRef.current) clearTimeout(terminateTimeoutRef.current);
+        if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
     }, []);
 
     if (!isOpen) return null;
@@ -145,7 +148,7 @@ export const ConferenceModal: React.FC<ConferenceModalProps> = ({
 
                         <button
                             type="button"
-                            onClick={onClose}
+                            onClick={handleCleanExit}
                             className="p-2 hover:bg-[var(--bg-secondary)] rounded-xl transition-colors text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
                             title="Sair da Sala"
                         >
@@ -156,91 +159,108 @@ export const ConferenceModal: React.FC<ConferenceModalProps> = ({
 
                 {/* Content Area */}
                 <div className="flex-1 bg-[var(--bg-secondary)] relative overflow-hidden">
-                    {/* Jitsi Meeting */}
-                    <div className={`absolute inset-0 transition-opacity duration-500 ${isTerminated ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
-                        <JitsiMeeting
-                            key={mountKey}
-                            domain="meet.ffmuc.net"
-                            roomName={roomName}
-                            configOverwrite={{
-                                startWithAudioMuted: true,
-                                startWithVideoMuted: true,
-                                disableModeratorIndicator: true,
-                                startScreenSharing: false,
-                                enableEmailInStats: false,
-                                prejoinPageEnabled: false,
-                                lobbyModeEnabled: false,
-                                enableLobby: false,
-                                p2p: { enabled: true },
-                                disableP2P: false,
-                                preferH264: true,
-                                enableLayerSuspension: true,
-                                hideConferenceTimer: true,
-                                subject: 'War Room Flash',
-                                defaultLanguage: 'pt-br',
-                                lang: 'pt-BR',
-                                toolbarButtons: [
-                                    'microphone', 'camera', 'closedcaptions', 'desktop', 'fullscreen',
-                                    'fodeviceselection', 'hangup', 'profile', 'chat', 'recording',
-                                    'livestreaming', 'sharedvideo', 'settings', 'raisehand',
-                                    'videoquality', 'filmstrip', 'tileview', 'videobackgroundblur', 'help'
-                                ],
-                            }}
-                            interfaceConfigOverwrite={{
-                                DISABLE_JOIN_LEAVE_NOTIFICATIONS: true,
-                                SHOW_JITSI_WATERMARK: false,
-                                SHOW_WATERMARK_FOR_GUESTS: false,
-                                SHOW_BRAND_WATERMARK: false,
-                                BRAND_WATERMARK_LINK: '',
-                                DEFAULT_BACKGROUND: 'linear-gradient(to bottom, #0f172a, #1e293b)',
-                            }}
-                            userInfo={{
-                                displayName: userName,
-                                email: '',
-                                id: userId
-                            } as { id?: string; displayName: string; email: string }}
-                            onApiReady={(api: unknown) => {
-                                const externalApi = api as JitsiApi;
-                                externalApi.addEventListeners({
-                                    videoConferenceJoined: (event: JitsiEvent) => {
-                                        handleJoined(event);
-                                        // Notificar lista inicial (eu)
-                                        onParticipantsUpdate?.([event.id]);
-                                    },
-                                    videoConferenceLeft: (event: JitsiEvent) => {
-                                        handleLeave(event);
-                                        onParticipantsUpdate?.([]);
-                                    },
-                                    participantJoined: (event: JitsiEvent) => {
-                                        console.log('[Jitsi] Participant joined:', event);
-                                        const info = externalApi.getParticipantsInfo();
-                                        const ids = info.map((p: JitsiParticipant) => p.participantId || p.id);
-                                        // Incluir eu mesmo (local)
-                                        const myId = externalApi._myUserID || userId;
-                                        if (myId) onParticipantsUpdate?.(Array.from(new Set([myId, ...ids])));
-                                    },
-                                    participantLeft: (event: JitsiEvent) => {
-                                        console.log('[Jitsi] Participant left:', event);
-                                        const info = externalApi.getParticipantsInfo();
-                                        const ids = info.map((p: JitsiParticipant) => p.participantId || p.id);
-                                        const myId = externalApi._myUserID || userId;
-                                        if (myId) onParticipantsUpdate?.(Array.from(new Set([myId, ...ids])));
-                                    },
-                                    readyToHangup: handleReadyToHangup,
-                                    participantRoleChanged: (event: unknown) => {
-                                        console.log('[Jitsi] Role change:', event);
-                                    }
-                                });
-                            }}
-                            getIFrameRef={(iframeRef) => {
-                                iframeRef.style.height = '100%';
-                                iframeRef.style.width = '100%';
-                            }}
-                        />
+                    {/* Jitsi Meeting - Unmount strictly on termination for clean re-entry */}
+                    <div className="absolute inset-0">
+                        {!isTerminated && (
+                            <JitsiMeeting
+                                key={mountKey}
+                                domain="meet.ffmuc.net"
+                                roomName={roomName}
+                                configOverwrite={{
+                                    startWithAudioMuted: false,
+                                    startWithVideoMuted: false,
+                                    disableModeratorIndicator: true,
+                                    startScreenSharing: false,
+                                    enableEmailInStats: false,
+                                    prejoinPageEnabled: false,
+                                    lobbyModeEnabled: false,
+                                    enableLobby: false,
+                                    p2p: { enabled: true },
+                                    disableP2P: false,
+                                    preferH264: true,
+                                    enableLayerSuspension: true,
+                                    hideConferenceTimer: true,
+                                    subject: 'War Room Flash',
+                                    defaultLanguage: 'pt-br',
+                                    lang: 'pt-BR',
+                                    toolbarButtons: [
+                                        'microphone', 'camera', 'closedcaptions', 'desktop', 'fullscreen',
+                                        'fodeviceselection', 'hangup', 'profile', 'chat', 'recording',
+                                        'livestreaming', 'sharedvideo', 'settings', 'raisehand',
+                                        'videoquality', 'filmstrip', 'tileview', 'videobackgroundblur', 'help'
+                                    ],
+                                }}
+                                interfaceConfigOverwrite={{
+                                    DISABLE_JOIN_LEAVE_NOTIFICATIONS: true,
+                                    SHOW_JITSI_WATERMARK: false,
+                                    SHOW_WATERMARK_FOR_GUESTS: false,
+                                    SHOW_BRAND_WATERMARK: false,
+                                    BRAND_WATERMARK_LINK: '',
+                                    DEFAULT_BACKGROUND: 'linear-gradient(to bottom, #0f172a, #1e293b)',
+                                }}
+                                userInfo={{
+                                    displayName: userName,
+                                    email: '',
+                                    id: userId
+                                } as { id?: string; displayName: string; email: string }}
+                                onApiReady={(api: unknown) => {
+                                    const externalApi = api as JitsiApi;
+                                    externalApi.addEventListeners({
+                                        videoConferenceJoined: (event: JitsiEvent) => {
+                                            handleJoined(event);
+                                            onParticipantsUpdate?.([event.id]);
+                                        },
+                                        videoConferenceLeft: (event: JitsiEvent) => {
+                                            handleLeave(event);
+                                            onParticipantsUpdate?.([]);
+                                        },
+                                        conferenceFailed: (event: unknown) => {
+                                            handleConnectionFailed(event);
+                                        },
+                                        suspended: (event: unknown) => {
+                                            console.log('[Jitsi] Conexão suspensa.');
+                                            handleConnectionFailed(event);
+                                        },
+                                        readyToHangup: handleReadyToHangup,
+                                        hangup: () => {
+                                            console.log('[Jitsi] Comando HANGUP recebido.');
+                                            handleCleanExit();
+                                        },
+                                        toolbarButtonClicked: (event: { key?: string; id?: string }) => {
+                                            if (event.key === 'hangup' || event.id === 'hangup') {
+                                                console.log('[Jitsi] Clique no Hangup detectado!');
+                                                handleCleanExit();
+                                            }
+                                        },
+                                        participantJoined: (event: JitsiEvent) => {
+                                            console.log('[Jitsi] Participant joined:', event);
+                                            const info = externalApi.getParticipantsInfo();
+                                            const ids = info.map((p: JitsiParticipant) => p.participantId || p.id);
+                                            const myId = externalApi._myUserID || userId;
+                                            if (myId) onParticipantsUpdate?.(Array.from(new Set([myId, ...ids])));
+                                        },
+                                        participantLeft: (event: JitsiEvent) => {
+                                            console.log('[Jitsi] Participant left:', event);
+                                            const info = externalApi.getParticipantsInfo();
+                                            const ids = info.map((p: JitsiParticipant) => p.participantId || p.id);
+                                            const myId = externalApi._myUserID || userId;
+                                            if (myId) onParticipantsUpdate?.(Array.from(new Set([myId, ...ids])));
+                                        },
+                                        participantRoleChanged: (event: unknown) => {
+                                            console.log('[Jitsi] Role change:', event);
+                                        }
+                                    });
+                                }}
+                                getIFrameRef={(iframeRef) => {
+                                    iframeRef.style.height = '100%';
+                                    iframeRef.style.width = '100%';
+                                }}
+                            />
+                        )}
                     </div>
 
                     {/* Reconnection Overlay */}
-                    {isReconnecting && (
+                    {isReconnecting && !isTerminated && (
                         <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-8 bg-slate-900/60 backdrop-blur-sm z-20 animate-in fade-in duration-300">
                             <div className="w-16 h-16 border-4 border-[var(--accent-primary)]/20 border-t-[var(--accent-primary)] rounded-full animate-spin mb-6" />
                             <h3 className="text-xl font-black text-white uppercase tracking-tighter mb-2">
@@ -254,7 +274,7 @@ export const ConferenceModal: React.FC<ConferenceModalProps> = ({
 
                     {/* Termination Overlay */}
                     {isTerminated && (
-                        <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-8 bg-[var(--bg-primary)] animate-in zoom-in-95 duration-500 z-10">
+                        <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-8 bg-[var(--bg-primary)] animate-in zoom-in-95 duration-500 z-30">
                             <div className="relative mb-8">
                                 <div className="absolute inset-0 bg-[var(--accent-primary)]/20 blur-[50px] rounded-full" />
                                 <div className="relative w-24 h-24 bg-[var(--accent-primary)] rounded-[2rem] flex items-center justify-center shadow-2xl shadow-[var(--accent-primary)]/40 border border-[var(--border-subtle)] active:scale-95 transition-transform">
@@ -279,7 +299,7 @@ export const ConferenceModal: React.FC<ConferenceModalProps> = ({
                                         setIsTerminated(false);
                                         setIsReconnecting(false);
                                         setMountKey(prev => prev + 1);
-                                        userIntendsToLeaveRef.current = false;
+                                        intentionalExitRef.current = false;
                                     }}
                                     className="px-8 py-3 bg-[var(--accent-primary)] text-[var(--accent-text)] rounded-2xl font-black uppercase tracking-widest text-xs hover:brightness-110 transition-all active:scale-95 shadow-xl shadow-[var(--accent-primary)]/20"
                                 >
@@ -287,10 +307,7 @@ export const ConferenceModal: React.FC<ConferenceModalProps> = ({
                                 </button>
                                 <button
                                     type="button"
-                                    onClick={() => {
-                                        userIntendsToLeaveRef.current = true;
-                                        onClose();
-                                    }}
+                                    onClick={onClose}
                                     className="px-8 py-2 text-[var(--text-tertiary)] font-bold uppercase tracking-widest text-[10px] hover:text-[var(--text-primary)] transition-colors"
                                 >
                                     Sair da Sala
