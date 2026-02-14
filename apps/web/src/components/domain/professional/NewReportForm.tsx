@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { Camera, Send, X } from 'lucide-react';
 import { Button, TextArea } from '../../ui';
 
@@ -20,6 +21,14 @@ export const NewReportForm: React.FC<NewReportFormProps> = ({
     onSubmit,
     isSending
 }) => {
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        if (fileInputRef.current) {
+            fileInputRef.current.setAttribute('capture', 'environment');
+        }
+    }, []);
+
     return (
         <form onSubmit={onSubmit} className="space-y-6">
             <div className="relative aspect-video rounded-[2.5rem] bg-[var(--bg-secondary)] border border-[var(--border-subtle)] overflow-hidden group shadow-sm transition-all hover:border-[var(--accent-primary)]">
@@ -43,6 +52,7 @@ export const NewReportForm: React.FC<NewReportFormProps> = ({
                         </div>
                         <p className="text-[10px] text-[var(--text-secondary)] font-black uppercase tracking-widest">Capturar Evidência</p>
                         <input
+                            ref={fileInputRef}
                             type="file"
                             accept="image/*"
                             onChange={onImageChange}

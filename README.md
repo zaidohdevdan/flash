@@ -1,52 +1,67 @@
-# Flash - Sistema de Gestão Operacional
+# ⚡ Flash - Sistema de Gestão Operacional
 
-Sistema de gestão operacional em tempo real para supervisão e coordenação de equipes.
+> **Mission Control**: Supervisão e coordenação de equipes em tempo real com alta performance.
 
-## 🚀 Tecnologias
+Flash é uma plataforma robusta de gestão operacional projetada para conectar supervisores e profissionais em campo de forma instantânea e eficiente.
 
-- **Frontend**: React 19 + TypeScript + Vite
-- **Backend**: Bun + Express + Prisma
-- **Real-time**: Socket.io
-- **Deployment**: Vercel (Frontend) + Railway (Backend)
-- **Documentation**: [Arquitetura](docs/architecture.md), [Backend](docs/backend.md), [Frontend](docs/frontend.md), [Deployment](docs/deployment.md)
+## ✨ Funcionalidades Principais
 
-## 📦 Instalação
+- **📡 Monitoramento em Tempo Real**: Acompanhe a localização e status da equipe ao vivo.
+- **💬 Comunicação Integrada**: Chat direto e em grupo com suporte a áudio e mídia.
+- **📝 Relatórios Avançados**: Criação de relatórios com geolocalização e funcionamento offline.
+- **🎨 Design Mission Control**: Interface de alto contraste otimizada para legibilidade e performance.
+- **🔄 Sincronização Inteligente**: Suporte robusto para operação offline com Dexie.js.
+
+## 🚀 Stack Tecnológico
+
+- **Frontend**: React 19, TypeScript, Vite, TailwindCSS
+- **Backend**: Bun, Express, Socket.io, Prisma
+- **Database**: MongoDB (Atlas)
+- **Local Database**: Dexie.js (IndexedDB)
+- **Deploy**: Vercel (Web) + Railway (Server)
+
+## 📦 Como Iniciar
+
+### Pré-requisitos
+
+- [Bun](https://bun.sh) (v1.0+)
+- Node.js (v18+) - *Opcional, mas recomendado para algumas ferramentas*
+
+### Instalação
 
 ```bash
+# Clone o repositório
+git clone https://github.com/seu-usuario/flash.git
+
+# Instale as dependências
 bun install
 ```
 
-## 🛠️ Desenvolvimento
-
-Para rodar ambos (servidor e web app):
+### 🛠️ Desenvolvimento
 
 ```bash
+# Iniciar Servidor e Web App simultaneamente
 bun run dev
+
+# Ou inicie separadamente:
+bun run dev:server # Backend (Porta 3001)
+bun run dev:web    # Frontend (Porta 5173)
 ```
 
-Para rodar especificamente:
+## 🏗️ Estrutura do Projeto
 
-- Web app: `bun run dev:web`
-- Server: `bun run dev:server`
-
-## 🏗️ Build
-
-```bash
-# Frontend
-cd apps/web && bun run build
-
-# Backend
-cd server && bun run build
-```
+- `apps/web`: Frontend React (SPA)
+- `server`: API Backend e WebSocket Server
+- `packages`: Pacotes compartilhados (UI Kit, tipos, etc.)
 
 ## 📝 Variáveis de Ambiente
 
-Configure as variáveis necessárias em `.env`:
+Crie um arquivo `.env` na raiz baseado no `.env.example`:
 
-- `DATABASE_URL`: URL do MongoDB
-- `JWT_SECRET`: Chave secreta para JWT
-- `CLOUDINARY_*`: Credenciais do Cloudinary
+- `DATABASE_URL`: Connection string do MongoDB
+- `JWT_SECRET`: Segredo para autenticação
+- `VITE_API_URL`: URL da API (ex: <http://localhost:3001>)
 
 ---
 
-**Última atualização**: 2026-02-09
+Desenvolvido com ⚡ por [Seu Nome/Time]
