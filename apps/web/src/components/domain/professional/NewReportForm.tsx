@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import React, { type ChangeEvent, type FC, useEffect, useRef } from 'react';
 import { Camera, Send, X } from 'lucide-react';
 import { Button, TextArea } from '../../ui';
 
@@ -6,13 +6,13 @@ interface NewReportFormProps {
     comment: string;
     onCommentChange: (val: string) => void;
     preview: string | null;
-    onImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    onImageChange: (e: ChangeEvent<HTMLInputElement>) => void;
     onClearImage: () => void;
-    onSubmit: (e: React.FormEvent) => void;
+    onSubmit: React.SubmitEventHandler<HTMLFormElement>;
     isSending: boolean;
 }
 
-export const NewReportForm: React.FC<NewReportFormProps> = ({
+export const NewReportForm: FC<NewReportFormProps> = ({
     comment,
     onCommentChange,
     preview,
