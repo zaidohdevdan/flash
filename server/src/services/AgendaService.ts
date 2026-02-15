@@ -34,9 +34,6 @@ export class AgendaService {
     async updateEvent(id: string, data: Partial<CreateAgendaEventDTO>, io?: SocketIOServer) {
         const event = await this.agendaRepository.update(id, data);
 
-        // Em um sistema real, aqui você cancelaria os agendamentos antigos e criaria novos.
-        // Para o MVP, vamos apenas criar novas notificações de "Evento Atualizado" se for relevante.
-
         return event;
     }
 
@@ -61,44 +58,44 @@ export class AgendaService {
                 link: `/agenda?event=${id}`
             }, io);
 
-            // 2. Notificação 1 dia antes
-            const oneDayBefore = new Date(startTime.getTime() - 24 * 60 * 60 * 1000);
-            if (oneDayBefore > new Date()) {
-                await this.notificationService.createNotification({
-                    userId,
-                    type: 'AGENDA_REMINDER',
-                    title: 'Lembrete: Evento amanhã',
-                    message: `O evento "${title}" começa em 24h.`,
-                    scheduledFor: oneDayBefore,
-                    link: `/agenda?event=${id}`
-                });
-            }
+            // // 2. Notificação 1 dia antes
+            // const oneDayBefore = new Date(startTime.getTime() - 24 * 60 * 60 * 1000);
+            // if (oneDayBefore > new Date()) {
+            //     await this.notificationService.createNotification({
+            //         userId,
+            //         type: 'AGENDA_REMINDER',
+            //         title: 'Lembrete: Evento amanhã',
+            //         message: `O evento "${title}" começa em 24h.`,
+            //         scheduledFor: oneDayBefore,
+            //         link: `/agenda?event=${id}`
+            //     });
+            // }
 
-            // 3. Notificação 1 hora antes
-            const oneHourBefore = new Date(startTime.getTime() - 1 * 60 * 60 * 1000);
-            if (oneHourBefore > new Date()) {
-                await this.notificationService.createNotification({
-                    userId,
-                    type: 'AGENDA_REMINDER',
-                    title: 'Lembrete: Evento em 1h',
-                    message: `O evento "${title}" começa em 1 hora. Prepare-se!`,
-                    scheduledFor: oneHourBefore,
-                    link: `/agenda?event=${id}`
-                });
-            }
+            // // 3. Notificação 1 hora antes
+            // const oneHourBefore = new Date(startTime.getTime() - 1 * 60 * 60 * 1000);
+            // if (oneHourBefore > new Date()) {
+            //     await this.notificationService.createNotification({
+            //         userId,
+            //         type: 'AGENDA_REMINDER',
+            //         title: 'Lembrete: Evento em 1h',
+            //         message: `O evento "${title}" começa em 1 hora. Prepare-se!`,
+            //         scheduledFor: oneHourBefore,
+            //         link: `/agenda?event=${id}`
+            //     });
+            // }
 
-            // 4. Notificação 5 minutos antes
-            const fiveMinutesBefore = new Date(startTime.getTime() - 5 * 60 * 1000);
-            if (fiveMinutesBefore > new Date()) {
-                await this.notificationService.createNotification({
-                    userId,
-                    type: 'AGENDA_REMINDER',
-                    title: 'Lembrete: Em 5 minutos!',
-                    message: `O evento "${title}" começa em apenas 5 minutos.`,
-                    scheduledFor: fiveMinutesBefore,
-                    link: `/agenda?event=${id}`
-                });
-            }
+            // // 4. Notificação 5 minutos antes
+            // const fiveMinutesBefore = new Date(startTime.getTime() - 5 * 60 * 1000);
+            // if (fiveMinutesBefore > new Date()) {
+            //     await this.notificationService.createNotification({
+            //         userId,
+            //         type: 'AGENDA_REMINDER',
+            //         title: 'Lembrete: Em 5 minutos!',
+            //         message: `O evento "${title}" começa em apenas 5 minutos.`,
+            //         scheduledFor: fiveMinutesBefore,
+            //         link: `/agenda?event=${id}`
+            //     });
+            // }
         }
     }
 }

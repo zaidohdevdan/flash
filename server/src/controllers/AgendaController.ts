@@ -21,6 +21,7 @@ export const AgendaController = {
             );
             return res.json(events);
         } catch (error) {
+            console.error('[AgendaController] Erro ao listar eventos:', error);
             return res.status(500).json({ error: 'Erro ao listar eventos' });
         }
     },
@@ -79,6 +80,7 @@ export const AgendaController = {
 
             return res.status(204).send();
         } catch (error) {
+            console.error('[AgendaController] Erro ao deletar evento:', error);
             return res.status(500).json({ error: 'Erro ao deletar evento' });
         }
     },
@@ -92,6 +94,7 @@ export const AgendaController = {
             const note = await noteService.saveNote(userId, content);
             return res.json(note);
         } catch (error) {
+            console.error('[AgendaController] Erro ao salvar nota:', error);
             return res.status(500).json({ error: 'Erro ao salvar nota' });
         }
     },
@@ -103,6 +106,7 @@ export const AgendaController = {
             const note = await noteService.getNote(userId);
             return res.json(note || { content: '' });
         } catch (error) {
+            console.error('[AgendaController] Erro ao buscar nota:', error);
             return res.status(500).json({ error: 'Erro ao buscar nota' });
         }
     },
@@ -120,6 +124,7 @@ export const AgendaController = {
             });
             return res.json(contacts);
         } catch (error) {
+            console.error('[AgendaController] Erro ao listar contatos:', error);
             return res.status(500).json({ error: 'Erro ao listar contatos' });
         }
     }

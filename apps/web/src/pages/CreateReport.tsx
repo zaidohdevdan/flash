@@ -289,11 +289,22 @@ export function CreateReport() {
 
     const handleMarkAsRead = async (id: string) => {
         try {
-            await api.patch(`/ notifications / ${id}/read`);
+            await api.patch(`/notifications/${id}/read`);
             await db.notifications.update(id, { read: true });
         } catch {
             await db.notifications.update(id, { read: true });
             toast.error('Erro ao sincronizar leitura com servidor');
+        }
+    };
+
+    const handleDeleteNotification = async (id: string) => {
+        try {
+            await api.delete(`/notifications/${id}`);
+            await db.notifications.delete(id);
+            toast.success("Notificação removida");
+        } catch (error) {
+            console.error('Erro ao deletar notificação:', error);
+            await db.notifications.delete(id);
         }
     };
 
@@ -451,6 +462,7 @@ export function CreateReport() {
             notifications={notifications}
             onMarkAsRead={handleMarkAsRead}
             onMarkAllAsRead={handleMarkAllAsRead}
+            onDelete={handleDeleteNotification}
             onProfileClick={() => setIsProfileOpen(true)}
             activeRoom={activeRoom}
             onRejoinRoom={setActiveRoom}

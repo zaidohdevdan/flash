@@ -200,6 +200,17 @@ export function AdminDashboard() {
         }
     };
 
+    const handleDeleteNotification = async (id: string) => {
+        try {
+            await api.delete(`/notifications/${id}`);
+            await db.notifications.delete(id);
+            toast.success("Notificação removida");
+        } catch (error) {
+            console.error('Erro ao deletar notificação:', error);
+            await db.notifications.delete(id);
+        }
+    };
+
     const fetchUsers = useCallback(async () => {
         try {
             const response = await api.get('/users', {
@@ -402,6 +413,7 @@ export function AdminDashboard() {
             notifications={notifications}
             onMarkAsRead={handleMarkAsRead}
             onMarkAllAsRead={handleMarkAllAsRead}
+            onDelete={handleDeleteNotification}
             onProfileClick={() => setIsProfileOpen(true)}
         >
             <div className="flex flex-col lg:flex-row gap-8 animate-in fade-in duration-500">

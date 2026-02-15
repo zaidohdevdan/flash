@@ -322,6 +322,17 @@ export function ManagerDashboard() {
         }
     };
 
+    const handleDeleteNotification = async (id: string) => {
+        try {
+            await api.delete(`/notifications/${id}`);
+            await db.notifications.delete(id);
+            toast.success("Notificação removida");
+        } catch (error) {
+            console.error('Erro ao deletar notificação:', error);
+            await db.notifications.delete(id);
+        }
+    };
+
     const handleProcessAnalysis = async () => {
         if (!analyzingReport) return;
         try {
@@ -400,6 +411,7 @@ export function ManagerDashboard() {
             notifications={notifications}
             onMarkAsRead={handleMarkAsRead}
             onMarkAllAsRead={handleMarkAllAsRead}
+            onDelete={handleDeleteNotification}
             onProfileClick={() => setIsProfileOpen(true)}
             activeRoom={activeRoom}
             onRejoinRoom={setActiveRoom}
