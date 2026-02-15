@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, X, CheckCircle2, ExternalLink, Calendar, Video, AlertCircle } from 'lucide-react';
+import { Bell, X, CheckCircle2, ExternalLink, Calendar, Video, AlertCircle, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Badge } from './';
@@ -12,6 +12,7 @@ interface NotificationDrawerProps {
     notifications: Notification[];
     onMarkAsRead: (id: string) => void;
     onMarkAllAsRead: () => void;
+    onDelete: (id: string) => void;
 }
 
 export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
@@ -19,7 +20,8 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
     onClose,
     notifications,
     onMarkAsRead,
-    onMarkAllAsRead
+    onMarkAllAsRead,
+    onDelete
 }) => {
     const currentLocale = ptBR;
     const unreadCount = notifications.filter(n => !n.read).length;
@@ -103,13 +105,15 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
                                         <div className="flex gap-4">
                                             <div className={`
                                                 flex-shrink-0 w-10 h-10 rounded-2xl flex items-center justify-center
-                                                ${notif.type.includes('AGENDA') ? 'bg-purple-100 text-purple-600' :
-                                                    notif.type.includes('CONFERENCE') ? 'bg-red-100 text-red-600' :
-                                                        'bg-blue-100 text-blue-600'}
+                                                ${(notif.type.includes('AGENDA') && (notif.title.toLowerCase().includes('cancelado') || notif.type.includes('CANCEL'))) ? 'bg-red-100 text-red-600' :
+                                                    notif.type.includes('AGENDA') ? 'bg-purple-100 text-purple-600' :
+                                                        notif.type.includes('CONFERENCE') ? 'bg-red-100 text-red-600' :
+                                                            'bg-blue-100 text-blue-600'}
                                             `}>
-                                                {notif.type.includes('AGENDA') ? <Calendar className="w-5 h-5" /> :
-                                                    notif.type.includes('CONFERENCE') ? <Video className="w-5 h-5" /> :
-                                                        <AlertCircle className="w-5 h-5" />}
+                                                {(notif.type.includes('AGENDA') && (notif.title.toLowerCase().includes('cancelado') || notif.type.includes('CANCEL'))) ? <X className="w-5 h-5" /> :
+                                                    notif.type.includes('AGENDA') ? <Calendar className="w-5 h-5" /> :
+                                                        notif.type.includes('CONFERENCE') ? <Video className="w-5 h-5" /> :
+                                                            <AlertCircle className="w-5 h-5" />}
                                             </div>
 
                                             <div className="flex-1">
@@ -121,11 +125,24 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
                                                         {format(new Date(notif.createdAt), "HH:mm • dd MMM", { locale: currentLocale })}
                                                     </span>
 
-                                                    {notif.link && (
-                                                        <Badge status="default" className="opacity-0 group-hover:opacity-100 transition-opacity">
-                                                            <ExternalLink className="w-3 h-3" />
-                                                        </Badge>
-                                                    )}
+                                                    <div className="flex items-center gap-2">
+                                                        <button
+                                                            type="button"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                onDelete(notif.id);
+                                                            }}
+                                                            className="p-1 text-[var(--text-tertiary)] hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                                                            title="Excluir notificação"
+                                                        >
+                                                            <Trash2 className="w-3.5 h-3.5" />
+                                                        </button>
+                                                        {notif.link && (
+                                                            <Badge status="default" className="opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                <ExternalLink className="w-3 h-3" />
+                                                            </Badge>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>

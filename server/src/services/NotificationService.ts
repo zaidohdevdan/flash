@@ -52,6 +52,10 @@ export class NotificationService {
         return this.notificationRepository.markAllAsRead(userId);
     }
 
+    async delete(id: string) {
+        return this.notificationRepository.delete(id);
+    }
+
     async processScheduledNotifications(io: SocketIOServer) {
         const now = new Date();
         const pending = await this.notificationRepository.findPending(now);

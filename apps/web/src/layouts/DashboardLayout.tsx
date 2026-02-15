@@ -25,6 +25,7 @@ interface DashboardLayoutProps {
         avatarUrl?: string | null;
         role?: string;
     };
+    onDelete?: (id: string) => void;
     onLogout?: () => void;
     notifications?: Notification[];
     onMarkAsRead?: (id: string) => void;
@@ -47,7 +48,8 @@ export function DashboardLayout({
     searchTerm,
     onSearchChange,
     activeRoom,
-    onRejoinRoom
+    onRejoinRoom,
+    onDelete = () => { }
 }: DashboardLayoutProps) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -106,6 +108,8 @@ export function DashboardLayout({
 
     const isActive = (path: string) => location.pathname === path;
     const unreadCount = notifications.filter(n => !n.read).length;
+
+
 
     return (
         <div className="h-screen bg-[var(--bg-secondary)] flex overflow-hidden">
@@ -279,6 +283,7 @@ export function DashboardLayout({
                 notifications={notifications}
                 onMarkAsRead={onMarkAsRead}
                 onMarkAllAsRead={onMarkAllAsRead}
+                onDelete={onDelete}
             />
         </div>
     );

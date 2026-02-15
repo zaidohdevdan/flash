@@ -32,5 +32,15 @@ export const NotificationController = {
         } catch (error) {
             return res.status(500).json({ error: 'Erro ao marcar todas como lidas' });
         }
+    },
+
+    delete: async (req: Request, res: Response) => {
+        const { id } = req.params;
+        try {
+            await notificationService.delete(String(id));
+            return res.status(204).send();
+        } catch (error) {
+            return res.status(500).json({ error: 'Erro ao deletar notificação' });
+        }
     }
 };

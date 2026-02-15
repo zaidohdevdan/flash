@@ -346,6 +346,18 @@ export function Dashboard() {
         }
     };
 
+    const handleDeleteNotification = async (id: string) => {
+        try {
+            await api.delete(`/notifications/${id}`);
+            await db.notifications.delete(id);
+            toast.success("Notificação removida");
+        } catch (error) {
+            console.error('Erro ao deletar notificação:', error);
+            // Mesmo com erro no server, removemos localmente para evitar frustração
+            await db.notifications.delete(id);
+        }
+    };
+
 
     const handleUpdateProfile = async () => {
         if (!user) return;
@@ -472,6 +484,7 @@ export function Dashboard() {
             notifications={notifications}
             onMarkAsRead={handleMarkAsRead}
             onMarkAllAsRead={handleMarkAllAsRead}
+            onDelete={handleDeleteNotification}
             onProfileClick={() => setIsProfileOpen(true)}
             searchTerm={searchTerm}
             onSearchChange={setSearchTerm}

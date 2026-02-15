@@ -60,6 +60,7 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
     const [eventStartTime, setEventStartTime] = useState('09:00');
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedParticipants, setSelectedParticipants] = useState<string[]>([]);
+    const [deletingEventId, setDeletingEventId] = useState<string | null>(null);
 
     // Effects
     const loadInitialData = useCallback(async () => {
@@ -141,6 +142,7 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
             await api.delete(`/agenda/${id}`);
             setEvents(events.filter(e => e.id !== id));
             toast.success("Evento excluído");
+            setDeletingEventId(null);
         } catch {
             toast.error("Erro ao excluir evento");
         }
@@ -440,15 +442,36 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
                                                     </p>
                                                 </div>
                                             </div>
-                                            <button
-                                                type="button"
-                                                onClick={() => handleDeleteEvent(event.id)}
-                                                className="p-2 text-[var(--text-tertiary)] hover:text-red-500 transition-all opacity-0 group-hover:opacity-100"
-                                                title="Excluir evento"
-                                                aria-label="Excluir evento"
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </button>
+
+                                            {deletingEventId === event.id ? (
+                                                <div className="absolute inset-0 bg-[var(--bg-primary)]/90 backdrop-blur-sm flex items-center justify-center gap-3 rounded-2xl animate-in fade-in zoom-in duration-200 z-10">
+                                                    <span className="text-xs font-bold text-[var(--text-primary)]">Confirmar?</span>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleDeleteEvent(event.id)}
+                                                        className="px-2 py-1 bg-red-500 text-white rounded-lg text-[10px] font-bold hover:bg-red-600 transition-colors"
+                                                    >
+                                                        Sim
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setDeletingEventId(null)}
+                                                        className="px-2 py-1 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg text-[10px] font-bold hover:bg-[var(--bg-secondary)] transition-colors border border-[var(--border-subtle)]"
+                                                    >
+                                                        Não
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setDeletingEventId(event.id)}
+                                                    className="p-2 text-[var(--text-tertiary)] hover:text-red-500 transition-all opacity-0 group-hover:opacity-100"
+                                                    title="Excluir evento"
+                                                    aria-label="Excluir evento"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
+                                            )}
                                         </Card>
                                     ))
                                 ) : (

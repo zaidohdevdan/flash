@@ -19,4 +19,5 @@ export interface INotificationRepository {
     findPending(now: Date): Promise<Notification[]>;
     markAsSent(id: string): Promise<void>; // Clears scheduledFor
     deleteOld(days: number): Promise<void>;
+    delete(id: string): Promise<void>;
 }

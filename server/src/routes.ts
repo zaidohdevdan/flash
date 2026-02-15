@@ -100,6 +100,7 @@ routes.post('/agenda/note', AuthMiddleware, AgendaController.saveNote);
 // Notificações
 routes.get('/notifications', AuthMiddleware, NotificationController.index);
 routes.patch('/notifications/:id/read', AuthMiddleware, NotificationController.markRead);
+routes.delete('/notifications/:id', AuthMiddleware, NotificationController.delete);
 routes.post('/notifications/read-all', AuthMiddleware, NotificationController.markAllRead);
 
 // Auditoria (Admin Only)
