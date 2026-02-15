@@ -11,7 +11,7 @@ export const SuccessView: React.FC<SuccessViewProps> = ({ onBack }) => {
             <div className="bg-emerald-500/10 mb-8 p-8 rounded-[3rem] border border-emerald-500/20 shadow-sm animate-in zoom-in-50 duration-500">
                 <Send className="w-20 h-20 text-emerald-500" />
             </div>
-            <h2 className="text-3xl font-black text-[var(--text-primary)] mb-2 tracking-tight uppercase">Missão Cumprida!</h2>
+            <h2 className="text-3xl font-black text-[var(--text-primary)] mb-2 tracking-tight uppercase">Report Enviado!</h2>
             <p className="text-[var(--text-tertiary)] mb-10 font-bold uppercase tracking-widest text-[10px]">Seu relatório foi enviado com sucesso para a central.</p>
             <Button variant="primary" size="lg" className="px-12" onClick={onBack}>
                 Voltar ao Histórico

@@ -173,15 +173,15 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
             maxWidth="6xl"
         >
             {isLoading ? (
-                <div className="flex flex-col items-center justify-center min-h-[400px] lg:h-[600px] gap-4">
+                <div className="flex flex-col items-center justify-center min-h-[50vh] md:h-[600px] gap-4">
                     <Loader2 className="w-12 h-12 text-[var(--accent-primary)] animate-spin" />
                     <p className="text-sm font-bold text-[var(--text-tertiary)] uppercase tracking-widest animate-pulse">Carregando Agenda...</p>
                 </div>
             ) : isCreatingEvent ? (
-                <div className="flex flex-col min-h-[500px] max-h-[85vh] lg:h-[600px] animate-in fade-in slide-in-from-bottom-4 duration-300">
-                    <div className="flex justify-between items-center mb-6">
+                <div className="flex flex-col min-h-[50vh] md:h-[600px] animate-in fade-in slide-in-from-bottom-4 duration-300">
+                    <div className="flex justify-between items-center mb-4 md:mb-6">
                         <div>
-                            <h3 className="text-xl font-bold text-[var(--text-primary)] uppercase tracking-tight">Novo Agendamento</h3>
+                            <h3 className="text-lg md:text-xl font-bold text-[var(--text-primary)] uppercase tracking-tight">Novo Agendamento</h3>
                             <p className="text-[10px] text-[var(--text-tertiary)] font-bold uppercase tracking-widest">{format(selectedDate, "EEEE, dd 'de' MMMM", { locale: dateLocale })}</p>
                         </div>
                         <button type="button" onClick={() => setIsCreatingEvent(false)} className="p-2 hover:bg-[var(--bg-secondary)] rounded-xl transition-all" title="Fechar novo agendamento" aria-label="Fechar novo agendamento">
@@ -189,7 +189,7 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
                         </button>
                     </div>
 
-                    <div className="flex-1 flex flex-col lg:flex-row gap-8 overflow-hidden">
+                    <div className="flex-1 flex flex-col md:flex-row gap-4 md:gap-8 overflow-hidden">
                         {/* Form Side */}
                         <div className="flex-1 space-y-6 overflow-y-auto pr-2 custom-scrollbar">
                             <div className="space-y-4">
@@ -238,7 +238,7 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
                                 <label className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest pl-1">
                                     PARTICIPANTES ({selectedParticipants.length})
                                 </label>
-                                <div className="bg-[var(--bg-secondary)] rounded-2xl p-6 border border-dashed border-[var(--border-medium)] min-h-[160px]">
+                                <div className="bg-[var(--bg-secondary)] rounded-2xl p-4 md:p-6 border border-dashed border-[var(--border-medium)] min-h-[100px] md:min-h-[160px]">
                                     <div className="flex flex-wrap gap-3">
                                         {selectedParticipants.map(pid => {
                                             const c = contacts.find(x => x.id === pid);
@@ -291,7 +291,7 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
                         </div>
 
                         {/* List Side */}
-                        <div className="w-full lg:w-[360px] flex flex-col gap-4 bg-[var(--bg-secondary)] rounded-3xl p-5 border border-[var(--border-subtle)]">
+                        <div className="w-full md:w-[360px] flex flex-col gap-4 bg-[var(--bg-secondary)] rounded-3xl p-4 md:p-5 border border-[var(--border-subtle)]">
                             <div className="relative">
                                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-tertiary)]" />
                                 <input
@@ -346,7 +346,7 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
                     </div>
                 </div>
             ) : (
-                <div className="flex flex-col lg:flex-row gap-6 min-h-[500px] max-h-[85vh] lg:h-[600px]">
+                <div className="flex flex-col md:flex-row gap-4 md:gap-6 min-h-[50vh] md:h-[600px]">
                     {/* Col 1: Calendar & Events */}
                     <div className="flex-1 flex flex-col gap-4 overflow-hidden">
                         <Card className="p-4 bg-[var(--bg-primary)] border border-[var(--border-subtle)] shadow-sm">
@@ -386,7 +386,7 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
                                             key={idx}
                                             onClick={() => setSelectedDate(day)}
                                             className={`
-                                                relative h-10 w-full flex flex-col items-center justify-center rounded-xl text-sm font-medium transition-all
+                                                relative h-8 md:h-10 w-full flex flex-col items-center justify-center rounded-xl text-xs md:text-sm font-medium transition-all
                                                 ${!isCurrentMonth ? 'text-[var(--text-tertiary)] opacity-40' : 'text-[var(--text-secondary)]'}
                                                 ${isSel ? 'bg-[var(--accent-primary)] !text-[var(--accent-text)] shadow-sm font-bold scale-105 z-10' : 'hover:bg-[var(--bg-secondary)]'}
                                                 ${isTod && !isSel ? 'text-[var(--accent-secondary)] !font-bold' : ''}
@@ -462,15 +462,15 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
                     </div>
 
                     {/* Col 2: Actions & Tools */}
-                    <div className="w-full lg:w-[320px] flex flex-col gap-4 overflow-hidden">
+                    <div className="w-full md:w-[320px] flex flex-col gap-4 overflow-hidden">
                         {/* Clock & Quick Summary */}
                         <Card className="p-6 bg-[var(--bg-primary)] shadow-md overflow-hidden relative group border-[var(--border-subtle)]">
                             <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--accent-primary)]/10 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-[var(--accent-primary)]/20 transition-all duration-700" />
                             <div className="relative z-10 flex flex-col items-center">
                                 <ClockIcon className="w-4 h-4 text-[var(--accent-secondary)] mb-2 animate-pulse" />
-                                <h2 className="text-4xl font-black text-[var(--text-primary)] tracking-tight mb-1">
+                                <h2 className="text-3xl md:text-4xl font-black text-[var(--text-primary)] tracking-tight mb-1">
                                     {format(currentTime, 'HH:mm')}
-                                    <span className="text-xl text-[var(--text-tertiary)] ml-1 font-medium">{format(currentTime, 'ss')}</span>
+                                    <span className="text-lg md:text-xl text-[var(--text-tertiary)] ml-1 font-medium">{format(currentTime, 'ss')}</span>
                                 </h2>
                                 <p className="text-[10px] text-[var(--text-secondary)] font-bold uppercase tracking-[0.2em] opacity-80">
                                     {format(currentTime, "EEEE, dd 'de' MMMM", { locale: dateLocale })}
@@ -479,7 +479,7 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
                         </Card>
 
                         {/* Bloco de Notas */}
-                        <div className="flex-1 flex flex-col gap-3 min-h-[300px]">
+                        <div className="flex-1 flex flex-col gap-3 min-h-[200px] md:min-h-[300px]">
                             <h4 className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest pl-1 mt-2">
                                 Bloco de Notas
                             </h4>

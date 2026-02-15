@@ -28,8 +28,6 @@ export const ReportFeed: React.FC<ReportFeedProps> = ({
 
     return (
         <div className="flex-1 space-y-6">
-            {/* Busca interna removida para evitar duplicidade com a busca global do Dashboard */}
-
             {reports.length === 0 && !isLoading ? (
                 <Card variant="glass" className="p-20 flex flex-col items-center justify-center text-gray-400">
                     <MessageSquare className="w-12 h-12 mb-4 opacity-20" />
