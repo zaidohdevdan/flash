@@ -391,7 +391,8 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
                                                 relative h-8 md:h-10 w-full flex flex-col items-center justify-center rounded-xl text-xs md:text-sm font-medium transition-all
                                                 ${!isCurrentMonth ? 'text-[var(--text-tertiary)] opacity-40' : 'text-[var(--text-secondary)]'}
                                                 ${isSel ? 'bg-[var(--accent-primary)] !text-[var(--accent-text)] shadow-sm font-bold scale-105 z-10' : 'hover:bg-[var(--bg-secondary)]'}
-                                                ${isTod && !isSel ? 'text-[var(--accent-secondary)] !font-bold' : ''}
+                                                ${isTod && !isSel ? 'text-[var(--accent-secondary)] !font-bold border border-[var(--accent-secondary)]' : ''}
+                                                ${hasEvents && !isSel ? 'animate-pulse font-bold' : ''}
                                             `}
                                             title={`Selecionar ${format(day, 'dd/MM/yyyy')}`}
                                             aria-label={`Selecionar ${format(day, 'dd/MM/yyyy')}`}
