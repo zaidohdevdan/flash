@@ -48,7 +48,7 @@ export const ReportCard: React.FC<ReportCardProps> = React.memo(({
                         e.stopPropagation();
                         setIsZoomModalOpen(true);
                     }}
-                    className="w-full sm:w-32 h-48 sm:h-32 rounded-xl overflow-hidden shadow-sm group-hover:scale-105 transition-transform duration-300 cursor-zoom-in focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] focus:ring-offset-2"
+                    className="w-full sm:w-32 h-48 sm:h-32 rounded-xl overflow-hidden shadow-sm group-hover:scale-105 transition-transform duration-300 cursor-zoom-in focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] focus:ring-offset-2 relative"
                     aria-label="Ampliar imagem do reporte"
                 >
                     <img
@@ -59,17 +59,26 @@ export const ReportCard: React.FC<ReportCardProps> = React.memo(({
                             (e.target as HTMLImageElement).src = 'https://placehold.co/300x200?text=Sem+Imagem&bg=f1f5f9&color=64748b';
                         }}
                     />
+                    {report.media && report.media.length > 1 && (
+                        <div className="absolute bottom-2 right-2 bg-black/60 backdrop-blur-sm text-white text-[10px] font-bold px-2 py-0.5 rounded-full border border-white/10">
+                            +{report.media.length - 1}
+                        </div>
+                    )}
                 </button>
                 <div className="absolute top-2 right-2 pointer-events-none">
                     <Badge status={report.status} className="shadow-sm bg-[var(--bg-primary)]/90 backdrop-blur-sm" />
                 </div>
             </div>
 
-            <ImageZoomModal
-                isOpen={isZoomModalOpen}
-                onClose={() => setIsZoomModalOpen(false)}
-                imageUrl={formatUrl(report.imageUrl) || ''}
-            />
+            {isZoomModalOpen && (
+                <ImageZoomModal
+                    isOpen={isZoomModalOpen}
+                    onClose={() => setIsZoomModalOpen(false)}
+                    images={report.media && report.media.length > 0
+                        ? report.media.map(m => formatUrl(m.secureUrl) || '')
+                        : [formatUrl(report.imageUrl) || '']}
+                />
+            )}
 
             {/* Content */}
             <div className="flex-1 flex flex-col justify-between min-w-0">

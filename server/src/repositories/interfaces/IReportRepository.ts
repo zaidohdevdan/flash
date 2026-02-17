@@ -1,9 +1,10 @@
-import type { Report, ReportStatus, User, ReportHistory, Department } from '../../generated/prisma';
+import type { Report, ReportStatus, User, ReportHistory, Department, Media } from '../../generated/prisma';
 
 export interface CreateReportDTO {
     comment: string;
     userId: string;
     imageUrl?: string;
+    mediaItems?: any[];
     latitude?: number;
     longitude?: number;
     createdAt?: string;
@@ -18,6 +19,7 @@ export type ReportWithUser = Report & {
     };
     history?: ReportHistory[];
     department?: Department | null;
+    media?: Media[];
 };
 
 export interface IReportRepository {

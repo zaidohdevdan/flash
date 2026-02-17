@@ -3,10 +3,23 @@ import { type Report, type ReportStatus, type User } from '../../generated/prism
 import type { CreateReportDTO, IReportRepository, ReportWithUser } from '../interfaces/IReportRepository';
 
 export class PrismaReportRepository implements IReportRepository {
-    async create({ comment, userId, imageUrl, latitude, longitude, createdAt }: CreateReportDTO): Promise<ReportWithUser> {
+    async create({ comment, userId, imageUrl, mediaItems, latitude, longitude, createdAt }: CreateReportDTO): Promise<ReportWithUser> {
         const user = await prisma.user.findUnique({ where: { id: userId }, select: { name: true, role: true } });
         const userName = user?.name || 'Operador';
         const userRole = user?.role || 'PROFESSIONAL';
+
+        const mediaCreateData = mediaItems?.map((item) => ({
+            publicId: item.publicId,
+            url: item.url,
+            secureUrl: item.secureUrl,
+            format: item.format,
+            width: item.width,
+            height: item.height,
+            bytes: item.bytes,
+            resourceType: item.resourceType,
+            folder: 'flash', // Default folder from schema, or passed from frontend
+            userId: userId // Vincula também ao usuário
+        })) || [];
 
         return prisma.report.create({
             data: {
@@ -24,6 +37,9 @@ export class PrismaReportRepository implements IReportRepository {
                         userName: userName,
                         userRole: userRole
                     }
+                },
+                media: {
+                    create: mediaCreateData
                 }
             },
             include: {
@@ -35,7 +51,8 @@ export class PrismaReportRepository implements IReportRepository {
                         statusPhrase: true,
                     },
                 },
-                history: true
+                history: true,
+                media: true // Inclui media no retorno
             },
         });
     }
@@ -65,7 +82,8 @@ export class PrismaReportRepository implements IReportRepository {
                     },
                     orderBy: { createdAt: 'desc' },
                 },
-                department: true
+                department: true,
+                media: true
             },
         }) as any; // Cast for now due to strict type mismatch in intermediate steps
     }
@@ -100,7 +118,7 @@ export class PrismaReportRepository implements IReportRepository {
         return prisma.report.update({
             where: { id },
             data: updateData,
-            include: { user: true, history: true, department: true },
+            include: { user: true, history: true, department: true, media: true },
         });
     }
 
@@ -160,7 +178,8 @@ export class PrismaReportRepository implements IReportRepository {
                 history: {
                     orderBy: { createdAt: 'desc' }
                 },
-                department: true
+                department: true,
+                media: true
             },
             orderBy: {
                 createdAt: 'desc'
@@ -202,7 +221,8 @@ export class PrismaReportRepository implements IReportRepository {
                 history: {
                     orderBy: { createdAt: 'desc' }
                 },
-                department: true
+                department: true,
+                media: true
             },
             orderBy: {
                 createdAt: 'desc'
@@ -244,7 +264,8 @@ export class PrismaReportRepository implements IReportRepository {
                 history: {
                     orderBy: { createdAt: 'desc' }
                 },
-                department: true
+                department: true,
+                media: true
             },
             orderBy: {
                 createdAt: 'desc'

@@ -49,8 +49,8 @@ export function CreateReport() {
     const activeChatId = searchParams.get('chat');
     const isChatOpen = !!activeChatId;
     const [comment, setComment] = useState('');
-    const [image, setImage] = useState<File | null>(null);
-    const [preview, setPreview] = useState<string | null>(null);
+    const [images, setImages] = useState<File[]>([]);
+    const [previews, setPreviews] = useState<string[]>([]);
     const [sending, setSending] = useState(false);
     const [history, setHistory] = useState<Report[]>([]);
     const [success, setSuccess] = useState(false);
@@ -260,11 +260,9 @@ export function CreateReport() {
     // Blob URL Cleanup
     useEffect(() => {
         return () => {
-            if (preview) {
-                URL.revokeObjectURL(preview);
-            }
+            previews.forEach(preview => URL.revokeObjectURL(preview));
         };
-    }, [preview]);
+    }, [previews]);
 
     const handleOpenChat = () => {
         if (!user?.supervisorId) {
@@ -361,61 +359,93 @@ export function CreateReport() {
         }
     };
 
-    function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
-        const file = e.target.files?.[0];
-        if (file) {
-            setImage(file);
-            setPreview(URL.createObjectURL(file));
+    function handleImagesChange(e: React.ChangeEvent<HTMLInputElement>) {
+        const files = Array.from(e.target.files || []);
+        if (files.length > 0) {
+            const newImages = [...images, ...files];
+            setImages(newImages);
+            const newPreviews = files.map(file => URL.createObjectURL(file));
+            setPreviews([...previews, ...newPreviews]);
         }
+    }
+
+    function handleRemoveImage(index: number) {
+        setImages(prev => prev.filter((_, i) => i !== index));
+        setPreviews(prev => {
+            URL.revokeObjectURL(prev[index]);
+            return prev.filter((_, i) => i !== index);
+        });
     }
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
-        if (!image) return toast.error('Por favor, tire uma foto para o relatório.');
+        if (images.length === 0) return toast.error('Por favor, tire uma foto para o relatório.');
 
         setSending(true);
 
         try {
             // Verificação de Conexão
+            // Para Offline, vamos simplificar e salvar apenas a primeira imagem por enquanto
+            // ou ajustar a lógica depois se o usuário pedir suporte offline para múltiplas.
             if (!navigator.onLine) {
-                // Modo Offline: Salva no Dexie
-                await db.pendingReports.add({
-                    comment,
-                    imageBlob: image,
-                    previewUrl: preview!,
-                    createdAt: Date.now(),
-                    status: 'pending'
-                });
+                // Modo Offline: Salva no Dexie (apenas a primeira por enquanto para segurança)
+                if (images.length > 0) {
+                    await db.pendingReports.add({
+                        comment,
+                        imageBlob: images[0],
+                        previewUrl: previews[0]!,
+                        createdAt: Date.now(),
+                        status: 'pending'
+                    });
 
-                setSuccess(true);
-                setComment('');
-                setImage(null);
-                setPreview(null);
-                setView('history');
-                toast.success('Relatório salvo localmente! Será enviado assim que houver internet.', {
-                    icon: '💾',
-                    duration: 5000
-                });
+                    setSuccess(true);
+                    setComment('');
+                    setImages([]);
+                    setPreviews([]);
+                    setView('history');
+                    toast.success('Relatório salvo localmente! Será enviado assim que houver internet.', {
+                        icon: '💾',
+                        duration: 5000
+                    });
+                }
                 return;
             }
 
-            const cloudinaryData = new FormData();
-            cloudinaryData.append('file', image);
-            cloudinaryData.append('upload_preset', 'flash_preset');
+            // Upload de Múltiplas Imagens para Cloudinary
+            const uploadPromises = images.map(async (img) => {
+                const cloudinaryData = new FormData();
+                cloudinaryData.append('file', img);
+                cloudinaryData.append('upload_preset', 'flash_preset');
 
-            const cloudinaryRes = await fetch('https://api.cloudinary.com/v1_1/dfr8mjlnb/image/upload', {
-                method: 'POST',
-                body: cloudinaryData
+                const cloudinaryRes = await fetch('https://api.cloudinary.com/v1_1/dfr8mjlnb/image/upload', {
+                    method: 'POST',
+                    body: cloudinaryData
+                });
+
+                if (!cloudinaryRes.ok) throw new Error('Falha no upload da imagem');
+                return cloudinaryRes.json();
             });
 
-            if (!cloudinaryRes.ok) throw new Error('Falha no upload da imagem');
+            const cloudinaryResults = await Promise.all(uploadPromises);
 
-            const cloudinaryJson = await cloudinaryRes.json();
-            const imageUrl = cloudinaryJson.secure_url;
+            // O primeiro é usado como 'capa' para compatibilidade
+            const mainImageUrl = cloudinaryResults[0].secure_url;
+
+            const mediaItems = cloudinaryResults.map(res => ({
+                publicId: res.public_id,
+                url: res.url,
+                secureUrl: res.secure_url,
+                format: res.format,
+                width: res.width,
+                height: res.height,
+                bytes: res.bytes,
+                resourceType: res.resource_type
+            }));
 
             const reportData = {
                 comment,
-                imageUrl,
+                imageUrl: mainImageUrl, // Retrocompatibilidade
+                mediaItems: mediaItems, // Novo campo
                 latitude: undefined as string | undefined,
                 longitude: undefined as string | undefined
             };
@@ -439,8 +469,8 @@ export function CreateReport() {
 
             setSuccess(true);
             setComment('');
-            setImage(null);
-            setPreview(null);
+            setImages([]);
+            setPreviews([]);
             setView('history');
             loadHistory(1, true);
         } catch (error) {
@@ -598,9 +628,9 @@ export function CreateReport() {
                         <NewReportForm
                             comment={comment}
                             onCommentChange={setComment}
-                            preview={preview}
-                            onImageChange={handleImageChange}
-                            onClearImage={() => { setImage(null); setPreview(null); }}
+                            previews={previews}
+                            onImagesChange={handleImagesChange}
+                            onRemoveImage={handleRemoveImage}
                             onSubmit={handleSubmit}
                             isSending={sending}
                         />
@@ -673,4 +703,5 @@ export function CreateReport() {
             />
         </DashboardLayout>
     );
+
 }

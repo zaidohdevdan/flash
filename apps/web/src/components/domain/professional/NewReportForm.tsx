@@ -5,9 +5,9 @@ import { Button, TextArea } from '../../ui';
 interface NewReportFormProps {
     comment: string;
     onCommentChange: (val: string) => void;
-    preview: string | null;
-    onImageChange: (e: ChangeEvent<HTMLInputElement>) => void;
-    onClearImage: () => void;
+    previews: string[];
+    onImagesChange: (e: ChangeEvent<HTMLInputElement>) => void;
+    onRemoveImage: (index: number) => void;
     onSubmit: React.SubmitEventHandler<HTMLFormElement>;
     isSending: boolean;
 }
@@ -15,9 +15,9 @@ interface NewReportFormProps {
 export const NewReportForm: FC<NewReportFormProps> = ({
     comment,
     onCommentChange,
-    preview,
-    onImageChange,
-    onClearImage,
+    previews,
+    onImagesChange,
+    onRemoveImage,
     onSubmit,
     isSending
 }) => {
@@ -31,37 +31,46 @@ export const NewReportForm: FC<NewReportFormProps> = ({
 
     return (
         <form onSubmit={onSubmit} className="space-y-6">
-            <div className="relative aspect-video rounded-[2.5rem] bg-[var(--bg-secondary)] border border-[var(--border-subtle)] overflow-hidden group shadow-sm transition-all hover:border-[var(--accent-primary)]">
-                {preview ? (
-                    <>
-                        <img src={preview} alt="Evidence" className="w-full h-full object-cover" />
-                        <button
-                            type="button"
-                            onClick={onClearImage}
-                            className="absolute top-6 right-6 p-3 bg-[var(--bg-primary)]/90 hover:bg-[var(--bg-primary)] text-red-600 rounded-2xl backdrop-blur-md transition-all scale-90 opacity-0 group-hover:opacity-100 group-hover:scale-100 shadow-sm border border-[var(--border-subtle)]"
-                            title="Remover foto"
-                            aria-label="Remover foto"
-                        >
-                            <X className="w-5 h-5" />
-                        </button>
-                    </>
-                ) : (
-                    <label className="w-full h-full flex flex-col items-center justify-center cursor-pointer hover:bg-[var(--bg-tertiary)] transition-colors">
-                        <div className="p-4 bg-[var(--bg-primary)] rounded-full shadow-sm mb-4 group-hover:scale-110 transition-transform border border-[var(--border-subtle)]">
-                            <Camera className="w-8 h-8 text-[var(--accent-primary)]" />
+            <div className="space-y-4">
+                <label className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest pl-1">
+                    Evidências ({previews.length})
+                </label>
+
+                <div className="grid grid-cols-2 gap-4">
+                    {previews.map((preview, index) => (
+                        <div key={index} className="relative aspect-square rounded-2xl bg-[var(--bg-secondary)] border border-[var(--border-subtle)] overflow-hidden group shadow-sm">
+                            <img src={preview} alt={`Evidence ${index + 1}`} className="w-full h-full object-cover" />
+                            <button
+                                type="button"
+                                onClick={() => onRemoveImage(index)}
+                                className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-xl shadow-sm transition-all hover:bg-red-600 opacity-0 group-hover:opacity-100"
+                                title="Remover foto"
+                                aria-label="Remover foto"
+                            >
+                                <X className="w-4 h-4" />
+                            </button>
                         </div>
-                        <p className="text-[10px] text-[var(--text-secondary)] font-black uppercase tracking-widest">Capturar Evidência</p>
+                    ))}
+
+                    <label className="aspect-square flex flex-col items-center justify-center cursor-pointer bg-[var(--bg-secondary)] border-2 border-dashed border-[var(--border-medium)] rounded-2xl hover:bg-[var(--bg-tertiary)] hover:border-[var(--accent-primary)] transition-all group">
+                        <div className="p-3 bg-[var(--bg-primary)] rounded-full shadow-sm mb-2 group-hover:scale-110 transition-transform">
+                            <Camera className="w-6 h-6 text-[var(--text-tertiary)] group-hover:text-[var(--accent-primary)]" />
+                        </div>
+                        <span className="text-[10px] font-bold text-[var(--text-tertiary)] group-hover:text-[var(--text-primary)] uppercase tracking-widest">
+                            {previews.length === 0 ? 'Adicionar Foto' : 'Mais Fotos'}
+                        </span>
                         <input
                             ref={fileInputRef}
                             type="file"
                             accept="image/*"
-                            onChange={onImageChange}
+                            multiple
+                            onChange={onImagesChange}
                             className="hidden"
-                            title="Capturar foto"
-                            aria-label="Capturar foto"
+                            title="Adicionar fotos"
+                            aria-label="Adicionar fotos"
                         />
                     </label>
-                )}
+                </div>
             </div>
 
             <div className="space-y-6">
@@ -78,7 +87,7 @@ export const NewReportForm: FC<NewReportFormProps> = ({
                     variant="primary"
                     size="lg"
                     fullWidth
-                    disabled={isSending || !preview}
+                    disabled={isSending || previews.length === 0}
                     className="h-16 !rounded-[2rem] text-sm shadow-xl shadow-[var(--accent-primary)]/20"
                 >
                     <Send className={`w-5 h-5 mr-3 ${isSending ? 'animate-ping' : ''}`} />

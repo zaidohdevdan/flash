@@ -172,7 +172,7 @@ export const ReportController = {
 
     // Create a new report (imagem obrigatória + Cloudinary)
     create: async (req: Request, res: Response) => {
-        const { comment, imageUrl, latitude, longitude, createdAt } = req.body;
+        const { comment, imageUrl, mediaItems, latitude, longitude, createdAt } = req.body;
         const userId = req.userId!;
 
         console.log(`[Report] Criando reporte para usuário: ${userId}`);
@@ -185,11 +185,15 @@ export const ReportController = {
         try {
             // 1. Cria o report com a URL já hospedada
             console.log("[Report] Salvando no banco com URL:", imageUrl);
+            if (mediaItems) {
+                console.log(`[Report] Mídia adicional: ${mediaItems.length} itens`);
+            }
 
             const report = await reportService.create({
                 comment,
                 userId,
                 imageUrl,
+                mediaItems,
                 latitude: latitude ? parseFloat(latitude) : undefined,
                 longitude: longitude ? parseFloat(longitude) : undefined,
                 createdAt

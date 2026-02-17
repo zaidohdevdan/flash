@@ -10,6 +10,18 @@ export interface ReportHistory {
     createdAt: string;
 }
 
+export interface Media {
+    id: string;
+    publicId: string;
+    url: string;
+    secureUrl: string;
+    format: string;
+    width?: number;
+    height?: number;
+    bytes: number;
+    resourceType: string;
+}
+
 export interface Report {
     id: string;
     imageUrl: string;
@@ -22,6 +34,7 @@ export interface Report {
     createdAt: string;
     latitude?: number;
     longitude?: number;
+    media?: Media[]; // Array de mídias anexadas
     user: {
         name: string;
         avatarUrl?: string | null;
