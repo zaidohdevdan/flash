@@ -1,13 +1,17 @@
 import type { Request, Response } from 'express';
 import { TicketService } from '../services/TicketService';
+import { NotificationService } from '../services/NotificationService';
+import { PrismaUserRepository } from '../repositories/implementations/PrismaUserRepository';
 
 const ticketService = new TicketService();
+const notificationService = new NotificationService();
+const userRepository = new PrismaUserRepository();
 
 export const TicketController = {
     async create(req: Request, res: Response) {
         try {
             const { protocol, subject, message } = req.body;
-            const supervisorId = req.userId!;
+            const supervisorId = String(req.userId);
 
             const ticket = await ticketService.createTicket({
                 protocol,
@@ -15,6 +19,24 @@ export const TicketController = {
                 message,
                 supervisorId
             });
+
+            // Notificar administradores
+            try {
+                const admins = await userRepository.findAllByRole('ADMIN');
+                const adminNotifications = admins.map(admin =>
+                    notificationService.createNotification({
+                        userId: admin.id,
+                        type: 'SUPPORT_TICKET',
+                        title: 'Novo Chamado de Suporte',
+                        message: `Um novo chamado (${protocol || 'Sem Protocolo'}) foi aberto: ${subject.replace(/_/g, ' ')}`,
+                        link: `/admin?view=tickets` // Link para o painel de tickets do admin
+                    }, req.io)
+                );
+                await Promise.all(adminNotifications);
+            } catch (notifyError) {
+                console.error('Erro ao notificar admins sobre novo ticket:', notifyError);
+                // Não falha a requisição se a notificação falhar
+            }
 
             return res.status(201).json(ticket);
         } catch (error: any) {
@@ -44,7 +66,7 @@ export const TicketController = {
             const { id } = req.params;
             const { status } = req.body;
 
-            const ticket = await ticketService.updateTicketStatus(id, status);
+            const ticket = await ticketService.updateTicketStatus(String(id), status as any);
             return res.json(ticket);
         } catch (error: any) {
             if (error.message === 'TICKET_NOT_FOUND') {
