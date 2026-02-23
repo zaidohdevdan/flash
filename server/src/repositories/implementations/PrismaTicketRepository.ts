@@ -1,12 +1,12 @@
-import { PrismaClient, TicketStatus } from "../../generated/prisma";
-import type { Ticket } from "../../generated/prisma";
+import { PrismaClient } from "../../generated/prisma";
+import type { Ticket, TicketStatus } from "../../generated/prisma";
 import type { ITicketRepository } from "../interfaces/ITicketRepository";
 
 const prisma = new PrismaClient();
 
 export class PrismaTicketRepository implements ITicketRepository {
     async create(data: {
-        protocol: string;
+        protocol?: string;
         subject: string;
         message?: string;
         supervisorId: string;

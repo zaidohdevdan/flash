@@ -1,8 +1,8 @@
-import { Ticket, TicketStatus } from "../../generated/prisma";
+import type { Ticket, TicketStatus } from "../../generated/prisma";
 
 export interface ITicketRepository {
     create(data: {
-        protocol: string;
+        protocol?: string;
         subject: string;
         message?: string;
         supervisorId: string;

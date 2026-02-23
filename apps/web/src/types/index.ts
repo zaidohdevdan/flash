@@ -94,7 +94,7 @@ export type TicketStatus = 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED';
 
 export interface Ticket {
     id: string;
-    protocol: string;
+    protocol?: string;
     subject: string;
     message?: string;
     status: TicketStatus;

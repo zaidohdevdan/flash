@@ -14107,7 +14107,7 @@ export namespace Prisma {
 
   export type TicketGroupByOutputType = {
     id: string
-    protocol: string
+    protocol: string | null
     subject: string
     message: string | null
     status: $Enums.TicketStatus
@@ -14170,7 +14170,7 @@ export namespace Prisma {
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
-      protocol: string
+      protocol: string | null
       subject: string
       message: string | null
       status: $Enums.TicketStatus
@@ -16204,7 +16204,7 @@ export namespace Prisma {
     OR?: TicketWhereInput[]
     NOT?: TicketWhereInput | TicketWhereInput[]
     id?: StringFilter<"Ticket"> | string
-    protocol?: StringFilter<"Ticket"> | string
+    protocol?: StringNullableFilter<"Ticket"> | string | null
     subject?: StringFilter<"Ticket"> | string
     message?: StringNullableFilter<"Ticket"> | string | null
     status?: EnumTicketStatusFilter<"Ticket"> | $Enums.TicketStatus
@@ -16231,7 +16231,7 @@ export namespace Prisma {
     AND?: TicketWhereInput | TicketWhereInput[]
     OR?: TicketWhereInput[]
     NOT?: TicketWhereInput | TicketWhereInput[]
-    protocol?: StringFilter<"Ticket"> | string
+    protocol?: StringNullableFilter<"Ticket"> | string | null
     subject?: StringFilter<"Ticket"> | string
     message?: StringNullableFilter<"Ticket"> | string | null
     status?: EnumTicketStatusFilter<"Ticket"> | $Enums.TicketStatus
@@ -16260,7 +16260,7 @@ export namespace Prisma {
     OR?: TicketScalarWhereWithAggregatesInput[]
     NOT?: TicketScalarWhereWithAggregatesInput | TicketScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"Ticket"> | string
-    protocol?: StringWithAggregatesFilter<"Ticket"> | string
+    protocol?: StringNullableWithAggregatesFilter<"Ticket"> | string | null
     subject?: StringWithAggregatesFilter<"Ticket"> | string
     message?: StringNullableWithAggregatesFilter<"Ticket"> | string | null
     status?: EnumTicketStatusWithAggregatesFilter<"Ticket"> | $Enums.TicketStatus
@@ -17228,7 +17228,7 @@ export namespace Prisma {
 
   export type TicketCreateInput = {
     id?: string
-    protocol: string
+    protocol?: string | null
     subject: string
     message?: string | null
     status?: $Enums.TicketStatus
@@ -17239,7 +17239,7 @@ export namespace Prisma {
 
   export type TicketUncheckedCreateInput = {
     id?: string
-    protocol: string
+    protocol?: string | null
     subject: string
     message?: string | null
     status?: $Enums.TicketStatus
@@ -17249,7 +17249,7 @@ export namespace Prisma {
   }
 
   export type TicketUpdateInput = {
-    protocol?: StringFieldUpdateOperationsInput | string
+    protocol?: NullableStringFieldUpdateOperationsInput | string | null
     subject?: StringFieldUpdateOperationsInput | string
     message?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
@@ -17259,7 +17259,7 @@ export namespace Prisma {
   }
 
   export type TicketUncheckedUpdateInput = {
-    protocol?: StringFieldUpdateOperationsInput | string
+    protocol?: NullableStringFieldUpdateOperationsInput | string | null
     subject?: StringFieldUpdateOperationsInput | string
     message?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
@@ -17270,7 +17270,7 @@ export namespace Prisma {
 
   export type TicketCreateManyInput = {
     id?: string
-    protocol: string
+    protocol?: string | null
     subject: string
     message?: string | null
     status?: $Enums.TicketStatus
@@ -17280,7 +17280,7 @@ export namespace Prisma {
   }
 
   export type TicketUpdateManyMutationInput = {
-    protocol?: StringFieldUpdateOperationsInput | string
+    protocol?: NullableStringFieldUpdateOperationsInput | string | null
     subject?: StringFieldUpdateOperationsInput | string
     message?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
@@ -17289,7 +17289,7 @@ export namespace Prisma {
   }
 
   export type TicketUncheckedUpdateManyInput = {
-    protocol?: StringFieldUpdateOperationsInput | string
+    protocol?: NullableStringFieldUpdateOperationsInput | string | null
     subject?: StringFieldUpdateOperationsInput | string
     message?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
@@ -19769,7 +19769,7 @@ export namespace Prisma {
 
   export type TicketCreateWithoutSupervisorInput = {
     id?: string
-    protocol: string
+    protocol?: string | null
     subject: string
     message?: string | null
     status?: $Enums.TicketStatus
@@ -19779,7 +19779,7 @@ export namespace Prisma {
 
   export type TicketUncheckedCreateWithoutSupervisorInput = {
     id?: string
-    protocol: string
+    protocol?: string | null
     subject: string
     message?: string | null
     status?: $Enums.TicketStatus
@@ -20137,7 +20137,7 @@ export namespace Prisma {
     OR?: TicketScalarWhereInput[]
     NOT?: TicketScalarWhereInput | TicketScalarWhereInput[]
     id?: StringFilter<"Ticket"> | string
-    protocol?: StringFilter<"Ticket"> | string
+    protocol?: StringNullableFilter<"Ticket"> | string | null
     subject?: StringFilter<"Ticket"> | string
     message?: StringNullableFilter<"Ticket"> | string | null
     status?: EnumTicketStatusFilter<"Ticket"> | $Enums.TicketStatus
@@ -21640,7 +21640,7 @@ export namespace Prisma {
 
   export type TicketCreateManySupervisorInput = {
     id?: string
-    protocol: string
+    protocol?: string | null
     subject: string
     message?: string | null
     status?: $Enums.TicketStatus
@@ -21951,7 +21951,7 @@ export namespace Prisma {
   }
 
   export type TicketUpdateWithoutSupervisorInput = {
-    protocol?: StringFieldUpdateOperationsInput | string
+    protocol?: NullableStringFieldUpdateOperationsInput | string | null
     subject?: StringFieldUpdateOperationsInput | string
     message?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
@@ -21960,7 +21960,7 @@ export namespace Prisma {
   }
 
   export type TicketUncheckedUpdateWithoutSupervisorInput = {
-    protocol?: StringFieldUpdateOperationsInput | string
+    protocol?: NullableStringFieldUpdateOperationsInput | string | null
     subject?: StringFieldUpdateOperationsInput | string
     message?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
@@ -21969,7 +21969,7 @@ export namespace Prisma {
   }
 
   export type TicketUncheckedUpdateManyWithoutSupervisorInput = {
-    protocol?: StringFieldUpdateOperationsInput | string
+    protocol?: NullableStringFieldUpdateOperationsInput | string | null
     subject?: StringFieldUpdateOperationsInput | string
     message?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus

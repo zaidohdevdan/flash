@@ -1,6 +1,6 @@
 import type { ITicketRepository } from "../repositories/interfaces/ITicketRepository";
 import { PrismaTicketRepository } from "../repositories/implementations/PrismaTicketRepository";
-import { TicketStatus } from "../generated/prisma";
+import type { TicketStatus } from "../generated/prisma";
 
 export class TicketService {
     private ticketRepository: ITicketRepository;
@@ -10,12 +10,12 @@ export class TicketService {
     }
 
     async createTicket(data: {
-        protocol: string;
+        protocol?: string;
         subject: string;
         message?: string;
         supervisorId: string;
     }) {
-        if (!data.protocol || !data.subject) {
+        if (!data.subject || !data.supervisorId) {
             throw new Error('MISSING_FIELDS');
         }
 

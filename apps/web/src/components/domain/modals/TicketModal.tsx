@@ -19,8 +19,8 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose }) => 
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!protocol || !subject) {
-            toast.error('Preencha os campos obrigatórios.');
+        if (!subject) {
+            toast.error('O assunto é obrigatório.');
             return;
         }
 
@@ -69,11 +69,10 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose }) => 
                 <form onSubmit={handleSubmit} className="p-6 space-y-5">
                     <div className="space-y-4">
                         <Input
-                            label="Protocolo do Caso (Obrigatório)"
+                            label="Protocolo do Caso (Opcional)"
                             placeholder="EX: A1B2C3"
                             value={protocol}
                             onChange={(e) => setProtocol(e.target.value.toUpperCase())}
-                            required
                         />
 
                         <div className="space-y-2">

@@ -228,7 +228,7 @@ model ContactMessage {
 
 model Ticket {
   id       String       @id @default(auto()) @map("_id") @db.ObjectId
-  protocol String
+  protocol String?
   subject  String
   message  String?
   status   TicketStatus @default(OPEN)

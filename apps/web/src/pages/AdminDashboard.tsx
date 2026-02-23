@@ -52,7 +52,7 @@ interface ContactMessage {
 
 interface Ticket {
     id: string;
-    protocol: string;
+    protocol?: string;
     subject: string;
     message?: string;
     status: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED';
