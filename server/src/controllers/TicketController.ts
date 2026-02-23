@@ -64,9 +64,9 @@ export const TicketController = {
     async updateStatus(req: Request, res: Response) {
         try {
             const { id } = req.params;
-            const { status } = req.body;
+            const { status, adminResponse } = req.body;
 
-            const ticket = await ticketService.updateTicketStatus(String(id), status as any);
+            const ticket = await ticketService.updateTicketStatus(String(id), status as any, adminResponse, req.io);
             return res.json(ticket);
         } catch (error: any) {
             if (error.message === 'TICKET_NOT_FOUND') {
@@ -74,6 +74,25 @@ export const TicketController = {
             }
             console.error('Erro ao atualizar status do chamado:', error);
             return res.status(500).json({ error: 'Erro ao atualizar chamado.' });
+        }
+    },
+    async destroy(req: Request, res: Response) {
+        try {
+            const { id } = req.params;
+            const userId = String(req.userId);
+            const userRole = (req.userRole as string) || 'UNKNOWN';
+
+            await ticketService.deleteTicket(String(id), userId, userRole);
+            return res.status(204).send();
+        } catch (error: any) {
+            if (error.message === 'TICKET_NOT_FOUND') {
+                return res.status(404).json({ error: 'Chamado não encontrado.' });
+            }
+            if (error.message === 'UNAUTHORIZED') {
+                return res.status(403).json({ error: 'Você não tem permissão para excluir este chamado.' });
+            }
+            console.error('Erro ao excluir chamado:', error);
+            return res.status(500).json({ error: 'Erro ao excluir chamado.' });
         }
     }
 };

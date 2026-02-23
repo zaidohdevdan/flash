@@ -48,26 +48,26 @@
   --shadow-float: 0 20px 25px -5px rgb(0 0 0 / 0.05), 0 8px 10px -6px rgb(0 0 0 / 0.01);
 }
 
-/* Dark Mode - Professional Slate */
+/* Dark Mode - Premium Midnight Zinc */
 .dark {
-  --bg-primary: #0f172a;
-  /* slate-900 */
-  --bg-secondary: #1e293b;
-  /* slate-800 */
-  --bg-tertiary: #334155;
-  /* slate-700 */
+  --bg-primary: #09090b;
+  /* zinc-950 */
+  --bg-secondary: #18181b;
+  /* zinc-900 */
+  --bg-tertiary: #27272a;
+  /* zinc-800 */
 
-  --text-primary: #f8fafc;
-  /* slate-50 */
-  --text-secondary: #cbd5e1;
-  /* slate-300 */
-  --text-tertiary: #94a3b8;
-  /* slate-400 */
+  --text-primary: #fafafa;
+  /* zinc-50 */
+  --text-secondary: #a1a1aa;
+  /* zinc-400 */
+  --text-tertiary: #71717a;
+  /* zinc-500 */
 
-  --border-subtle: #334155;
-  /* slate-700 */
-  --border-medium: #475569;
-  /* slate-600 */
+  --border-subtle: rgba(255, 255, 255, 0.05);
+  /* ultra-subtle border */
+  --border-medium: rgba(255, 255, 255, 0.1);
+  /* slightly visible border */
 }
 
 @layer base {
@@ -141,7 +141,7 @@
 }
 
 .dark .glass {
-  @apply bg-slate-900/70 backdrop-blur-md border border-white/5;
+  @apply bg-[#18181b]/60 backdrop-blur-xl border border-white/5 shadow-2xl;
 }
 
 /* Animation utilities */

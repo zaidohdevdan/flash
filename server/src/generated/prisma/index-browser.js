@@ -21,11 +21,11 @@ exports.$Enums = {}
 
 /**
  * Prisma Client JS version: 6.18.0
- * Query Engine version: acc0b9dd43eb689cbd20c9470515d719db10d0b0
+ * Query Engine version: 34b5a692b7bd79939a9a2c3ef97d816e749cda2f
  */
 Prisma.prismaVersion = {
   client: "6.18.0",
-  engine: "acc0b9dd43eb689cbd20c9470515d719db10d0b0"
+  engine: "34b5a692b7bd79939a9a2c3ef97d816e749cda2f"
 }
 
 Prisma.PrismaClientKnownRequestError = () => {
@@ -256,6 +256,9 @@ exports.Prisma.TicketScalarFieldEnum = {
   subject: 'subject',
   message: 'message',
   status: 'status',
+  isDeletedBySupervisor: 'isDeletedBySupervisor',
+  adminResponse: 'adminResponse',
+  respondedAt: 'respondedAt',
   supervisorId: 'supervisorId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'

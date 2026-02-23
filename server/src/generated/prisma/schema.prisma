@@ -227,11 +227,14 @@ model ContactMessage {
 }
 
 model Ticket {
-  id       String       @id @default(auto()) @map("_id") @db.ObjectId
-  protocol String?
-  subject  String
-  message  String?
-  status   TicketStatus @default(OPEN)
+  id                    String       @id @default(auto()) @map("_id") @db.ObjectId
+  protocol              String?
+  subject               String
+  message               String?
+  status                TicketStatus @default(OPEN)
+  isDeletedBySupervisor Boolean      @default(false)
+  adminResponse         String?
+  respondedAt           DateTime?
 
   supervisorId String @db.ObjectId
   supervisor   User   @relation("SupervisorTickets", fields: [supervisorId], references: [id])

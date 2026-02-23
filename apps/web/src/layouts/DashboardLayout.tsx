@@ -112,7 +112,7 @@ export function DashboardLayout({
 
 
     return (
-        <div className="h-screen bg-[var(--bg-secondary)] flex overflow-hidden">
+        <div className="h-screen bg-[var(--bg-secondary)] flex overflow-hidden print:h-auto print:block print:overflow-visible">
             {persistentRoom && !activeRoom && (
                 <ActiveConferenceBanner
                     roomName={persistentRoom}
@@ -213,7 +213,7 @@ export function DashboardLayout({
             </aside>
 
             {/* Main Content Area */}
-            <div className="flex-1 flex flex-col min-w-0 overflow-hidden print:overflow-visible">
+            <div className="flex-1 flex flex-col min-w-0 overflow-hidden print:overflow-visible print:block print:h-auto">
                 {/* Top Header */}
                 <header className="h-16 flex-shrink-0 bg-[var(--bg-primary)] border-b border-[var(--border-subtle)] flex items-center justify-between px-4 lg:px-8 print:hidden">
                     <div className="flex items-center gap-4">
@@ -270,7 +270,7 @@ export function DashboardLayout({
                 </header>
 
                 {/* Page Content */}
-                <main className="flex-1 overflow-y-auto bg-[var(--bg-secondary)] p-4 lg:p-8 print:p-0 print:bg-white print:overflow-visible">
+                <main className="flex-1 overflow-y-auto bg-[var(--bg-secondary)] p-4 lg:p-8 print:p-0 print:bg-white print:overflow-visible print:h-auto print:block">
                     <div className="max-w-7xl mx-auto print:max-w-none print:w-full">
                         {children}
                     </div>

@@ -1,4 +1,4 @@
-import { BarChart3, AlertCircle, Download, Video, Calendar, LifeBuoy, type LucideIcon } from 'lucide-react';
+import { BarChart3, AlertCircle, Download, Video, Calendar, LifeBuoy, History as HistoryIcon, type LucideIcon } from 'lucide-react';
 import { Button } from '../ui';
 import { KpiCard } from './KpiCard';
 
@@ -34,6 +34,7 @@ interface DashboardHeroProps {
     onConferenceClick?: () => void;
     onAgendaClick?: () => void;
     onSupportClick?: () => void;
+    onHistoryClick?: () => void;
     children?: React.ReactNode;
 }
 
@@ -56,6 +57,7 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
     onConferenceClick,
     onAgendaClick,
     onSupportClick,
+    onHistoryClick,
     children
 }) => {
     return (
@@ -92,7 +94,7 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
                                 onClick={onConferenceClick}
                                 leftIcon={<Video className="w-4 h-4" />}
                             >
-                                Sala de Crise
+                                Videoconferência
                             </Button>
                         )}
                         {onAgendaClick && (
@@ -111,6 +113,15 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
                                 leftIcon={<LifeBuoy className="w-4 h-4" />}
                             >
                                 Suporte
+                            </Button>
+                        )}
+                        {onHistoryClick && (
+                            <Button
+                                variant="secondary"
+                                onClick={onHistoryClick}
+                                leftIcon={<HistoryIcon className="w-4 h-4" />}
+                            >
+                                Meus Chamados
                             </Button>
                         )}
                         {children}

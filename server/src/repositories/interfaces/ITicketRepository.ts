@@ -12,7 +12,9 @@ export interface ITicketRepository {
 
     listBySupervisor(supervisorId: string): Promise<Ticket[]>;
 
-    updateStatus(id: string, status: TicketStatus): Promise<Ticket>;
+    updateStatus(id: string, status: TicketStatus, adminResponse?: string): Promise<Ticket>;
 
     findById(id: string): Promise<Ticket | null>;
+    softDeleteBySupervisor(id: string): Promise<void>;
+    delete(id: string): Promise<void>;
 }

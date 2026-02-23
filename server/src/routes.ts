@@ -127,5 +127,6 @@ routes.delete('/admin/contacts/:id', AuthMiddleware, AdminMiddleware, ContactCon
 routes.post('/tickets', AuthMiddleware, TicketController.create);
 routes.get('/tickets', AuthMiddleware, TicketController.index);
 routes.patch('/tickets/:id/status', AuthMiddleware, AdminMiddleware, TicketController.updateStatus);
+routes.delete('/tickets/:id', AuthMiddleware, TicketController.destroy);
 
 export { routes };

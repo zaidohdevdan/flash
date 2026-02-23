@@ -98,6 +98,8 @@ export interface Ticket {
     subject: string;
     message?: string;
     status: TicketStatus;
+    adminResponse?: string;
+    respondedAt?: string;
     supervisorId: string;
     supervisor?: { id: string; name: string; avatarUrl?: string | null };
     createdAt: string;

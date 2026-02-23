@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
 import { toast } from 'react-hot-toast';
 import { useDashboardSocket } from '../hooks/useDashboardSocket';
 import { db } from '../services/db';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { Users, UserPlus, Filter, Mail, Trash2, Search, Archive, AlertTriangle, FolderArchive, CheckCircle, Download, UploadCloud, Shield, Edit2, Eye, LifeBuoy } from 'lucide-react';
+import { Users, UserPlus, Filter, Mail, Trash2, Search, Archive, AlertTriangle, FolderArchive, CheckCircle, Clock, Download, UploadCloud, Shield, Edit2, Eye, LifeBuoy } from 'lucide-react';
 import {
     Button,
     Input,
@@ -15,8 +15,9 @@ import {
 } from '../components/ui';
 import { DashboardLayout } from '../layouts/DashboardLayout';
 import { ProfileSettingsModal } from '../components/domain/modals/ProfileSettingsModal';
+import { TicketResponseModal } from '../components/domain/modals/TicketResponseModal';
 import { ReportCard } from '../components/domain/ReportCard';
-import type { Report } from '../types';
+import type { Report, Ticket, ReportHistory } from '../types';
 
 interface Supervisor {
     id: string;
@@ -50,17 +51,7 @@ interface ContactMessage {
     createdAt: string;
 }
 
-interface Ticket {
-    id: string;
-    protocol?: string;
-    subject: string;
-    message?: string;
-    status: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED';
-    supervisorId: string;
-    supervisor?: { id: string; name: string; avatarUrl?: string | null };
-    createdAt: string;
-    updatedAt: string;
-}
+
 
 export function AdminDashboard() {
     const {
@@ -119,7 +110,16 @@ export function AdminDashboard() {
     const [isImporting, setIsImporting] = useState(false);
     const [tickets, setTickets] = useState<Ticket[]>([]);
     const [isLoadingTickets, setIsLoadingTickets] = useState(false);
+    const [ticketFilters, setTicketFilters] = useState({
+        protocol: '',
+        supervisor: '',
+        subject: '',
+        status: ''
+    });
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const [isTicketResponseModalOpen, setIsTicketResponseModalOpen] = useState(false);
+    const [ticketResponseAction, setTicketResponseAction] = useState<{ id: string, status: 'IN_PROGRESS' | 'RESOLVED', currentResponse?: string } | null>(null);
 
     // Profile Management State
     const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -136,13 +136,28 @@ export function AdminDashboard() {
         role: user.role || ''
     } : null, [user]);
 
+    const filteredTickets = useMemo(() => {
+        return tickets.filter(ticket => {
+            const protocolStr = (ticket.protocol || '').toLowerCase();
+            const supervisorStr = (ticket.supervisor?.name || '').toLowerCase();
+            const subjectStr = (ticket.subject || '').toLowerCase();
+
+            const matchesProtocol = protocolStr.includes(ticketFilters.protocol.toLowerCase());
+            const matchesSupervisor = supervisorStr.includes(ticketFilters.supervisor.toLowerCase());
+            const matchesSubject = subjectStr.includes(ticketFilters.subject.toLowerCase());
+            const matchesStatus = ticketFilters.status === '' || ticket.status === ticketFilters.status;
+
+            return matchesProtocol && matchesSupervisor && matchesSubject && matchesStatus;
+        });
+    }, [tickets, ticketFilters]);
+
     const {
         playNotificationSound
     } = useDashboardSocket({
         user: socketUser,
         notificationsEnabled,
         onNotification: (data) => {
-            toast(`Mensagem: ${data.text}`, {
+            toast(`Mensagem: ${data.text} `, {
                 icon: '💬',
                 duration: 5000,
             });
@@ -189,7 +204,7 @@ export function AdminDashboard() {
             });
 
             if (unreadCount > 0) {
-                toast(`Você tem ${unreadCount} ${unreadCount === 1 ? 'notificação não lida' : 'notificações não lidas'}`, {
+                toast(`Você tem ${unreadCount} ${unreadCount === 1 ? 'notificação não lida' : 'notificações não lidas'} `, {
                     icon: '🔔',
                     duration: 4000
                 });
@@ -331,14 +346,32 @@ export function AdminDashboard() {
         }
     }, []);
 
-    const handleUpdateTicketStatus = async (id: string, status: string) => {
+    const handleUpdateTicketStatus = async (id: string, status: string, adminResponse?: string) => {
         try {
-            await api.patch(`/tickets/${id}/status`, { status });
+            await api.patch(`/tickets/${id}/status`, { status, adminResponse });
             toast.success('Status do chamado atualizado!');
             fetchTickets();
         } catch {
             toast.error('Erro ao atualizar chamado.');
         }
+    };
+
+    const handleOpenTicketResponse = (id: string, status: 'IN_PROGRESS' | 'RESOLVED', currentResponse?: string) => {
+        setTicketResponseAction({ id, status, currentResponse });
+        setIsTicketResponseModalOpen(true);
+    };
+
+    const handleSubmitTicketResponse = async (response: string) => {
+        if (!ticketResponseAction) return;
+
+        await handleUpdateTicketStatus(
+            ticketResponseAction.id,
+            ticketResponseAction.status,
+            response || undefined
+        );
+
+        setIsTicketResponseModalOpen(false);
+        setTicketResponseAction(null);
     };
 
     useEffect(() => {
@@ -786,13 +819,12 @@ export function AdminDashboard() {
                 </aside>
 
                 <section className="flex-1">
-                    {view === 'tickets' ? (
+                    {view === 'tickets' && (
                         <div className="space-y-6 min-h-[calc(100vh-12rem)] flex flex-col">
                             <Card variant="white" className="border-[var(--border-subtle)]">
                                 <div className="p-6 border-b border-[var(--border-subtle)] flex justify-between items-center bg-[var(--bg-primary)]">
                                     <div>
                                         <h2 className="text-xl font-black text-[var(--text-primary)] uppercase tracking-tighter">Chamados de Suporte</h2>
-                                        <p className="text-xs text-[var(--text-tertiary)] font-medium mt-1">Gestão de solicitações técnicas e operacionais dos supervisores</p>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <Button
@@ -803,6 +835,54 @@ export function AdminDashboard() {
                                         >
                                             Atualizar
                                         </Button>
+                                    </div>
+                                </div>
+
+                                <div className="p-4 bg-[var(--bg-tertiary)] border-b border-[var(--border-subtle)] grid grid-cols-1 md:grid-cols-4 gap-4">
+                                    <div className="relative">
+                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-tertiary)]" />
+                                        <input
+                                            type="text"
+                                            placeholder="Buscar Protocolo..."
+                                            className="w-full pl-9 pr-4 py-2 bg-[var(--bg-primary)] border border-[var(--border-subtle)] rounded-lg text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                            value={ticketFilters.protocol}
+                                            onChange={(e) => setTicketFilters(prev => ({ ...prev, protocol: e.target.value }))}
+                                        />
+                                    </div>
+                                    <div className="relative">
+                                        <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-tertiary)]" />
+                                        <input
+                                            type="text"
+                                            placeholder="Filtrar por Supervisor..."
+                                            className="w-full pl-9 pr-4 py-2 bg-[var(--bg-primary)] border border-[var(--border-subtle)] rounded-lg text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                            value={ticketFilters.supervisor}
+                                            onChange={(e) => setTicketFilters(prev => ({ ...prev, supervisor: e.target.value }))}
+                                        />
+                                    </div>
+                                    <div className="relative">
+                                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-tertiary)]" />
+                                        <input
+                                            type="text"
+                                            placeholder="Assunto / Motivo..."
+                                            className="w-full pl-9 pr-4 py-2 bg-[var(--bg-primary)] border border-[var(--border-subtle)] rounded-lg text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                            value={ticketFilters.subject}
+                                            onChange={(e) => setTicketFilters(prev => ({ ...prev, subject: e.target.value }))}
+                                        />
+                                    </div>
+                                    <div className="relative">
+                                        <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-tertiary)]" />
+                                        <select
+                                            title="Filtrar por Status"
+                                            className="w-full pl-9 pr-4 py-2 bg-[var(--bg-primary)] border border-[var(--border-subtle)] rounded-lg text-xs focus:ring-2 focus:ring-blue-500 outline-none appearance-none cursor-pointer"
+                                            value={ticketFilters.status}
+                                            onChange={(e) => setTicketFilters(prev => ({ ...prev, status: e.target.value }))}
+                                        >
+                                            <option value="">Todos os Status</option>
+                                            <option value="OPEN">Aberto</option>
+                                            <option value="IN_PROGRESS">Em Andamento</option>
+                                            <option value="RESOLVED">Resolvido</option>
+                                            <option value="CLOSED">Arquivado</option>
+                                        </select>
                                     </div>
                                 </div>
 
@@ -818,14 +898,14 @@ export function AdminDashboard() {
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-[var(--border-subtle)]">
-                                            {tickets.length === 0 && !isLoadingTickets && (
+                                            {filteredTickets.length === 0 && !isLoadingTickets && (
                                                 <tr>
                                                     <td colSpan={5} className="px-6 py-12 text-center text-[var(--text-tertiary)] font-medium italic">
-                                                        Nenhum chamado registrado no momento.
+                                                        {tickets.length === 0 ? "Nenhum chamado registrado no momento." : "Nenhum chamado corresponde aos filtros."}
                                                     </td>
                                                 </tr>
                                             )}
-                                            {tickets.map(ticket => (
+                                            {filteredTickets.map((ticket: Ticket) => (
                                                 <tr key={ticket.id} className="hover:bg-[var(--bg-tertiary)] transition-colors group">
                                                     <td className="px-6 py-4">
                                                         <div className="flex flex-col">
@@ -887,7 +967,7 @@ export function AdminDashboard() {
                                                                     variant="secondary"
                                                                     size="sm"
                                                                     className="h-8 text-[9px] font-black uppercase tracking-widest px-3 border-orange-500/30 text-orange-600 hover:bg-orange-50"
-                                                                    onClick={() => handleUpdateTicketStatus(ticket.id, 'IN_PROGRESS')}
+                                                                    onClick={() => handleOpenTicketResponse(ticket.id, 'IN_PROGRESS', ticket.adminResponse)}
                                                                 >
                                                                     Assumir
                                                                 </Button>
@@ -897,7 +977,7 @@ export function AdminDashboard() {
                                                                     variant="secondary"
                                                                     size="sm"
                                                                     className="h-8 text-[9px] font-black uppercase tracking-widest px-3 border-emerald-500/30 text-emerald-600 hover:bg-emerald-50"
-                                                                    onClick={() => handleUpdateTicketStatus(ticket.id, 'RESOLVED')}
+                                                                    onClick={() => handleOpenTicketResponse(ticket.id, 'RESOLVED', ticket.adminResponse)}
                                                                 >
                                                                     Finalizar
                                                                 </Button>
@@ -921,7 +1001,8 @@ export function AdminDashboard() {
                                 </div>
                             </Card>
                         </div>
-                    ) : view === 'list' ? (
+                    )}
+                    {view === 'list' && (
                         <div className="space-y-6 min-h-[calc(100vh-12rem)] flex flex-col">
                             {/* Filter Bar */}
                             <Card variant="white" className="p-3 flex flex-col md:flex-row gap-4 items-center border-[var(--border-subtle)]">
@@ -1048,8 +1129,9 @@ export function AdminDashboard() {
                                 </div>
                             </Card>
                         </div>
-                    ) : view === 'departments' ? (
-                        <div className="animate-in slide-in-from-right-4 duration-500 min-h-[calc(100vh-12rem)] flex flex-col space-y-6">
+                    )}
+                    {view === 'departments' && (
+                        <div className="animate-in slide-in-from-right-4 duration-500 min-h-[calc(100vh-12rem)] flex flex-col">
                             <Card variant="white" className="overflow-hidden border-[var(--border-subtle)]">
                                 <div className="p-6 border-b border-[var(--border-subtle)] flex justify-between items-center bg-[var(--bg-primary)]">
                                     <div>
@@ -1106,7 +1188,8 @@ export function AdminDashboard() {
                                 </div>
                             </Card>
                         </div>
-                    ) : view === 'contacts' ? (
+                    )}
+                    {view === 'contacts' && (
                         <div className="animate-in slide-in-from-right-4 duration-500 min-h-[calc(100vh-12rem)] flex flex-col">
                             <Card variant="white" className="overflow-hidden border-[var(--border-subtle)] h-full flex flex-col">
                                 <div className="p-6 border-b border-[var(--border-subtle)] bg-[var(--bg-primary)]">
@@ -1254,7 +1337,8 @@ export function AdminDashboard() {
                                 )}
                             </Card>
                         </div>
-                    ) : (view === 'edit' || view === 'create') && (
+                    )}
+                    {(view === 'edit' || view === 'create') && (
                         <div className="animate-in slide-in-from-bottom-5 duration-500 min-h-[calc(100vh-12rem)] flex flex-col">
                             <Card variant="white" className="p-8 border-[var(--border-subtle)]">
                                 <div className="flex justify-between items-start mb-8 border-b border-[var(--border-subtle)] pb-6">
@@ -1516,17 +1600,16 @@ export function AdminDashboard() {
                                         <p className="font-bold">Nenhum processo arquivado</p>
                                     </div>
                                 ) : (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    <div className="flex flex-wrap gap-3">
                                         {archivedReports.map(report => (
-                                            <div
+                                            <button
                                                 key={report.id}
-                                                className="cursor-pointer ring-2 ring-transparent hover:ring-amber-500 rounded-[1.5rem] transition-all"
                                                 onClick={() => setArchivedReportSelected(report)}
+                                                className="px-4 py-3 bg-[var(--bg-tertiary)] border border-[var(--border-subtle)] rounded-2xl text-amber-500 font-mono font-bold text-sm hover:border-amber-500 hover:bg-[var(--bg-primary)] transition-all shadow-sm flex items-center gap-2 group"
                                             >
-                                                <div className="pointer-events-none opacity-80 mix-blend-luminosity">
-                                                    <ReportCard report={report} showUser={true} />
-                                                </div>
-                                            </div>
+                                                <FolderArchive className="w-4 h-4 text-[var(--text-tertiary)] group-hover:text-amber-500 transition-colors" />
+                                                #{report.id.slice(-6).toUpperCase()}
+                                            </button>
                                         ))}
                                     </div>
                                 )}
@@ -1574,8 +1657,49 @@ export function AdminDashboard() {
                                 </div>
 
                                 {archivedReportSelected && (
-                                    <div className="pointer-events-none">
-                                        <ReportCard report={archivedReportSelected} showUser={true} />
+                                    <div className="space-y-6">
+                                        <div className="pointer-events-none opacity-60 grayscale scale-[0.98] origin-top">
+                                            <ReportCard report={archivedReportSelected} showUser={true} />
+                                        </div>
+
+                                        <div className="pt-6 border-t border-[var(--border-subtle)]">
+                                            <h4 className="text-xs font-black text-[var(--text-tertiary)] uppercase tracking-widest mb-6 flex items-center gap-2">
+                                                <Clock className="w-4 h-4" /> Histórico de Movimentações
+                                            </h4>
+
+                                            <div className="space-y-6 relative before:absolute before:left-[15px] before:top-2 before:bottom-2 before:w-[2px] before:bg-[var(--border-subtle)]">
+                                                {archivedReportSelected.history?.map((step: ReportHistory, idx: number) => (
+                                                    <div key={idx} className="relative pl-10">
+                                                        <div className={`absolute left-0 top-1 w-8 h-8 rounded-xl border-4 border-[var(--bg-primary)] shadow-sm flex items-center justify-center z-10 ${step.status === 'SENT' ? 'bg-yellow-400' :
+                                                            step.status === 'IN_REVIEW' ? 'bg-blue-500' :
+                                                                step.status === 'FORWARDED' ? 'bg-purple-500' :
+                                                                    step.status === 'RESOLVED' ? 'bg-emerald-500' : 'bg-slate-400'
+                                                            }`} />
+                                                        <div className="bg-[var(--bg-tertiary)] p-4 rounded-2xl border border-[var(--border-subtle)]">
+                                                            <div className="flex justify-between items-start mb-2">
+                                                                <span className="text-[10px] font-bold text-[var(--text-tertiary)]">
+                                                                    {new Date(step.createdAt).toLocaleString('pt-BR')}
+                                                                </span>
+                                                                <Badge status={step.status as "SENT" | "IN_REVIEW" | "FORWARDED" | "RESOLVED" | "ARCHIVED" | "default"} />
+                                                            </div>
+                                                            <p className="text-xs font-medium text-[var(--text-secondary)] leading-tight">
+                                                                {step.comment || "Sem observações"}
+                                                            </p>
+                                                            <div className="mt-3 pt-2 border-t border-[var(--border-subtle)] flex items-center gap-2">
+                                                                <span className="text-[9px] font-black text-[var(--text-tertiary)] uppercase">
+                                                                    POR {step.userName}
+                                                                </span>
+                                                                {step.departmentName && (
+                                                                    <span className="text-[9px] font-bold text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded uppercase">
+                                                                        {step.departmentName}
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
                                     </div>
                                 )}
                             </Modal>
@@ -1583,7 +1707,7 @@ export function AdminDashboard() {
                     )}
                     <RestorationInput />
                 </section>
-            </div>
+            </div >
 
             {success && (
                 <div className="fixed bottom-10 right-10 z-50 animate-in slide-in-from-right-10">
@@ -1595,7 +1719,8 @@ export function AdminDashboard() {
                         </div>
                     </Card>
                 </div>
-            )}
+            )
+            }
 
             <ProfileSettingsModal
                 isOpen={isProfileOpen}
@@ -1611,6 +1736,15 @@ export function AdminDashboard() {
                 desktopNotificationsEnabled={desktopNotificationsEnabled}
                 setDesktopNotificationsEnabled={setDesktopNotificationsEnabled}
             />
-        </DashboardLayout>
+
+            <TicketResponseModal
+                isOpen={isTicketResponseModalOpen}
+                onClose={() => setIsTicketResponseModalOpen(false)}
+                onSubmit={handleSubmitTicketResponse}
+                ticketId={ticketResponseAction?.id || null}
+                actionType={ticketResponseAction?.status || null}
+                currentResponse={ticketResponseAction?.currentResponse}
+            />
+        </DashboardLayout >
     );
 }

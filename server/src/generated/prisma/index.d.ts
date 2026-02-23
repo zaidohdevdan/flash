@@ -398,7 +398,7 @@ export namespace Prisma {
 
   /**
    * Prisma Client JS version: 6.18.0
-   * Query Engine version: acc0b9dd43eb689cbd20c9470515d719db10d0b0
+   * Query Engine version: 34b5a692b7bd79939a9a2c3ef97d816e749cda2f
    */
   export type PrismaVersion = {
     client: string
@@ -13970,6 +13970,9 @@ export namespace Prisma {
     subject: string | null
     message: string | null
     status: $Enums.TicketStatus | null
+    isDeletedBySupervisor: boolean | null
+    adminResponse: string | null
+    respondedAt: Date | null
     supervisorId: string | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -13981,6 +13984,9 @@ export namespace Prisma {
     subject: string | null
     message: string | null
     status: $Enums.TicketStatus | null
+    isDeletedBySupervisor: boolean | null
+    adminResponse: string | null
+    respondedAt: Date | null
     supervisorId: string | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -13992,6 +13998,9 @@ export namespace Prisma {
     subject: number
     message: number
     status: number
+    isDeletedBySupervisor: number
+    adminResponse: number
+    respondedAt: number
     supervisorId: number
     createdAt: number
     updatedAt: number
@@ -14005,6 +14014,9 @@ export namespace Prisma {
     subject?: true
     message?: true
     status?: true
+    isDeletedBySupervisor?: true
+    adminResponse?: true
+    respondedAt?: true
     supervisorId?: true
     createdAt?: true
     updatedAt?: true
@@ -14016,6 +14028,9 @@ export namespace Prisma {
     subject?: true
     message?: true
     status?: true
+    isDeletedBySupervisor?: true
+    adminResponse?: true
+    respondedAt?: true
     supervisorId?: true
     createdAt?: true
     updatedAt?: true
@@ -14027,6 +14042,9 @@ export namespace Prisma {
     subject?: true
     message?: true
     status?: true
+    isDeletedBySupervisor?: true
+    adminResponse?: true
+    respondedAt?: true
     supervisorId?: true
     createdAt?: true
     updatedAt?: true
@@ -14111,6 +14129,9 @@ export namespace Prisma {
     subject: string
     message: string | null
     status: $Enums.TicketStatus
+    isDeletedBySupervisor: boolean
+    adminResponse: string | null
+    respondedAt: Date | null
     supervisorId: string
     createdAt: Date
     updatedAt: Date
@@ -14139,6 +14160,9 @@ export namespace Prisma {
     subject?: boolean
     message?: boolean
     status?: boolean
+    isDeletedBySupervisor?: boolean
+    adminResponse?: boolean
+    respondedAt?: boolean
     supervisorId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -14153,12 +14177,15 @@ export namespace Prisma {
     subject?: boolean
     message?: boolean
     status?: boolean
+    isDeletedBySupervisor?: boolean
+    adminResponse?: boolean
+    respondedAt?: boolean
     supervisorId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type TicketOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "protocol" | "subject" | "message" | "status" | "supervisorId" | "createdAt" | "updatedAt", ExtArgs["result"]["ticket"]>
+  export type TicketOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "protocol" | "subject" | "message" | "status" | "isDeletedBySupervisor" | "adminResponse" | "respondedAt" | "supervisorId" | "createdAt" | "updatedAt", ExtArgs["result"]["ticket"]>
   export type TicketInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     supervisor?: boolean | UserDefaultArgs<ExtArgs>
   }
@@ -14174,6 +14201,9 @@ export namespace Prisma {
       subject: string
       message: string | null
       status: $Enums.TicketStatus
+      isDeletedBySupervisor: boolean
+      adminResponse: string | null
+      respondedAt: Date | null
       supervisorId: string
       createdAt: Date
       updatedAt: Date
@@ -14575,6 +14605,9 @@ export namespace Prisma {
     readonly subject: FieldRef<"Ticket", 'String'>
     readonly message: FieldRef<"Ticket", 'String'>
     readonly status: FieldRef<"Ticket", 'TicketStatus'>
+    readonly isDeletedBySupervisor: FieldRef<"Ticket", 'Boolean'>
+    readonly adminResponse: FieldRef<"Ticket", 'String'>
+    readonly respondedAt: FieldRef<"Ticket", 'DateTime'>
     readonly supervisorId: FieldRef<"Ticket", 'String'>
     readonly createdAt: FieldRef<"Ticket", 'DateTime'>
     readonly updatedAt: FieldRef<"Ticket", 'DateTime'>
@@ -15146,6 +15179,9 @@ export namespace Prisma {
     subject: 'subject',
     message: 'message',
     status: 'status',
+    isDeletedBySupervisor: 'isDeletedBySupervisor',
+    adminResponse: 'adminResponse',
+    respondedAt: 'respondedAt',
     supervisorId: 'supervisorId',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
@@ -16208,6 +16244,9 @@ export namespace Prisma {
     subject?: StringFilter<"Ticket"> | string
     message?: StringNullableFilter<"Ticket"> | string | null
     status?: EnumTicketStatusFilter<"Ticket"> | $Enums.TicketStatus
+    isDeletedBySupervisor?: BoolFilter<"Ticket"> | boolean
+    adminResponse?: StringNullableFilter<"Ticket"> | string | null
+    respondedAt?: DateTimeNullableFilter<"Ticket"> | Date | string | null
     supervisorId?: StringFilter<"Ticket"> | string
     createdAt?: DateTimeFilter<"Ticket"> | Date | string
     updatedAt?: DateTimeFilter<"Ticket"> | Date | string
@@ -16220,6 +16259,9 @@ export namespace Prisma {
     subject?: SortOrder
     message?: SortOrder
     status?: SortOrder
+    isDeletedBySupervisor?: SortOrder
+    adminResponse?: SortOrder
+    respondedAt?: SortOrder
     supervisorId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -16235,6 +16277,9 @@ export namespace Prisma {
     subject?: StringFilter<"Ticket"> | string
     message?: StringNullableFilter<"Ticket"> | string | null
     status?: EnumTicketStatusFilter<"Ticket"> | $Enums.TicketStatus
+    isDeletedBySupervisor?: BoolFilter<"Ticket"> | boolean
+    adminResponse?: StringNullableFilter<"Ticket"> | string | null
+    respondedAt?: DateTimeNullableFilter<"Ticket"> | Date | string | null
     supervisorId?: StringFilter<"Ticket"> | string
     createdAt?: DateTimeFilter<"Ticket"> | Date | string
     updatedAt?: DateTimeFilter<"Ticket"> | Date | string
@@ -16247,6 +16292,9 @@ export namespace Prisma {
     subject?: SortOrder
     message?: SortOrder
     status?: SortOrder
+    isDeletedBySupervisor?: SortOrder
+    adminResponse?: SortOrder
+    respondedAt?: SortOrder
     supervisorId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -16264,6 +16312,9 @@ export namespace Prisma {
     subject?: StringWithAggregatesFilter<"Ticket"> | string
     message?: StringNullableWithAggregatesFilter<"Ticket"> | string | null
     status?: EnumTicketStatusWithAggregatesFilter<"Ticket"> | $Enums.TicketStatus
+    isDeletedBySupervisor?: BoolWithAggregatesFilter<"Ticket"> | boolean
+    adminResponse?: StringNullableWithAggregatesFilter<"Ticket"> | string | null
+    respondedAt?: DateTimeNullableWithAggregatesFilter<"Ticket"> | Date | string | null
     supervisorId?: StringWithAggregatesFilter<"Ticket"> | string
     createdAt?: DateTimeWithAggregatesFilter<"Ticket"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Ticket"> | Date | string
@@ -17232,6 +17283,9 @@ export namespace Prisma {
     subject: string
     message?: string | null
     status?: $Enums.TicketStatus
+    isDeletedBySupervisor?: boolean
+    adminResponse?: string | null
+    respondedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     supervisor: UserCreateNestedOneWithoutTicketsInput
@@ -17243,6 +17297,9 @@ export namespace Prisma {
     subject: string
     message?: string | null
     status?: $Enums.TicketStatus
+    isDeletedBySupervisor?: boolean
+    adminResponse?: string | null
+    respondedAt?: Date | string | null
     supervisorId: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -17253,6 +17310,9 @@ export namespace Prisma {
     subject?: StringFieldUpdateOperationsInput | string
     message?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
+    isDeletedBySupervisor?: BoolFieldUpdateOperationsInput | boolean
+    adminResponse?: NullableStringFieldUpdateOperationsInput | string | null
+    respondedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     supervisor?: UserUpdateOneRequiredWithoutTicketsNestedInput
@@ -17263,6 +17323,9 @@ export namespace Prisma {
     subject?: StringFieldUpdateOperationsInput | string
     message?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
+    isDeletedBySupervisor?: BoolFieldUpdateOperationsInput | boolean
+    adminResponse?: NullableStringFieldUpdateOperationsInput | string | null
+    respondedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     supervisorId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -17274,6 +17337,9 @@ export namespace Prisma {
     subject: string
     message?: string | null
     status?: $Enums.TicketStatus
+    isDeletedBySupervisor?: boolean
+    adminResponse?: string | null
+    respondedAt?: Date | string | null
     supervisorId: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -17284,6 +17350,9 @@ export namespace Prisma {
     subject?: StringFieldUpdateOperationsInput | string
     message?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
+    isDeletedBySupervisor?: BoolFieldUpdateOperationsInput | boolean
+    adminResponse?: NullableStringFieldUpdateOperationsInput | string | null
+    respondedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -17293,6 +17362,9 @@ export namespace Prisma {
     subject?: StringFieldUpdateOperationsInput | string
     message?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
+    isDeletedBySupervisor?: BoolFieldUpdateOperationsInput | boolean
+    adminResponse?: NullableStringFieldUpdateOperationsInput | string | null
+    respondedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     supervisorId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -18151,6 +18223,9 @@ export namespace Prisma {
     subject?: SortOrder
     message?: SortOrder
     status?: SortOrder
+    isDeletedBySupervisor?: SortOrder
+    adminResponse?: SortOrder
+    respondedAt?: SortOrder
     supervisorId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -18162,6 +18237,9 @@ export namespace Prisma {
     subject?: SortOrder
     message?: SortOrder
     status?: SortOrder
+    isDeletedBySupervisor?: SortOrder
+    adminResponse?: SortOrder
+    respondedAt?: SortOrder
     supervisorId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -18173,6 +18251,9 @@ export namespace Prisma {
     subject?: SortOrder
     message?: SortOrder
     status?: SortOrder
+    isDeletedBySupervisor?: SortOrder
+    adminResponse?: SortOrder
+    respondedAt?: SortOrder
     supervisorId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -19773,6 +19854,9 @@ export namespace Prisma {
     subject: string
     message?: string | null
     status?: $Enums.TicketStatus
+    isDeletedBySupervisor?: boolean
+    adminResponse?: string | null
+    respondedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -19783,6 +19867,9 @@ export namespace Prisma {
     subject: string
     message?: string | null
     status?: $Enums.TicketStatus
+    isDeletedBySupervisor?: boolean
+    adminResponse?: string | null
+    respondedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -20141,6 +20228,9 @@ export namespace Prisma {
     subject?: StringFilter<"Ticket"> | string
     message?: StringNullableFilter<"Ticket"> | string | null
     status?: EnumTicketStatusFilter<"Ticket"> | $Enums.TicketStatus
+    isDeletedBySupervisor?: BoolFilter<"Ticket"> | boolean
+    adminResponse?: StringNullableFilter<"Ticket"> | string | null
+    respondedAt?: DateTimeNullableFilter<"Ticket"> | Date | string | null
     supervisorId?: StringFilter<"Ticket"> | string
     createdAt?: DateTimeFilter<"Ticket"> | Date | string
     updatedAt?: DateTimeFilter<"Ticket"> | Date | string
@@ -21644,6 +21734,9 @@ export namespace Prisma {
     subject: string
     message?: string | null
     status?: $Enums.TicketStatus
+    isDeletedBySupervisor?: boolean
+    adminResponse?: string | null
+    respondedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -21955,6 +22048,9 @@ export namespace Prisma {
     subject?: StringFieldUpdateOperationsInput | string
     message?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
+    isDeletedBySupervisor?: BoolFieldUpdateOperationsInput | boolean
+    adminResponse?: NullableStringFieldUpdateOperationsInput | string | null
+    respondedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -21964,6 +22060,9 @@ export namespace Prisma {
     subject?: StringFieldUpdateOperationsInput | string
     message?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
+    isDeletedBySupervisor?: BoolFieldUpdateOperationsInput | boolean
+    adminResponse?: NullableStringFieldUpdateOperationsInput | string | null
+    respondedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -21973,6 +22072,9 @@ export namespace Prisma {
     subject?: StringFieldUpdateOperationsInput | string
     message?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
+    isDeletedBySupervisor?: BoolFieldUpdateOperationsInput | boolean
+    adminResponse?: NullableStringFieldUpdateOperationsInput | string | null
+    respondedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }

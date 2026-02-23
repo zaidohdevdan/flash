@@ -41,7 +41,8 @@ export class PrismaTicketRepository implements ITicketRepository {
     async listBySupervisor(supervisorId: string): Promise<Ticket[]> {
         return prisma.ticket.findMany({
             where: {
-                supervisorId
+                supervisorId,
+                isDeletedBySupervisor: false
             },
             orderBy: {
                 createdAt: 'desc'
@@ -49,10 +50,13 @@ export class PrismaTicketRepository implements ITicketRepository {
         });
     }
 
-    async updateStatus(id: string, status: TicketStatus): Promise<Ticket> {
+    async updateStatus(id: string, status: TicketStatus, adminResponse?: string): Promise<Ticket> {
         return prisma.ticket.update({
             where: { id },
-            data: { status }
+            data: {
+                status,
+                ...(adminResponse ? { adminResponse, respondedAt: new Date() } : {})
+            }
         });
     }
 
@@ -68,6 +72,18 @@ export class PrismaTicketRepository implements ITicketRepository {
                     }
                 }
             }
+        });
+    }
+    async softDeleteBySupervisor(id: string): Promise<void> {
+        await prisma.ticket.update({
+            where: { id },
+            data: { isDeletedBySupervisor: true }
+        });
+    }
+
+    async delete(id: string): Promise<void> {
+        await prisma.ticket.delete({
+            where: { id }
         });
     }
 }

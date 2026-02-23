@@ -261,7 +261,7 @@ export function Analytics() {
                             <p className="text-[var(--text-tertiary)] text-[10px] font-bold uppercase tracking-widest mt-1">Eficiência departamental</p>
                         </div>
 
-                        <div className="space-y-6 overflow-y-auto max-h-[350px] pr-2 custom-scrollbar">
+                        <div className="space-y-6 overflow-y-auto max-h-[350px] pr-2 custom-scrollbar print:max-h-none print:overflow-visible">
                             {data.sectorPerformance.map((sector) => (
                                 <div key={sector.name} className="group">
                                     <div className="flex justify-between items-end mb-2">

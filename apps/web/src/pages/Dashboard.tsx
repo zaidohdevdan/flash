@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { TicketHistoryModal } from '../components/domain/modals/TicketHistoryModal';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
 import { toast } from 'react-hot-toast';
@@ -10,7 +11,7 @@ import {
     CheckCircle,
     AlertCircle,
     Folder,
-    History,
+    History as HistoryIcon,
     Users,
     Shield
 } from 'lucide-react';
@@ -115,6 +116,7 @@ export function Dashboard() {
     const [isAgendaOpen, setIsAgendaOpen] = useState(false);
     const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
     const [isTicketModalOpen, setIsTicketModalOpen] = useState(false);
+    const [isTicketHistoryModalOpen, setIsTicketHistoryModalOpen] = useState(false);
     const [roomParticipants, setRoomParticipants] = useState<string[]>([]);
     const hasShownSummaryRef = useRef(false);
 
@@ -512,6 +514,7 @@ export function Dashboard() {
                 onConferenceClick={user?.role === 'SUPERVISOR' ? handleStartConference : undefined}
                 onAgendaClick={() => setIsAgendaOpen(true)}
                 onSupportClick={user?.role === 'SUPERVISOR' ? () => setIsTicketModalOpen(true) : undefined}
+                onHistoryClick={user?.role === 'SUPERVISOR' ? () => setIsTicketHistoryModalOpen(true) : undefined}
             >
                 <div className="flex bg-[var(--bg-tertiary)] p-1 rounded-lg border border-[var(--border-subtle)]">
                     <button
@@ -561,7 +564,7 @@ export function Dashboard() {
                                         </Button>
                                     )}
                                     <Button variant="ghost" size="sm" onClick={() => setSelectedReport(report)}>
-                                        <History className="w-4 h-4" />
+                                        <HistoryIcon className="w-4 h-4" />
                                     </Button>
                                 </div>
                             )}
@@ -664,6 +667,11 @@ export function Dashboard() {
             <TicketModal
                 isOpen={isTicketModalOpen}
                 onClose={() => setIsTicketModalOpen(false)}
+            />
+
+            <TicketHistoryModal
+                isOpen={isTicketHistoryModalOpen}
+                onClose={() => setIsTicketHistoryModalOpen(false)}
             />
 
             <InviteConferenceModal
