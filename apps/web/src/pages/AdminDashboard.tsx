@@ -717,55 +717,55 @@ export function AdminDashboard() {
             onDelete={handleDeleteNotification}
             onProfileClick={() => setIsProfileOpen(true)}
         >
-            <div className="flex flex-col lg:flex-row gap-8 animate-in fade-in duration-500 items-start">
-                <aside className="w-full lg:w-72 shrink-0 space-y-4 lg:sticky lg:top-0 lg:h-[calc(100vh-8rem)] lg:overflow-y-auto custom-scrollbar">
-                    <Card variant="white" className="p-2 space-y-1 shadow-sm">
+            <div className="flex flex-col lg:flex-row gap-6 animate-in fade-in duration-500 items-start">
+                <aside className="w-full lg:w-72 shrink-0 lg:sticky lg:top-0 lg:h-[calc(100vh-8rem)] lg:overflow-y-auto custom-scrollbar">
+                    <Card variant="white" className="p-2 flex flex-row lg:flex-col overflow-x-auto lg:overflow-x-visible gap-2 lg:gap-1 shadow-sm hide-scrollbar sm:custom-scrollbar">
                         <button
                             title='Gestão de Usuários'
                             type='button'
                             onClick={() => { setView('list'); resetForm(); }}
-                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-xs uppercase tracking-wide transition-all ${view === 'list'
+                            className={`flex-shrink-0 lg:w-full flex items-center justify-center lg:justify-start gap-2 lg:gap-3 px-4 py-2.5 lg:py-3 rounded-xl font-bold text-xs uppercase tracking-wide transition-all ${view === 'list'
                                 ? 'bg-[var(--accent-primary)] text-[var(--accent-text)] shadow-md'
                                 : 'text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]'
                                 }`}
                         >
-                            <Users className="w-4 h-4" /> Gestão de Usuários
+                            <Users className="w-4 h-4" /> <span className="hidden sm:inline lg:inline">Gestão de Usuários</span><span className="sm:hidden">Usuários</span>
                         </button>
                         <button
                             title='Novo Cadastro'
                             type='button'
                             onClick={() => { setView('create'); resetForm(); }}
-                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-xs uppercase tracking-wide transition-all ${view === 'create'
+                            className={`flex-shrink-0 lg:w-full flex items-center justify-center lg:justify-start gap-2 lg:gap-3 px-4 py-2.5 lg:py-3 rounded-xl font-bold text-xs uppercase tracking-wide transition-all ${view === 'create'
                                 ? 'bg-[var(--accent-primary)] text-[var(--accent-text)] shadow-md'
                                 : 'text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]'
                                 }`}
                         >
-                            <UserPlus className="w-4 h-4" /> Novo Cadastro
+                            <UserPlus className="w-4 h-4" /> <span className="hidden sm:inline lg:inline">Novo Cadastro</span><span className="sm:hidden">Novo</span>
                         </button>
                         <button
                             title='Gestão de Setores'
                             type='button'
                             onClick={() => { setView('departments'); resetForm(); }}
-                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-xs uppercase tracking-wide transition-all ${view === 'departments'
+                            className={`flex-shrink-0 lg:w-full flex items-center justify-center lg:justify-start gap-2 lg:gap-3 px-4 py-2.5 lg:py-3 rounded-xl font-bold text-xs uppercase tracking-wide transition-all ${view === 'departments'
                                 ? 'bg-[var(--accent-primary)] text-[var(--accent-text)] shadow-md'
                                 : 'text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]'
                                 }`}
                         >
-                            <Filter className="w-4 h-4" /> Gestão de Setores
+                            <Filter className="w-4 h-4" /> <span className="hidden sm:inline lg:inline">Gestão de Setores</span><span className="sm:hidden">Setores</span>
                         </button>
 
                         <button
                             title='Mensagens de Contato'
                             type='button'
                             onClick={() => { setView('contacts'); resetForm(); }}
-                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-xs uppercase tracking-wide transition-all ${view === 'contacts'
+                            className={`flex-shrink-0 lg:w-full flex items-center justify-center lg:justify-start gap-2 lg:gap-3 px-4 py-2.5 lg:py-3 rounded-xl font-bold text-xs uppercase tracking-wide transition-all ${view === 'contacts'
                                 ? 'bg-[var(--accent-primary)] text-[var(--accent-text)] shadow-md'
                                 : 'text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]'
                                 }`}
                         >
-                            <Mail className="w-4 h-4" /> Mensagens
+                            <Mail className="w-4 h-4" /> <span className="hidden sm:inline lg:inline">Mensagens</span><span className="sm:hidden">MSGs</span>
                             {contacts.filter(c => !c.read).length > 0 && (
-                                <span className="ml-auto bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full ring-2 ring-[var(--bg-primary)]">
+                                <span className="ml-1 lg:ml-auto bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full ring-2 ring-[var(--bg-primary)]">
                                     {contacts.filter(c => !c.read).length}
                                 </span>
                             )}
@@ -775,39 +775,39 @@ export function AdminDashboard() {
                             title='Excluir Processo'
                             type='button'
                             onClick={() => { setView('delete_report'); resetForm(); }}
-                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-xs uppercase tracking-wide transition-all ${view === 'delete_report'
+                            className={`flex-shrink-0 lg:w-full flex items-center justify-center lg:justify-start gap-2 lg:gap-3 px-4 py-2.5 lg:py-3 rounded-xl font-bold text-xs uppercase tracking-wide transition-all ${view === 'delete_report'
                                 ? 'bg-red-500 text-white shadow-md'
                                 : 'text-red-500 hover:bg-red-50'
                                 }`}
                         >
-                            <Trash2 className="w-4 h-4" /> Excluir Processo
+                            <Trash2 className="w-4 h-4" /> <span className="hidden sm:inline lg:inline">Excluir Processo</span><span className="sm:hidden">Excluir</span>
                         </button>
 
                         <button
                             title='Arquivos de Auditoria'
                             type='button'
                             onClick={() => { setView('archived'); resetForm(); }}
-                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-xs uppercase tracking-wide transition-all ${view === 'archived'
+                            className={`flex-shrink-0 lg:w-full flex items-center justify-center lg:justify-start gap-2 lg:gap-3 px-4 py-2.5 lg:py-3 rounded-xl font-bold text-xs uppercase tracking-wide transition-all ${view === 'archived'
                                 ? 'bg-amber-500 text-white shadow-md'
                                 : 'text-amber-600 hover:bg-amber-50'
                                 }`}
                         >
-                            <FolderArchive className="w-4 h-4" /> Arquivos
+                            <FolderArchive className="w-4 h-4" /> <span className="hidden sm:inline lg:inline">Arquivos</span><span className="sm:hidden">Audit</span>
                         </button>
 
                         <button
                             title='Chamados de Suporte'
                             type='button'
                             onClick={() => { setView('tickets'); resetForm(); }}
-                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-xs uppercase tracking-wide transition-all ${view === 'tickets'
+                            className={`flex-shrink-0 lg:w-full flex items-center justify-center lg:justify-start gap-2 lg:gap-3 px-4 py-2.5 lg:py-3 rounded-xl font-bold text-xs uppercase tracking-wide transition-all ${view === 'tickets'
                                 ? 'bg-blue-600 text-white shadow-md'
                                 : 'text-blue-600 hover:bg-blue-50'
                                 }`}
                         >
-                            <LifeBuoy className="w-4 h-4" /> Chamados
+                            <LifeBuoy className="w-4 h-4" /> <span className="hidden sm:inline lg:inline">Chamados</span><span className="sm:hidden">Tickets</span>
                         </button>
 
-                        <div className="pt-4 mt-4 border-t border-[var(--border-subtle)] px-2 pb-2">
+                        <div className="hidden lg:block pt-4 mt-4 border-t border-[var(--border-subtle)] px-2 pb-2">
                             <div className="bg-emerald-500/10 p-3 rounded-xl border border-emerald-500/20">
                                 <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest leading-none mb-1">Status do Sistema</p>
                                 <div className="flex items-center gap-2 text-emerald-500 font-bold text-xs uppercase tracking-tight">
@@ -1340,8 +1340,8 @@ export function AdminDashboard() {
                     )}
                     {(view === 'edit' || view === 'create') && (
                         <div className="animate-in slide-in-from-bottom-5 duration-500 min-h-[calc(100vh-12rem)] flex flex-col">
-                            <Card variant="white" className="p-8 border-[var(--border-subtle)]">
-                                <div className="flex justify-between items-start mb-8 border-b border-[var(--border-subtle)] pb-6">
+                            <Card variant="white" className="p-4 md:p-6 lg:p-8 border-[var(--border-subtle)]">
+                                <div className="flex flex-col md:flex-row md:justify-between md:items-start mb-6 md:mb-8 border-b border-[var(--border-subtle)] pb-4 md:pb-6 gap-4">
                                     <div>
                                         <h2 className="text-2xl font-bold text-[var(--text-primary)] tracking-tight mb-1">{view === 'create' ? 'Novo Cadastro' : 'Editar Membro'}</h2>
                                         <p className="text-xs text-[var(--text-secondary)] font-medium">Preencha as informações de acesso</p>
@@ -1483,8 +1483,8 @@ export function AdminDashboard() {
                     )}
                     {view === 'delete_report' && (
                         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 min-h-[calc(100vh-12rem)] flex flex-col">
-                            <Card variant="white" className="p-8">
-                                <div className="flex items-center justify-between mb-8 pb-6 border-b border-[var(--border-subtle)]">
+                            <Card variant="white" className="p-4 md:p-6 lg:p-8">
+                                <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 md:mb-8 pb-4 md:pb-6 border-b border-[var(--border-subtle)] gap-4">
                                     <div>
                                         <h2 className="text-xl font-bold text-red-600 mb-1 flex items-center gap-2">
                                             <Trash2 className="w-5 h-5" /> Excluir Processo
@@ -1570,7 +1570,7 @@ export function AdminDashboard() {
 
                     {view === 'archived' && (
                         <div className="space-y-6 min-h-[calc(100vh-12rem)] flex flex-col">
-                            <Card variant="white" className="p-8 border-[var(--border-subtle)]">
+                            <Card variant="white" className="p-4 md:p-6 lg:p-8 border-[var(--border-subtle)]">
                                 <div className="max-w-xl mb-8">
                                     <h2 className="text-2xl font-black text-[var(--text-primary)] tracking-tight flex items-center gap-3 mb-2">
                                         <FolderArchive className="w-8 h-8 text-amber-500" />
