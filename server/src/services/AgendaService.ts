@@ -48,13 +48,17 @@ export class AgendaService {
     private async scheduleEventNotifications(event: any, io?: SocketIOServer) {
         const { id, title, startTime, participantIds, type } = event;
 
+        const dateObj = new Date(startTime);
+        const dateStr = dateObj.toLocaleDateString('pt-BR');
+        const timeStr = dateObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
         for (const userId of participantIds) {
             // 1. Notificação de "Você foi convidado" (Imediata)
             await this.notificationService.createNotification({
                 userId,
                 type: 'AGENDA_INVITE',
-                title: 'Novo Compromisso',
-                message: `Você foi marcado no evento: ${title}`,
+                title: 'Novo Agendamento',
+                message: `Você foi marcado no evento: "${title}" para o dia ${dateStr} às ${timeStr}.`,
                 link: `/agenda?event=${id}`
             }, io);
 
