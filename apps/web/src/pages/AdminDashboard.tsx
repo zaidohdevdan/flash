@@ -818,7 +818,7 @@ export function AdminDashboard() {
                     </Card>
                 </aside>
 
-                <section className="flex-1">
+                <section className="flex-1 min-w-0 w-full">
                     {view === 'tickets' && (
                         <div className="space-y-6 min-h-[calc(100vh-12rem)] flex flex-col">
                             <Card variant="white" className="border-[var(--border-subtle)]">
@@ -886,8 +886,8 @@ export function AdminDashboard() {
                                     </div>
                                 </div>
 
-                                <div className="overflow-x-auto">
-                                    <table className="w-full text-left border-collapse">
+                                <div className="overflow-x-auto w-full">
+                                    <table className="w-full min-w-max text-left border-collapse">
                                         <thead>
                                             <tr className="bg-[var(--bg-tertiary)] text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest border-b border-[var(--border-subtle)]">
                                                 <th className="px-6 py-4">Data / Protocolo</th>
@@ -1045,7 +1045,7 @@ export function AdminDashboard() {
                                 </div>
 
                                 <div className="overflow-x-auto">
-                                    <table className="w-full text-left border-collapse">
+                                    <table className="w-full min-w-max text-left border-collapse">
                                         <thead>
                                             <tr className="bg-[var(--bg-tertiary)] text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest border-b border-[var(--border-subtle)]">
                                                 <th className="px-6 py-4">Usuário / Identidade</th>
@@ -1142,8 +1142,8 @@ export function AdminDashboard() {
                                         Voltar
                                     </Button>
                                 </div>
-                                <div className="overflow-x-auto">
-                                    <table className="w-full text-left border-collapse">
+                                <div className="overflow-x-auto w-full">
+                                    <table className="w-full min-w-max text-left border-collapse">
                                         <thead>
                                             <tr className="bg-[var(--bg-tertiary)] text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest border-b border-[var(--border-subtle)]">
                                                 <th className="px-6 py-4">Nome do Setor</th>
@@ -1229,8 +1229,8 @@ export function AdminDashboard() {
                                         </select>
                                     </div>
                                 </div>
-                                <div className="overflow-x-auto flex-1">
-                                    <table className="w-full text-left border-collapse">
+                                <div className="overflow-x-auto flex-1 w-full">
+                                    <table className="w-full min-w-max text-left border-collapse">
                                         <thead>
                                             <tr className="bg-[var(--bg-tertiary)] text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest border-b border-[var(--border-subtle)]">
                                                 <th className="px-6 py-4">Remetente / Empresa</th>
