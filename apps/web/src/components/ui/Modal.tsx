@@ -12,7 +12,7 @@ export interface ModalProps {
     /** Título exibido no cabeçalho. */
     title?: string;
     /** Subtítulo descritivo (opcional). */
-    subtitle?: string;
+    subtitle?: React.ReactNode;
     /** Conteúdo do modal. */
     children: React.ReactNode;
     /** Rodapé personalizado (opcional). */

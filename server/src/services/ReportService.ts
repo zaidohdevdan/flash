@@ -44,4 +44,28 @@ export class ReportService {
     async getAdvancedStats(userId: string, role: string) {
         return this.reportRepository.getAdvancedStats(userId, role);
     }
+
+    async findByProtocol(protocol: string) {
+        return this.reportRepository.findByProtocol(protocol);
+    }
+
+    async listArchivedReports(page?: number, limit?: number) {
+        return this.reportRepository.listArchivedReports(page, limit);
+    }
+
+    async archiveByProtocol(protocol: string) {
+        return this.reportRepository.archiveByProtocol(protocol);
+    }
+
+    async restoreByProtocol(protocol: string) {
+        return this.reportRepository.restoreByProtocol(protocol);
+    }
+
+    async importReport(data: any) {
+        return this.reportRepository.importReport(data);
+    }
+
+    async deleteByProtocol(protocol: string) {
+        return this.reportRepository.deleteByProtocol(protocol);
+    }
 }

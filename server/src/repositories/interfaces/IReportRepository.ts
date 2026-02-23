@@ -32,4 +32,10 @@ export interface IReportRepository {
     findStatsBySupervisor(supervisorId: string): Promise<{ status: string, _count: number }[]>;
     findStatsByDepartment(departmentId: string): Promise<{ status: string, _count: number }[]>;
     getAdvancedStats(userId: string, role: string): Promise<any>;
+    findByProtocol(protocol: string): Promise<ReportWithUser | null>;
+    archiveByProtocol(protocol: string): Promise<void>;
+    restoreByProtocol(protocol: string): Promise<void>;
+    listArchivedReports(page?: number, limit?: number): Promise<ReportWithUser[]>;
+    importReport(data: any): Promise<void>;
+    deleteByProtocol(protocol: string): Promise<void>;
 }

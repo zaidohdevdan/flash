@@ -92,8 +92,49 @@ export class PrismaUserRepository implements IUserRepository {
     }
 
     async delete(id: string): Promise<void> {
-        await prisma.user.delete({
-            where: { id }
+        await prisma.$transaction(async (tx) => {
+            // 1. Audit Logs
+            await tx.auditLog.deleteMany({ where: { userId: id } });
+
+            // 2. Chat Messages
+            await tx.chatMessage.deleteMany({ where: { OR: [{ fromId: id }, { toId: id }] } });
+
+            // 3. Notes
+            await tx.note.deleteMany({ where: { userId: id } });
+
+            // 4. Notifications
+            await tx.notification.deleteMany({ where: { userId: id } });
+
+            // 5. Media (Directly tied to User)
+            await tx.media.deleteMany({ where: { userId: id } });
+
+            // 6. Reports (and their history/media)
+            const userReports = await tx.report.findMany({ where: { userId: id }, select: { id: true } });
+            const reportIds = userReports.map(r => r.id);
+
+            if (reportIds.length > 0) {
+                await tx.reportHistory.deleteMany({ where: { reportId: { in: reportIds } } });
+                await tx.media.deleteMany({ where: { reportId: { in: reportIds } } });
+                await tx.report.deleteMany({ where: { userId: id } });
+            }
+
+            // 7. Agenda Events created by the user
+            await tx.agendaEvent.deleteMany({ where: { createdById: id } });
+
+            // 8. Remove from participants in AgendaEvents
+            // P2014 doesn't usually happen on arrays of IDs in MongoDB Prisma, 
+            // but it's good practice to clean up if needed. We'll skip it unless strictly required.
+
+            // 9. Unlink subordinates
+            await tx.user.updateMany({
+                where: { supervisorId: id },
+                data: { supervisorId: null }
+            });
+
+            // 10. Finally, delete the user
+            await tx.user.delete({
+                where: { id }
+            });
         });
     }
 }

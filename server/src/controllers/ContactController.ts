@@ -32,10 +32,45 @@ export class ContactController {
 
     static async index(req: Request, res: Response) {
         try {
-            const messages = await prisma.contactMessage.findMany({
-                orderBy: { createdAt: 'desc' }
+            const page = parseInt(req.query.page as string) || 1;
+            const limit = parseInt(req.query.limit as string) || 10;
+            const search = req.query.search as string;
+            const readStatus = req.query.readStatus as string;
+
+            const skip = (page - 1) * limit;
+
+            const where: any = {};
+
+            if (search) {
+                where.OR = [
+                    { name: { contains: search, mode: 'insensitive' } },
+                    { email: { contains: search, mode: 'insensitive' } },
+                    { company: { contains: search, mode: 'insensitive' } }
+                ];
+            }
+
+            if (readStatus === 'true') {
+                where.read = true;
+            } else if (readStatus === 'false') {
+                where.read = false;
+            }
+
+            const [messages, total] = await Promise.all([
+                prisma.contactMessage.findMany({
+                    where,
+                    orderBy: { createdAt: 'desc' },
+                    skip,
+                    take: limit
+                }),
+                prisma.contactMessage.count({ where })
+            ]);
+
+            return res.status(200).json({
+                data: messages,
+                total,
+                page,
+                totalPages: Math.ceil(total / limit)
             });
-            return res.status(200).json(messages);
         } catch (error) {
             console.error('Erro ao buscar mensagens:', error);
             return res.status(500).json({ error: 'Erro ao buscar mensagens' });
@@ -58,6 +93,24 @@ export class ContactController {
         } catch (error) {
             console.error('Erro ao marcar como lida:', error);
             return res.status(500).json({ error: 'Erro ao processar solicitação' });
+        }
+    }
+
+    static async destroy(req: Request, res: Response) {
+        try {
+            const { id } = req.params;
+
+            if (typeof id !== 'string') {
+                return res.status(400).json({ error: 'ID inválido' });
+            }
+
+            await prisma.contactMessage.delete({
+                where: { id }
+            });
+            return res.status(204).send();
+        } catch (error) {
+            console.error('Erro ao excluir mensagem de contato:', error);
+            return res.status(500).json({ error: 'Erro ao excluir mensagem' });
         }
     }
 }

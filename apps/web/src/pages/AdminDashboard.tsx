@@ -5,26 +5,18 @@ import { toast } from 'react-hot-toast';
 import { useDashboardSocket } from '../hooks/useDashboardSocket';
 import { db } from '../services/db';
 import { useLiveQuery } from 'dexie-react-hooks';
-import {
-    UserPlus,
-    Shield,
-    Users,
-    Search,
-    Filter,
-    Edit2,
-    CheckCircle,
-    Trash2,
-    Mail,
-    Eye
-} from 'lucide-react';
+import { Users, UserPlus, Filter, Mail, Trash2, Search, Archive, AlertTriangle, FolderArchive, CheckCircle, Download, UploadCloud, Shield, Edit2, Eye } from 'lucide-react';
 import {
     Button,
     Input,
     Card,
-    Badge
+    Badge,
+    Modal
 } from '../components/ui';
 import { DashboardLayout } from '../layouts/DashboardLayout';
 import { ProfileSettingsModal } from '../components/domain/modals/ProfileSettingsModal';
+import { ReportCard } from '../components/domain/ReportCard';
+import type { Report } from '../types';
 
 interface Supervisor {
     id: string;
@@ -68,11 +60,17 @@ export function AdminDashboard() {
         desktopNotificationsEnabled,
         setDesktopNotificationsEnabled
     } = useAuth();
-    const [view, setView] = useState<'list' | 'create' | 'edit' | 'departments' | 'contacts'>('list');
+    const [view, setView] = useState<'list' | 'create' | 'edit' | 'departments' | 'contacts' | 'delete_report' | 'archived'>('list');
     const [users, setUsers] = useState<UserSummary[]>([]);
     const [supervisors, setSupervisors] = useState<Supervisor[]>([]);
     const [departments, setDepartments] = useState<Department[]>([]);
+    // Contact Messages State
     const [contacts, setContacts] = useState<ContactMessage[]>([]);
+    const [contactSearch, setContactSearch] = useState('');
+    const [contactFilter, setContactFilter] = useState<'all' | 'read' | 'unread'>('all');
+    const [contactPage, setContactPage] = useState(1);
+    const [totalContactPages, setTotalContactPages] = useState(1);
+    const [isDeletingContact, setIsDeletingContact] = useState<string | null>(null);
     const [editingUser, setEditingUser] = useState<UserSummary | null>(null);
 
     // Filters
@@ -88,9 +86,26 @@ export function AdminDashboard() {
     const [supervisorId, setSupervisorId] = useState('');
     const [departmentId, setDepartmentId] = useState('');
     const [newDepartmentName, setNewDepartmentName] = useState('');
+    const [newSupervisorName, setNewSupervisorName] = useState('');
+    const [newSupervisorEmail, setNewSupervisorEmail] = useState('');
 
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
+
+    // Protocol Deletion State
+    const [protocolToDelete, setProtocolToDelete] = useState('');
+    const [isDeletingProtocol, setIsDeletingProtocol] = useState(false);
+    const [reportToDelete, setReportToDelete] = useState<Report | null>(null);
+
+    // Archived Reports State
+    const [archivedReports, setArchivedReports] = useState<Report[]>([]);
+    const [isLoadingArchived, setIsLoadingArchived] = useState(false);
+    const [archivedReportSelected, setArchivedReportSelected] = useState<Report | null>(null);
+    const [isRestoring, setIsRestoring] = useState(false);
+    const [isHardDeleting, setIsHardDeleting] = useState(false);
+    const [isExporting, setIsExporting] = useState(false);
+    const [isImporting, setIsImporting] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Profile Management State
     const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -120,6 +135,19 @@ export function AdminDashboard() {
             playNotificationSound();
         }
     });
+
+    // Hidden input for backup file selection
+    const RestorationInput = () => (
+        <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleUploadBackup}
+            accept=".json"
+            title="Importar Backup JSON"
+            placeholder="Selecionar arquivo de backup"
+            className="hidden"
+        />
+    );
 
     const fetchNotifications = useCallback(async () => {
         if (hasShownSummaryRef.current) return;
@@ -242,10 +270,37 @@ export function AdminDashboard() {
 
     const fetchContacts = useCallback(async () => {
         try {
-            const response = await api.get('/admin/contacts');
-            setContacts(response.data);
+            const params = new URLSearchParams({
+                page: contactPage.toString(),
+                limit: '10'
+            });
+
+            if (contactSearch) {
+                params.append('search', contactSearch);
+            }
+
+            if (contactFilter !== 'all') {
+                params.append('readStatus', contactFilter === 'read' ? 'true' : 'false');
+            }
+
+            const response = await api.get(`/admin/contacts?${params.toString()}`);
+            setContacts(response.data.data);
+            setTotalContactPages(response.data.totalPages);
         } catch {
             console.error('Erro ao buscar contatos');
+        }
+    }, [contactPage, contactSearch, contactFilter]);
+
+    const fetchArchivedReports = useCallback(async () => {
+        setIsLoadingArchived(true);
+        try {
+            const response = await api.get('/admin/reports/archived');
+            setArchivedReports(response.data);
+        } catch {
+            console.error('Erro ao buscar relatórios arquivados');
+            toast.error('Erro ao buscar relatórios arquivados');
+        } finally {
+            setIsLoadingArchived(false);
         }
     }, []);
 
@@ -255,15 +310,38 @@ export function AdminDashboard() {
         fetchUsers();
         fetchNotifications();
         fetchContacts();
-    }, [fetchUsers, fetchSupervisors, fetchDepartments, fetchNotifications, fetchContacts]);
+        if (view === 'archived') {
+            fetchArchivedReports();
+        }
+    }, [fetchUsers, fetchSupervisors, fetchDepartments, fetchNotifications, fetchContacts, view, fetchArchivedReports]);
 
     async function handleProcessUser(e: React.FormEvent) {
         e.preventDefault();
         setLoading(true);
-
         let deptId = departmentId;
+        let finalSupervisorId = supervisorId;
 
         try {
+            // Cria novo supervisor se especificado (apenas em criação)
+            if (view === 'create' && role === 'PROFESSIONAL' && !finalSupervisorId && newSupervisorName.trim() && newSupervisorEmail.trim()) {
+                const supRes = await api.post('/register', {
+                    name: newSupervisorName,
+                    email: newSupervisorEmail,
+                    password: 'flash2026',
+                    role: 'SUPERVISOR'
+                });
+                finalSupervisorId = supRes.data.id;
+                toast.success(`Supervisor ${newSupervisorName} criado! Senha: flash2026`);
+                fetchSupervisors();
+            }
+
+            // Validação básica para profissional
+            if (role === 'PROFESSIONAL' && !finalSupervisorId) {
+                toast.error('Selecione um supervisor ou preencha os dados para criar um novo.');
+                setLoading(false);
+                return;
+            }
+
             // Cria novo departamento se especificado
             if (role === 'MANAGER' && !deptId && newDepartmentName.trim()) {
                 const deptRes = await api.post('/departments', { name: newDepartmentName });
@@ -273,14 +351,14 @@ export function AdminDashboard() {
             if (view === 'create') {
                 await api.post('/register', {
                     name, email, password, role,
-                    supervisorId: role === 'PROFESSIONAL' ? supervisorId : undefined,
+                    supervisorId: role === 'PROFESSIONAL' ? finalSupervisorId : undefined,
                     departmentId: role === 'MANAGER' ? deptId : undefined
                 });
             } else if (editingUser) {
                 await api.put(`/users/${editingUser.id}`, {
                     name, email, role,
                     password: password || undefined,
-                    supervisorId: role === 'PROFESSIONAL' ? supervisorId : null,
+                    supervisorId: role === 'PROFESSIONAL' ? finalSupervisorId : null,
                     departmentId: role === 'MANAGER' ? deptId : null
                 });
             }
@@ -295,6 +373,7 @@ export function AdminDashboard() {
         } catch (err: unknown) {
             const error = err as { response?: { data?: { error?: string } } };
             console.error('Erro na operação:', error.response?.data?.error);
+            toast.error(error.response?.data?.error || 'Erro ao processar operação.');
         } finally {
             setLoading(false);
         }
@@ -349,6 +428,8 @@ export function AdminDashboard() {
         setSupervisorId('');
         setDepartmentId('');
         setNewDepartmentName('');
+        setNewSupervisorName('');
+        setNewSupervisorEmail('');
         setEditingUser(null);
     }
 
@@ -371,14 +452,30 @@ export function AdminDashboard() {
         }
     }
 
-    async function handleMarkContactAsRead(id: string) {
+    const handleMarkContactAsRead = async (id: string) => {
         try {
             await api.patch(`/admin/contacts/${id}/read`);
-            setContacts(prev => prev.map(c => c.id === id ? { ...c, read: true } : c));
+            fetchContacts();
+            toast.success('Mensagem marcada como lida');
         } catch {
-            toast.error('Erro ao marcar mensagem como lida');
+            toast.error('Erro ao atualizar mensagem');
         }
-    }
+    };
+
+    const handleDeleteContact = async (id: string) => {
+        if (!window.confirm('Tem certeza que deseja apagar esta mensagem permanentemente?')) return;
+
+        setIsDeletingContact(id);
+        try {
+            await api.delete(`/admin/contacts/${id}`);
+            toast.success('Mensagem apagada com sucesso');
+            fetchContacts();
+        } catch {
+            toast.error('Erro ao apagar mensagem');
+        } finally {
+            setIsDeletingContact(null);
+        }
+    };
 
     const handleUpdateProfile = async () => {
         if (!user) return;
@@ -406,6 +503,138 @@ export function AdminDashboard() {
         }
     };
 
+    const handleDownloadBackup = async (protocol: string) => {
+        try {
+            setIsExporting(true);
+            const response = await api.get(`/admin/reports/protocol/${protocol}/export`, {
+                responseType: 'blob'
+            });
+
+            // Create a temporary link to download the JSON blob
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `backup_protocol_${protocol}.json`);
+            document.body.appendChild(link);
+            link.click();
+            link.parentNode?.removeChild(link);
+
+            toast.success('Backup exportado com sucesso!');
+        } catch (error: unknown) {
+            console.error('Erro ao exportar backup:', error);
+            toast.error('Falha ao baixar o backup do processo.');
+        } finally {
+            setIsExporting(false);
+        }
+    };
+
+    const handleUploadBackup = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        // Limpa o target value para permitir upar o mesmo arquivo novamente se precisar
+        event.target.value = '';
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            setIsImporting(true);
+            await api.post('/admin/reports/import', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            fetchArchivedReports();
+            toast.success('Backup importado com sucesso!');
+        } catch (error: unknown) {
+            console.error('Erro ao importar backup:', error);
+            let errorMessage = 'Falha ao importar o arquivo JSON. O arquivo pode estar corrompido ou o protocolo já existir ativamente.';
+
+            if (error && typeof error === 'object' && 'response' in error) {
+                const axiosError = error as { response?: { data?: { error?: string } } };
+                if (axiosError.response?.data?.error) {
+                    errorMessage = axiosError.response.data.error;
+                }
+            }
+
+            toast.error(errorMessage);
+        } finally {
+            setIsImporting(false);
+        }
+    };
+
+    const handleProtocolSearch = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        if (!protocolToDelete || protocolToDelete.length !== 6) {
+            toast.error('O protocolo deve ter exatamente 6 caracteres.');
+            return;
+        }
+
+        setIsDeletingProtocol(true);
+        try {
+            const response = await api.get(`/admin/reports/protocol/${protocolToDelete}`);
+            setReportToDelete(response.data);
+        } catch (err: unknown) {
+            const error = err as { response?: { data?: { error?: string } } };
+            console.error('Erro ao buscar protocolo:', error.response?.data?.error);
+            toast.error(error.response?.data?.error || 'Relatório não encontrado ou erro na busca.');
+            setReportToDelete(null);
+        } finally {
+            setIsDeletingProtocol(false);
+        }
+    };
+
+    const confirmProtocolArchive = async () => {
+        if (!protocolToDelete || protocolToDelete.length !== 6 || !reportToDelete) return;
+
+        setIsDeletingProtocol(true);
+        try {
+            await api.patch(`/admin/reports/protocol/${protocolToDelete}/archive`);
+            toast.success('Processo arquivado com sucesso para auditoria.');
+            setProtocolToDelete('');
+            setReportToDelete(null);
+            setView('list'); // Retorna pra lista ou reseta
+        } catch (err: unknown) {
+            const error = err as { response?: { data?: { error?: string } } };
+            console.error('Erro ao arquivar protocolo:', error.response?.data?.error);
+            toast.error(error.response?.data?.error || 'Erro ao arquivar o processo.');
+        } finally {
+            setIsDeletingProtocol(false);
+        }
+    };
+
+    const confirmRestoreArchived = async () => {
+        if (!archivedReportSelected) return;
+        const protocol = archivedReportSelected.id.slice(-6).toUpperCase();
+        setIsRestoring(true);
+        try {
+            await api.patch(`/admin/reports/protocol/${protocol}/restore`);
+            toast.success(`Protocolo ${protocol} restaurado com sucesso!`);
+            setArchivedReportSelected(null);
+            fetchArchivedReports();
+        } catch {
+            toast.error('Erro ao restaurar o processo.');
+        } finally {
+            setIsRestoring(false);
+        }
+    };
+
+    const confirmHardDeleteArchived = async () => {
+        if (!archivedReportSelected) return;
+        const protocol = archivedReportSelected.id.slice(-6).toUpperCase();
+        setIsHardDeleting(true);
+        try {
+            await api.delete(`/admin/reports/protocol/${protocol}`);
+            toast.success(`Protocolo ${protocol} excluído permanentemente!`);
+            setArchivedReportSelected(null);
+            fetchArchivedReports();
+        } catch {
+            toast.error('Erro ao excluir definitivamente o processo.');
+        } finally {
+            setIsHardDeleting(false);
+        }
+    };
+
     return (
         <DashboardLayout
             user={{ name: user?.name, avatarUrl: user?.avatarUrl, role: user?.role }}
@@ -416,9 +645,9 @@ export function AdminDashboard() {
             onDelete={handleDeleteNotification}
             onProfileClick={() => setIsProfileOpen(true)}
         >
-            <div className="flex flex-col lg:flex-row gap-8 animate-in fade-in duration-500">
-                <aside className="w-full lg:w-72 shrink-0 space-y-4">
-                    <Card variant="white" className="p-2 space-y-1 shadow-sm sticky top-6">
+            <div className="flex flex-col lg:flex-row gap-8 animate-in fade-in duration-500 items-start">
+                <aside className="w-full lg:w-72 shrink-0 space-y-4 lg:sticky lg:top-0 lg:h-[calc(100vh-8rem)] lg:overflow-y-auto custom-scrollbar">
+                    <Card variant="white" className="p-2 space-y-1 shadow-sm">
                         <button
                             title='Gestão de Usuários'
                             type='button'
@@ -470,6 +699,30 @@ export function AdminDashboard() {
                             )}
                         </button>
 
+                        <button
+                            title='Excluir Processo'
+                            type='button'
+                            onClick={() => { setView('delete_report'); resetForm(); }}
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-xs uppercase tracking-wide transition-all ${view === 'delete_report'
+                                ? 'bg-red-500 text-white shadow-md'
+                                : 'text-red-500 hover:bg-red-50'
+                                }`}
+                        >
+                            <Trash2 className="w-4 h-4" /> Excluir Processo
+                        </button>
+
+                        <button
+                            title='Arquivos de Auditoria'
+                            type='button'
+                            onClick={() => { setView('archived'); resetForm(); }}
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-xs uppercase tracking-wide transition-all ${view === 'archived'
+                                ? 'bg-amber-500 text-white shadow-md'
+                                : 'text-amber-600 hover:bg-amber-50'
+                                }`}
+                        >
+                            <FolderArchive className="w-4 h-4" /> Arquivos
+                        </button>
+
                         <div className="pt-4 mt-4 border-t border-[var(--border-subtle)] px-2 pb-2">
                             <div className="bg-emerald-500/10 p-3 rounded-xl border border-emerald-500/20">
                                 <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest leading-none mb-1">Status do Sistema</p>
@@ -481,9 +734,9 @@ export function AdminDashboard() {
                     </Card>
                 </aside>
 
-                <section className="flex-1 space-y-6">
+                <section className="flex-1">
                     {view === 'list' ? (
-                        <>
+                        <div className="space-y-6 min-h-[calc(100vh-12rem)] flex flex-col">
                             {/* Filter Bar */}
                             <Card variant="white" className="p-3 flex flex-col md:flex-row gap-4 items-center border-[var(--border-subtle)]">
                                 <div className="relative flex-1 w-full">
@@ -608,9 +861,9 @@ export function AdminDashboard() {
                                     </table>
                                 </div>
                             </Card>
-                        </>
+                        </div>
                     ) : view === 'departments' ? (
-                        <div className="animate-in slide-in-from-right-4 duration-500">
+                        <div className="animate-in slide-in-from-right-4 duration-500 min-h-[calc(100vh-12rem)] flex flex-col space-y-6">
                             <Card variant="white" className="overflow-hidden border-[var(--border-subtle)]">
                                 <div className="p-6 border-b border-[var(--border-subtle)] flex justify-between items-center bg-[var(--bg-primary)]">
                                     <div>
@@ -668,16 +921,46 @@ export function AdminDashboard() {
                             </Card>
                         </div>
                     ) : view === 'contacts' ? (
-                        <div className="animate-in slide-in-from-right-4 duration-500">
-                            <Card variant="white" className="overflow-hidden border-[var(--border-subtle)]">
-                                <div className="p-6 border-b border-[var(--border-subtle)] flex justify-between items-center bg-[var(--bg-primary)]">
-                                    <div>
-                                        <h2 className="text-lg font-bold text-[var(--text-primary)] uppercase tracking-tight">Mensagens de Contato</h2>
-                                        <p className="text-xs text-[var(--text-tertiary)] font-medium mt-1">Leads e solicitações da Landing Page</p>
+                        <div className="animate-in slide-in-from-right-4 duration-500 min-h-[calc(100vh-12rem)] flex flex-col">
+                            <Card variant="white" className="overflow-hidden border-[var(--border-subtle)] h-full flex flex-col">
+                                <div className="p-6 border-b border-[var(--border-subtle)] bg-[var(--bg-primary)]">
+                                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                                        <div>
+                                            <h2 className="text-lg font-bold text-[var(--text-primary)] uppercase tracking-tight">Mensagens de Contato</h2>
+                                            <p className="text-xs text-[var(--text-tertiary)] font-medium mt-1">Leads e solicitações da Landing Page</p>
+                                        </div>
                                     </div>
-                                    <Badge status="IN_REVIEW" label={`${contacts.filter(c => !c.read).length} NÃO LIDAS`} />
+
+                                    <div className="flex flex-col sm:flex-row gap-4">
+                                        <div className="relative flex-1">
+                                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                            <input
+                                                type="text"
+                                                placeholder="Buscar por nome, e-mail ou empresa..."
+                                                value={contactSearch}
+                                                onChange={(e) => {
+                                                    setContactSearch(e.target.value);
+                                                    setContactPage(1);
+                                                }}
+                                                className="w-full pl-10 pr-4 py-2 bg-[var(--bg-secondary)] border border-[var(--border-strong)] rounded-lg text-sm text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-[var(--text-tertiary)]"
+                                            />
+                                        </div>
+                                        <select
+                                            aria-label="Filtrar por Status"
+                                            value={contactFilter}
+                                            onChange={(e) => {
+                                                setContactFilter(e.target.value as 'all' | 'read' | 'unread');
+                                                setContactPage(1);
+                                            }}
+                                            className="px-4 py-2 bg-[var(--bg-secondary)] border border-[var(--border-strong)] rounded-lg text-sm font-medium text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all cursor-pointer"
+                                        >
+                                            <option value="all">Todas as Mensagens</option>
+                                            <option value="unread">Não Lidas</option>
+                                            <option value="read">Lidas</option>
+                                        </select>
+                                    </div>
                                 </div>
-                                <div className="overflow-x-auto">
+                                <div className="overflow-x-auto flex-1">
                                     <table className="w-full text-left border-collapse">
                                         <thead>
                                             <tr className="bg-[var(--bg-tertiary)] text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest border-b border-[var(--border-subtle)]">
@@ -739,6 +1022,16 @@ export function AdminDashboard() {
                                                                 >
                                                                     <Eye className="w-4 h-4" />
                                                                 </Button>
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    onClick={() => handleDeleteContact(msg.id)}
+                                                                    isLoading={isDeletingContact === msg.id}
+                                                                    className="hover:text-red-600 hover:bg-red-50 transition-colors"
+                                                                    title="Excluir Mensagem"
+                                                                >
+                                                                    <Trash2 className="w-4 h-4" />
+                                                                </Button>
                                                             </div>
                                                         </td>
                                                     </tr>
@@ -747,10 +1040,36 @@ export function AdminDashboard() {
                                         </tbody>
                                     </table>
                                 </div>
+
+                                {totalContactPages > 1 && (
+                                    <div className="p-4 border-t border-[var(--border-subtle)] flex items-center justify-between bg-[var(--bg-primary)]">
+                                        <p className="text-xs text-slate-500 font-medium tracking-wide">
+                                            Página {contactPage} de {totalContactPages}
+                                        </p>
+                                        <div className="flex gap-2">
+                                            <Button
+                                                variant="secondary"
+                                                size="sm"
+                                                onClick={() => setContactPage(p => Math.max(1, p - 1))}
+                                                disabled={contactPage === 1}
+                                            >
+                                                Anterior
+                                            </Button>
+                                            <Button
+                                                variant="secondary"
+                                                size="sm"
+                                                onClick={() => setContactPage(p => Math.min(totalContactPages, p + 1))}
+                                                disabled={contactPage === totalContactPages}
+                                            >
+                                                Próxima
+                                            </Button>
+                                        </div>
+                                    </div>
+                                )}
                             </Card>
                         </div>
-                    ) : (
-                        <div className="max-w-3xl mx-auto animate-in slide-in-from-bottom-5 duration-500">
+                    ) : (view === 'edit' || view === 'create') && (
+                        <div className="animate-in slide-in-from-bottom-5 duration-500 min-h-[calc(100vh-12rem)] flex flex-col">
                             <Card variant="white" className="p-8 border-[var(--border-subtle)]">
                                 <div className="flex justify-between items-start mb-8 border-b border-[var(--border-subtle)] pb-6">
                                     <div>
@@ -820,13 +1139,34 @@ export function AdminDashboard() {
                                                     value={supervisorId}
                                                     onChange={e => setSupervisorId(e.target.value)}
                                                     className="w-full px-4 py-3 bg-[var(--bg-primary)] border border-[var(--border-medium)] rounded-xl outline-none focus:ring-2 focus:ring-[var(--border-subtle)] focus:border-[var(--text-primary)] transition-all font-medium text-[var(--text-primary)] text-sm appearance-none"
-                                                    required
                                                 >
                                                     <option value="">-- Selecione o responsável técnico --</option>
                                                     {supervisors.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                                                 </select>
                                                 <Users className="w-4 h-4 absolute right-4 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] pointer-events-none" />
                                             </div>
+
+                                            {view === 'create' && (
+                                                <div className="pt-4 mt-4 border-t border-[var(--border-subtle)] space-y-4">
+                                                    <p className="text-[10px] font-black uppercase tracking-widest text-[var(--accent-primary)] mb-2">Ou criar novo supervisor:</p>
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                        <Input
+                                                            label="Nome do Supervisor"
+                                                            placeholder="NOME COMPLETO"
+                                                            value={newSupervisorName}
+                                                            onChange={e => setNewSupervisorName(e.target.value.toUpperCase())}
+                                                        />
+                                                        <Input
+                                                            label="E-mail do Supervisor"
+                                                            type="email"
+                                                            placeholder="email@flash.com"
+                                                            value={newSupervisorEmail}
+                                                            onChange={e => setNewSupervisorEmail(e.target.value)}
+                                                        />
+                                                    </div>
+                                                    <p className="text-[9px] text-[var(--text-tertiary)] italic">* Senha padrão para novos supervisores: flash2026</p>
+                                                </div>
+                                            )}
                                         </div>
                                     )}
 
@@ -871,6 +1211,191 @@ export function AdminDashboard() {
                             </Card>
                         </div>
                     )}
+                    {view === 'delete_report' && (
+                        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 min-h-[calc(100vh-12rem)] flex flex-col">
+                            <Card variant="white" className="p-8">
+                                <div className="flex items-center justify-between mb-8 pb-6 border-b border-[var(--border-subtle)]">
+                                    <div>
+                                        <h2 className="text-xl font-bold text-red-600 mb-1 flex items-center gap-2">
+                                            <Trash2 className="w-5 h-5" /> Excluir Processo
+                                        </h2>
+                                        <p className="text-xs text-[var(--text-secondary)] font-medium">Insira o número de protocolo para exclusão permanente do relatório</p>
+                                    </div>
+                                    <Button variant="secondary" size="sm" onClick={() => { setView('list'); resetForm(); }}>
+                                        Voltar para Lista
+                                    </Button>
+                                </div>
+
+                                <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-xl mb-6">
+                                    <h3 className="text-red-600 font-bold text-sm mb-2">Aviso de Exclusão</h3>
+                                    <p className="text-red-500/80 text-xs leading-relaxed">
+                                        A exclusão de um processo é <strong className="font-bold">permanente e irreversível</strong>.
+                                        Todos os dados vinculados a este protocolo (histórico de movimentações, fotos, áudios e interações no chat)
+                                        serão apagados permanentemente do banco de dados e do servidor de mídia.
+                                    </p>
+                                </div>
+
+                                <form onSubmit={handleProtocolSearch} className="space-y-6">
+                                    <div className="max-w-md">
+                                        <Input
+                                            label="Número do Protocolo (6 caracteres)"
+                                            value={protocolToDelete}
+                                            onChange={e => setProtocolToDelete(e.target.value.toUpperCase())}
+                                            placeholder="Ex: A1B2C3"
+                                            maxLength={6}
+                                            required
+                                            className="font-mono text-center tracking-widest uppercase text-lg"
+                                        />
+                                    </div>
+
+                                    <Button
+                                        type="submit"
+                                        variant="primary"
+                                        size="lg"
+                                        isLoading={isDeletingProtocol}
+                                        disabled={protocolToDelete.length !== 6 || isDeletingProtocol}
+                                        className="mt-6 w-full md:w-auto"
+                                    >
+                                        <Search className="w-4 h-4 mr-2" /> Localizar Processo
+                                    </Button>
+                                </form>
+
+                                {/* Modal de Confirmação Segura */}
+                                <Modal
+                                    isOpen={!!reportToDelete}
+                                    onClose={() => setReportToDelete(null)}
+                                    title="Confirmar Arquivamento (Soft Delete)"
+                                    subtitle={`Processo #${protocolToDelete.toUpperCase()}`}
+                                    maxWidth="2xl"
+                                    footer={
+                                        <>
+                                            <Button variant="secondary" onClick={() => setReportToDelete(null)} disabled={isDeletingProtocol}>
+                                                Cancelar
+                                            </Button>
+                                            <Button variant="danger" onClick={confirmProtocolArchive} isLoading={isDeletingProtocol} className="bg-amber-600 hover:bg-amber-700 text-white">
+                                                <Archive className="w-4 h-4 mr-2" /> Sim, Arquivar Processo
+                                            </Button>
+                                        </>
+                                    }
+                                >
+                                    <div className="mb-6 bg-red-50 p-4 rounded-xl border border-red-100 flex items-start gap-4">
+                                        <AlertTriangle className="w-6 h-6 text-red-500 shrink-0 mt-0.5" />
+                                        <div>
+                                            <h4 className="text-red-800 font-bold mb-1">Último Aviso</h4>
+                                            <p className="text-red-700/80 text-sm">
+                                                Você está prestes a arquivar o relatório abaixo. Ele sairá das listagens e relatórios gerais, e ficará guardado na aba de Arquivos de Auditoria para consultas futuras.
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {reportToDelete && (
+                                        <div className="pointer-events-none">
+                                            <ReportCard report={reportToDelete} showUser={true} />
+                                        </div>
+                                    )}
+                                </Modal>
+                            </Card>
+                        </div>
+                    )}
+
+                    {view === 'archived' && (
+                        <div className="space-y-6 min-h-[calc(100vh-12rem)] flex flex-col">
+                            <Card variant="white" className="p-8 border-[var(--border-subtle)]">
+                                <div className="max-w-xl mb-8">
+                                    <h2 className="text-2xl font-black text-[var(--text-primary)] tracking-tight flex items-center gap-3 mb-2">
+                                        <FolderArchive className="w-8 h-8 text-amber-500" />
+                                        Arquivos de Auditoria
+                                    </h2>
+                                    <p className="text-[var(--text-secondary)]">Listagem de processos arquivados (soft delete). Estes dados estão ocultos para operações diárias.</p>
+                                </div>
+
+                                <div className="mb-8 flex flex-wrap gap-4">
+                                    <Button
+                                        variant="secondary"
+                                        onClick={() => fileInputRef.current?.click()}
+                                        isLoading={isImporting}
+                                        className="bg-[var(--bg-tertiary)] border-[var(--border-strong)] hover:border-amber-500"
+                                    >
+                                        <UploadCloud className="w-4 h-4 mr-2 text-amber-500" /> Restaurar via Arquivo Local
+                                    </Button>
+                                </div>
+
+                                {isLoadingArchived ? (
+                                    <div className="flex justify-center py-12">
+                                        <div className="w-8 h-8 rounded-full border-4 border-amber-500 border-t-transparent animate-spin"></div>
+                                    </div>
+                                ) : archivedReports.length === 0 ? (
+                                    <div className="text-center py-12 text-[var(--text-tertiary)] bg-[var(--bg-tertiary)] rounded-xl border border-dashed border-[var(--border-strong)]">
+                                        <FolderArchive className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                                        <p className="font-bold">Nenhum processo arquivado</p>
+                                    </div>
+                                ) : (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                        {archivedReports.map(report => (
+                                            <div
+                                                key={report.id}
+                                                className="cursor-pointer ring-2 ring-transparent hover:ring-amber-500 rounded-[1.5rem] transition-all"
+                                                onClick={() => setArchivedReportSelected(report)}
+                                            >
+                                                <div className="pointer-events-none opacity-80 mix-blend-luminosity">
+                                                    <ReportCard report={report} showUser={true} />
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </Card>
+
+                            {/* Modal de Gestão de Arquivados */}
+                            <Modal
+                                isOpen={!!archivedReportSelected}
+                                onClose={() => setArchivedReportSelected(null)}
+                                title="Gerenciar Processo Arquivado"
+                                subtitle={archivedReportSelected ? `Protocolo #${archivedReportSelected.id.slice(-6).toUpperCase()}` : ''}
+                                maxWidth="2xl"
+                                footer={
+                                    <div className="flex flex-col sm:flex-row w-full gap-3 justify-end items-center">
+                                        <Button variant="secondary" onClick={() => setArchivedReportSelected(null)} disabled={isRestoring || isHardDeleting || isExporting}>
+                                            Cancelar
+                                        </Button>
+                                        <div className="flex-1"></div>
+                                        <Button
+                                            variant="secondary"
+                                            onClick={() => archivedReportSelected && handleDownloadBackup(archivedReportSelected.id.slice(-6).toUpperCase())}
+                                            isLoading={isExporting}
+                                            disabled={isRestoring || isHardDeleting}
+                                            className="bg-[var(--bg-tertiary)] w-full sm:w-auto"
+                                        >
+                                            <Download className="w-4 h-4 mr-2" /> Backup Offline
+                                        </Button>
+                                        <Button variant="primary" onClick={confirmRestoreArchived} isLoading={isRestoring} disabled={isHardDeleting || isExporting} className="bg-emerald-600 hover:bg-emerald-700 w-full sm:w-auto">
+                                            Restaurar Processo
+                                        </Button>
+                                        <Button variant="danger" onClick={confirmHardDeleteArchived} isLoading={isHardDeleting} disabled={isRestoring || isExporting} className="w-full sm:w-auto">
+                                            <Trash2 className="w-4 h-4 mr-2" /> Excluir
+                                        </Button>
+                                    </div>
+                                }
+                            >
+                                <div className="mb-6 bg-amber-50 p-4 rounded-xl border border-amber-100 flex items-start gap-4">
+                                    <FolderArchive className="w-6 h-6 text-amber-500 shrink-0 mt-0.5" />
+                                    <div>
+                                        <h4 className="text-amber-800 font-bold mb-1">Processo em Auditoria</h4>
+                                        <p className="text-amber-700/80 text-sm">
+                                            Este processo está protegido (soft delete). Você pode <strong className="font-bold text-emerald-700">restaurá-lo</strong> para a operação ativa ou <strong className="font-bold text-red-700">excluí-lo permanentemente</strong>.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {archivedReportSelected && (
+                                    <div className="pointer-events-none">
+                                        <ReportCard report={archivedReportSelected} showUser={true} />
+                                    </div>
+                                )}
+                            </Modal>
+                        </div>
+                    )}
+                    <RestorationInput />
                 </section>
             </div>
 

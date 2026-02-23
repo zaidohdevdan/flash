@@ -126,6 +126,7 @@ export class PrismaReportRepository implements IReportRepository {
         const stats = await prisma.report.groupBy({
             by: ['status'],
             where: {
+                isArchived: { not: true },
                 user: {
                     supervisorId: supervisorId
                 }
@@ -143,6 +144,7 @@ export class PrismaReportRepository implements IReportRepository {
         const skip = (page - 1) * limit;
 
         const where: any = {
+            isArchived: { not: true },
             user: {
                 supervisorId: supervisorId
             }
@@ -193,6 +195,7 @@ export class PrismaReportRepository implements IReportRepository {
         const skip = (page - 1) * limit;
 
         const where: any = {
+            isArchived: { not: true },
             userId,
             status: status,
         };
@@ -236,6 +239,7 @@ export class PrismaReportRepository implements IReportRepository {
         const skip = (page - 1) * limit;
 
         const where: any = {
+            isArchived: { not: true },
             departmentId,
             status: status,
         };
@@ -279,6 +283,7 @@ export class PrismaReportRepository implements IReportRepository {
         const stats = await prisma.report.groupBy({
             by: ['status'],
             where: {
+                isArchived: { not: true },
                 departmentId
             },
             _count: true
@@ -292,7 +297,7 @@ export class PrismaReportRepository implements IReportRepository {
 
     async getAdvancedStats(userId: string, role: string): Promise<any> {
         // 1. Define o escopo da busca baseado na role
-        let where: any = {};
+        let where: any = { isArchived: { not: true } };
         if (role === 'SUPERVISOR') {
             where.user = { supervisorId: userId };
         } else if (role === 'MANAGER') {
@@ -414,5 +419,229 @@ export class PrismaReportRepository implements IReportRepository {
             volume: sortedVolume.map(([date, count]) => ({ date, count })),
             sectorPerformance: sectorList
         };
+    }
+
+    async findByProtocol(protocol: string): Promise<ReportWithUser | null> {
+        protocol = protocol.toLowerCase();
+
+        // Find the report ID based on the last 6 characters of the ObjectId
+        const rawResult: any = await prisma.report.findRaw({
+            filter: {
+                $expr: {
+                    $eq: [
+                        { $substrCP: [{ $toString: "$_id" }, 18, 6] },
+                        protocol
+                    ]
+                }
+            }
+        });
+
+        if (!rawResult || rawResult.length === 0) {
+            return null;
+        }
+
+        const reportId = rawResult[0]._id.$oid;
+        return this.findById(reportId);
+    }
+
+    async listArchivedReports(page: number = 1, limit: number = 10): Promise<ReportWithUser[]> {
+        const skip = (page - 1) * limit;
+
+        return prisma.report.findMany({
+            where: { isArchived: true },
+            include: {
+                user: {
+                    select: {
+                        name: true,
+                        supervisorId: true,
+                        avatarUrl: true,
+                        statusPhrase: true,
+                    }
+                },
+                history: {
+                    orderBy: { createdAt: 'desc' }
+                },
+                department: true,
+                media: true
+            },
+            orderBy: {
+                archivedAt: 'desc'
+            },
+            skip,
+            take: limit
+        });
+    }
+
+    async archiveByProtocol(protocol: string): Promise<void> {
+        const report = await this.findByProtocol(protocol);
+        if (!report) throw new Error('REPORT_NOT_FOUND');
+
+        await prisma.report.update({
+            where: { id: report.id },
+            data: {
+                isArchived: true,
+                archivedAt: new Date(),
+                history: {
+                    create: {
+                        status: report.status,
+                        comment: 'Processo arquivado para auditoria.',
+                        userName: 'Sistema (Admin)'
+                    }
+                }
+            }
+        });
+    }
+
+    async restoreByProtocol(protocol: string): Promise<void> {
+        const report = await this.findByProtocol(protocol);
+        if (!report) throw new Error('REPORT_NOT_FOUND');
+
+        await prisma.report.update({
+            where: { id: report.id },
+            data: {
+                isArchived: false,
+                archivedAt: null,
+                history: {
+                    create: {
+                        status: report.status,
+                        comment: 'Processo restaurado do arquivo de auditoria.',
+                        userName: 'Sistema (Admin)'
+                    }
+                }
+            }
+        });
+    }
+
+    async deleteByProtocol(protocol: string): Promise<void> {
+        protocol = protocol.toLowerCase();
+
+        // Find the report ID based on the last 6 characters of the ObjectId
+        const rawResult: any = await prisma.report.findRaw({
+            filter: {
+                $expr: {
+                    $eq: [
+                        { $substrCP: [{ $toString: "$_id" }, 18, 6] },
+                        protocol
+                    ]
+                }
+            }
+        });
+
+        if (!rawResult || rawResult.length === 0) {
+            throw new Error('REPORT_NOT_FOUND');
+        }
+
+        const reportId = rawResult[0]._id.$oid;
+
+        // Execute cascaded deletion
+        await prisma.$transaction(async (tx) => {
+            // 1. Delete associated media (Cloudinary cleanups should be handled elsewhere if needed, but DB records deleted here)
+            await tx.media.deleteMany({ where: { reportId } });
+
+            // 2. Delete report history
+            await tx.reportHistory.deleteMany({ where: { reportId } });
+
+            // 3. Unlink from AgendaEvents (or delete if it's strictly a report event)
+            await tx.agendaEvent.updateMany({
+                where: { reportId },
+                data: { reportId: null }
+            });
+
+            // 4. Finally delete the report
+            await tx.report.delete({ where: { id: reportId } });
+        });
+    }
+    async importReport(data: any): Promise<void> {
+        // Here we recreate the report and its relations.
+        // Prisma on MongoDB expects `id` to be a valid 24-character hex string if provided,
+        // or we can let it generate a new one, but to keep the same Protocol (last 6 chars), 
+        // we MUST preserve the original `id` if possible.
+
+        await prisma.$transaction(async (tx) => {
+            // Upsert Report (so if it already exists it just updates or ignores)
+            const createdReport = await tx.report.upsert({
+                where: { id: data.id },
+                create: {
+                    id: data.id,
+                    status: data.status,
+                    comment: data.comment,
+                    imageUrl: data.imageUrl,
+                    latitude: data.latitude,
+                    longitude: data.longitude,
+                    userId: data.userId,
+                    departmentId: data.departmentId,
+                    isArchived: data.isArchived ?? false,
+                    archivedAt: data.archivedAt ? new Date(data.archivedAt) : null,
+                    createdAt: data.createdAt ? new Date(data.createdAt) : undefined,
+                    updatedAt: data.updatedAt ? new Date(data.updatedAt) : undefined,
+                },
+                update: {
+                    status: data.status,
+                    comment: data.comment,
+                    imageUrl: data.imageUrl,
+                    latitude: data.latitude,
+                    longitude: data.longitude,
+                    userId: data.userId,
+                    departmentId: data.departmentId,
+                    isArchived: data.isArchived ?? false,
+                    archivedAt: data.archivedAt ? new Date(data.archivedAt) : null,
+                    updatedAt: new Date()
+                }
+            });
+
+            // Re-create history if it exists
+            if (data.history && Array.isArray(data.history)) {
+                for (const h of data.history) {
+                    await tx.reportHistory.upsert({
+                        where: { id: h.id },
+                        create: {
+                            id: h.id,
+                            reportId: createdReport.id,
+                            status: h.status,
+                            comment: h.comment,
+                            userName: h.userName,
+                            userRole: h.userRole,
+                            departmentName: h.departmentName,
+                            createdAt: h.createdAt ? new Date(h.createdAt) : undefined
+                        },
+                        update: {
+                            status: h.status,
+                            comment: h.comment,
+                            userName: h.userName,
+                            userRole: h.userRole,
+                            departmentName: h.departmentName,
+                        }
+                    });
+                }
+            }
+
+            // Re-create media if it exists
+            if (data.media && Array.isArray(data.media)) {
+                for (const m of data.media) {
+                    await tx.media.upsert({
+                        where: { id: m.id }, // Make sure id exists or publicId
+                        create: {
+                            id: m.id,
+                            publicId: m.publicId,
+                            url: m.url,
+                            secureUrl: m.secureUrl,
+                            format: m.format,
+                            width: m.width,
+                            height: m.height,
+                            bytes: m.bytes,
+                            resourceType: m.resourceType,
+                            folder: m.folder,
+                            userId: m.userId,
+                            reportId: createdReport.id,
+                            uploadedAt: m.uploadedAt ? new Date(m.uploadedAt) : undefined
+                        },
+                        update: {
+                            // usually media doesn't change, just update the relationship
+                            reportId: createdReport.id
+                        }
+                    });
+                }
+            }
+        });
     }
 }

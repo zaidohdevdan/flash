@@ -328,4 +328,164 @@ export const ReportController = {
             return res.status(500).json({ error: 'Erro ao atualizar status' });
         }
     },
+
+    getByProtocol: async (req: Request, res: Response) => {
+        const { protocol } = req.params;
+
+        if (!protocol || typeof protocol !== 'string' || protocol.length !== 6) {
+            return res.status(400).json({ error: 'Protocolo inválido. Deve conter 6 caracteres.' });
+        }
+
+        try {
+            const report = await reportService.findByProtocol(protocol);
+            if (!report) {
+                return res.status(404).json({ error: 'Relatório não encontrado através deste protocolo.' });
+            }
+
+            return res.status(200).json(report);
+        } catch (error) {
+            console.error('[Report] Erro ao buscar por protocolo:', error);
+            return res.status(500).json({ error: 'Erro ao buscar relatório por protocolo' });
+        }
+    },
+
+    listArchived: async (req: Request, res: Response) => {
+        try {
+            const page = parseInt(req.query.page as string) || 1;
+            const limit = parseInt(req.query.limit as string) || 50;
+            const reports = await reportService.listArchivedReports(page, limit);
+            return res.json(reports);
+        } catch (error) {
+            console.error('[Report] Erro ao listar arquivados:', error);
+            return res.status(500).json({ error: 'Erro ao listar relatórios arquivados' });
+        }
+    },
+
+    archiveByProtocol: async (req: Request, res: Response) => {
+        const { protocol } = req.params;
+        if (!protocol || typeof protocol !== 'string' || protocol.length !== 6) {
+            return res.status(400).json({ error: 'Protocolo inválido.' });
+        }
+        try {
+            await reportService.archiveByProtocol(protocol);
+            await AuditService.log({
+                userId: req.userId,
+                action: 'ARCHIVE_REPORT_PROTOCOL',
+                target: `Protocol:${protocol}`,
+                ip: req.ip,
+                userAgent: req.get('user-agent')
+            });
+            return res.status(204).send();
+        } catch (error: any) {
+            console.error('[Report] Erro ao arquivar:', error);
+            if (error.message === 'REPORT_NOT_FOUND') return res.status(404).json({ error: 'Relatório não encontrado.' });
+            return res.status(500).json({ error: 'Erro ao arquivar relatório.' });
+        }
+    },
+
+    restoreByProtocol: async (req: Request, res: Response) => {
+        const { protocol } = req.params;
+        if (!protocol || typeof protocol !== 'string' || protocol.length !== 6) {
+            return res.status(400).json({ error: 'Protocolo inválido.' });
+        }
+        try {
+            await reportService.restoreByProtocol(protocol);
+            await AuditService.log({
+                userId: req.userId,
+                action: 'RESTORE_REPORT_PROTOCOL',
+                target: `Protocol:${protocol}`,
+                ip: req.ip,
+                userAgent: req.get('user-agent')
+            });
+            return res.status(204).send();
+        } catch (error: any) {
+            console.error('[Report] Erro ao restaurar:', error);
+            if (error.message === 'REPORT_NOT_FOUND') return res.status(404).json({ error: 'Relatório não encontrado.' });
+            return res.status(500).json({ error: 'Erro ao restaurar relatório.' });
+        }
+    },
+
+    deleteByProtocol: async (req: Request, res: Response) => {
+        const { protocol } = req.params;
+
+        if (!protocol || typeof protocol !== 'string' || protocol.length !== 6) {
+            return res.status(400).json({ error: 'Protocolo inválido. Deve conter 6 caracteres.' });
+        }
+
+        try {
+            await reportService.deleteByProtocol(protocol);
+
+            // Auditoria
+            await AuditService.log({
+                userId: req.userId,
+                action: 'DELETE_REPORT_PROTOCOL',
+                target: `Protocol:${protocol}`,
+                ip: req.ip,
+                userAgent: req.get('user-agent')
+            });
+
+            return res.status(204).send();
+        } catch (error: any) {
+            console.error('[Report] Erro ao deletar por protocolo:', error);
+            if (error.message === 'REPORT_NOT_FOUND') {
+                return res.status(404).json({ error: 'Relatório não encontrado através deste protocolo.' });
+            }
+            return res.status(500).json({ error: 'Erro ao deletar relatório por protocolo' });
+        }
+    },
+
+    exportArchived: async (req: Request, res: Response) => {
+        const { protocol } = req.params;
+        if (!protocol || typeof protocol !== 'string' || protocol.length !== 6) {
+            return res.status(400).json({ error: 'Protocolo inválido.' });
+        }
+
+        try {
+            const report = await reportService.findByProtocol(protocol);
+            if (!report) {
+                return res.status(404).json({ error: 'Relatório não encontrado.' });
+            }
+
+            // Converter para string JSON
+            const jsonStr = JSON.stringify(report, null, 2);
+
+            // Setar headers para forçar o download como arquivo .json
+            res.setHeader('Content-disposition', `attachment; filename=backup_protocol_${protocol}.json`);
+            res.setHeader('Content-type', 'application/json');
+
+            return res.status(200).send(jsonStr);
+        } catch (error: any) {
+            console.error('[Report] Erro ao exportar:', error);
+            return res.status(500).json({ error: 'Erro ao exportar relatório.' });
+        }
+    },
+
+    importArchived: async (req: Request, res: Response) => {
+        // Uploaded file will be available in req.file (from Multer memoryStorage)
+        if (!req.file) {
+            return res.status(400).json({ error: 'Nenhum arquivo enviado.' });
+        }
+
+        try {
+            const fileContent = req.file.buffer.toString('utf-8');
+            const data = JSON.parse(fileContent);
+
+            await reportService.importReport(data);
+
+            // Auditoria
+            const protocol = data.id ? data.id.substring(data.id.length - 6).toUpperCase() : 'UNKNOWN';
+            await AuditService.log({
+                userId: req.userId,
+                action: 'IMPORT_REPORT_LOCAL_BACKUP',
+                target: `Protocol:${protocol}`,
+                ip: req.ip,
+                userAgent: req.get('user-agent')
+            });
+
+            return res.status(200).json({ message: 'Relatório importado com sucesso.' });
+        } catch (error: any) {
+            console.error('[Report] Erro ao importar JSON:', error);
+            return res.status(500).json({ error: 'Falha ao importar o arquivo. Verifique se o formato está correto.' });
+        }
+    }
 };

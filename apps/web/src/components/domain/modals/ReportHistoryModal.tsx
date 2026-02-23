@@ -1,5 +1,6 @@
 import { Shield } from 'lucide-react';
 import React from 'react';
+import { toast } from 'react-hot-toast';
 import { Modal, Badge } from '../../ui';
 
 interface HistoryStep {
@@ -37,7 +38,23 @@ export const ReportHistoryModal: React.FC<ReportHistoryModalProps> = ({
             isOpen={isOpen}
             onClose={onClose}
             title="Linha do Tempo"
-            subtitle={`Reporte: #${report.id.slice(-6).toUpperCase()}${report.department?.name ? ` • Setor Atual: ${report.department.name}` : ''}`}
+            subtitle={
+                <div className="flex items-center gap-1.5 mt-1">
+                    <span
+                        className="font-mono bg-[var(--bg-secondary)] px-2 py-0.5 rounded text-[var(--text-primary)] hover:bg-[var(--text-secondary)] hover:text-white transition-colors cursor-pointer"
+                        title="Copiar Protocolo"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            const protocol = report.id.slice(-6).toUpperCase();
+                            navigator.clipboard.writeText(protocol);
+                            toast.success(`Protocolo ${protocol} copiado!`);
+                        }}
+                    >
+                        #{report.id.slice(-6).toUpperCase()}
+                    </span>
+                    {report.department?.name && <span className="text-[var(--text-tertiary)]">• Setor Atual: {report.department.name}</span>}
+                </div>
+            }
             maxWidth="lg"
         >
             <div className="space-y-8 py-4 px-2 relative before:absolute before:left-[19px] before:top-4 before:bottom-4 before:w-[2px] before:bg-[var(--border-subtle)]">

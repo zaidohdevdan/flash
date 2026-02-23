@@ -24,12 +24,13 @@ export class ChatService {
         return messages.filter(msg => {
             if (msg.deletedForEveryone) return false;
             if (msg.fromId === userId && msg.deletedForSender) return false;
+            if (msg.toId === userId && msg.deletedForReceiver) return false;
             return true;
         });
     }
 
-    async deleteHistory(room: string) {
-        return this.chatRepository.deleteByRoom(room);
+    async deleteHistory(room: string, userId: string) {
+        return this.chatRepository.softDeleteByRoom(room, userId);
     }
 
     async updateMessage(id: string, text: string) {

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Calendar, MessageSquare, Hash } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 import { Card, Avatar, Badge } from '../ui';
 import { formatUrl } from '../../services/api';
 import { ImageZoomModal } from './ImageZoomModal';
@@ -89,8 +90,17 @@ export const ReportCard: React.FC<ReportCardProps> = React.memo(({
                                 <Calendar className="w-3.5 h-3.5" />
                                 {new Date(report.createdAt).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
                             </div>
-                            <div className="flex items-center gap-1 px-2 py-0.5 bg-[var(--bg-tertiary)] rounded text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wide">
-                                <Hash className="w-2.5 h-2.5 opacity-60" />
+                            <div
+                                className="flex items-center gap-1 px-2 py-0.5 bg-[var(--bg-tertiary)] rounded text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wide cursor-pointer hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)] transition-colors group/protocol"
+                                title="Copiar Protocolo"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    const protocol = report.id.slice(-6).toUpperCase();
+                                    navigator.clipboard.writeText(protocol);
+                                    toast.success(`Protocolo ${protocol} copiado!`);
+                                }}
+                            >
+                                <Hash className="w-2.5 h-2.5 opacity-60 group-hover/protocol:opacity-100" />
                                 {report.id.slice(-6).toUpperCase()}
                             </div>
                         </div>

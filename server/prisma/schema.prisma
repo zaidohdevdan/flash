@@ -64,6 +64,9 @@ model Report {
   departmentId String?     @db.ObjectId
   department   Department? @relation(fields: [departmentId], references: [id])
 
+  isArchived Boolean   @default(false)
+  archivedAt DateTime?
+
   history ReportHistory[]
   media   Media[] // <- NEW: Relação com Media
 
@@ -130,6 +133,7 @@ model ChatMessage {
   expiresAt          DateTime?
   read               Boolean   @default(false)
   deletedForSender   Boolean   @default(false)
+  deletedForReceiver Boolean   @default(false)
   deletedForEveryone Boolean   @default(false)
 
   @@index([room])

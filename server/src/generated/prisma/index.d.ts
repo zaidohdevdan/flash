@@ -369,7 +369,7 @@ export namespace Prisma {
 
   /**
    * Prisma Client JS version: 6.18.0
-   * Query Engine version: acc0b9dd43eb689cbd20c9470515d719db10d0b0
+   * Query Engine version: 34b5a692b7bd79939a9a2c3ef97d816e749cda2f
    */
   export type PrismaVersion = {
     client: string
@@ -3334,6 +3334,8 @@ export namespace Prisma {
     longitude: number | null
     userId: string | null
     departmentId: string | null
+    isArchived: boolean | null
+    archivedAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -3349,6 +3351,8 @@ export namespace Prisma {
     longitude: number | null
     userId: string | null
     departmentId: string | null
+    isArchived: boolean | null
+    archivedAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -3364,6 +3368,8 @@ export namespace Prisma {
     longitude: number
     userId: number
     departmentId: number
+    isArchived: number
+    archivedAt: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -3391,6 +3397,8 @@ export namespace Prisma {
     longitude?: true
     userId?: true
     departmentId?: true
+    isArchived?: true
+    archivedAt?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -3406,6 +3414,8 @@ export namespace Prisma {
     longitude?: true
     userId?: true
     departmentId?: true
+    isArchived?: true
+    archivedAt?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -3421,6 +3431,8 @@ export namespace Prisma {
     longitude?: true
     userId?: true
     departmentId?: true
+    isArchived?: true
+    archivedAt?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -3523,6 +3535,8 @@ export namespace Prisma {
     longitude: number | null
     userId: string
     departmentId: string | null
+    isArchived: boolean
+    archivedAt: Date | null
     createdAt: Date
     updatedAt: Date
     _count: ReportCountAggregateOutputType | null
@@ -3557,6 +3571,8 @@ export namespace Prisma {
     longitude?: boolean
     userId?: boolean
     departmentId?: boolean
+    isArchived?: boolean
+    archivedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
@@ -3580,11 +3596,13 @@ export namespace Prisma {
     longitude?: boolean
     userId?: boolean
     departmentId?: boolean
+    isArchived?: boolean
+    archivedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type ReportOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "imageUrl" | "comment" | "feedback" | "feedbackAt" | "status" | "latitude" | "longitude" | "userId" | "departmentId" | "createdAt" | "updatedAt", ExtArgs["result"]["report"]>
+  export type ReportOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "imageUrl" | "comment" | "feedback" | "feedbackAt" | "status" | "latitude" | "longitude" | "userId" | "departmentId" | "isArchived" | "archivedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["report"]>
   export type ReportInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
     department?: boolean | Report$departmentArgs<ExtArgs>
@@ -3614,6 +3632,8 @@ export namespace Prisma {
       longitude: number | null
       userId: string
       departmentId: string | null
+      isArchived: boolean
+      archivedAt: Date | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["report"]>
@@ -4023,6 +4043,8 @@ export namespace Prisma {
     readonly longitude: FieldRef<"Report", 'Float'>
     readonly userId: FieldRef<"Report", 'String'>
     readonly departmentId: FieldRef<"Report", 'String'>
+    readonly isArchived: FieldRef<"Report", 'Boolean'>
+    readonly archivedAt: FieldRef<"Report", 'DateTime'>
     readonly createdAt: FieldRef<"Report", 'DateTime'>
     readonly updatedAt: FieldRef<"Report", 'DateTime'>
   }
@@ -7700,6 +7722,7 @@ export namespace Prisma {
     expiresAt: Date | null
     read: boolean | null
     deletedForSender: boolean | null
+    deletedForReceiver: boolean | null
     deletedForEveryone: boolean | null
   }
 
@@ -7715,6 +7738,7 @@ export namespace Prisma {
     expiresAt: Date | null
     read: boolean | null
     deletedForSender: boolean | null
+    deletedForReceiver: boolean | null
     deletedForEveryone: boolean | null
   }
 
@@ -7730,6 +7754,7 @@ export namespace Prisma {
     expiresAt: number
     read: number
     deletedForSender: number
+    deletedForReceiver: number
     deletedForEveryone: number
     _all: number
   }
@@ -7747,6 +7772,7 @@ export namespace Prisma {
     expiresAt?: true
     read?: true
     deletedForSender?: true
+    deletedForReceiver?: true
     deletedForEveryone?: true
   }
 
@@ -7762,6 +7788,7 @@ export namespace Prisma {
     expiresAt?: true
     read?: true
     deletedForSender?: true
+    deletedForReceiver?: true
     deletedForEveryone?: true
   }
 
@@ -7777,6 +7804,7 @@ export namespace Prisma {
     expiresAt?: true
     read?: true
     deletedForSender?: true
+    deletedForReceiver?: true
     deletedForEveryone?: true
     _all?: true
   }
@@ -7865,6 +7893,7 @@ export namespace Prisma {
     expiresAt: Date | null
     read: boolean
     deletedForSender: boolean
+    deletedForReceiver: boolean
     deletedForEveryone: boolean
     _count: ChatMessageCountAggregateOutputType | null
     _min: ChatMessageMinAggregateOutputType | null
@@ -7897,6 +7926,7 @@ export namespace Prisma {
     expiresAt?: boolean
     read?: boolean
     deletedForSender?: boolean
+    deletedForReceiver?: boolean
     deletedForEveryone?: boolean
   }, ExtArgs["result"]["chatMessage"]>
 
@@ -7914,10 +7944,11 @@ export namespace Prisma {
     expiresAt?: boolean
     read?: boolean
     deletedForSender?: boolean
+    deletedForReceiver?: boolean
     deletedForEveryone?: boolean
   }
 
-  export type ChatMessageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "fromId" | "toId" | "text" | "audioUrl" | "audioPublicId" | "room" | "createdAt" | "expiresAt" | "read" | "deletedForSender" | "deletedForEveryone", ExtArgs["result"]["chatMessage"]>
+  export type ChatMessageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "fromId" | "toId" | "text" | "audioUrl" | "audioPublicId" | "room" | "createdAt" | "expiresAt" | "read" | "deletedForSender" | "deletedForReceiver" | "deletedForEveryone", ExtArgs["result"]["chatMessage"]>
 
   export type $ChatMessagePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "ChatMessage"
@@ -7934,6 +7965,7 @@ export namespace Prisma {
       expiresAt: Date | null
       read: boolean
       deletedForSender: boolean
+      deletedForReceiver: boolean
       deletedForEveryone: boolean
     }, ExtArgs["result"]["chatMessage"]>
     composites: {}
@@ -8338,6 +8370,7 @@ export namespace Prisma {
     readonly expiresAt: FieldRef<"ChatMessage", 'DateTime'>
     readonly read: FieldRef<"ChatMessage", 'Boolean'>
     readonly deletedForSender: FieldRef<"ChatMessage", 'Boolean'>
+    readonly deletedForReceiver: FieldRef<"ChatMessage", 'Boolean'>
     readonly deletedForEveryone: FieldRef<"ChatMessage", 'Boolean'>
   }
     
@@ -13812,6 +13845,8 @@ export namespace Prisma {
     longitude: 'longitude',
     userId: 'userId',
     departmentId: 'departmentId',
+    isArchived: 'isArchived',
+    archivedAt: 'archivedAt',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -13873,6 +13908,7 @@ export namespace Prisma {
     expiresAt: 'expiresAt',
     read: 'read',
     deletedForSender: 'deletedForSender',
+    deletedForReceiver: 'deletedForReceiver',
     deletedForEveryone: 'deletedForEveryone'
   };
 
@@ -14042,6 +14078,13 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'Boolean'
+   */
+  export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
+
+  /**
    * Reference to a field of type 'Int'
    */
   export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
@@ -14052,13 +14095,6 @@ export namespace Prisma {
    * Reference to a field of type 'Int[]'
    */
   export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
-    
-
-
-  /**
-   * Reference to a field of type 'Boolean'
-   */
-  export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
     
 
 
@@ -14210,6 +14246,8 @@ export namespace Prisma {
     longitude?: FloatNullableFilter<"Report"> | number | null
     userId?: StringFilter<"Report"> | string
     departmentId?: StringNullableFilter<"Report"> | string | null
+    isArchived?: BoolFilter<"Report"> | boolean
+    archivedAt?: DateTimeNullableFilter<"Report"> | Date | string | null
     createdAt?: DateTimeFilter<"Report"> | Date | string
     updatedAt?: DateTimeFilter<"Report"> | Date | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
@@ -14230,6 +14268,8 @@ export namespace Prisma {
     longitude?: SortOrder
     userId?: SortOrder
     departmentId?: SortOrder
+    isArchived?: SortOrder
+    archivedAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     user?: UserOrderByWithRelationInput
@@ -14253,6 +14293,8 @@ export namespace Prisma {
     longitude?: FloatNullableFilter<"Report"> | number | null
     userId?: StringFilter<"Report"> | string
     departmentId?: StringNullableFilter<"Report"> | string | null
+    isArchived?: BoolFilter<"Report"> | boolean
+    archivedAt?: DateTimeNullableFilter<"Report"> | Date | string | null
     createdAt?: DateTimeFilter<"Report"> | Date | string
     updatedAt?: DateTimeFilter<"Report"> | Date | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
@@ -14273,6 +14315,8 @@ export namespace Prisma {
     longitude?: SortOrder
     userId?: SortOrder
     departmentId?: SortOrder
+    isArchived?: SortOrder
+    archivedAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: ReportCountOrderByAggregateInput
@@ -14296,6 +14340,8 @@ export namespace Prisma {
     longitude?: FloatNullableWithAggregatesFilter<"Report"> | number | null
     userId?: StringWithAggregatesFilter<"Report"> | string
     departmentId?: StringNullableWithAggregatesFilter<"Report"> | string | null
+    isArchived?: BoolWithAggregatesFilter<"Report"> | boolean
+    archivedAt?: DateTimeNullableWithAggregatesFilter<"Report"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Report"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Report"> | Date | string
   }
@@ -14533,6 +14579,7 @@ export namespace Prisma {
     expiresAt?: DateTimeNullableFilter<"ChatMessage"> | Date | string | null
     read?: BoolFilter<"ChatMessage"> | boolean
     deletedForSender?: BoolFilter<"ChatMessage"> | boolean
+    deletedForReceiver?: BoolFilter<"ChatMessage"> | boolean
     deletedForEveryone?: BoolFilter<"ChatMessage"> | boolean
   }
 
@@ -14548,6 +14595,7 @@ export namespace Prisma {
     expiresAt?: SortOrder
     read?: SortOrder
     deletedForSender?: SortOrder
+    deletedForReceiver?: SortOrder
     deletedForEveryone?: SortOrder
   }
 
@@ -14566,6 +14614,7 @@ export namespace Prisma {
     expiresAt?: DateTimeNullableFilter<"ChatMessage"> | Date | string | null
     read?: BoolFilter<"ChatMessage"> | boolean
     deletedForSender?: BoolFilter<"ChatMessage"> | boolean
+    deletedForReceiver?: BoolFilter<"ChatMessage"> | boolean
     deletedForEveryone?: BoolFilter<"ChatMessage"> | boolean
   }, "id">
 
@@ -14581,6 +14630,7 @@ export namespace Prisma {
     expiresAt?: SortOrder
     read?: SortOrder
     deletedForSender?: SortOrder
+    deletedForReceiver?: SortOrder
     deletedForEveryone?: SortOrder
     _count?: ChatMessageCountOrderByAggregateInput
     _max?: ChatMessageMaxOrderByAggregateInput
@@ -14602,6 +14652,7 @@ export namespace Prisma {
     expiresAt?: DateTimeNullableWithAggregatesFilter<"ChatMessage"> | Date | string | null
     read?: BoolWithAggregatesFilter<"ChatMessage"> | boolean
     deletedForSender?: BoolWithAggregatesFilter<"ChatMessage"> | boolean
+    deletedForReceiver?: BoolWithAggregatesFilter<"ChatMessage"> | boolean
     deletedForEveryone?: BoolWithAggregatesFilter<"ChatMessage"> | boolean
   }
 
@@ -15100,6 +15151,8 @@ export namespace Prisma {
     status?: $Enums.ReportStatus
     latitude?: number | null
     longitude?: number | null
+    isArchived?: boolean
+    archivedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutReportsInput
@@ -15120,6 +15173,8 @@ export namespace Prisma {
     longitude?: number | null
     userId: string
     departmentId?: string | null
+    isArchived?: boolean
+    archivedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     history?: ReportHistoryUncheckedCreateNestedManyWithoutReportInput
@@ -15135,6 +15190,8 @@ export namespace Prisma {
     status?: EnumReportStatusFieldUpdateOperationsInput | $Enums.ReportStatus
     latitude?: NullableFloatFieldUpdateOperationsInput | number | null
     longitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    isArchived?: BoolFieldUpdateOperationsInput | boolean
+    archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutReportsNestedInput
@@ -15154,6 +15211,8 @@ export namespace Prisma {
     longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     userId?: StringFieldUpdateOperationsInput | string
     departmentId?: NullableStringFieldUpdateOperationsInput | string | null
+    isArchived?: BoolFieldUpdateOperationsInput | boolean
+    archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     history?: ReportHistoryUncheckedUpdateManyWithoutReportNestedInput
@@ -15172,6 +15231,8 @@ export namespace Prisma {
     longitude?: number | null
     userId: string
     departmentId?: string | null
+    isArchived?: boolean
+    archivedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -15184,6 +15245,8 @@ export namespace Prisma {
     status?: EnumReportStatusFieldUpdateOperationsInput | $Enums.ReportStatus
     latitude?: NullableFloatFieldUpdateOperationsInput | number | null
     longitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    isArchived?: BoolFieldUpdateOperationsInput | boolean
+    archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -15198,6 +15261,8 @@ export namespace Prisma {
     longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     userId?: StringFieldUpdateOperationsInput | string
     departmentId?: NullableStringFieldUpdateOperationsInput | string | null
+    isArchived?: BoolFieldUpdateOperationsInput | boolean
+    archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -15438,6 +15503,7 @@ export namespace Prisma {
     expiresAt?: Date | string | null
     read?: boolean
     deletedForSender?: boolean
+    deletedForReceiver?: boolean
     deletedForEveryone?: boolean
   }
 
@@ -15453,6 +15519,7 @@ export namespace Prisma {
     expiresAt?: Date | string | null
     read?: boolean
     deletedForSender?: boolean
+    deletedForReceiver?: boolean
     deletedForEveryone?: boolean
   }
 
@@ -15467,6 +15534,7 @@ export namespace Prisma {
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     read?: BoolFieldUpdateOperationsInput | boolean
     deletedForSender?: BoolFieldUpdateOperationsInput | boolean
+    deletedForReceiver?: BoolFieldUpdateOperationsInput | boolean
     deletedForEveryone?: BoolFieldUpdateOperationsInput | boolean
   }
 
@@ -15481,6 +15549,7 @@ export namespace Prisma {
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     read?: BoolFieldUpdateOperationsInput | boolean
     deletedForSender?: BoolFieldUpdateOperationsInput | boolean
+    deletedForReceiver?: BoolFieldUpdateOperationsInput | boolean
     deletedForEveryone?: BoolFieldUpdateOperationsInput | boolean
   }
 
@@ -15496,6 +15565,7 @@ export namespace Prisma {
     expiresAt?: Date | string | null
     read?: boolean
     deletedForSender?: boolean
+    deletedForReceiver?: boolean
     deletedForEveryone?: boolean
   }
 
@@ -15510,6 +15580,7 @@ export namespace Prisma {
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     read?: BoolFieldUpdateOperationsInput | boolean
     deletedForSender?: BoolFieldUpdateOperationsInput | boolean
+    deletedForReceiver?: BoolFieldUpdateOperationsInput | boolean
     deletedForEveryone?: BoolFieldUpdateOperationsInput | boolean
   }
 
@@ -15524,6 +15595,7 @@ export namespace Prisma {
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     read?: BoolFieldUpdateOperationsInput | boolean
     deletedForSender?: BoolFieldUpdateOperationsInput | boolean
+    deletedForReceiver?: BoolFieldUpdateOperationsInput | boolean
     deletedForEveryone?: BoolFieldUpdateOperationsInput | boolean
   }
 
@@ -16167,6 +16239,11 @@ export namespace Prisma {
     isSet?: boolean
   }
 
+  export type BoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
   export type UserScalarRelationFilter = {
     is?: UserWhereInput
     isNot?: UserWhereInput
@@ -16193,6 +16270,8 @@ export namespace Prisma {
     longitude?: SortOrder
     userId?: SortOrder
     departmentId?: SortOrder
+    isArchived?: SortOrder
+    archivedAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -16213,6 +16292,8 @@ export namespace Prisma {
     longitude?: SortOrder
     userId?: SortOrder
     departmentId?: SortOrder
+    isArchived?: SortOrder
+    archivedAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -16228,6 +16309,8 @@ export namespace Prisma {
     longitude?: SortOrder
     userId?: SortOrder
     departmentId?: SortOrder
+    isArchived?: SortOrder
+    archivedAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -16277,6 +16360,14 @@ export namespace Prisma {
     _min?: NestedFloatNullableFilter<$PrismaModel>
     _max?: NestedFloatNullableFilter<$PrismaModel>
     isSet?: boolean
+  }
+
+  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type DepartmentCountOrderByAggregateInput = {
@@ -16475,11 +16566,6 @@ export namespace Prisma {
     _max?: NestedIntFilter<$PrismaModel>
   }
 
-  export type BoolFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolFilter<$PrismaModel> | boolean
-  }
-
   export type ChatMessageCountOrderByAggregateInput = {
     id?: SortOrder
     fromId?: SortOrder
@@ -16492,6 +16578,7 @@ export namespace Prisma {
     expiresAt?: SortOrder
     read?: SortOrder
     deletedForSender?: SortOrder
+    deletedForReceiver?: SortOrder
     deletedForEveryone?: SortOrder
   }
 
@@ -16507,6 +16594,7 @@ export namespace Prisma {
     expiresAt?: SortOrder
     read?: SortOrder
     deletedForSender?: SortOrder
+    deletedForReceiver?: SortOrder
     deletedForEveryone?: SortOrder
   }
 
@@ -16522,15 +16610,8 @@ export namespace Prisma {
     expiresAt?: SortOrder
     read?: SortOrder
     deletedForSender?: SortOrder
+    deletedForReceiver?: SortOrder
     deletedForEveryone?: SortOrder
-  }
-
-  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedBoolFilter<$PrismaModel>
-    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type AuditLogCountOrderByAggregateInput = {
@@ -17178,6 +17259,10 @@ export namespace Prisma {
     unset?: boolean
   }
 
+  export type BoolFieldUpdateOperationsInput = {
+    set?: boolean
+  }
+
   export type UserUpdateOneRequiredWithoutReportsNestedInput = {
     create?: XOR<UserCreateWithoutReportsInput, UserUncheckedCreateWithoutReportsInput>
     connectOrCreate?: UserCreateOrConnectWithoutReportsInput
@@ -17430,10 +17515,6 @@ export namespace Prisma {
     delete?: ReportWhereInput | boolean
     connect?: ReportWhereUniqueInput
     update?: XOR<XOR<ReportUpdateToOneWithWhereWithoutMediaInput, ReportUpdateWithoutMediaInput>, ReportUncheckedUpdateWithoutMediaInput>
-  }
-
-  export type BoolFieldUpdateOperationsInput = {
-    set?: boolean
   }
 
   export type UserCreateNestedOneWithoutAuditLogsInput = {
@@ -17721,6 +17802,11 @@ export namespace Prisma {
     isSet?: boolean
   }
 
+  export type NestedBoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
   export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
@@ -17761,6 +17847,14 @@ export namespace Prisma {
     _min?: NestedFloatNullableFilter<$PrismaModel>
     _max?: NestedFloatNullableFilter<$PrismaModel>
     isSet?: boolean
+  }
+
+  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type NestedEnumRoleNullableFilter<$PrismaModel = never> = {
@@ -17824,19 +17918,6 @@ export namespace Prisma {
     gt?: number | FloatFieldRefInput<$PrismaModel>
     gte?: number | FloatFieldRefInput<$PrismaModel>
     not?: NestedFloatFilter<$PrismaModel> | number
-  }
-
-  export type NestedBoolFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolFilter<$PrismaModel> | boolean
-  }
-
-  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedBoolFilter<$PrismaModel>
-    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type NestedEnumAgendaEventTypeFilter<$PrismaModel = never> = {
@@ -17984,6 +18065,8 @@ export namespace Prisma {
     status?: $Enums.ReportStatus
     latitude?: number | null
     longitude?: number | null
+    isArchived?: boolean
+    archivedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     department?: DepartmentCreateNestedOneWithoutReportsInput
@@ -18002,6 +18085,8 @@ export namespace Prisma {
     latitude?: number | null
     longitude?: number | null
     departmentId?: string | null
+    isArchived?: boolean
+    archivedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     history?: ReportHistoryUncheckedCreateNestedManyWithoutReportInput
@@ -18349,6 +18434,8 @@ export namespace Prisma {
     longitude?: FloatNullableFilter<"Report"> | number | null
     userId?: StringFilter<"Report"> | string
     departmentId?: StringNullableFilter<"Report"> | string | null
+    isArchived?: BoolFilter<"Report"> | boolean
+    archivedAt?: DateTimeNullableFilter<"Report"> | Date | string | null
     createdAt?: DateTimeFilter<"Report"> | Date | string
     updatedAt?: DateTimeFilter<"Report"> | Date | string
   }
@@ -18843,6 +18930,8 @@ export namespace Prisma {
     status?: $Enums.ReportStatus
     latitude?: number | null
     longitude?: number | null
+    isArchived?: boolean
+    archivedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutReportsInput
@@ -18861,6 +18950,8 @@ export namespace Prisma {
     latitude?: number | null
     longitude?: number | null
     userId: string
+    isArchived?: boolean
+    archivedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     history?: ReportHistoryUncheckedCreateNestedManyWithoutReportInput
@@ -18970,6 +19061,8 @@ export namespace Prisma {
     status?: $Enums.ReportStatus
     latitude?: number | null
     longitude?: number | null
+    isArchived?: boolean
+    archivedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutReportsInput
@@ -18989,6 +19082,8 @@ export namespace Prisma {
     longitude?: number | null
     userId: string
     departmentId?: string | null
+    isArchived?: boolean
+    archivedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     media?: MediaUncheckedCreateNestedManyWithoutReportInput
@@ -19019,6 +19114,8 @@ export namespace Prisma {
     status?: EnumReportStatusFieldUpdateOperationsInput | $Enums.ReportStatus
     latitude?: NullableFloatFieldUpdateOperationsInput | number | null
     longitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    isArchived?: BoolFieldUpdateOperationsInput | boolean
+    archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutReportsNestedInput
@@ -19037,6 +19134,8 @@ export namespace Prisma {
     longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     userId?: StringFieldUpdateOperationsInput | string
     departmentId?: NullableStringFieldUpdateOperationsInput | string | null
+    isArchived?: BoolFieldUpdateOperationsInput | boolean
+    archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     media?: MediaUncheckedUpdateManyWithoutReportNestedInput
@@ -19100,6 +19199,8 @@ export namespace Prisma {
     status?: $Enums.ReportStatus
     latitude?: number | null
     longitude?: number | null
+    isArchived?: boolean
+    archivedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutReportsInput
@@ -19119,6 +19220,8 @@ export namespace Prisma {
     longitude?: number | null
     userId: string
     departmentId?: string | null
+    isArchived?: boolean
+    archivedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     history?: ReportHistoryUncheckedCreateNestedManyWithoutReportInput
@@ -19201,6 +19304,8 @@ export namespace Prisma {
     status?: EnumReportStatusFieldUpdateOperationsInput | $Enums.ReportStatus
     latitude?: NullableFloatFieldUpdateOperationsInput | number | null
     longitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    isArchived?: BoolFieldUpdateOperationsInput | boolean
+    archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutReportsNestedInput
@@ -19219,6 +19324,8 @@ export namespace Prisma {
     longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     userId?: StringFieldUpdateOperationsInput | string
     departmentId?: NullableStringFieldUpdateOperationsInput | string | null
+    isArchived?: BoolFieldUpdateOperationsInput | boolean
+    archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     history?: ReportHistoryUncheckedUpdateManyWithoutReportNestedInput
@@ -19430,6 +19537,8 @@ export namespace Prisma {
     status?: $Enums.ReportStatus
     latitude?: number | null
     longitude?: number | null
+    isArchived?: boolean
+    archivedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutReportsInput
@@ -19449,6 +19558,8 @@ export namespace Prisma {
     longitude?: number | null
     userId: string
     departmentId?: string | null
+    isArchived?: boolean
+    archivedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     history?: ReportHistoryUncheckedCreateNestedManyWithoutReportInput
@@ -19547,6 +19658,8 @@ export namespace Prisma {
     status?: EnumReportStatusFieldUpdateOperationsInput | $Enums.ReportStatus
     latitude?: NullableFloatFieldUpdateOperationsInput | number | null
     longitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    isArchived?: BoolFieldUpdateOperationsInput | boolean
+    archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutReportsNestedInput
@@ -19565,6 +19678,8 @@ export namespace Prisma {
     longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     userId?: StringFieldUpdateOperationsInput | string
     departmentId?: NullableStringFieldUpdateOperationsInput | string | null
+    isArchived?: BoolFieldUpdateOperationsInput | boolean
+    archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     history?: ReportHistoryUncheckedUpdateManyWithoutReportNestedInput
@@ -19795,6 +19910,8 @@ export namespace Prisma {
     latitude?: number | null
     longitude?: number | null
     departmentId?: string | null
+    isArchived?: boolean
+    archivedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -19918,6 +20035,8 @@ export namespace Prisma {
     status?: EnumReportStatusFieldUpdateOperationsInput | $Enums.ReportStatus
     latitude?: NullableFloatFieldUpdateOperationsInput | number | null
     longitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    isArchived?: BoolFieldUpdateOperationsInput | boolean
+    archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     department?: DepartmentUpdateOneWithoutReportsNestedInput
@@ -19935,6 +20054,8 @@ export namespace Prisma {
     latitude?: NullableFloatFieldUpdateOperationsInput | number | null
     longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     departmentId?: NullableStringFieldUpdateOperationsInput | string | null
+    isArchived?: BoolFieldUpdateOperationsInput | boolean
+    archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     history?: ReportHistoryUncheckedUpdateManyWithoutReportNestedInput
@@ -19951,6 +20072,8 @@ export namespace Prisma {
     latitude?: NullableFloatFieldUpdateOperationsInput | number | null
     longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     departmentId?: NullableStringFieldUpdateOperationsInput | string | null
+    isArchived?: BoolFieldUpdateOperationsInput | boolean
+    archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -20304,6 +20427,8 @@ export namespace Prisma {
     latitude?: number | null
     longitude?: number | null
     userId: string
+    isArchived?: boolean
+    archivedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -20330,6 +20455,8 @@ export namespace Prisma {
     status?: EnumReportStatusFieldUpdateOperationsInput | $Enums.ReportStatus
     latitude?: NullableFloatFieldUpdateOperationsInput | number | null
     longitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    isArchived?: BoolFieldUpdateOperationsInput | boolean
+    archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutReportsNestedInput
@@ -20347,6 +20474,8 @@ export namespace Prisma {
     latitude?: NullableFloatFieldUpdateOperationsInput | number | null
     longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     userId?: StringFieldUpdateOperationsInput | string
+    isArchived?: BoolFieldUpdateOperationsInput | boolean
+    archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     history?: ReportHistoryUncheckedUpdateManyWithoutReportNestedInput
@@ -20363,6 +20492,8 @@ export namespace Prisma {
     latitude?: NullableFloatFieldUpdateOperationsInput | number | null
     longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     userId?: StringFieldUpdateOperationsInput | string
+    isArchived?: BoolFieldUpdateOperationsInput | boolean
+    archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }

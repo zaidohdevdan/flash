@@ -19,7 +19,8 @@ export const ChatController = {
     async clearHistory(req: Request, res: Response) {
         try {
             const { room } = req.params;
-            await chatService.deleteHistory(room as string);
+            const userId = req.userId!;
+            await chatService.deleteHistory(room as string, userId);
             return res.status(204).send();
         } catch (error) {
             console.error('Erro ao excluir histórico do chat:', error);

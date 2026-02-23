@@ -22,6 +22,33 @@ export class PrismaChatRepository implements IChatRepository {
         });
     }
 
+    async softDeleteByRoom(room: string, userId: string): Promise<void> {
+        // Find all messages in the room
+        const messages = await prisma.chatMessage.findMany({
+            where: { room }
+        });
+
+        const updates = messages.map(msg => {
+            if (msg.fromId === userId) {
+                return prisma.chatMessage.update({
+                    where: { id: msg.id },
+                    data: { deletedForSender: true }
+                });
+            } else if (msg.toId === userId) {
+                // If there's no deletedForReceiver, we might need a different approach or we add deletedForReceiver
+                // Wait, if I just add deletedForReceiver to schema it will require db push.
+                // Or I can delete it if both have deleted it? But for now let's just use deletedForReceiver?
+                return prisma.chatMessage.update({
+                    where: { id: msg.id },
+                    data: { deletedForReceiver: true }
+                });
+            }
+            return Promise.resolve();
+        });
+
+        await Promise.all(updates);
+    }
+
     async deleteByRoom(room: string): Promise<void> {
         await prisma.chatMessage.deleteMany({
             where: { room }

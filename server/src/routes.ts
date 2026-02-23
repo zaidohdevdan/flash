@@ -62,6 +62,16 @@ routes.post('/reports', AuthMiddleware, ReportController.create);
 // Interação (Via Supervisor -> Profissional)
 routes.patch('/reports/:id/status', AuthMiddleware, ReportController.updateStatus);
 
+// Extração/Deleção por Protocolo e Arquivos (Admin Only)
+routes.get('/admin/reports/archived', AuthMiddleware, AdminMiddleware, ReportController.listArchived);
+routes.get('/admin/reports/protocol/:protocol', AuthMiddleware, AdminMiddleware, ReportController.getByProtocol);
+routes.patch('/admin/reports/protocol/:protocol/archive', AuthMiddleware, AdminMiddleware, ReportController.archiveByProtocol);
+routes.patch('/admin/reports/protocol/:protocol/restore', AuthMiddleware, AdminMiddleware, ReportController.restoreByProtocol);
+// Exporta/Importa Backup de Processo (JSON)
+routes.get('/admin/reports/protocol/:protocol/export', AuthMiddleware, AdminMiddleware, ReportController.exportArchived);
+routes.post('/admin/reports/import', AuthMiddleware, AdminMiddleware, upload.single('file'), ReportController.importArchived);
+routes.delete('/admin/reports/protocol/:protocol', AuthMiddleware, AdminMiddleware, ReportController.deleteByProtocol);
+
 // Departamentos
 // controllers/DepartmentController.ts
 routes.get('/departments', AuthMiddleware, DepartmentController.index);
@@ -110,5 +120,6 @@ routes.get('/admin/logs', AuthMiddleware, AdminMiddleware, AuditController.index
 routes.post('/contacts', ContactController.store);
 routes.get('/admin/contacts', AuthMiddleware, AdminMiddleware, ContactController.index);
 routes.patch('/admin/contacts/:id/read', AuthMiddleware, AdminMiddleware, ContactController.markAsRead);
+routes.delete('/admin/contacts/:id', AuthMiddleware, AdminMiddleware, ContactController.destroy);
 
 export { routes };

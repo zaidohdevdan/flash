@@ -34,3 +34,9 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 .DS_Store
 
 /generated/prisma
+test-setup-deletion.ts
+test-setup-deletion.js
+test-protocol.ts
+test-protocol.js
+test_auth.ts
+test_auth.js

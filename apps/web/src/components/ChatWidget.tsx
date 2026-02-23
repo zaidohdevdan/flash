@@ -322,7 +322,7 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead }:
     const formatTime = (seconds: number) => {
         const mins = Math.floor(seconds / 60);
         const secs = seconds % 60;
-        return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+        return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     };
 
     return (
@@ -522,7 +522,7 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead }:
                         </button>
                     </div>
                 ) : (
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 relative">
                         <button
                             type="button"
                             onClick={startRecording}
@@ -531,6 +531,7 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead }:
                         >
                             <Mic className="w-5 h-5" />
                         </button>
+
                         <input
                             type="text"
                             value={inputText}
