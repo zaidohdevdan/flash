@@ -27,14 +27,14 @@ export interface Report {
     imageUrl: string;
     comment: string;
     feedback?: string;
-    status: ReportStatus; // Correção: Uso do tipo Union explícito ao invés de string genérica
+    status: ReportStatus;
     history: ReportHistory[];
     departmentId?: string | null;
     department?: { name: string };
     createdAt: string;
     latitude?: number;
     longitude?: number;
-    media?: Media[]; // Array de mídias anexadas
+    media?: Media[];
     user: {
         name: string;
         avatarUrl?: string | null;
@@ -88,4 +88,18 @@ export interface Notification {
     read: boolean;
     link?: string;
     createdAt: string;
+}
+
+export type TicketStatus = 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED';
+
+export interface Ticket {
+    id: string;
+    protocol: string;
+    subject: string;
+    message?: string;
+    status: TicketStatus;
+    supervisorId: string;
+    supervisor?: { id: string; name: string; avatarUrl?: string | null };
+    createdAt: string;
+    updatedAt: string;
 }

@@ -28,6 +28,7 @@ import { ConferenceModal } from '../components/domain/modals/ConferenceModal';
 import { InviteConferenceModal } from '../components/domain/modals/InviteConferenceModal';
 import { AgendaModal } from '../components/domain/modals/AgendaModal';
 import { ReportHistoryModal } from '../components/domain/modals/ReportHistoryModal';
+import { TicketModal } from '../components/domain/modals/TicketModal';
 import { ConferenceInviteNotification } from '../components/ui/ConferenceInviteNotification';
 import { db } from '../services/db';
 import { useLiveQuery } from 'dexie-react-hooks';
@@ -113,6 +114,7 @@ export function Dashboard() {
     const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
     const [isAgendaOpen, setIsAgendaOpen] = useState(false);
     const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+    const [isTicketModalOpen, setIsTicketModalOpen] = useState(false);
     const [roomParticipants, setRoomParticipants] = useState<string[]>([]);
     const hasShownSummaryRef = useRef(false);
 
@@ -509,6 +511,7 @@ export function Dashboard() {
                 onExportClick={() => setIsExportModalOpen(true)}
                 onConferenceClick={user?.role === 'SUPERVISOR' ? handleStartConference : undefined}
                 onAgendaClick={() => setIsAgendaOpen(true)}
+                onSupportClick={user?.role === 'SUPERVISOR' ? () => setIsTicketModalOpen(true) : undefined}
             >
                 <div className="flex bg-[var(--bg-tertiary)] p-1 rounded-lg border border-[var(--border-subtle)]">
                     <button
@@ -656,6 +659,11 @@ export function Dashboard() {
             <AgendaModal
                 isOpen={isAgendaOpen}
                 onClose={() => setIsAgendaOpen(false)}
+            />
+
+            <TicketModal
+                isOpen={isTicketModalOpen}
+                onClose={() => setIsTicketModalOpen(false)}
             />
 
             <InviteConferenceModal

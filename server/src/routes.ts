@@ -17,6 +17,7 @@ import { AgendaController } from './controllers/AgendaController';
 import { NotificationController } from './controllers/NotificationController';
 import { AuditController } from './controllers/AuditController';
 import { ContactController } from './controllers/ContactController';
+import { TicketController } from './controllers/TicketController';
 
 const routes = Router();
 
@@ -121,5 +122,10 @@ routes.post('/contacts', ContactController.store);
 routes.get('/admin/contacts', AuthMiddleware, AdminMiddleware, ContactController.index);
 routes.patch('/admin/contacts/:id/read', AuthMiddleware, AdminMiddleware, ContactController.markAsRead);
 routes.delete('/admin/contacts/:id', AuthMiddleware, AdminMiddleware, ContactController.destroy);
+
+// Chamados de Suporte
+routes.post('/tickets', AuthMiddleware, TicketController.create);
+routes.get('/tickets', AuthMiddleware, TicketController.index);
+routes.patch('/tickets/:id/status', AuthMiddleware, AdminMiddleware, TicketController.updateStatus);
 
 export { routes };

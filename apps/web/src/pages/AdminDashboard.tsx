@@ -5,7 +5,7 @@ import { toast } from 'react-hot-toast';
 import { useDashboardSocket } from '../hooks/useDashboardSocket';
 import { db } from '../services/db';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { Users, UserPlus, Filter, Mail, Trash2, Search, Archive, AlertTriangle, FolderArchive, CheckCircle, Download, UploadCloud, Shield, Edit2, Eye } from 'lucide-react';
+import { Users, UserPlus, Filter, Mail, Trash2, Search, Archive, AlertTriangle, FolderArchive, CheckCircle, Download, UploadCloud, Shield, Edit2, Eye, LifeBuoy } from 'lucide-react';
 import {
     Button,
     Input,
@@ -50,6 +50,18 @@ interface ContactMessage {
     createdAt: string;
 }
 
+interface Ticket {
+    id: string;
+    protocol: string;
+    subject: string;
+    message?: string;
+    status: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED';
+    supervisorId: string;
+    supervisor?: { id: string; name: string; avatarUrl?: string | null };
+    createdAt: string;
+    updatedAt: string;
+}
+
 export function AdminDashboard() {
     const {
         user,
@@ -60,7 +72,7 @@ export function AdminDashboard() {
         desktopNotificationsEnabled,
         setDesktopNotificationsEnabled
     } = useAuth();
-    const [view, setView] = useState<'list' | 'create' | 'edit' | 'departments' | 'contacts' | 'delete_report' | 'archived'>('list');
+    const [view, setView] = useState<'list' | 'create' | 'edit' | 'departments' | 'contacts' | 'delete_report' | 'archived' | 'tickets'>('list');
     const [users, setUsers] = useState<UserSummary[]>([]);
     const [supervisors, setSupervisors] = useState<Supervisor[]>([]);
     const [departments, setDepartments] = useState<Department[]>([]);
@@ -105,6 +117,8 @@ export function AdminDashboard() {
     const [isHardDeleting, setIsHardDeleting] = useState(false);
     const [isExporting, setIsExporting] = useState(false);
     const [isImporting, setIsImporting] = useState(false);
+    const [tickets, setTickets] = useState<Ticket[]>([]);
+    const [isLoadingTickets, setIsLoadingTickets] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Profile Management State
@@ -304,6 +318,29 @@ export function AdminDashboard() {
         }
     }, []);
 
+    const fetchTickets = useCallback(async () => {
+        setIsLoadingTickets(true);
+        try {
+            const response = await api.get('/tickets');
+            setTickets(response.data);
+        } catch (error) {
+            console.error('Erro ao buscar chamados:', error);
+            toast.error('Erro ao carregar chamados.');
+        } finally {
+            setIsLoadingTickets(false);
+        }
+    }, []);
+
+    const handleUpdateTicketStatus = async (id: string, status: string) => {
+        try {
+            await api.patch(`/tickets/${id}/status`, { status });
+            toast.success('Status do chamado atualizado!');
+            fetchTickets();
+        } catch {
+            toast.error('Erro ao atualizar chamado.');
+        }
+    };
+
     useEffect(() => {
         fetchSupervisors();
         fetchDepartments();
@@ -312,8 +349,10 @@ export function AdminDashboard() {
         fetchContacts();
         if (view === 'archived') {
             fetchArchivedReports();
+        } else if (view === 'tickets') {
+            fetchTickets();
         }
-    }, [fetchUsers, fetchSupervisors, fetchDepartments, fetchNotifications, fetchContacts, view, fetchArchivedReports]);
+    }, [fetchUsers, fetchSupervisors, fetchDepartments, fetchNotifications, fetchContacts, view, fetchArchivedReports, fetchTickets]);
 
     async function handleProcessUser(e: React.FormEvent) {
         e.preventDefault();
@@ -723,6 +762,18 @@ export function AdminDashboard() {
                             <FolderArchive className="w-4 h-4" /> Arquivos
                         </button>
 
+                        <button
+                            title='Chamados de Suporte'
+                            type='button'
+                            onClick={() => { setView('tickets'); resetForm(); }}
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-xs uppercase tracking-wide transition-all ${view === 'tickets'
+                                ? 'bg-blue-600 text-white shadow-md'
+                                : 'text-blue-600 hover:bg-blue-50'
+                                }`}
+                        >
+                            <LifeBuoy className="w-4 h-4" /> Chamados
+                        </button>
+
                         <div className="pt-4 mt-4 border-t border-[var(--border-subtle)] px-2 pb-2">
                             <div className="bg-emerald-500/10 p-3 rounded-xl border border-emerald-500/20">
                                 <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest leading-none mb-1">Status do Sistema</p>
@@ -735,7 +786,142 @@ export function AdminDashboard() {
                 </aside>
 
                 <section className="flex-1">
-                    {view === 'list' ? (
+                    {view === 'tickets' ? (
+                        <div className="space-y-6 min-h-[calc(100vh-12rem)] flex flex-col">
+                            <Card variant="white" className="border-[var(--border-subtle)]">
+                                <div className="p-6 border-b border-[var(--border-subtle)] flex justify-between items-center bg-[var(--bg-primary)]">
+                                    <div>
+                                        <h2 className="text-xl font-black text-[var(--text-primary)] uppercase tracking-tighter">Chamados de Suporte</h2>
+                                        <p className="text-xs text-[var(--text-tertiary)] font-medium mt-1">Gestão de solicitações técnicas e operacionais dos supervisores</p>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Button
+                                            variant="secondary"
+                                            onClick={fetchTickets}
+                                            isLoading={isLoadingTickets}
+                                            className="px-4 py-2 text-xs"
+                                        >
+                                            Atualizar
+                                        </Button>
+                                    </div>
+                                </div>
+
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left border-collapse">
+                                        <thead>
+                                            <tr className="bg-[var(--bg-tertiary)] text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest border-b border-[var(--border-subtle)]">
+                                                <th className="px-6 py-4">Data / Protocolo</th>
+                                                <th className="px-6 py-4">Supervisor / Origem</th>
+                                                <th className="px-6 py-4">Motivo / Assunto</th>
+                                                <th className="px-6 py-4">Status Atual</th>
+                                                <th className="px-6 py-4 text-right">Ações de Gestão</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-[var(--border-subtle)]">
+                                            {tickets.length === 0 && !isLoadingTickets && (
+                                                <tr>
+                                                    <td colSpan={5} className="px-6 py-12 text-center text-[var(--text-tertiary)] font-medium italic">
+                                                        Nenhum chamado registrado no momento.
+                                                    </td>
+                                                </tr>
+                                            )}
+                                            {tickets.map(ticket => (
+                                                <tr key={ticket.id} className="hover:bg-[var(--bg-tertiary)] transition-colors group">
+                                                    <td className="px-6 py-4">
+                                                        <div className="flex flex-col">
+                                                            <span className="text-xs font-black text-[var(--text-primary)]">{ticket.protocol}</span>
+                                                            <span className="text-[10px] font-medium text-[var(--text-tertiary)]">
+                                                                {new Date(ticket.createdAt).toLocaleDateString()} {new Date(ticket.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                            </span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="w-8 h-8 rounded-full bg-[var(--bg-tertiary)] border border-[var(--border-subtle)] overflow-hidden">
+                                                                {ticket.supervisor?.avatarUrl ? (
+                                                                    <img src={ticket.supervisor.avatarUrl} alt="" className="w-full h-full object-cover" />
+                                                                ) : (
+                                                                    <div className="w-full h-full flex items-center justify-center bg-blue-500/10 text-blue-500 font-bold text-[10px]">
+                                                                        {ticket.supervisor?.name?.charAt(0) || 'S'}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            <div className="flex flex-col">
+                                                                <span className="text-xs font-bold text-[var(--text-secondary)] truncate max-w-[120px]">
+                                                                    {ticket.supervisor?.name || 'Supervisor'}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <div className="flex flex-col max-w-xs">
+                                                            <span className="text-xs font-black text-[var(--text-primary)] uppercase tracking-tight">
+                                                                {ticket.subject.replace(/_/g, ' ')}
+                                                            </span>
+                                                            {ticket.message && (
+                                                                <p className="text-[10px] text-[var(--text-tertiary)] line-clamp-2 mt-1 leading-relaxed">
+                                                                    {ticket.message}
+                                                                </p>
+                                                            )}
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <Badge
+                                                            status={
+                                                                ticket.status === 'OPEN' ? 'SENT' :
+                                                                    ticket.status === 'IN_PROGRESS' ? 'IN_REVIEW' :
+                                                                        'RESOLVED'
+                                                            }
+                                                            label={
+                                                                ticket.status === 'OPEN' ? 'ABERTO' :
+                                                                    ticket.status === 'IN_PROGRESS' ? 'EM ANDAMENTO' :
+                                                                        ticket.status === 'RESOLVED' ? 'RESOLVIDO' : 'FECHADO'
+                                                            }
+                                                            className="font-black text-[9px] scale-90 origin-left"
+                                                        />
+                                                    </td>
+                                                    <td className="px-6 py-4 text-right">
+                                                        <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                            {ticket.status === 'OPEN' && (
+                                                                <Button
+                                                                    variant="secondary"
+                                                                    size="sm"
+                                                                    className="h-8 text-[9px] font-black uppercase tracking-widest px-3 border-orange-500/30 text-orange-600 hover:bg-orange-50"
+                                                                    onClick={() => handleUpdateTicketStatus(ticket.id, 'IN_PROGRESS')}
+                                                                >
+                                                                    Assumir
+                                                                </Button>
+                                                            )}
+                                                            {ticket.status === 'IN_PROGRESS' && (
+                                                                <Button
+                                                                    variant="secondary"
+                                                                    size="sm"
+                                                                    className="h-8 text-[9px] font-black uppercase tracking-widest px-3 border-emerald-500/30 text-emerald-600 hover:bg-emerald-50"
+                                                                    onClick={() => handleUpdateTicketStatus(ticket.id, 'RESOLVED')}
+                                                                >
+                                                                    Finalizar
+                                                                </Button>
+                                                            )}
+                                                            {ticket.status === 'RESOLVED' && (
+                                                                <Button
+                                                                    variant="secondary"
+                                                                    size="sm"
+                                                                    className="h-8 text-[9px] font-black uppercase tracking-widest px-3 border-slate-500/30 text-slate-600 hover:bg-slate-50"
+                                                                    onClick={() => handleUpdateTicketStatus(ticket.id, 'CLOSED')}
+                                                                >
+                                                                    Arquivar
+                                                                </Button>
+                                                            )}
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </Card>
+                        </div>
+                    ) : view === 'list' ? (
                         <div className="space-y-6 min-h-[calc(100vh-12rem)] flex flex-col">
                             {/* Filter Bar */}
                             <Card variant="white" className="p-3 flex flex-col md:flex-row gap-4 items-center border-[var(--border-subtle)]">

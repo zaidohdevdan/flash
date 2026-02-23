@@ -23,6 +23,13 @@ enum ReportStatus {
   RESOLVED
 }
 
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
 model User {
   id                    String         @id @default(auto()) @map("_id") @db.ObjectId
   name                  String
@@ -47,6 +54,7 @@ model User {
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
   auditLogs AuditLog[]
+  tickets   Ticket[]   @relation("SupervisorTickets")
 }
 
 model Report {
@@ -216,4 +224,21 @@ model ContactMessage {
   message   String
   read      Boolean  @default(false)
   createdAt DateTime @default(now())
+}
+
+model Ticket {
+  id       String       @id @default(auto()) @map("_id") @db.ObjectId
+  protocol String
+  subject  String
+  message  String?
+  status   TicketStatus @default(OPEN)
+
+  supervisorId String @db.ObjectId
+  supervisor   User   @relation("SupervisorTickets", fields: [supervisorId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([supervisorId])
+  @@index([protocol])
 }

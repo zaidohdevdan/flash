@@ -21,11 +21,11 @@ exports.$Enums = {}
 
 /**
  * Prisma Client JS version: 6.18.0
- * Query Engine version: 34b5a692b7bd79939a9a2c3ef97d816e749cda2f
+ * Query Engine version: acc0b9dd43eb689cbd20c9470515d719db10d0b0
  */
 Prisma.prismaVersion = {
   client: "6.18.0",
-  engine: "34b5a692b7bd79939a9a2c3ef97d816e749cda2f"
+  engine: "acc0b9dd43eb689cbd20c9470515d719db10d0b0"
 }
 
 Prisma.PrismaClientKnownRequestError = () => {
@@ -250,6 +250,17 @@ exports.Prisma.ContactMessageScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.TicketScalarFieldEnum = {
+  id: 'id',
+  protocol: 'protocol',
+  subject: 'subject',
+  message: 'message',
+  status: 'status',
+  supervisorId: 'supervisorId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -280,6 +291,13 @@ exports.AgendaEventType = exports.$Enums.AgendaEventType = {
   OTHER: 'OTHER'
 };
 
+exports.TicketStatus = exports.$Enums.TicketStatus = {
+  OPEN: 'OPEN',
+  IN_PROGRESS: 'IN_PROGRESS',
+  RESOLVED: 'RESOLVED',
+  CLOSED: 'CLOSED'
+};
+
 exports.Prisma.ModelName = {
   User: 'User',
   Report: 'Report',
@@ -291,7 +309,8 @@ exports.Prisma.ModelName = {
   AgendaEvent: 'AgendaEvent',
   Notification: 'Notification',
   Note: 'Note',
-  ContactMessage: 'ContactMessage'
+  ContactMessage: 'ContactMessage',
+  Ticket: 'Ticket'
 };
 
 /**
