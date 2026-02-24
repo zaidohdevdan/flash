@@ -9,13 +9,21 @@ const Login = lazy(() => import('./pages/Login').then(m => ({ default: m.Login }
 const Register = lazy(() => import('./pages/Register').then(m => ({ default: m.Register })));
 const Dashboard = lazy(() => import('./pages/Dashboard').then(m => ({ default: m.Dashboard })));
 const CreateReport = lazy(() => import('./pages/CreateReport').then(m => ({ default: m.CreateReport })));
-const AdminDashboard = lazy(() => import('./pages/AdminDashboard').then(m => ({ default: m.AdminDashboard })));
 const ManagerDashboard = lazy(() => import('./pages/ManagerDashboard').then(m => ({ default: m.ManagerDashboard })));
 const Home = lazy(() => import('./pages/Home').then(m => ({ default: m.Home })));
 const Analytics = lazy(() => import('./pages/Analytics').then(m => ({ default: m.Analytics })));
 const Profile = lazy(() => import('./pages/Profile').then(m => ({ default: m.Profile })));
 const Settings = lazy(() => import('./pages/Settings'));
-const Logs = lazy(() => import('./pages/Logs').then(m => ({ default: m.Logs })));
+
+// Admin Modular Pages
+const AdminOverview = lazy(() => import('./pages/admin/AdminOverview').then(m => ({ default: m.AdminOverview })));
+const UserManagement = lazy(() => import('./pages/admin/UserManagement').then(m => ({ default: m.UserManagement })));
+const DepartmentManagement = lazy(() => import('./pages/admin/DepartmentManagement').then(m => ({ default: m.DepartmentManagement })));
+const AdminTickets = lazy(() => import('./pages/admin/Tickets').then(m => ({ default: m.AdminTickets })));
+const AdminAudit = lazy(() => import('./pages/admin/Audit').then(m => ({ default: m.AdminAudit })));
+const AdminInbox = lazy(() => import('./pages/admin/Inbox').then(m => ({ default: m.AdminInbox })));
+const AdminLogs = lazy(() => import('./pages/admin/Logs').then(m => ({ default: m.Logs })));
+const AdminLayout = lazy(() => import('./layouts/AdminLayout').then(m => ({ default: m.AdminLayout })));
 
 // Loading Component
 const PageLoader = () => (
@@ -43,7 +51,7 @@ function PrivateRoute({ children, role }: { children: React.ReactNode, role?: st
   if (role) {
     const roles = Array.isArray(role) ? role : [role];
     if (!roles.includes(user?.role || '')) {
-      if (user?.role === 'ADMIN') return <Navigate to="/admin-dashboard" />;
+      if (user?.role === 'ADMIN') return <Navigate to="/admin/overview" />;
       if (user?.role === 'SUPERVISOR') return <Navigate to="/dashboard" />;
       if (user?.role === 'PROFESSIONAL') return <Navigate to="/create-report" />;
       if (user?.role === 'MANAGER') return <Navigate to="/manager-dashboard" />;
@@ -57,7 +65,7 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, user } = useAuth();
 
   if (isAuthenticated) {
-    if (user?.role === 'ADMIN') return <Navigate to="/admin-dashboard" />;
+    if (user?.role === 'ADMIN') return <Navigate to="/admin/overview" />;
     if (user?.role === 'SUPERVISOR') return <Navigate to="/dashboard" />;
     if (user?.role === 'PROFESSIONAL') return <Navigate to="/create-report" />;
     if (user?.role === 'MANAGER') return <Navigate to="/manager-dashboard" />;
@@ -85,11 +93,18 @@ function AppRoutes() {
         </PrivateRoute>
       } />
 
-      <Route path="/admin-dashboard" element={
-        <PrivateRoute role="ADMIN">
-          <AdminDashboard />
-        </PrivateRoute>
-      } />
+      {/* Admin Central Hub */}
+      <Route path="/admin-dashboard" element={<Navigate to="/admin/overview" />} />
+      <Route path="/admin" element={<PrivateRoute role="ADMIN"><AdminLayout /></PrivateRoute>}>
+        <Route path="overview" element={<AdminOverview />} />
+        <Route path="users" element={<UserManagement />} />
+        <Route path="departments" element={<DepartmentManagement />} />
+        <Route path="tickets" element={<AdminTickets />} />
+        <Route path="audit" element={<AdminAudit />} />
+        <Route path="inbox" element={<AdminInbox />} />
+        <Route path="logs" element={<AdminLogs />} />
+      </Route>
+
 
       <Route path="/manager-dashboard" element={
         <PrivateRoute role="MANAGER">
@@ -112,11 +127,6 @@ function AppRoutes() {
       <Route path="/profile" element={
         <PrivateRoute role={['SUPERVISOR', 'MANAGER', 'PROFESSIONAL', 'ADMIN']}>
           <Profile />
-        </PrivateRoute>
-      } />
-      <Route path="/logs" element={
-        <PrivateRoute role="ADMIN">
-          <Logs />
         </PrivateRoute>
       } />
     </Routes>
@@ -143,4 +153,3 @@ function App() {
 }
 
 export default App;
-// Trigger deploy fix 2026-02-06 - Force Update 2

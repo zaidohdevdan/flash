@@ -18,6 +18,7 @@ import { NotificationController } from './controllers/NotificationController';
 import { AuditController } from './controllers/AuditController';
 import { ContactController } from './controllers/ContactController';
 import { TicketController } from './controllers/TicketController';
+import { AdminController } from './controllers/AdminController';
 
 const routes = Router();
 
@@ -128,5 +129,8 @@ routes.post('/tickets', AuthMiddleware, TicketController.create);
 routes.get('/tickets', AuthMiddleware, TicketController.index);
 routes.patch('/tickets/:id/status', AuthMiddleware, AdminMiddleware, TicketController.updateStatus);
 routes.delete('/tickets/:id', AuthMiddleware, TicketController.destroy);
+
+// Estatísticas do Sistema (Admin Only)
+routes.get('/admin/stats', AuthMiddleware, AdminMiddleware, AdminController.getStats);
 
 export { routes };

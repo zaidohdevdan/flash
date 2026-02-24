@@ -94,7 +94,7 @@ export const Modal: React.FC<ModalProps> = ({
         animate-in zoom-in-95 slide-in-from-bottom-4 duration-300
         flex flex-col max-h-[90vh]
         ${currentStyle.container}
-      `}>
+`}>
                 {/* Header */}
                 {(title || subtitle) && (
                     <div className="px-8 pt-8 pb-4 flex justify-between items-start">
@@ -105,9 +105,9 @@ export const Modal: React.FC<ModalProps> = ({
                                 </h2>
                             )}
                             {subtitle && (
-                                <p className={`text-sm font-bold mt-1 ${currentStyle.subtitle}`}>
+                                <div className={`text-sm font-bold mt-1 ${currentStyle.subtitle}`}>
                                     {subtitle}
-                                </p>
+                                </div>
                             )}
                         </div>
                         <button

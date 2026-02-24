@@ -1,15 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
-    LayoutDashboard,
-    LogOut,
-    Bell,
-    Menu,
-    Search,
-    ArrowRight,
-    Wifi,
-    WifiOff,
-    Settings as SettingsIcon,
-    Activity
+    LayoutDashboard, LogOut, Menu, Bell, Search, Activity, Settings as SettingsIcon, Wifi, WifiOff, ArrowRight,
+    PieChart, Users, Building2, LifeBuoy, FolderArchive, Mail
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
@@ -96,17 +88,36 @@ export function DashboardLayout({
     }, []);
 
     const menuItems = [
-        { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
-        { icon: Activity, label: 'Logs do Sistema', path: '/logs' },
+        { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard', roles: ['SUPERVISOR'] },
+        { icon: LayoutDashboard, label: 'Painel Gestor', path: '/manager-dashboard', roles: ['MANAGER'] },
+    ];
+
+    const adminItems = [
+        { icon: PieChart, label: 'Visão Geral', path: '/admin/overview' },
+        { icon: Users, label: 'Usuários & Acessos', path: '/admin/users' },
+        { icon: Building2, label: 'Setores Operacionais', path: '/admin/departments' },
+        { icon: LifeBuoy, label: 'Chamados Sup.', path: '/admin/tickets' },
+        { icon: FolderArchive, label: 'Auditoria & Arquivo', path: '/admin/audit' },
+        { icon: Mail, label: 'Caixa de Entrada', path: '/admin/inbox' },
+        { icon: Activity, label: 'Logs do Sistema', path: '/admin/logs' },
+    ];
+
+    const commonItems = [
         { icon: SettingsIcon, label: 'Configurações', path: '/settings' },
     ];
 
-    // Filter menu items for non-admins
-    const filteredMenuItems = user?.role === 'ADMIN'
-        ? menuItems
-        : menuItems.filter(item => item.path !== '/logs');
+    // Filter menu items based on role
+    const getFilteredMenuItems = () => {
+        if (!user) return [];
+        if (user.role === 'ADMIN') return [...adminItems, ...commonItems];
 
-    const isActive = (path: string) => location.pathname === path;
+        const roleSpecific = menuItems.filter(item => item.roles.includes(user?.role || ''));
+        return [...roleSpecific, ...commonItems];
+    };
+
+    const filteredMenuItems = getFilteredMenuItems();
+
+    const isActive = (path: string) => location.pathname === path || (path !== '/' && location.pathname.startsWith(path + '/'));
     const unreadCount = notifications.filter(n => !n.read).length;
 
 
