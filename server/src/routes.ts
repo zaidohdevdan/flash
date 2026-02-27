@@ -19,7 +19,7 @@ import { AuditController } from './controllers/AuditController';
 import { ContactController } from './controllers/ContactController';
 import { TicketController } from './controllers/TicketController';
 import { AdminController } from './controllers/AdminController';
-
+import { TerminalController } from './controllers/TerminalController';
 const routes = Router();
 
 // Cloudinay
@@ -132,5 +132,8 @@ routes.delete('/tickets/:id', AuthMiddleware, TicketController.destroy);
 
 // Estatísticas do Sistema (Admin Only)
 routes.get('/admin/stats', AuthMiddleware, AdminMiddleware, AdminController.getStats);
+
+// Terminal Integrado
+routes.post('/admin/terminal/execute', AuthMiddleware, AdminMiddleware, TerminalController.execute);
 
 export { routes };

@@ -11,6 +11,11 @@ import { routes } from './routes';
 import { ChatService } from './services/ChatService';
 import { startScheduler } from './jobs/scheduler';
 import { AuditService } from './services/AuditService';
+import { TerminalLogger } from './lib/logger';
+import { presenceService } from './services/PresenceService';
+import { NetworkSniffer } from './lib/sniffer';
+
+TerminalLogger.init();
 
 const chatService = new ChatService();
 
@@ -47,9 +52,17 @@ app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }))
 
-// Injeta o io em todas as requisições
-app.use((req: Request, _res: Response, next: NextFunction) => {
+// Injeta o io em todas as requisições e Sniffer de Rede
+app.use((req: Request, res: Response, next: NextFunction) => {
     req.io = io;
+
+    // Sniffer HTTP
+    const start = Date.now();
+    res.on('finish', () => {
+        const duration = Date.now() - start;
+        NetworkSniffer.logHttp(req.method, req.originalUrl, res.statusCode, duration);
+    });
+
     next();
 });
 
@@ -85,15 +98,17 @@ async function bootstrap() {
         await prisma.$connect();
         console.log('[DB] Connected to the database successfully.');
 
-        const onlineUsers = new Set<string>();
-
         io.on('connection', async (socket) => {
             const { userId } = socket.handshake.query;
+
+            // Sniffer WebSocket
+            socket.onAny((event, ...args) => {
+                NetworkSniffer.logWs(event, args[0]);
+            });
 
             if (userId) {
                 const roomName = String(userId);
                 socket.join(roomName);
-                onlineUsers.add(roomName);
 
                 // Busca dados do usuário no banco para garantir entrada na sala do departamento
                 try {
@@ -113,6 +128,9 @@ async function bootstrap() {
                         socket.join('admin-monitor');
                         console.log(`[Socket] Admin ${user.name} entrou na sala admin-monitor.`);
                     }
+
+                    // Add to PresenceService
+                    presenceService.addUser(String(userId), user?.name || 'Unknown', user?.role || 'PROFESSIONAL');
                 } catch (err) {
                     console.error(`[Socket] Erro ao buscar dados do usuário ${userId} para entrar na sala:`, err);
                 }
@@ -127,7 +145,7 @@ async function bootstrap() {
             }
 
             // Envia lista inicial de quem está online
-            socket.emit('initial_presence_list', Array.from(onlineUsers));
+            socket.emit('initial_presence_list', presenceService.getOnlineUsers().map(u => u.userId));
 
             socket.on('join_private_chat', (data: { targetUserId: string }) => {
                 const myId = socket.handshake.query.userId as string;
@@ -201,13 +219,11 @@ async function bootstrap() {
 
                 if (userIdFromQuery) {
                     const roomName = String(userIdFromQuery);
-                    onlineUsers.delete(roomName);
+                    presenceService.removeUser(roomName);
 
                     io.emit('user_offline', {
                         userId: roomName,
                     });
-
-
                 }
             });
 

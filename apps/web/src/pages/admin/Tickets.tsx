@@ -5,7 +5,7 @@ import { Button } from '../../components/ui/Button';
 import { TicketResponseModal } from '../../components/domain/modals/TicketResponseModal';
 import { api } from '../../services/api';
 import toast from 'react-hot-toast';
-import { LifeBuoy, Search, Filter as FilterIcon, Clock, CheckCircle } from 'lucide-react';
+import { LifeBuoy, Search, Filter as FilterIcon, Clock, CheckCircle, RefreshCw } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -146,9 +146,14 @@ export function AdminTickets() {
                     </h1>
                     <p className="text-xs text-[var(--text-secondary)] font-medium">Gestão de tickets e suporte técnico ao usuário</p>
                 </div>
-                <Button variant="secondary" onClick={fetchTickets}>
-                    Atualizar Fila
-                </Button>
+                <button
+                    type="button"
+                    onClick={fetchTickets}
+                    title="Atualizar Fila"
+                    className="w-10 h-10 p-0 flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)] bg-[var(--bg-primary)] border border-[var(--border-subtle)] rounded-xl transition-all"
+                >
+                    <RefreshCw className="w-4 h-4" />
+                </button>
             </div>
 
             <Card variant="white" className="p-4 grid grid-cols-1 md:grid-cols-4 gap-4 border-[var(--border-subtle)]">
@@ -200,7 +205,7 @@ export function AdminTickets() {
                                 </tr>
                             ) : (
                                 displayedTickets.map(ticket => (
-                                    <tr key={ticket.id} className="hover:bg-[var(--bg-tertiary)]/50 transition-colors">
+                                    <tr key={ticket.id} className="table-row-hover group">
                                         <td className="px-6 py-4">
                                             <div className="flex flex-col gap-1">
                                                 <div className="flex items-center gap-1.5 text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider">

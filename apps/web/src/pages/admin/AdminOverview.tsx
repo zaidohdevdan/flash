@@ -102,12 +102,17 @@ export function AdminOverview() {
                     </div>
                 </Card>
 
-                <Card variant="white" className="p-6 border-[var(--border-subtle)] hover:border-rose-500/30 transition-colors">
+                <Card variant="white" className={`p-6 border-[var(--border-subtle)] transition-colors relative ${stats.totalTickets - stats.resolvedTickets > 0 ? 'border-rose-500/50 shadow-[0_0_20px_rgba(244,63,94,0.15)] ring-1 ring-rose-500/30 ring-offset-2 ring-offset-[var(--bg-primary)] animate-pulse' : 'hover:border-rose-500/30'}`}>
+                    {stats.totalTickets - stats.resolvedTickets > 0 && (
+                        <div className="absolute -top-1 -right-1 w-3 h-3 bg-rose-500 rounded-full animate-ping" />
+                    )}
                     <div className="flex items-center justify-between mb-4">
-                        <div className="p-2.5 bg-rose-500/10 rounded-xl text-rose-500">
+                        <div className={`p-2.5 rounded-xl ${stats.totalTickets - stats.resolvedTickets > 0 ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/40' : 'bg-rose-500/10 text-rose-500'}`}>
                             <TicketIcon className="w-5 h-5" />
                         </div>
-                        <span className="text-xs font-bold text-rose-500 bg-rose-50 px-2 py-0.5 rounded-full">{stats.totalTickets - stats.resolvedTickets} pendentes</span>
+                        <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${stats.totalTickets - stats.resolvedTickets > 0 ? 'text-rose-600 bg-rose-500/20' : 'text-rose-500 bg-rose-500/10'}`}>
+                            {stats.totalTickets - stats.resolvedTickets} pendentes
+                        </span>
                     </div>
                     <p className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wide">Chamados de Suporte</p>
                     <div className="flex items-baseline gap-2 mt-2">

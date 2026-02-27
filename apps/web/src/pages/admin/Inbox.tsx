@@ -4,7 +4,7 @@ import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
 import { api } from '../../services/api';
 import toast from 'react-hot-toast';
-import { Mail, Search, Clock, MailOpen, AlertCircle, Trash2, Eye, AlertTriangle } from 'lucide-react';
+import { Mail, MailOpen, Search, Eye, Trash2, Clock, AlertCircle, RefreshCw, AlertTriangle } from 'lucide-react';
 import { format } from 'date-fns';
 import { Modal } from '../../components/ui/Modal';
 import { ptBR } from 'date-fns/locale';
@@ -118,9 +118,14 @@ export function AdminInbox() {
                     </h1>
                     <p className="text-xs text-[var(--text-secondary)] font-medium">Contatos do landing page comercial</p>
                 </div>
-                <Button variant="secondary" onClick={fetchMessages}>
-                    Sincronizar Emails
-                </Button>
+                <button
+                    type="button"
+                    onClick={fetchMessages}
+                    title="Sincronizar Emails"
+                    className="w-10 h-10 p-0 flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)] bg-[var(--bg-primary)] border border-[var(--border-subtle)] rounded-xl transition-all"
+                >
+                    <RefreshCw className="w-4 h-4" />
+                </button>
             </div>
 
             <Card variant="white" className="p-4 border-[var(--border-subtle)]">
@@ -157,7 +162,7 @@ export function AdminInbox() {
                                 </tr>
                             ) : (
                                 displayedMessages.map(contact => (
-                                    <tr key={contact.id} className={`transition-colors ${!contact.read ? 'bg-indigo-50/50 hover:bg-indigo-50' : 'hover:bg-[var(--bg-tertiary)]/50'}`}>
+                                    <tr key={contact.id} className={`table-row-hover group transition-colors ${!contact.read ? 'bg-blue-500/10' : ''}`}>
                                         <td className="px-6 py-4">
                                             <div className="flex flex-col gap-1 w-48 truncate">
                                                 <span className={`text-sm ${!contact.read ? 'font-black text-indigo-700' : 'font-bold text-[var(--text-primary)]'}`}>

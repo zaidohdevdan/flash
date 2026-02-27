@@ -236,7 +236,7 @@ export function UserManagement() {
                                 </tr>
                             ) : (
                                 displayedUsers.map(u => (
-                                    <tr key={u.id} className="hover:bg-[var(--bg-tertiary)]/50 transition-colors group">
+                                    <tr key={u.id} className="table-row-hover group">
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3">
                                                 <div className="w-10 h-10 rounded-xl bg-[var(--bg-tertiary)] flex items-center justify-center text-[var(--accent-primary)] font-black text-sm border border-[var(--border-subtle)]">

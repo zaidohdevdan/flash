@@ -1,21 +1,14 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AxiosError } from 'axios';
 import {
-    User,
-    Bell,
-    ChevronRight,
-    Lock,
     Sun,
     Moon,
     Monitor,
-    Database,
-    Users,
     Volume2,
-    Shield,
     KeyRound,
     Loader2,
-    Trash2,
-    Save
+    Save,
+    Trash2
 } from 'lucide-react';
 import { DashboardLayout } from '../layouts/DashboardLayout';
 import { useAuth } from '../contexts/AuthContext';
@@ -25,16 +18,6 @@ import toast from 'react-hot-toast';
 
 type Theme = 'light' | 'dark' | 'system';
 type Density = 'comfortable' | 'compact';
-
-interface AdminUser {
-    id: string;
-    name: string;
-    email: string;
-    role: string;
-    avatarUrl?: string;
-}
-
-// --- Sub-components ---
 
 const GeneralSettings = () => {
     const { user, updateUser } = useAuth();
@@ -437,184 +420,47 @@ const OfflineSettings = () => {
     );
 };
 
-const AdminSettings = () => {
-    const [users, setUsers] = useState<AdminUser[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [searchTerm, setSearchTerm] = useState('');
 
-    const loadUsers = useCallback(async () => {
-        setIsLoading(true);
-        try {
-            const response = await api.get<AdminUser[]>('/users', {
-                params: { search: searchTerm }
-            });
-            setUsers(response.data);
-        } catch (error) {
-            console.error(error);
-            toast.error('Erro ao carregar usuários.');
-        } finally {
-            setIsLoading(false);
-        }
-    }, [searchTerm]);
-
-    useEffect(() => {
-        loadUsers();
-    }, [loadUsers]);
-
-    const handleDeleteUser = async (userId: string) => {
-        if (!window.confirm('Tem certeza que deseja excluir este usuário? Esta ação é irreversível.')) return;
-
-        try {
-            await api.delete(`/users/${userId}`);
-            toast.success('Usuário removido com sucesso!');
-            loadUsers();
-        } catch (error) {
-            const err = error as AxiosError<{ error: string }>;
-            const message = err.response?.data?.error || 'Erro ao excluir usuário.';
-            toast.error(message);
-        }
-    };
-
-    return (
-        <div className="space-y-6 animate-in">
-            <div>
-                <h3 className="text-lg font-bold text-[var(--text-primary)]">Administrativo</h3>
-                <p className="text-sm text-[var(--text-tertiary)]">Gestão de usuários e permissões do sistema.</p>
-            </div>
-
-            <div className="bg-[var(--bg-primary)] border border-[var(--border-subtle)] rounded-2xl p-6 space-y-6">
-
-                <div className="pt-6 border-t border-[var(--border-subtle)] space-y-4">
-                    <h4 className="text-sm font-bold text-[var(--text-primary)]">Usuários do Sistema</h4>
-
-                    <div className="flex gap-4">
-                        <input
-                            type="text"
-                            placeholder="Buscar por nome ou e-mail..."
-                            value={searchTerm}
-                            onChange={e => setSearchTerm(e.target.value)}
-                            className="flex-1 p-3 bg-[var(--bg-secondary)] rounded-xl border border-[var(--border-subtle)] text-[var(--text-primary)] outline-none focus:ring-1 focus:ring-[var(--accent-primary)] text-sm"
-                        />
-                    </div>
-
-                    <div className="space-y-2">
-                        {isLoading ? (
-                            <div className="flex justify-center p-8"><Loader2 className="w-6 h-6 animate-spin text-[var(--accent-primary)]" /></div>
-                        ) : (
-                            users.map(u => (
-                                <div key={u.id} className="flex items-center justify-between p-4 bg-[var(--bg-secondary)] rounded-xl border border-[var(--border-subtle)] group">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-10 h-10 rounded-full bg-[var(--bg-tertiary)] flex items-center justify-center overflow-hidden">
-                                            {u.avatarUrl ? <img src={u.avatarUrl} alt={u.name} className="w-full h-full object-cover" /> : <User className="w-5 h-5 text-[var(--text-tertiary)]" />}
-                                        </div>
-                                        <div>
-                                            <p className="text-sm font-bold text-[var(--text-primary)]">{u.name}</p>
-                                            <p className="text-xs text-[var(--text-tertiary)]">{u.email} • <span className="uppercase">{u.role}</span></p>
-                                        </div>
-                                    </div>
-                                    <button
-                                        title='Remover Usuário'
-                                        type='button'
-                                        onClick={() => handleDeleteUser(u.id)}
-                                        className="p-2 text-red-500 hover:bg-red-500/10 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
-                                    >
-                                        <Trash2 className="w-4 h-4" />
-                                    </button>
-                                </div>
-                            ))
-                        )}
-                        {!isLoading && users.length === 0 && (
-                            <p className="text-center text-sm text-[var(--text-tertiary)] py-8">Nenhum usuário encontrado.</p>
-                        )}
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-};
 
 // --- Main Page ---
 
-type TabType = 'general' | 'notifications' | 'appearance' | 'security' | 'offline' | 'admin';
-
 export default function Settings() {
     const { user, signOut } = useAuth();
-    const [activeTab, setActiveTab] = useState<TabType>('general');
-
-    const tabs = [
-        { id: 'general', label: "Geral", icon: User },
-        { id: 'notifications', label: "Notificações", icon: Bell },
-        { id: 'appearance', label: "Aparência", icon: Monitor },
-        { id: 'security', label: "Segurança", icon: Lock },
-        { id: 'offline', label: "Offline", icon: Database },
-    ];
-
-    if (user?.role === 'ADMIN') {
-        tabs.push({ id: 'admin', label: "Administrativo", icon: Users });
-    }
-
-    const renderContent = () => {
-        switch (activeTab) {
-            case 'general': return <GeneralSettings />;
-            case 'appearance': return <AppearanceSettings />;
-            case 'notifications': return <NotificationSettings />;
-            case 'security': return <SecuritySettings />;
-            case 'offline': return <OfflineSettings />;
-            case 'admin': return user?.role === 'ADMIN' ? <AdminSettings /> : null;
-            default: return (
-                <div className="py-20 text-center space-y-4">
-                    <div className="w-16 h-16 bg-[var(--bg-tertiary)] rounded-full flex items-center justify-center mx-auto">
-                        <Shield className="w-8 h-8 text-[var(--text-tertiary)]" />
-                    </div>
-                    <div>
-                        <h3 className="text-lg font-bold text-[var(--text-primary)]">Em Desenvolvimento</h3>
-                        <p className="text-[var(--text-tertiary)] max-w-xs mx-auto">Esta seção de configurações será implementada em breve.</p>
-                    </div>
-                </div>
-            );
-        }
-    };
 
     return (
         <DashboardLayout
             user={{ name: user?.name, avatarUrl: user?.avatarUrl, role: user?.role }}
             onLogout={signOut}
         >
-            <div className="max-w-5xl mx-auto py-8 px-4">
-                <div className="mb-10">
+            <div className="w-full animate-in fade-in duration-500 pt-4">
+                <div className="mb-8">
                     <h2 className="text-3xl font-black text-[var(--text-primary)] tracking-tighter">Configurações</h2>
-                    <p className="text-[var(--text-secondary)] font-medium">Personalize sua experiência e gerencie sua conta.</p>
+                    <p className="text-[var(--text-secondary)] font-medium mt-1">Personalize sua experiência e gerencie sua conta localmente.</p>
                 </div>
 
-                <div className="flex flex-col lg:flex-row gap-8">
-                    {/* Inner Sidebar */}
-                    <aside className="w-full lg:w-64 space-y-1">
-                        {tabs.map(tab => (
-                            <button
-                                title={tab.label}
-                                type='button'
-                                key={tab.id}
-                                onClick={() => setActiveTab(tab.id as TabType)}
-                                className={`
-                                    w-full flex items-center justify-between p-3.5 rounded-2xl transition-all group
-                                    ${activeTab === tab.id
-                                        ? 'bg-[var(--accent-primary)] text-[var(--accent-text)] shadow-lg shadow-lime-500/10'
-                                        : 'hover:bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}
-                                `}
-                            >
-                                <div className="flex items-center gap-3">
-                                    <tab.icon className={`w-4 h-4 ${activeTab === tab.id ? 'text-[var(--accent-text)]' : 'text-[var(--text-tertiary)] group-hover:text-[var(--text-primary)]'}`} />
-                                    <span className="text-sm font-bold">{tab.label}</span>
-                                </div>
-                                <ChevronRight className={`w-3.5 h-3.5 opacity-0 group-hover:opacity-40 ${activeTab === tab.id ? 'hidden' : ''}`} />
-                            </button>
-                        ))}
-                    </aside>
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                    {/* Column 1 */}
+                    <div className="space-y-8">
+                        <section id="general">
+                            <GeneralSettings />
+                        </section>
+                        <section id="appearance">
+                            <AppearanceSettings />
+                        </section>
+                    </div>
 
-                    {/* Content Area */}
-                    <main className="flex-1 min-w-0">
-                        {renderContent()}
-                    </main>
+                    {/* Column 2 */}
+                    <div className="space-y-8">
+                        <section id="notifications">
+                            <NotificationSettings />
+                        </section>
+                        <section id="security">
+                            <SecuritySettings />
+                        </section>
+                        <section id="offline">
+                            <OfflineSettings />
+                        </section>
+                    </div>
                 </div>
             </div>
         </DashboardLayout>

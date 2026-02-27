@@ -41,33 +41,33 @@
   --border-medium: #d1d5db;
   /* gray-300 */
 
-  /* Shadows - Soft & Diffuse */
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05);
-  --shadow-float: 0 20px 25px -5px rgb(0 0 0 / 0.05), 0 8px 10px -6px rgb(0 0 0 / 0.01);
+  /* Shadows - Premium Diffuse */
+  --shadow-sm: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 10px 15px -3px rgb(0 0 0 / 0.15), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 20px 25px -5px rgb(0 0 0 / 0.2), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --shadow-float: 0 25px 50px -12px rgb(0 0 0 / 0.35);
 }
 
-/* Dark Mode - Premium Midnight Zinc */
+/* Dark Mode - Dracula Theme */
 .dark {
-  --bg-primary: #09090b;
-  /* zinc-950 */
-  --bg-secondary: #18181b;
-  /* zinc-900 */
-  --bg-tertiary: #27272a;
-  /* zinc-800 */
+  --bg-primary: #282a36;
+  /* dracula background */
+  --bg-secondary: #21222c;
+  /* slightly darker base */
+  --bg-tertiary: #44475a;
+  /* dracula selection/current line */
 
-  --text-primary: #fafafa;
-  /* zinc-50 */
-  --text-secondary: #a1a1aa;
-  /* zinc-400 */
-  --text-tertiary: #71717a;
-  /* zinc-500 */
+  --text-primary: #f8f8f2;
+  /* dracula foreground */
+  --text-secondary: #8be9fd;
+  /* dracula cyan */
+  --text-tertiary: #6272a4;
+  /* dracula comment */
 
-  --border-subtle: rgba(255, 255, 255, 0.05);
-  /* ultra-subtle border */
-  --border-medium: rgba(255, 255, 255, 0.1);
-  /* slightly visible border */
+  --border-subtle: rgba(98, 114, 164, 0.2);
+  /* comment alpha */
+  --border-medium: rgba(98, 114, 164, 0.4);
+  /* stronger comment */
 }
 
 @layer base {
@@ -117,16 +117,33 @@
 
   /* Minimalist Card */
   .card-base {
-    @apply bg-[var(--bg-primary)] border border-[var(--border-subtle)] rounded-2xl shadow-[var(--shadow-sm)] transition-all duration-200;
+    @apply bg-[var(--bg-primary)] border border-[var(--border-subtle)] rounded-2xl shadow-[var(--shadow-md)] transition-all duration-300;
   }
 
   .card-hover {
-    @apply hover:shadow-[var(--shadow-md)] hover:border-[var(--border-medium)];
+    @apply hover:shadow-[var(--shadow-lg)] hover:-translate-y-1 hover:border-[var(--border-medium)];
+  }
+
+  /* Premium Lists & Table Rows */
+  .list-item-hover {
+    @apply transition-all duration-300 relative;
+  }
+
+  .list-item-hover:hover {
+    background-color: var(--bg-tertiary) !important;
+    box-shadow: var(--shadow-md) !important;
+    transform: translateY(-2px) !important;
+    border-color: var(--border-medium) !important;
+    z-index: 10;
+  }
+
+  .table-row-hover {
+    @apply transition-colors duration-200 hover:bg-[var(--bg-tertiary)];
   }
 
   /* Minimalist Button Base */
   .btn-base {
-    @apply inline-flex items-center justify-center rounded-xl font-medium transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none;
+    @apply inline-flex items-center justify-center rounded-xl font-medium transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none hover:shadow-md;
   }
 
   /* Status Badge Base */
@@ -137,11 +154,11 @@
 
 /* Utilities for glass effects (kept minimal) */
 .glass {
-  @apply bg-white/70 backdrop-blur-md border border-white/20 shadow-sm;
+  @apply bg-white/70 backdrop-blur-md border border-white/20 shadow-md transition-all duration-300;
 }
 
 .dark .glass {
-  @apply bg-[#18181b]/60 backdrop-blur-xl border border-white/5 shadow-2xl;
+  @apply bg-[#18181b]/60 backdrop-blur-xl border border-white/5 shadow-2xl transition-all duration-300;
 }
 
 /* Animation utilities */

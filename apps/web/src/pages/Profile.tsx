@@ -103,7 +103,7 @@ export function Profile() {
             user={{ name: user?.name, avatarUrl: user?.avatarUrl, role: user?.role }}
             onLogout={signOut}
         >
-            <div className="max-w-4xl mx-auto w-full animate-in fade-in duration-500">
+            <div className="max-w-[1600px] mx-auto w-full animate-in fade-in duration-500">
                 <div className="mb-8">
                     <h1 className="text-2xl font-bold text-[var(--text-primary)] uppercase tracking-tight">Meu Perfil</h1>
                     <p className="text-xs text-[var(--text-tertiary)] font-bold uppercase tracking-widest mt-1">Gerencie sua identidade no Flash</p>

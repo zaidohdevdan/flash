@@ -30,7 +30,7 @@ export const KpiCard: React.FC<KpiCardProps> = ({
     return (
         <Card className="p-5 flex flex-col justify-between h-full hover:shadow-md transition-shadow">
             <div className="flex justify-between items-start mb-4">
-                <div className={`p-2 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-subtle)]`}>
+                <div className={`p-2 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-subtle)] card-hover transition-all duration-300`}>
                     <Icon className={`w-5 h-5 ${colors.icon}`} />
                 </div>
                 {trend && (

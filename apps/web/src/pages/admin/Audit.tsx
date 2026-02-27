@@ -3,9 +3,9 @@ import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { api } from '../../services/api';
 import toast from 'react-hot-toast';
-import { FolderArchive, Search, Clock, AlertTriangle, RotateCcw, Trash2, FileText, History, Upload } from 'lucide-react';
 import { format } from 'date-fns';
 import { Modal } from '../../components/ui/Modal';
+import { RefreshCw, FolderArchive, Search, Clock, AlertTriangle, RotateCcw, Trash2, FileText, History, Upload } from 'lucide-react';
 import { ReportHistoryModal } from '../../components/domain/modals/ReportHistoryModal';
 
 interface ArchivedReport {
@@ -196,9 +196,14 @@ export function AdminAudit() {
                     <Button variant="primary" className="bg-amber-500 hover:bg-amber-600 border-none text-white" onClick={() => fileInputRef.current?.click()} isLoading={isUploading}>
                         <Upload className="w-4 h-4 mr-2" /> Importar Backup
                     </Button>
-                    <Button variant="secondary" onClick={fetchArchivedReports}>
-                        Atualizar Registros
-                    </Button>
+                    <button
+                        type="button"
+                        onClick={fetchArchivedReports}
+                        title="Atualizar Registros"
+                        className="w-10 h-10 p-0 flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)] bg-[var(--bg-primary)] border border-[var(--border-subtle)] rounded-xl transition-all"
+                    >
+                        <RefreshCw className="w-4 h-4" />
+                    </button>
                 </div>
             </div>
 
@@ -236,7 +241,7 @@ export function AdminAudit() {
                                 </tr>
                             ) : (
                                 displayedReports.map(report => (
-                                    <tr key={report.id} className="hover:bg-[var(--bg-tertiary)]/50 transition-colors">
+                                    <tr key={report.id} className="table-row-hover group">
                                         <td className="px-6 py-4">
                                             <div className="flex flex-col gap-1">
                                                 <span className="font-mono text-sm font-black text-[var(--text-primary)]">

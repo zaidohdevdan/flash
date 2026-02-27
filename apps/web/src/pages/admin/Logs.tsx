@@ -223,7 +223,7 @@ export function Logs() {
                                 </tr>
                             ) : (
                                 displayedLogs.map((log) => (
-                                    <tr key={log.id} className="hover:bg-[var(--bg-secondary)]/30 transition-colors group">
+                                    <tr key={log.id} className="table-row-hover group">
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center gap-2 text-xs text-[var(--text-secondary)]">
                                                 <Clock className="w-3 h-3 opacity-50" />
