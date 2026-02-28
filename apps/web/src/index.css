@@ -274,6 +274,36 @@
   background: #ffffff20;
 }
 
+/* Chat Widget Modern Scrollbar */
+.chat-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(99, 102, 241, 0.25) transparent;
+}
+
+.chat-scrollbar::-webkit-scrollbar {
+  width: 3px;
+}
+
+.chat-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 99px;
+}
+
+.chat-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, 0.2);
+  border-radius: 99px;
+  transition: background 0.2s ease;
+}
+
+.chat-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(99, 102, 241, 0.5);
+}
+
+/* Hide scrollbar thumb until hovered (modern feel) */
+.chat-scrollbar:not(:hover)::-webkit-scrollbar-thumb {
+  background: transparent;
+}
+
 @media print {
   .min-h-screen {
     background: white !important;

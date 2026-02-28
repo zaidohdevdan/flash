@@ -109,26 +109,26 @@ export function DepartmentManagement() {
         <div className="space-y-6 animate-in fade-in duration-500">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-black text-[var(--text-primary)] uppercase tracking-tight mb-1">
+                    <h1 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight mb-1">
                         Departamentos e Setores
                     </h1>
-                    <p className="text-xs text-[var(--text-secondary)] font-medium">Gerencie a estrutura organizacional da empresa</p>
+                    <p className="text-[12px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest mt-1">Gerencie a estrutura organizacional da empresa</p>
                 </div>
                 <Button variant="primary" onClick={openCreateModal} className="shrink-0">
                     <Plus className="w-4 h-4 mr-2" /> Novo Departamento
                 </Button>
             </div>
 
-            <Card variant="white" className="overflow-hidden border-[var(--border-subtle)]">
+            <Card variant="white" className="overflow-hidden bg-white/70 dark:bg-black/60 border border-slate-200 dark:border-white/5 shadow-2xl backdrop-blur-md rounded-2xl">
                 <div className="overflow-x-auto w-full">
                     <table className="w-full min-w-max text-left border-collapse">
                         <thead>
-                            <tr className="bg-[var(--bg-tertiary)] text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest border-b border-[var(--border-subtle)]">
+                            <tr className="bg-slate-50 dark:bg-black/40 text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest border-b border-slate-200 dark:border-white/5">
                                 <th className="px-6 py-4">Nome do Setor</th>
                                 <th className="px-6 py-4 text-right">Ações</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-[var(--border-subtle)]">
+                        <tbody className="divide-y divide-slate-200 dark:divide-white/5">
                             {departments.length === 0 ? (
                                 <tr>
                                     <td colSpan={2} className="px-6 py-12 text-center text-[var(--text-tertiary)]">
@@ -140,11 +140,11 @@ export function DepartmentManagement() {
                                     <tr key={d.id} className="table-row-hover group">
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500">
+                                                <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500 border border-blue-500/20 shadow-inner group-hover:scale-110 transition-transform">
                                                     <Building2 className="w-5 h-5" />
                                                 </div>
                                                 <div>
-                                                    <p className="font-bold text-[var(--text-primary)] text-sm mb-0.5">{d.name}</p>
+                                                    <p className="font-black text-slate-900 dark:text-white text-sm mb-0.5 uppercase tracking-tight">{d.name}</p>
                                                     <Badge status="RESOLVED" label="ATIVO" />
                                                 </div>
                                             </div>

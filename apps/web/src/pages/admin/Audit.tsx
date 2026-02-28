@@ -179,10 +179,10 @@ export function AdminAudit() {
         <div className="space-y-6 animate-in fade-in duration-500">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-black text-[var(--text-primary)] uppercase tracking-tight mb-1 flex items-center gap-3">
+                    <h1 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight mb-1 flex items-center gap-3">
                         <FolderArchive className="w-8 h-8 text-amber-500" /> Auditoria e Arquivos
                     </h1>
-                    <p className="text-xs text-[var(--text-secondary)] font-medium">Registro de relatórios arquivados ou removidos temporariamente</p>
+                    <p className="text-[12px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest mt-1">Registro de relatórios arquivados ou removidos temporariamente</p>
                 </div>
                 <div className="flex gap-2">
                     <input
@@ -207,31 +207,31 @@ export function AdminAudit() {
                 </div>
             </div>
 
-            <Card variant="white" className="p-4 flex flex-col md:flex-row gap-4 items-center border-[var(--border-subtle)]">
+            <Card variant="white" className="p-4 bg-white/70 dark:bg-black/60 border border-slate-200 dark:border-white/5 shadow-xl backdrop-blur-md flex flex-col md:flex-row gap-4 items-center rounded-2xl">
                 <div className="relative flex-1 w-full">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-tertiary)]" />
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500" />
                     <input
                         type="text"
                         placeholder="Buscar por Protocolo, Autor ou Responsável..."
                         value={searchQuery}
                         onChange={e => setSearchQuery(e.target.value)}
-                        className="w-full pl-10 pr-4 py-3 bg-[var(--bg-tertiary)] border-transparent border rounded-xl focus:bg-[var(--bg-primary)] focus:border-[var(--accent-primary)] outline-none transition-all text-sm font-medium text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)]"
+                        className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-black/40 border-slate-200 dark:border-white/5 border rounded-xl focus:bg-white dark:focus:bg-black/60 focus:border-indigo-500 outline-none transition-all text-sm font-bold text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 uppercase tracking-tight"
                     />
                 </div>
             </Card>
 
-            <Card variant="white" className="overflow-hidden border-[var(--border-subtle)]">
+            <Card variant="white" className="overflow-hidden bg-white/70 dark:bg-black/60 border border-slate-200 dark:border-white/5 shadow-2xl backdrop-blur-md rounded-2xl">
                 <div className="overflow-x-auto w-full">
                     <table className="w-full min-w-max text-left border-collapse">
                         <thead>
-                            <tr className="bg-[var(--bg-tertiary)] text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest border-b border-[var(--border-subtle)]">
+                            <tr className="bg-slate-50 dark:bg-black/40 text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest border-b border-slate-200 dark:border-white/5">
                                 <th className="px-6 py-4">Protocolo / Data</th>
                                 <th className="px-6 py-4">Autor Original</th>
                                 <th className="px-6 py-4">Arquivado Por</th>
                                 <th className="px-6 py-4 text-right">Ações de Auditoria</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-[var(--border-subtle)]">
+                        <tbody className="divide-y divide-slate-200 dark:divide-white/5">
                             {filteredReports.length === 0 ? (
                                 <tr>
                                     <td colSpan={4} className="px-6 py-24 text-center text-[var(--text-tertiary)]">
@@ -244,10 +244,10 @@ export function AdminAudit() {
                                     <tr key={report.id} className="table-row-hover group">
                                         <td className="px-6 py-4">
                                             <div className="flex flex-col gap-1">
-                                                <span className="font-mono text-sm font-black text-[var(--text-primary)]">
+                                                <span className="font-mono text-sm font-black text-slate-900 dark:text-white">
                                                     #{report.id.slice(-6).toUpperCase()}
                                                 </span>
-                                                <div className="flex items-center gap-1.5 text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider">
+                                                <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider">
                                                     <Clock className="w-3 h-3" />
                                                     {format(new Date(report.createdAt), "dd/MM/yy")} (Criado)
                                                 </div>
@@ -255,17 +255,17 @@ export function AdminAudit() {
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="flex flex-col gap-1">
-                                                <span className="font-bold text-sm text-[var(--text-primary)] flex items-center gap-2">
+                                                <span className="font-black text-sm text-slate-900 dark:text-white flex items-center gap-2 uppercase tracking-tight">
                                                     {report.user?.name || 'Autor Desconhecido'}
                                                 </span>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="flex flex-col gap-1">
-                                                <span className="font-bold text-sm text-amber-600 flex items-center gap-2">
+                                                <span className="font-black text-sm text-amber-600 flex items-center gap-2 uppercase tracking-tight">
                                                     Sistema
                                                 </span>
-                                                <span className="text-[10px] font-bold uppercase text-[var(--text-tertiary)] tracking-wider">
+                                                <span className="text-[11px] font-bold uppercase text-slate-400 dark:text-slate-600 tracking-wider">
                                                     Restrito
                                                 </span>
                                             </div>

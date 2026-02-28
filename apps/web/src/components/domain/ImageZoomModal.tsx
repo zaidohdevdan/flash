@@ -166,12 +166,12 @@ export const ImageZoomModal: React.FC<ImageZoomModalProps> = ({ isOpen, onClose,
                     alt={`Visualização ${currentIndex + 1}`}
                     style={{
                         transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
-                        transition: isDragging ? 'none' : 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                        maxWidth: '90%',
-                        maxHeight: '90%',
+                        transition: isDragging ? 'none' : 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+                        maxWidth: '98%',
+                        maxHeight: '98%',
                         objectFit: 'contain'
                     }}
-                    className="rounded-2xl shadow-2xl select-none"
+                    className="rounded-lg shadow-[0_0_100px_rgba(0,0,0,0.8)] select-none border border-white/5"
                     draggable={false}
                 />
             </div>

@@ -40,48 +40,48 @@ export function InviteConferenceModal({ isOpen, onClose, participants, onConfirm
     const isSelected = (id: string) => selectedIds.includes(id);
 
     return (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-300">
-            <div className="w-full max-w-md bg-[var(--bg-primary)] rounded-[2.5rem] border border-[var(--border-subtle)] shadow-2xl overflow-hidden flex flex-col">
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/40 dark:bg-black/60 backdrop-blur-xl animate-in fade-in duration-500">
+            <div className="w-full max-w-md bg-white dark:bg-[#020617] rounded-[3rem] border border-slate-200 dark:border-white/10 shadow-2xl overflow-hidden flex flex-col backdrop-blur-3xl">
                 {/* Header */}
-                <div className="p-8 pb-4 flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-red-500/10 rounded-2xl flex items-center justify-center text-red-500">
-                            <Video className="w-6 h-6" />
+                <div className="p-10 pb-6 flex items-center justify-between">
+                    <div className="flex items-center gap-5">
+                        <div className="w-14 h-14 bg-indigo-50 dark:bg-indigo-500/10 rounded-2xl flex items-center justify-center text-indigo-500 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/20 shadow-xl shadow-indigo-500/10">
+                            <Video className="w-7 h-7" />
                         </div>
                         <div>
-                            <h3 className="text-xl font-black text-[var(--text-primary)] uppercase tracking-tighter">
-                                {isAdding ? 'Convidar Membros' : 'Iniciar War Room'}
+                            <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-[0.3em] leading-none">
+                                {isAdding ? 'CONVOCAR MEMBROS' : 'INICIAR WAR ROOM'}
                             </h3>
-                            <p className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-widest">
-                                Selecione os participantes
+                            <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mt-2 opacity-80">
+                                Seleção de Operadores Disponíveis
                             </p>
                         </div>
                     </div>
                     <button
                         onClick={onClose}
                         title="Fechar"
-                        className="p-2 hover:bg-[var(--bg-secondary)] rounded-xl transition-colors text-[var(--text-tertiary)]"
+                        className="p-3 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 rounded-2xl transition-all text-slate-500 dark:text-slate-500 hover:text-slate-800 dark:hover:text-white border border-slate-200 dark:border-white/5 active:scale-90"
                     >
                         <X className="w-5 h-5" />
                     </button>
                 </div>
 
-                <div className="px-8 pb-4">
+                <div className="px-10 pb-6">
                     <button
                         onClick={handleSelectAll}
-                        className="text-[10px] font-black text-[var(--accent-primary)] uppercase tracking-widest hover:underline"
+                        className="text-[9px] font-black text-indigo-400 uppercase tracking-[0.2em] hover:text-indigo-300 transition-colors bg-indigo-500/5 px-4 py-2 rounded-full border border-indigo-500/10"
                     >
-                        {selectedIds.length === participants.length ? 'Desmarcar Todos' : 'Selecionar Todos'}
+                        {selectedIds.length === participants.length ? 'DESMARCAR ESQUADRÃO' : 'SELECIONAR TODOS'}
                     </button>
                 </div>
 
                 {/* List */}
-                <div className="flex-1 overflow-y-auto px-4 max-h-[400px] space-y-2 pb-8">
+                <div className="flex-1 overflow-y-auto px-6 max-h-[400px] space-y-3 pb-8 scrollbar-hide">
                     {participants.length === 0 ? (
-                        <div className="p-8 text-center">
-                            <Users className="w-8 h-8 mx-auto text-[var(--text-tertiary)] opacity-20 mb-4" />
-                            <p className="text-xs font-bold text-[var(--text-tertiary)] uppercase tracking-widest">
-                                Nenhum membro online disponível
+                        <div className="p-12 text-center bg-slate-50 dark:bg-black/20 rounded-[2rem] border border-dashed border-slate-200 dark:border-white/5">
+                            <Users className="w-10 h-10 mx-auto text-slate-400 dark:text-slate-700 mb-4 opacity-40 dark:opacity-100" />
+                            <p className="text-[10px] font-black text-slate-500 dark:text-slate-600 uppercase tracking-widest">
+                                Nenhum operador online disponível para convocação
                             </p>
                         </div>
                     ) : (
@@ -90,44 +90,44 @@ export function InviteConferenceModal({ isOpen, onClose, participants, onConfirm
                                 key={participant.id}
                                 onClick={() => toggleParticipant(participant.id)}
                                 className={`
-                                    w-full flex items-center gap-4 p-4 rounded-3xl border transition-all duration-300
+                                    w-full flex items-center gap-4 p-5 rounded-[2rem] border transition-all duration-500 group
                                     ${isSelected(participant.id)
-                                        ? 'bg-[var(--accent-primary)]/5 border-[var(--accent-primary)] shadow-sm'
-                                        : 'bg-[var(--bg-secondary)] border-transparent hover:border-[var(--border-subtle)]'}
+                                        ? 'bg-indigo-50 dark:bg-indigo-600/10 border-indigo-200 dark:border-indigo-500/50 shadow-2xl shadow-indigo-500/10'
+                                        : 'bg-slate-100 dark:bg-black/30 border-slate-200 dark:border-white/5 hover:border-slate-300 dark:hover:border-white/10'}
                                 `}
                             >
                                 <div className="relative">
                                     <div className={`
-                                        w-12 h-12 rounded-2xl flex items-center justify-center overflow-hidden border border-[var(--border-subtle)]
-                                        ${participant.avatarUrl ? '' : 'bg-[var(--bg-tertiary)]'}
+                                        w-12 h-12 rounded-2xl flex items-center justify-center overflow-hidden border transition-all duration-500
+                                        ${isSelected(participant.id) ? 'border-indigo-400 shadow-[0_0_15px_rgba(129,140,248,0.3)]' : 'border-slate-300 dark:border-white/10 bg-slate-200 dark:bg-slate-900'}
                                     `}>
                                         {participant.avatarUrl ? (
                                             <img src={participant.avatarUrl} alt={participant.name} className="w-full h-full object-cover" />
                                         ) : (
                                             participant.role === 'SUPERVISOR' || participant.role === 'ADMIN'
-                                                ? <Shield className="w-5 h-5 text-[var(--text-tertiary)]" />
-                                                : <User className="w-5 h-5 text-[var(--text-tertiary)]" />
+                                                ? <Shield className="w-5 h-5 text-indigo-500 dark:text-indigo-400/60" />
+                                                : <User className="w-5 h-5 text-slate-500" />
                                         )}
                                     </div>
-                                    <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 border-2 border-[var(--bg-primary)] shadow-sm" />
+                                    <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 border-[3px] border-white dark:border-[#020617] shadow-lg animate-pulse" />
                                 </div>
 
                                 <div className="flex-1 text-left min-w-0">
-                                    <p className="text-sm font-black text-[var(--text-primary)] truncate uppercase tracking-tighter">
+                                    <p className={`text-[11px] font-black uppercase tracking-widest truncate transition-colors duration-500 ${isSelected(participant.id) ? 'text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-300'}`}>
                                         {participant.name}
                                     </p>
-                                    <p className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-widest truncate">
+                                    <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest truncate mt-1">
                                         {participant.role}
                                     </p>
                                 </div>
 
                                 <div className={`
-                                    w-6 h-6 rounded-lg flex items-center justify-center transition-all
+                                    w-7 h-7 rounded-xl flex items-center justify-center transition-all duration-500 border
                                     ${isSelected(participant.id)
-                                        ? 'bg-[var(--accent-primary)] text-white scale-110'
-                                        : 'bg-[var(--bg-tertiary)] text-transparent'}
+                                        ? 'bg-indigo-600 border-indigo-400 text-white scale-110 shadow-lg shadow-indigo-500/50'
+                                        : 'bg-slate-200 dark:bg-black/40 border-slate-300 dark:border-white/5 text-transparent'}
                                 `}>
-                                    <Check className="w-3.5 h-3.5" />
+                                    <Check className="w-4 h-4" />
                                 </div>
                             </button>
                         ))
@@ -135,17 +135,17 @@ export function InviteConferenceModal({ isOpen, onClose, participants, onConfirm
                 </div>
 
                 {/* Footer */}
-                <div className="p-8 pt-4 bg-[var(--bg-secondary)]/50 border-t border-[var(--border-subtle)]">
+                <div className="p-10 pt-6 bg-slate-50 dark:bg-black/40 border-t border-slate-200 dark:border-white/5 backdrop-blur-md">
                     <Button
                         variant="primary"
                         fullWidth
                         size="lg"
                         disabled={selectedIds.length === 0}
                         onClick={() => onConfirm(selectedIds)}
-                        className="group"
+                        className={`h-14 font-black uppercase tracking-[0.3em] text-[11px] !rounded-2xl transition-all shadow-2xl ${selectedIds.length > 0 ? 'bg-indigo-600 hover:bg-indigo-500 shadow-indigo-600/20' : 'opacity-40'}`}
                     >
-                        <Video className="w-4 h-4 mr-2" />
-                        {isAdding ? 'Convidar' : 'Iniciar'} com {selectedIds.length} {selectedIds.length === 1 ? 'membro' : 'membros'}
+                        <Video className="w-4 h-4 mr-3" />
+                        {isAdding ? 'CONVOCAR' : 'ESTABELECER CANAL'} ({selectedIds.length})
                     </Button>
                 </div>
             </div>

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
 import {
@@ -37,6 +38,8 @@ interface AnalyticsData {
 }
 
 export function Analytics() {
+    const navigate = useNavigate();
+    const { user, signOut } = useAuth();
     const [data, setData] = useState<AnalyticsData | null>(null);
     const [loading, setLoading] = useState(true);
     const [isReady, setIsReady] = useState(false);
@@ -57,11 +60,6 @@ export function Analytics() {
             setLoading(false);
         }
     };
-
-    const { user, signOut } = useAuth();
-    // ... (keep state variables)
-
-    // ... (keep useEffect and loading logic)
 
     if (loading) {
         return (
@@ -89,6 +87,7 @@ export function Analytics() {
         <DashboardLayout
             user={{ name: user?.name, avatarUrl: user?.avatarUrl, role: user?.role }}
             onLogout={signOut}
+            onProfileClick={() => navigate('/profile')}
         >
             <div className="max-w-[1600px] mx-auto space-y-8 animate-in fade-in duration-500">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
@@ -201,9 +200,9 @@ export function Analytics() {
                             </div>
                         </div>
 
-                        <div className="h-[300px] w-full">
+                        <div className="h-[300px] w-full min-w-0">
                             {isReady && (
-                                <ResponsiveContainer width="100%" height="100%">
+                                <ResponsiveContainer width="100%" height={300}>
                                     <AreaChart data={data.volume}>
                                         <defs>
                                             <linearGradient id="colorArea" x1="0" y1="0" x2="0" y2="1">
@@ -309,7 +308,7 @@ export function Analytics() {
                                 </div>
                             </div>
 
-                            <div className="h-[300px] w-full flex items-center justify-center relative">
+                            <div className="h-[300px] w-full min-w-0 flex items-center justify-center relative">
                                 <div className="absolute inset-0 bg-blue-500/5 rounded-full blur-3xl opacity-50" />
                                 {isReady && (
                                     <ResponsiveContainer width="100%" height={300}>

@@ -136,7 +136,7 @@ export function Dashboard() {
     } : null, [user]);
 
     const {
-        socket,
+        socketRef,
         onlineUserIds,
         unreadMessages,
         markAsRead,
@@ -489,7 +489,7 @@ export function Dashboard() {
             onMarkAsRead={handleMarkAsRead}
             onMarkAllAsRead={handleMarkAllAsRead}
             onDelete={handleDeleteNotification}
-            onProfileClick={() => setIsProfileOpen(true)}
+            onProfileClick={() => navigate('/profile')}
             searchTerm={searchTerm}
             onSearchChange={setSearchTerm}
             activeRoom={activeRoom}
@@ -516,22 +516,22 @@ export function Dashboard() {
                 onSupportClick={user?.role === 'SUPERVISOR' ? () => setIsTicketModalOpen(true) : undefined}
                 onHistoryClick={user?.role === 'SUPERVISOR' ? () => setIsTicketHistoryModalOpen(true) : undefined}
             >
-                <div className="flex bg-[var(--bg-tertiary)] p-1 rounded-lg border border-[var(--border-subtle)]">
+                <div className="flex bg-white/70 dark:bg-black/60 p-1.5 rounded-2xl border border-slate-200 dark:border-white/5 backdrop-blur-md shadow-lg dark:shadow-xl transition-all">
                     <button
-                        title='Lista'
+                        title='Operar em Lista'
                         type='button'
                         onClick={() => setViewMode('list')}
-                        className={`px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider transition-all border ${viewMode === 'list' ? 'bg-[var(--bg-primary)] border-[var(--border-medium)] text-[var(--text-primary)] shadow-sm' : 'border-transparent text-[var(--text-tertiary)] hover:bg-[var(--bg-primary)]'}`}
+                        className={`px-5 py-2 rounded-xl text-[12px] font-black uppercase tracking-[0.2em] transition-all border ${viewMode === 'list' ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-600/20' : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
                     >
-                        Lista
+                        Index
                     </button>
                     <button
-                        title='Mapa'
+                        title='Operar em Mapa'
                         type='button'
                         onClick={() => setViewMode('map')}
-                        className={`px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider transition-all border ${viewMode === 'map' ? 'bg-[var(--bg-primary)] border-[var(--border-medium)] text-[var(--text-primary)] shadow-sm' : 'border-transparent text-[var(--text-tertiary)] hover:bg-[var(--bg-primary)]'}`}
+                        className={`px-5 py-2 rounded-xl text-[12px] font-black uppercase tracking-[0.2em] transition-all border ${viewMode === 'map' ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-600/20' : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
                     >
-                        Mapa
+                        Recon
                     </button>
                 </div>
             </DashboardHero>
@@ -550,27 +550,33 @@ export function Dashboard() {
                             hasMore={hasMore}
                             onLoadMore={handleLoadMore}
                             isLoading={isReportsLoading}
+                            variant="grid"
                             renderReportActions={(report) => (
-                                <div className="flex gap-2 w-full">
+                                <div className="flex gap-3 w-full">
                                     {report.status !== 'RESOLVED' && !report.department && (
                                         <Button
                                             variant="secondary"
                                             size="sm"
                                             fullWidth
-                                            className="bg-[var(--bg-tertiary)] hover:bg-[var(--bg-primary)] border border-[var(--border-medium)]"
+                                            className="bg-indigo-50 dark:bg-indigo-600/20 border border-indigo-200 dark:border-indigo-500/30 text-indigo-600 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-600/40 hover:text-indigo-700 dark:hover:text-white font-black uppercase tracking-widest text-[11px] h-11 !rounded-xl transition-all"
                                             onClick={() => { setAnalyzingReport(report); setTargetStatus('FORWARDED'); }}
                                         >
-                                            Analisar
+                                            Processar Protocolo
                                         </Button>
                                     )}
-                                    <Button variant="ghost" size="sm" onClick={() => setSelectedReport(report)}>
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => setSelectedReport(report)}
+                                        className="bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/5 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white !rounded-xl w-10 h-10 p-0 flex items-center justify-center transition-all"
+                                    >
                                         <HistoryIcon className="w-4 h-4" />
                                     </Button>
                                 </div>
                             )}
                         />
                     ) : (
-                        <div className="w-full h-[600px] rounded-2xl overflow-hidden border border-[var(--border-subtle)] shadow-sm">
+                        <div className="w-full h-[650px] rounded-[2.5rem] overflow-hidden border border-white/5 shadow-2xl relative">
                             <MapView reports={reports} />
                         </div>
                     )}
@@ -627,7 +633,7 @@ export function Dashboard() {
                     currentUser={{ id: user.id || '', name: user.name || '', role: user.role || '' }}
                     targetUser={chatTarget}
                     onClose={handleCloseChat}
-                    socket={socket}
+                    socket={socketRef.current}
                     onRead={markAsRead}
                 />
             )}

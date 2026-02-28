@@ -85,7 +85,6 @@ export const AdminTerminal: React.FC<AdminTerminalProps> = ({ isOpen, onClose })
         }
     };
 
-    // Filter out only the commands typed by user for the up/down arrow history
     const commandHistoryOnly = history.map(h => h.command);
 
     useEffect(() => {
@@ -101,7 +100,6 @@ export const AdminTerminal: React.FC<AdminTerminalProps> = ({ isOpen, onClose })
     useEffect(() => {
         const handleMouseMove = (e: MouseEvent) => {
             if (!isDraggingRef.current) return;
-            // Limit minimum and maximum height
             let newHeight = e.clientY;
             if (newHeight < 200) newHeight = 200;
             if (newHeight > window.innerHeight - 50) newHeight = window.innerHeight - 50;
@@ -143,14 +141,12 @@ export const AdminTerminal: React.FC<AdminTerminalProps> = ({ isOpen, onClose })
         }
 
         setIsExecuting(true);
-        // Add optimistic command entry with loading state
         setHistory(prev => [...prev, { command: cmd, output: [], timestamp: new Date() }]);
 
         try {
             const response = await api.post('/admin/terminal/execute', { command: cmd });
             const outputStats = response.data as TerminalOutput[];
 
-            // Scan for actions and execute
             for (const out of outputStats) {
                 if (out.action) {
                     handleRemoteAction(out);
@@ -162,11 +158,16 @@ export const AdminTerminal: React.FC<AdminTerminalProps> = ({ isOpen, onClose })
                 newHistory[newHistory.length - 1].output = outputStats;
                 return newHistory;
             });
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } catch (error: any) {
+        } catch (error: unknown) {
             let errorMsg = 'Falha crítica na conexão com o terminal.';
-            if (error.response?.data && Array.isArray(error.response.data)) {
-                errorMsg = error.response.data[0]?.message || errorMsg;
+            const err = error as { response?: { data?: { message?: string }[] | { message?: string } } };
+
+            if (err.response?.data) {
+                if (Array.isArray(err.response.data)) {
+                    errorMsg = err.response.data[0]?.message || errorMsg;
+                } else if ('message' in err.response.data && err.response.data.message) {
+                    errorMsg = err.response.data.message;
+                }
             }
 
             setHistory(prev => {
@@ -218,7 +219,7 @@ export const AdminTerminal: React.FC<AdminTerminalProps> = ({ isOpen, onClose })
                 </div>
                 <div className="flex items-center gap-2">
                     <button
-                        title="Documentação / Comandos"
+                        title="Manual de Comandos"
                         type="button"
                         onClick={() => {
                             setHistory(prev => [...prev, { command: 'help', output: [{ type: 'info', message: 'Rodando comando help...' }], timestamp: new Date() }]);
@@ -264,8 +265,7 @@ export const AdminTerminal: React.FC<AdminTerminalProps> = ({ isOpen, onClose })
                                     <pre key={j} className={`whitespace-pre-wrap ${out.type === 'error' ? 'text-rose-400' :
                                         out.type === 'success' ? 'text-emerald-400' :
                                             out.type === 'warning' ? 'text-orange-400' :
-                                                'text-gray-300'
-                                        }`}>
+                                                'text-gray-300'}`}>
                                         {out.message}
                                     </pre>
                                 ))}
@@ -291,8 +291,8 @@ export const AdminTerminal: React.FC<AdminTerminalProps> = ({ isOpen, onClose })
                     autoComplete="off"
                     spellCheck="false"
                 />
-                <button type="submit" title="Executar Comando" disabled={!input.trim() || isExecuting} className="text-gray-500 hover:text-white disabled:opacity-50 transition-colors">
-                    <ChevronRight className="w-5 h-5" />
+                <button type="submit" title="Executar" disabled={!input.trim() || isExecuting} className="text-gray-500 hover:text-white disabled:opacity-50 transition-colors">
+                    <ChevronRight className="w-4 h-4" />
                 </button>
             </form>
 

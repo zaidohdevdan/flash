@@ -16,8 +16,13 @@ export const ReportController = {
     // Dashboard Stats for chart
     stats: async (req: Request, res: Response) => {
         const supervisorId = req.userId!;
+        const { startDate, endDate } = req.query;
         try {
-            const stats = await reportService.getDashboardStats(supervisorId);
+            const stats = await reportService.getDashboardStats(
+                supervisorId,
+                startDate ? new Date(startDate as string) : undefined,
+                endDate ? new Date(endDate as string) : undefined,
+            );
             return res.json(stats);
         } catch (error) {
             return res.status(500).json({ error: 'Erro ao buscar estatísticas' });
@@ -28,8 +33,15 @@ export const ReportController = {
     advancedStats: async (req: Request, res: Response) => {
         const userId = req.userId!;
         const role = req.userRole!;
+        const { status, startDate, endDate } = req.query;
         try {
-            const stats = await reportService.getAdvancedStats(userId, role);
+            const stats = await reportService.getAdvancedStats(
+                userId,
+                role,
+                (status && status !== '') ? (status as ReportStatus) : undefined,
+                startDate ? new Date(startDate as string) : undefined,
+                endDate ? new Date(endDate as string) : undefined,
+            );
             return res.json(stats);
         } catch (error) {
             return res.status(500).json({ error: 'Erro ao buscar analytics' });
@@ -83,11 +95,16 @@ export const ReportController = {
     // Stats for department manager
     departmentStats: async (req: Request, res: Response) => {
         const userId = req.userId!;
+        const { startDate, endDate } = req.query;
         try {
             const user = await prisma.user.findUnique({ where: { id: userId }, select: { departmentId: true } });
             if (!user?.departmentId) return res.status(403).json({ error: 'Usuário não vinculado a um departamento' });
 
-            const stats = await reportService.getDepartmentStats(user.departmentId);
+            const stats = await reportService.getDepartmentStats(
+                user.departmentId,
+                startDate ? new Date(startDate as string) : undefined,
+                endDate ? new Date(endDate as string) : undefined,
+            );
             return res.json(stats);
         } catch (error) {
             return res.status(500).json({ error: 'Erro ao buscar estatísticas do departamento' });

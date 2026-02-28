@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AxiosError } from 'axios';
 import {
     Sun,
@@ -426,11 +427,13 @@ const OfflineSettings = () => {
 
 export default function Settings() {
     const { user, signOut } = useAuth();
+    const navigate = useNavigate();
 
     return (
         <DashboardLayout
             user={{ name: user?.name, avatarUrl: user?.avatarUrl, role: user?.role }}
             onLogout={signOut}
+            onProfileClick={() => navigate('/profile')}
         >
             <div className="w-full animate-in fade-in duration-500 pt-4">
                 <div className="mb-8">

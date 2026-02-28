@@ -23,7 +23,7 @@ interface InsightData {
 interface InsightsModalProps {
     isOpen: boolean;
     onClose: () => void;
-    data: InsightData;
+    data: InsightData | null;
 }
 
 export const InsightsModal: React.FC<InsightsModalProps> = ({ isOpen, onClose, data }) => {
@@ -104,22 +104,22 @@ ${d.predictions.trend === 'UP'
                 {step === 'generating' ? (
                     <div className="flex flex-col items-center justify-center py-16 space-y-6">
                         <div className="relative">
-                            <div className="absolute inset-0 bg-[var(--accent-primary)]/20 blur-xl rounded-full animate-pulse" />
-                            <Brain className="w-16 h-16 text-[var(--accent-secondary)] relative z-10 animate-bounce" />
+                            <div className="absolute inset-0 bg-indigo-500/20 blur-xl rounded-full animate-pulse" />
+                            <Brain className="w-16 h-16 text-indigo-500 relative z-10 animate-bounce" />
                         </div>
                         <div className="text-center space-y-2">
-                            <p className="text-sm font-bold text-[var(--text-primary)] uppercase tracking-widest animate-pulse">
+                            <p className="text-[12px] font-black text-slate-900 dark:text-white uppercase tracking-widest animate-pulse">
                                 Processando Dados
                             </p>
-                            <p className="text-xs text-[var(--text-tertiary)]">
+                            <p className="text-[11px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-tight">
                                 Analisando padrões operacionais...
                             </p>
                         </div>
                     </div>
                 ) : (
                     <div className="space-y-6 animate-in slide-in-from-bottom-2 duration-500">
-                        <div className="p-6 bg-[var(--bg-tertiary)] rounded-2xl border border-[var(--border-subtle)]">
-                            <pre className="whitespace-pre-wrap font-sans text-sm text-[var(--text-secondary)] leading-relaxed">
+                        <div className="p-6 bg-slate-50 dark:bg-black/60 rounded-2xl border border-slate-200 dark:border-white/5 shadow-inner backdrop-blur-md">
+                            <pre className="whitespace-pre-wrap font-sans text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-bold">
                                 {insightText}
                             </pre>
                         </div>

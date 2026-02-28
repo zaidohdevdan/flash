@@ -226,7 +226,7 @@ export function ManagerDashboard() {
     } : null, [user]);
 
     const {
-        socket,
+        socketRef,
         onlineUserIds,
         unreadMessages,
         markAsRead,
@@ -412,7 +412,7 @@ export function ManagerDashboard() {
             onMarkAsRead={handleMarkAsRead}
             onMarkAllAsRead={handleMarkAllAsRead}
             onDelete={handleDeleteNotification}
-            onProfileClick={() => setIsProfileOpen(true)}
+            onProfileClick={() => navigate('/profile')}
             activeRoom={activeRoom}
             onRejoinRoom={setActiveRoom}
         >
@@ -430,14 +430,16 @@ export function ManagerDashboard() {
                         onExportClick={() => setIsExportModalOpen(true)}
                     />
 
-                    <div className="relative group">
-                        <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-tertiary)] opacity-60 group-focus-within:opacity-100 transition-opacity" />
+                    <div className="relative group max-w-2xl">
+                        <div className="absolute inset-y-0 left-6 flex items-center pointer-events-none">
+                            <Search className="w-4 h-4 text-slate-500 group-focus-within:text-indigo-600 dark:group-focus-within:text-slate-300 transition-colors" />
+                        </div>
                         <input
                             type="text"
-                            placeholder="Filtrar por protocolo ou descrição..."
+                            placeholder="FILTRAR PROTOCOLO OU DESCRIÇÃO..."
                             value={searchTerm}
                             onChange={e => setSearchTerm(e.target.value)}
-                            className="w-full pl-14 pr-8 py-4 bg-[var(--bg-primary)] border border-[var(--border-subtle)] rounded-3xl outline-none focus:ring-2 focus:ring-[var(--border-medium)] transition-all text-sm font-medium text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)]"
+                            className="w-full pl-14 pr-8 py-5 bg-white dark:bg-black/40 border border-slate-200 dark:border-white/5 rounded-[2rem] outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition-all text-[11px] font-black text-slate-800 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 uppercase tracking-widest backdrop-blur-md shadow-xl dark:shadow-2xl"
                         />
                     </div>
 
@@ -456,11 +458,13 @@ export function ManagerDashboard() {
                         }}
                         renderReportActions={(report) => (
                             <Button
-                                variant="primary"
+                                variant="secondary"
                                 size="sm"
+                                fullWidth
+                                className="bg-indigo-50 dark:bg-indigo-600/20 border border-indigo-200 dark:border-indigo-500/30 text-indigo-600 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-600/40 hover:text-indigo-700 dark:hover:text-white font-black uppercase tracking-widest text-[11px] h-12 !rounded-xl transition-all shadow-lg dark:shadow-none"
                                 onClick={() => { setAnalyzingReport(report); }}
                             >
-                                Analisar
+                                Processar Demanda
                             </Button>
                         )}
                     />
@@ -517,7 +521,7 @@ export function ManagerDashboard() {
                     currentUser={{ id: user.id || '', name: user.name || '', role: user.role || '' }}
                     targetUser={chatTarget}
                     onClose={handleCloseChat}
-                    socket={socket}
+                    socket={socketRef.current}
                 />
             )}
 

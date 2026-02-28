@@ -61,48 +61,52 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
     children
 }) => {
     return (
-        <div className="pb-8 animate-in">
-            <div className="flex flex-col gap-6 mb-8">
+        <div className="pb-10 animate-in fade-in slide-in-from-top-4 duration-700">
+            <div className="flex flex-col gap-8 mb-10">
                 {/* Header Section */}
-                <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6">
+                <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-8">
                     <div>
-                        <h2 className="text-3xl font-bold tracking-tight text-[var(--text-primary)]">{title}</h2>
-                        <p className="text-[var(--text-secondary)] font-medium mt-1">{subtitle}</p>
+                        <h2 className="text-4xl font-black tracking-tight text-slate-900 dark:text-white uppercase">{title}</h2>
+                        <p className="text-slate-500 dark:text-slate-400 font-bold mt-2 uppercase tracking-[0.2em] text-[12px]">{subtitle}</p>
                     </div>
                     <div className="flex flex-wrap items-center gap-3">
                         {onAnalyticsClick && (
                             <Button
                                 variant="secondary"
                                 onClick={onAnalyticsClick}
-                                leftIcon={<BarChart3 className="w-4 h-4" />}
+                                className="bg-white/70 dark:bg-white/5 border-slate-200 dark:border-white/5 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white font-black uppercase tracking-widest text-[11px] h-10 px-4 rounded-xl shadow-sm transition-all"
                             >
-                                Análise Inteligente
+                                <BarChart3 className="w-4 h-4 mr-2 text-indigo-500 dark:text-indigo-400" />
+                                Inteligência
                             </Button>
                         )}
                         {onExportClick && (
                             <Button
                                 variant="secondary"
                                 onClick={onExportClick}
-                                leftIcon={<Download className="w-4 h-4" />}
+                                className="bg-white/70 dark:bg-white/5 border-slate-200 dark:border-white/5 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white font-black uppercase tracking-widest text-[11px] h-10 px-4 rounded-xl shadow-sm transition-all"
                             >
-                                Exportar
+                                <Download className="w-4 h-4 mr-2 text-indigo-500 dark:text-indigo-400" />
+                                Transmitir
                             </Button>
                         )}
                         {onConferenceClick && (
                             <Button
                                 variant="secondary"
                                 onClick={onConferenceClick}
-                                leftIcon={<Video className="w-4 h-4" />}
+                                className="bg-indigo-50 dark:bg-indigo-600/20 border-indigo-200 dark:border-indigo-500/20 text-indigo-600 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-600/30 hover:text-indigo-700 dark:hover:text-indigo-200 font-black uppercase tracking-widest text-[11px] h-10 px-4 rounded-xl shadow-[0_0_15px_rgba(99,102,241,0.1)] transition-all"
                             >
-                                Videoconferência
+                                <Video className="w-4 h-4 mr-2" />
+                                Operações
                             </Button>
                         )}
                         {onAgendaClick && (
                             <Button
                                 variant="secondary"
                                 onClick={onAgendaClick}
-                                leftIcon={<Calendar className="w-4 h-4" />}
+                                className="bg-white/70 dark:bg-white/5 border-slate-200 dark:border-white/5 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white font-black uppercase tracking-widest text-[11px] h-10 px-4 rounded-xl shadow-sm transition-all"
                             >
+                                <Calendar className="w-4 h-4 mr-2 text-indigo-500 dark:text-indigo-400" />
                                 Agenda
                             </Button>
                         )}
@@ -110,8 +114,9 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
                             <Button
                                 variant="secondary"
                                 onClick={onSupportClick}
-                                leftIcon={<LifeBuoy className="w-4 h-4" />}
+                                className="bg-white/70 dark:bg-white/5 border-slate-200 dark:border-white/5 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white font-black uppercase tracking-widest text-[11px] h-10 px-4 rounded-xl shadow-sm transition-all"
                             >
+                                <LifeBuoy className="w-4 h-4 mr-2 text-indigo-500 dark:text-indigo-400" />
                                 Suporte
                             </Button>
                         )}
@@ -119,9 +124,10 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
                             <Button
                                 variant="secondary"
                                 onClick={onHistoryClick}
-                                leftIcon={<HistoryIcon className="w-4 h-4" />}
+                                className="bg-white/70 dark:bg-white/5 border-slate-200 dark:border-white/5 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white font-black uppercase tracking-widest text-[11px] h-10 px-4 rounded-xl shadow-sm transition-all"
                             >
-                                Meus Chamados
+                                <HistoryIcon className="w-4 h-4 mr-2 text-indigo-500 dark:text-indigo-400" />
+                                Arquivos
                             </Button>
                         )}
                         {children}
@@ -129,19 +135,19 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
                 </div>
 
                 {/* Filters Section */}
-                <div className="flex flex-col xl:flex-row items-center justify-between gap-4 w-full">
+                <div className="flex flex-col xl:flex-row items-center justify-between gap-6 w-full">
                     {/* Status Filter Tabs */}
-                    <div className="flex bg-[var(--bg-tertiary)] p-1 rounded-xl w-full xl:w-auto overflow-x-auto">
+                    <div className="flex bg-white/70 dark:bg-black/60 p-1 rounded-2xl w-full xl:w-auto overflow-x-auto border border-slate-200 dark:border-white/5 backdrop-blur-md shadow-inner transition-all">
                         {filters.map(filter => (
                             <button
                                 type="button"
                                 key={filter.id}
                                 onClick={() => onStatusFilterChange(filter.id)}
                                 className={`
-                                    flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-semibold uppercase tracking-wide transition-all whitespace-nowrap
+                                    flex-1 sm:flex-none px-6 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-[0.15em] transition-all whitespace-nowrap
                                     ${statusFilter === filter.id
-                                        ? 'bg-[var(--bg-primary)] text-[var(--text-primary)] shadow-sm border border-[var(--border-medium)]'
-                                        : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'
+                                        ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20'
+                                        : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-200/50 dark:hover:bg-white/5'
                                     }
                                 `}
                             >
@@ -152,32 +158,32 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
 
                     {/* Date Filters */}
                     {showDateFilters && (
-                        <div className="flex items-center bg-[var(--bg-primary)] border border-[var(--border-subtle)] p-1 rounded-xl shadow-[var(--shadow-sm)]">
+                        <div className="flex items-center bg-white/70 dark:bg-black/60 border border-slate-200 dark:border-white/5 p-1 rounded-2xl shadow-xl backdrop-blur-md transition-all">
                             <div className="relative group">
-                                <div className="flex items-center gap-2 px-4 py-2 hover:bg-[var(--bg-secondary)] rounded-lg transition-colors cursor-pointer border-r border-[var(--border-subtle)]">
-                                    <Calendar className="w-4 h-4 text-[var(--accent-secondary)]" />
+                                <div className="flex items-center gap-3 px-5 py-2.5 hover:bg-slate-200 dark:hover:bg-white/5 rounded-xl transition-colors cursor-pointer border-r border-slate-200 dark:border-white/5">
+                                    <Calendar className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
                                     <div className="flex flex-col">
-                                        <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase leading-none">De</span>
+                                        <span className="text-[11px] font-black text-slate-500 dark:text-slate-600 uppercase leading-none mb-1">Início</span>
                                         <input
                                             type="date"
                                             value={startDate}
                                             onChange={e => onStartDateChange?.(e.target.value)}
-                                            className="bg-transparent text-xs font-bold outline-none text-[var(--text-primary)] uppercase font-sans cursor-pointer p-0 m-0 w-[110px]"
+                                            className="bg-transparent text-[13px] font-black outline-none text-slate-700 dark:text-slate-300 uppercase font-sans cursor-pointer p-0 m-0 w-[120px]"
                                             aria-label="Start Date"
                                         />
                                     </div>
                                 </div>
                             </div>
                             <div className="relative group">
-                                <div className="flex items-center gap-2 px-4 py-2 hover:bg-[var(--bg-secondary)] rounded-lg transition-colors cursor-pointer">
-                                    <Calendar className="w-4 h-4 text-[var(--accent-secondary)]" />
+                                <div className="flex items-center gap-3 px-5 py-2.5 hover:bg-slate-200 dark:hover:bg-white/5 rounded-xl transition-colors cursor-pointer">
+                                    <Calendar className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
                                     <div className="flex flex-col">
-                                        <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase leading-none">Até</span>
+                                        <span className="text-[11px] font-black text-slate-500 dark:text-slate-600 uppercase leading-none mb-1">Término</span>
                                         <input
                                             type="date"
                                             value={endDate}
                                             onChange={e => onEndDateChange?.(e.target.value)}
-                                            className="bg-transparent text-xs font-bold outline-none text-[var(--text-primary)] uppercase font-sans cursor-pointer p-0 m-0 w-[110px]"
+                                            className="bg-transparent text-[13px] font-black outline-none text-slate-700 dark:text-slate-300 uppercase font-sans cursor-pointer p-0 m-0 w-[120px]"
                                             aria-label="End Date"
                                         />
                                     </div>
@@ -187,10 +193,10 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
                                 <button
                                     type="button"
                                     onClick={onClearDates}
-                                    className="p-2 hover:bg-red-50 text-red-400 hover:text-red-500 rounded-lg transition-colors mx-1"
-                                    title="Limpar Filtros"
+                                    className="p-2.5 hover:bg-rose-100 dark:hover:bg-rose-500/10 text-rose-500 rounded-xl transition-colors mx-1"
+                                    title="Zerar Filtros"
                                 >
-                                    <AlertCircle className="w-4 h-4" />
+                                    <AlertCircle className="w-5 h-5" />
                                 </button>
                             )}
                         </div>
@@ -200,16 +206,20 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
 
             {/* KPI Grid */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {kpiConfigs.map(kpi => (
-                    <KpiCard
-                        key={kpi.status}
-                        label={kpi.label}
-                        value={stats.find(s => s.status === kpi.status)?._count || 0}
-                        icon={kpi.icon}
-                        variant={kpi.color}
-                        trend={kpi.trend}
-                    />
-                ))}
+                {kpiConfigs.map(kpi => {
+                    const value = stats.find(s => s.status === kpi.status)?._count || 0;
+                    return (
+                        <KpiCard
+                            key={kpi.status}
+                            label={kpi.label}
+                            value={value}
+                            icon={kpi.icon}
+                            variant={kpi.status === 'SENT' && value > 0 ? 'rose' : kpi.color}
+                            trend={kpi.trend}
+                            isCritical={kpi.status === 'SENT' && value > 0}
+                        />
+                    );
+                })}
             </div>
         </div>
     );

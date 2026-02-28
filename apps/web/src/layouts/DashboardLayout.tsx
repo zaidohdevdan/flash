@@ -84,7 +84,7 @@ export function DashboardLayout({
     }, []);
 
     return (
-        <div className="h-screen bg-[#0a0f1c] dark:bg-[#020617] flex overflow-hidden print:h-auto print:block print:overflow-visible relative">
+        <div className="h-screen bg-slate-50 dark:bg-[#020617] flex overflow-hidden print:h-auto print:block print:overflow-visible relative text-slate-900 dark:text-slate-100 transition-colors duration-500">
             {persistentRoom && !activeRoom && (
                 <ActiveConferenceBanner
                     roomName={persistentRoom}
@@ -116,8 +116,8 @@ export function DashboardLayout({
 
             {/* Main Content Area */}
             <div className="flex-1 flex flex-col min-w-0 overflow-hidden print:overflow-visible print:block print:h-auto">
-                {/* Top Header */}
-                <header className="h-16 flex-shrink-0 bg-[var(--bg-primary)] border-b border-[var(--border-subtle)] flex items-center justify-between px-4 lg:px-8 print:hidden">
+                {/* Top Header - Mission Control Style */}
+                <header className="h-20 flex-shrink-0 bg-white/70 dark:bg-[#020617]/70 backdrop-blur-xl border-b border-slate-200 dark:border-white/5 flex items-center justify-between px-6 lg:px-10 print:hidden sticky top-0 z-30 transition-all duration-500">
                     <div className="flex items-center gap-4">
                         <button
                             title='Abrir Menu'
@@ -184,7 +184,7 @@ export function DashboardLayout({
                 </header>
 
                 {/* Page Content */}
-                <main className="flex-1 overflow-y-auto overflow-x-hidden bg-[var(--bg-secondary)] p-4 lg:px-6 lg:py-8 print:p-0 print:bg-white print:overflow-visible print:h-auto print:block">
+                <main className="flex-1 overflow-y-auto overflow-x-hidden bg-slate-50 dark:bg-[#020617]/40 p-4 lg:px-8 lg:py-10 print:p-0 print:bg-white print:overflow-visible print:h-auto print:block transition-all duration-500">
                     <div className="max-w-[1600px] mx-auto w-full xl:px-4 print:max-w-none print:w-full">
                         {children}
                     </div>

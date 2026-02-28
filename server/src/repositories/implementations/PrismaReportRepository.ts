@@ -122,15 +122,27 @@ export class PrismaReportRepository implements IReportRepository {
         });
     }
 
-    async findStatsBySupervisor(supervisorId: string): Promise<{ status: string, _count: number }[]> {
+    async findStatsBySupervisor(supervisorId: string, startDate?: Date, endDate?: Date): Promise<{ status: string, _count: number }[]> {
+        const where: any = {
+            isArchived: { not: true },
+            user: {
+                supervisorId: supervisorId
+            }
+        };
+
+        if (startDate || endDate) {
+            where.createdAt = {};
+            if (startDate) where.createdAt.gte = startDate;
+            if (endDate) {
+                const end = new Date(endDate);
+                end.setUTCHours(23, 59, 59, 999);
+                where.createdAt.lte = end;
+            }
+        }
+
         const stats = await prisma.report.groupBy({
             by: ['status'],
-            where: {
-                isArchived: { not: true },
-                user: {
-                    supervisorId: supervisorId
-                }
-            },
+            where,
             _count: true
         });
 
@@ -279,13 +291,25 @@ export class PrismaReportRepository implements IReportRepository {
         });
     }
 
-    async findStatsByDepartment(departmentId: string): Promise<{ status: string, _count: number }[]> {
+    async findStatsByDepartment(departmentId: string, startDate?: Date, endDate?: Date): Promise<{ status: string, _count: number }[]> {
+        const where: any = {
+            isArchived: { not: true },
+            departmentId
+        };
+
+        if (startDate || endDate) {
+            where.createdAt = {};
+            if (startDate) where.createdAt.gte = startDate;
+            if (endDate) {
+                const end = new Date(endDate);
+                end.setUTCHours(23, 59, 59, 999);
+                where.createdAt.lte = end;
+            }
+        }
+
         const stats = await prisma.report.groupBy({
             by: ['status'],
-            where: {
-                isArchived: { not: true },
-                departmentId
-            },
+            where,
             _count: true
         });
 
@@ -295,7 +319,7 @@ export class PrismaReportRepository implements IReportRepository {
         }));
     }
 
-    async getAdvancedStats(userId: string, role: string): Promise<any> {
+    async getAdvancedStats(userId: string, role: string, status?: ReportStatus, startDate?: Date, endDate?: Date): Promise<any> {
         // 1. Define o escopo da busca baseado na role
         let where: any = { isArchived: { not: true } };
         if (role === 'SUPERVISOR') {
@@ -303,6 +327,20 @@ export class PrismaReportRepository implements IReportRepository {
         } else if (role === 'MANAGER') {
             const user = await prisma.user.findUnique({ where: { id: userId } });
             if (user?.departmentId) where.departmentId = user.departmentId;
+        }
+
+        if (status) {
+            where.status = status;
+        }
+
+        if (startDate || endDate) {
+            where.createdAt = {};
+            if (startDate) where.createdAt.gte = startDate;
+            if (endDate) {
+                const end = new Date(endDate);
+                end.setUTCHours(23, 59, 59, 999);
+                where.createdAt.lte = end;
+            }
         }
 
         // Busca reports e histórico para cálculos

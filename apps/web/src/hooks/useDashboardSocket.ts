@@ -29,7 +29,9 @@ interface UseDashboardSocketOptions {
 }
 
 export const useDashboardSocket = ({ user, onNotification, onConferenceInvite, onNewNotification, onNewReport, onReportStatusUpdate, notificationsEnabled = true }: UseDashboardSocketOptions) => {
-    const [socket, setSocket] = useState<Socket | null>(null);
+    // Store socket in a ref so it is NEVER temporarily null between renders.
+    // useState causes a null window during StrictMode cleanup that breaks child components.
+    const socketRef = useRef<Socket | null>(null);
     const [onlineUserIds, setOnlineUserIds] = useState<string[]>([]);
     const [unreadMessages, setUnreadMessages] = useState<Record<string, boolean>>({});
     const [isConnected, setIsConnected] = useState(false);
@@ -73,8 +75,8 @@ export const useDashboardSocket = ({ user, onNotification, onConferenceInvite, o
             query: { userId, role: userRole, userName }
         });
 
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setSocket(newSocket);
+        // Assign to ref immediately – no re-render triggered
+        socketRef.current = newSocket;
 
         newSocket.on('connect', () => setIsConnected(true));
         newSocket.on('disconnect', () => setIsConnected(false));
@@ -194,7 +196,7 @@ export const useDashboardSocket = ({ user, onNotification, onConferenceInvite, o
             newSocket.off('new_report_to_review');
             newSocket.off('report_status_updated_for_supervisor');
             newSocket.disconnect();
-            setSocket(null);
+            socketRef.current = null;
         };
     }, [user?.id, user?.name, user?.role, playNotificationSound]);
 
@@ -229,7 +231,10 @@ export const useDashboardSocket = ({ user, onNotification, onConferenceInvite, o
     }, []);
 
     return {
-        socket,
+        // socketRef is a stable ref — its .current is the live socket or null.
+        // Using a ref avoids the temporary null that useState creates during
+        // StrictMode cleanup, which caused "socket.on is not a function" crashes.
+        socketRef,
         onlineUserIds,
         unreadMessages,
         isConnected,

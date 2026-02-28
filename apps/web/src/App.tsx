@@ -7,7 +7,6 @@ import { UserSettingsEffects } from './components/UserSettingsEffects';
 // Lazy loaded pages
 const Login = lazy(() => import('./pages/Login').then(m => ({ default: m.Login })));
 const Register = lazy(() => import('./pages/Register').then(m => ({ default: m.Register })));
-const Dashboard = lazy(() => import('./pages/Dashboard').then(m => ({ default: m.Dashboard })));
 const CreateReport = lazy(() => import('./pages/CreateReport').then(m => ({ default: m.CreateReport })));
 const ManagerDashboard = lazy(() => import('./pages/ManagerDashboard').then(m => ({ default: m.ManagerDashboard })));
 const Home = lazy(() => import('./pages/Home').then(m => ({ default: m.Home })));
@@ -24,6 +23,15 @@ const AdminAudit = lazy(() => import('./pages/admin/Audit').then(m => ({ default
 const AdminInbox = lazy(() => import('./pages/admin/Inbox').then(m => ({ default: m.AdminInbox })));
 const AdminLogs = lazy(() => import('./pages/admin/Logs').then(m => ({ default: m.Logs })));
 const AdminLayout = lazy(() => import('./layouts/AdminLayout').then(m => ({ default: m.AdminLayout })));
+
+// Supervisor Modular Pages
+const SupervisorLayout = lazy(() => import('./layouts/SupervisorLayout').then(m => ({ default: m.SupervisorLayout })));
+const SupervisorIntelligence = lazy(() => import('./pages/supervisor/Intelligence').then(m => ({ default: m.Intelligence })));
+const SupervisorOperations = lazy(() => import('./pages/supervisor/Operations').then(m => ({ default: m.Operations })));
+const SupervisorSchedule = lazy(() => import('./pages/supervisor/Schedule').then(m => ({ default: m.Schedule })));
+const SupervisorSupport = lazy(() => import('./pages/supervisor/Support').then(m => ({ default: m.Support })));
+const SupervisorArchive = lazy(() => import('./pages/supervisor/Archive').then(m => ({ default: m.Archive })));
+const SupervisorChat = lazy(() => import('./pages/supervisor/Chat').then(m => ({ default: m.SupervisorChat })));
 
 // Loading Component
 const PageLoader = () => (
@@ -52,8 +60,8 @@ function PrivateRoute({ children, role }: { children: React.ReactNode, role?: st
     const roles = Array.isArray(role) ? role : [role];
     if (!roles.includes(user?.role || '')) {
       if (user?.role === 'ADMIN') return <Navigate to="/admin/overview" />;
-      if (user?.role === 'SUPERVISOR') return <Navigate to="/dashboard" />;
-      if (user?.role === 'PROFESSIONAL') return <Navigate to="/create-report" />;
+      if (user?.role === 'SUPERVISOR') return <Navigate to="/supervisor/intelligence" />;
+      if (user?.role === 'PROFESSIONAL') return <Navigate to="/dashboard" />;
       if (user?.role === 'MANAGER') return <Navigate to="/manager-dashboard" />;
     }
   }
@@ -66,8 +74,8 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
 
   if (isAuthenticated) {
     if (user?.role === 'ADMIN') return <Navigate to="/admin/overview" />;
-    if (user?.role === 'SUPERVISOR') return <Navigate to="/dashboard" />;
-    if (user?.role === 'PROFESSIONAL') return <Navigate to="/create-report" />;
+    if (user?.role === 'SUPERVISOR') return <Navigate to="/supervisor/intelligence" />;
+    if (user?.role === 'PROFESSIONAL') return <Navigate to="/dashboard" />; // Note: The old professional route /create-report is now bound to /dashboard visually for them
     if (user?.role === 'MANAGER') return <Navigate to="/manager-dashboard" />;
   }
 
@@ -82,16 +90,24 @@ function AppRoutes() {
       <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
 
       <Route path="/dashboard" element={
-        <PrivateRoute role="SUPERVISOR">
-          <Dashboard />
+        <PrivateRoute role={['PROFESSIONAL', 'SUPERVISOR']}>
+          {/* Default fallback for legacy endpoints / professional specific dashboard */}
+          {useAuth().user?.role === 'SUPERVISOR' ? <Navigate to="/supervisor/intelligence" replace /> : <CreateReport />}
         </PrivateRoute>
       } />
 
-      <Route path="/create-report" element={
-        <PrivateRoute role="PROFESSIONAL">
-          <CreateReport />
-        </PrivateRoute>
-      } />
+      <Route path="/create-report" element={<Navigate to="/dashboard" replace />} />
+
+      {/* Supervisor Central Hub */}
+      <Route path="/supervisor" element={<PrivateRoute role="SUPERVISOR"><SupervisorLayout /></PrivateRoute>}>
+        <Route index element={<Navigate to="intelligence" replace />} />
+        <Route path="intelligence" element={<SupervisorIntelligence />} />
+        <Route path="operations" element={<SupervisorOperations />} />
+        <Route path="schedule" element={<SupervisorSchedule />} />
+        <Route path="support" element={<SupervisorSupport />} />
+        <Route path="archive" element={<SupervisorArchive />} />
+        <Route path="chat" element={<SupervisorChat />} />
+      </Route>
 
       {/* Admin Central Hub */}
       <Route path="/admin-dashboard" element={<Navigate to="/admin/overview" />} />

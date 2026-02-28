@@ -102,6 +102,7 @@ export function Profile() {
         <DashboardLayout
             user={{ name: user?.name, avatarUrl: user?.avatarUrl, role: user?.role }}
             onLogout={signOut}
+            onProfileClick={() => navigate('/profile')}
         >
             <div className="max-w-[1600px] mx-auto w-full animate-in fade-in duration-500">
                 <div className="mb-8">

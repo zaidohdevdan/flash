@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Modal } from '../../ui';
-import { FileText, Download } from 'lucide-react';
+import { FileText, Download, X } from 'lucide-react';
 import { Button } from '../../ui';
 import type { Report, ReportStatus, Department } from '../../../types';
 import { generateReportsPDF } from '../../../utils/pdfGenerator';
@@ -66,81 +66,89 @@ export const ExportReportsModal: React.FC<ExportReportsModalProps> = ({
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title="Exportar Relatórios">
-            <div className="space-y-6">
-                <div className="flex items-center gap-4 p-4 bg-blue-50/50 border border-blue-100 rounded-2xl">
-                    <div className="p-3 bg-blue-600 rounded-xl text-white shadow-lg shadow-blue-200">
-                        <FileText className="w-6 h-6" />
+        <Modal isOpen={isOpen} onClose={onClose} title="Central de Exportação" maxWidth="xl">
+            <div className="space-y-8 py-2">
+                <div className="flex items-center gap-5 p-6 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/5 rounded-[2rem] backdrop-blur-md shadow-inner">
+                    <div className="p-4 bg-indigo-50 dark:bg-indigo-500/10 rounded-2xl border border-indigo-200 dark:border-indigo-500/20 shadow-xl">
+                        <FileText className="w-6 h-6 text-indigo-500 dark:text-indigo-400" />
                     </div>
                     <div>
-                        <h4 className="text-sm font-bold text-gray-900">Configurações de Exportação</h4>
-                        <p className="text-xs text-blue-600/80 font-medium">Configure as opções de filtro para o relatório.</p>
+                        <h4 className="text-xs font-black text-slate-800 dark:text-white uppercase tracking-widest">Protocolos de Extração</h4>
+                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-tight mt-1">Configure o filtro para indexação tática.</p>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                        <label className="text-[10px] font-black text-gray-700 uppercase tracking-widest ml-1">Filtrar por Status</label>
-                        <select
-                            value={selectedStatus}
-                            onChange={(e) => setSelectedStatus(e.target.value as ReportStatus | 'ALL')}
-                            className="w-full bg-gray-50/50 border border-gray-100 rounded-xl px-4 py-3 text-sm text-gray-900 focus:border-blue-500 focus:bg-white transition-all outline-none font-bold"
-                            title="Filtrar por Status"
-                            aria-label="Filtrar por Status"
-                        >
-                            <option value="ALL">Todos os Status</option>
-                            <option value="SENT">Enviado</option>
-                            <option value="IN_REVIEW">Em Análise</option>
-                            <option value="FORWARDED">Encaminhado</option>
-                            <option value="RESOLVED">Resolvido</option>
-                        </select>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-3">
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] ml-1">STATUS OPERACIONAL</label>
+                        <div className="relative group/select">
+                            <select
+                                value={selectedStatus}
+                                onChange={(e) => setSelectedStatus(e.target.value as ReportStatus | 'ALL')}
+                                className="w-full bg-white dark:bg-black/40 border border-slate-200 dark:border-white/5 rounded-2xl px-6 py-4 text-[11px] font-black text-slate-800 dark:text-white uppercase tracking-widest outline-none focus:border-indigo-500/50 transition-all appearance-none backdrop-blur-md shadow-inner"
+                                title="Filtrar por Status"
+                                aria-label="Filtrar por Status"
+                            >
+                                <option value="ALL" className="bg-white dark:bg-[#020617]">TODOS OS STATUS</option>
+                                <option value="SENT" className="bg-white dark:bg-[#020617]">ENVIADO</option>
+                                <option value="IN_REVIEW" className="bg-white dark:bg-[#020617]">EM ANÁLISE</option>
+                                <option value="FORWARDED" className="bg-white dark:bg-[#020617]">ENCAMINHADO</option>
+                                <option value="RESOLVED" className="bg-white dark:bg-[#020617]">RESOLVIDO</option>
+                            </select>
+                        </div>
                     </div>
 
-                    <div className="space-y-2">
-                        <label className="text-[10px] font-black text-gray-700 uppercase tracking-widest ml-1">Filtrar por Setor</label>
-                        <select
-                            value={selectedDept}
-                            onChange={(e) => setSelectedDept(e.target.value)}
-                            className="w-full bg-gray-50/50 border border-gray-100 rounded-xl px-4 py-3 text-sm text-gray-900 focus:border-blue-500 focus:bg-white transition-all outline-none font-bold"
-                            title="Filtrar por Setor"
-                            aria-label="Filtrar por Setor"
-                        >
-                            <option value="ALL">Todos os Setores</option>
-                            {departments.map(dept => (
-                                <option key={dept.id} value={dept.id}>{dept.name}</option>
-                            ))}
-                        </select>
+                    <div className="space-y-3">
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] ml-1">SETOR DE ORIGEM</label>
+                        <div className="relative group/select">
+                            <select
+                                value={selectedDept}
+                                onChange={(e) => setSelectedDept(e.target.value)}
+                                className="w-full bg-white dark:bg-black/40 border border-slate-200 dark:border-white/5 rounded-2xl px-6 py-4 text-[11px] font-black text-slate-800 dark:text-white uppercase tracking-widest outline-none focus:border-indigo-500/50 transition-all appearance-none backdrop-blur-md shadow-inner"
+                                title="Filtrar por Setor"
+                                aria-label="Filtrar por Setor"
+                            >
+                                <option value="ALL" className="bg-white dark:bg-[#020617]">TODOS OS SETORES</option>
+                                {departments.map(dept => (
+                                    <option key={dept.id} value={dept.id} className="bg-white dark:bg-[#020617]">{dept.name.toUpperCase()}</option>
+                                ))}
+                            </select>
+                        </div>
                     </div>
                 </div>
 
-                <div className="pt-4 border-t border-gray-100 flex items-center justify-between">
-                    <div className="text-xs text-gray-500 font-medium">
-                        Total: <span className="text-gray-900 font-black">
+                <div className="pt-8 border-t border-slate-200 dark:border-white/5 flex flex-col sm:flex-row items-center justify-between gap-6">
+                    <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest bg-slate-100 dark:bg-white/5 px-4 py-2 rounded-full border border-slate-200 dark:border-white/5">
+                        TOTAL INDEXADO: <span className="text-slate-800 dark:text-white ml-1">
                             {reports.filter(r =>
                                 (selectedStatus === 'ALL' || r.status === selectedStatus) &&
                                 (selectedDept === 'ALL' || r.departmentId === selectedDept)
-                            ).length} Relatórios
+                            ).length} REGISTROS
                         </span>
                     </div>
-                    <div className="flex gap-3">
-                        <Button type="button" variant="ghost" onClick={onClose} disabled={isGenerating}>Cancelar</Button>
+                    <div className="flex items-center justify-end gap-3 w-full sm:w-auto mt-4 sm:mt-0">
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            onClick={onClose}
+                            disabled={isGenerating}
+                            title="Abortar Exportação"
+                            className="flex items-center justify-center w-12 h-12 text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-white/5 hover:bg-rose-100 dark:hover:bg-rose-500/10 hover:text-rose-600 dark:hover:text-rose-400 rounded-xl transition-all p-0 flex-shrink-0"
+                        >
+                            <X className="w-5 h-5" />
+                        </Button>
                         <Button
                             type="button"
                             variant="primary"
                             onClick={handleExport}
                             disabled={isGenerating}
-                            className="!px-8"
+                            title="Extrair PDF"
+                            className="flex items-center justify-center w-12 h-12 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl shadow-xl shadow-indigo-600/20 transition-all p-0 flex-shrink-0"
                         >
                             {isGenerating ? (
-                                <div className="flex items-center gap-2">
-                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                    Gerando documento...
-                                </div>
+                                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                             ) : (
-                                <div className="flex items-center gap-2">
-                                    <Download className="w-4 h-4" />
-                                    Exportar PDF
-                                </div>
+                                <Download className="w-5 h-5" />
                             )}
                         </Button>
                     </div>

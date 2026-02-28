@@ -28,9 +28,10 @@ interface ChatWidgetProps {
     onClose: () => void;
     socket: Socket | null;
     onRead?: (userId: string) => void;
+    inline?: boolean;
 }
 
-export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead }: ChatWidgetProps) {
+export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead, inline = false }: ChatWidgetProps) {
     const { notificationsEnabled } = useAuth();
     const [inputText, setInputText] = useState('');
     const [isRecording, setIsRecording] = useState(false);
@@ -73,19 +74,26 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead }:
         }
     }, [chatRoom, onRead, targetUser.id]);
 
+    // Keep a stable ref so the socket effect doesn't re-fire when chatRoom/onRead change
+    const markRoomAsReadRef = useRef(markRoomAsRead);
+    useEffect(() => {
+        markRoomAsReadRef.current = markRoomAsRead;
+    }, [markRoomAsRead]);
+
     const allMessages = useMemo(() => {
         const combined = [...dexieMessages];
         return combined.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
     }, [dexieMessages]);
 
+    // Fetch history once per chatRoom (keep separate from the socket listener effect)
+    const hasFetchedRef = useRef<string | null>(null);
     useEffect(() => {
-        if (!chatRoom || !socket) return;
-        let isMounted = true;
+        if (!chatRoom || hasFetchedRef.current === chatRoom) return;
+        hasFetchedRef.current = chatRoom;
 
-        async function fetchHistory() {
+        const fetchHistory = async () => {
             try {
                 const response = await api.get(`/chat/history/${encodeURIComponent(chatRoom)}`);
-                // Import history into Dexie (upsert)
                 for (const msg of response.data) {
                     await db.chatMessages.put({
                         id: msg.id,
@@ -101,10 +109,44 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead }:
             } catch (error) {
                 console.error('Error fetching chat history:', error);
             }
-        }
+        };
 
         fetchHistory();
-        markRoomAsRead();
+        markRoomAsReadRef.current();
+    }, [chatRoom, currentUser.id, targetUser.id]);
+
+    // Track whether the socket is genuinely connected using plain .on/.off
+    const [isSocketConnected, setIsSocketConnected] = useState(false);
+    useEffect(() => {
+        if (!socket) {
+            setIsSocketConnected(false);
+            return;
+        }
+        // May already be connected when the prop arrives
+        if (socket.connected) setIsSocketConnected(true);
+        const handleConnect = () => setIsSocketConnected(true);
+        const handleDisconnect = () => setIsSocketConnected(false);
+        socket.on('connect', handleConnect);
+        socket.on('disconnect', handleDisconnect);
+        return () => {
+            socket.off('connect', handleConnect);
+            socket.off('disconnect', handleDisconnect);
+        };
+    }, [socket]);
+
+    // Emit join_private_chat only when both room + connection are ready
+    const hasJoinedRef = useRef<string | null>(null);
+    useEffect(() => {
+        if (!chatRoom || !socket || !isSocketConnected) return;
+        const key = `${chatRoom}-${socket.id ?? ''}`;
+        if (hasJoinedRef.current === key) return;
+        hasJoinedRef.current = key;
+        socket.emit('join_private_chat', { targetUserId: targetUser.id });
+    }, [chatRoom, socket, isSocketConnected, targetUser.id]);
+
+    useEffect(() => {
+        if (!chatRoom || !socket) return;
+        let isMounted = true;
 
         const handlePrivateMessage = async (msg: Message) => {
             if (isMounted) {
@@ -127,8 +169,7 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead }:
                         }
                         notificationAudioRef.current.play().catch(() => { });
                     }
-                    // Se estou com o chat aberto, marco como lida imediatamente no servidor
-                    markRoomAsRead();
+                    markRoomAsReadRef.current();
                 }
             }
         };
@@ -147,7 +188,6 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead }:
 
         const handleMessagesRead = async (data: { room: string, readBy: string }) => {
             if (isMounted && data.room === chatRoom && data.readBy === targetUser.id) {
-                // Se o destinatário leu as mensagens, atualizamos as nossas mensagens enviadas para 'read: true'
                 await db.chatMessages
                     .where('roomName')
                     .equals(chatRoom)
@@ -156,7 +196,6 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead }:
             }
         };
 
-        socket.emit('join_private_chat', { targetUserId: targetUser.id });
         socket.on('private_message', handlePrivateMessage);
         socket.on('message_edited', handleMessageEdited);
         socket.on('message_deleted', handleMessageDeleted);
@@ -169,7 +208,7 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead }:
             socket.off('message_deleted', handleMessageDeleted);
             socket.off('messages_read', handleMessagesRead);
         };
-    }, [currentUser.id, targetUser.id, chatRoom, socket, markRoomAsRead, notificationsEnabled]);
+    }, [currentUser.id, targetUser.id, chatRoom, socket, notificationsEnabled]);
 
     useEffect(() => {
         const interval = setInterval(() => setNow(Date.now()), 1000);
@@ -326,7 +365,11 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead }:
     };
 
     return (
-        <div className="fixed inset-0 sm:top-auto sm:left-auto sm:bottom-6 sm:right-6 w-full sm:w-[400px] md:w-[440px] h-[100dvh] sm:h-[650px] sm:max-h-[calc(100vh-4rem)] bg-[var(--bg-primary)]/90 backdrop-blur-[32px] sm:rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden sm:border border-[var(--border-subtle)] ring-1 ring-black/5 z-[60] animate-in slide-in-from-bottom-5 fade-in duration-500">
+        <div className={
+            inline
+                ? "w-full h-full flex flex-col bg-white dark:bg-black/20 md:rounded-[2.5rem] border border-slate-200 dark:border-white/5 shadow-xl backdrop-blur-xl overflow-hidden"
+                : "fixed inset-0 sm:top-auto sm:left-auto sm:bottom-6 sm:right-6 w-full sm:w-[400px] md:w-[440px] h-[100dvh] sm:h-[650px] sm:max-h-[calc(100vh-4rem)] bg-[var(--bg-primary)]/90 backdrop-blur-[32px] sm:rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden sm:border border-[var(--border-subtle)] ring-1 ring-black/5 z-[60] animate-in slide-in-from-bottom-5 fade-in duration-500"
+        }>
             {/* Header */}
             <div className="p-4 bg-[var(--bg-primary)]/80 backdrop-blur-xl text-[var(--text-primary)] flex justify-between items-center border-b border-[var(--border-subtle)]">
                 <div className="flex items-center gap-3">
@@ -364,7 +407,7 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead }:
             </div>
 
             {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 overscroll-contain scrollbar-thin scrollbar-thumb-[var(--border-medium)] scrollbar-track-transparent">
+            <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4 overscroll-contain chat-scrollbar">
                 {allMessages.length === 0 && (
                     <div className="flex flex-col items-center justify-center h-full text-[var(--text-tertiary)] opacity-50">
                         <MessageSquare className="w-12 h-12 mb-2" />

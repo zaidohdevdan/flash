@@ -1,14 +1,9 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
 import { toast } from 'react-hot-toast';
-import {
-    Plus,
-    History,
-    CloudOff,
-    RefreshCw
-} from 'lucide-react';
+import { Plus, RefreshCw, CloudOff } from 'lucide-react';
 import { useDashboardSocket } from '../hooks/useDashboardSocket';
 import {
     ProfessionalHeader,
@@ -35,6 +30,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import type { Report } from '../types';
 
 export function CreateReport() {
+    const navigate = useNavigate();
     const {
         user,
         signOut,
@@ -481,9 +477,9 @@ export function CreateReport() {
         }
     }
 
-    if (success) {
-        return <SuccessView onBack={() => setSuccess(false)} />;
-    }
+    // If we want to show success view inside the layout, we'll keep the view state.
+    // The previous implementation returned SuccessView directly, which was jarring.
+    // I've moved the success view logic into the main return.
 
     return (
         <DashboardLayout
@@ -493,7 +489,7 @@ export function CreateReport() {
             onMarkAsRead={handleMarkAsRead}
             onMarkAllAsRead={handleMarkAllAsRead}
             onDelete={handleDeleteNotification}
-            onProfileClick={() => setIsProfileOpen(true)}
+            onProfileClick={() => navigate('/profile')}
             activeRoom={activeRoom}
             onRejoinRoom={setActiveRoom}
             searchTerm={searchTerm}
@@ -501,16 +497,16 @@ export function CreateReport() {
         >
             <div className="relative h-full">
                 {/* Alerta de Modo Offline */}
-                <div className="max-w-2xl mx-auto pt-4 mb-6">
+                <div className="max-w-2xl mx-auto pt-4 mb-6 z-20 relative">
                     {pendingReports && pendingReports.length > 0 && (
-                        <Card variant="outline" className="p-4 border-amber-500/30 bg-amber-500/10 flex items-center justify-between animate-in slide-in-from-top-4 duration-500">
+                        <Card className="p-4 border-amber-500/30 bg-amber-500/10 flex items-center justify-between animate-in slide-in-from-top-4 duration-500 backdrop-blur-md rounded-2xl">
                             <div className="flex items-center gap-3">
                                 <div className="p-2 bg-amber-500/20 text-amber-500 rounded-xl">
                                     <CloudOff className="w-5 h-5" />
                                 </div>
                                 <div>
-                                    <h4 className="text-xs font-black text-amber-500 uppercase tracking-tight">Relatórios Offline</h4>
-                                    <p className="text-[10px] font-bold text-amber-500/80 uppercase tracking-widest">{pendingReports.length} {pendingReports.length === 1 ? 'relatório aguardando' : 'relatórios aguardando'} conexão</p>
+                                    <h4 className="text-[10px] font-black text-amber-500 uppercase tracking-widest">Relatórios Offline</h4>
+                                    <p className="text-[9px] font-bold text-amber-500/80 uppercase tracking-tighter">{pendingReports.length} pendentes</p>
                                 </div>
                             </div>
                             <div className="flex items-center gap-2">
@@ -518,30 +514,23 @@ export function CreateReport() {
                                     variant="ghost"
                                     size="sm"
                                     onClick={() => syncAll()}
-                                    className="!text-amber-500 hover:bg-amber-500/10 !px-4"
+                                    className="!text-amber-500 hover:bg-amber-500/10 !px-4 text-[10px] font-black uppercase tracking-widest"
                                 >
-                                    <RefreshCw className="w-4 h-4 mr-2" />
-                                    Tentar Agora
+                                    <RefreshCw className="w-3 h-3 mr-2" />
+                                    Sincronizar
                                 </Button>
-                                <button
-                                    type="button"
-                                    onClick={async () => {
-                                        if (confirm('Tem certeza que deseja apagar todos os rascunhos offline?')) {
-                                            await db.pendingReports.clear();
-                                        }
-                                    }}
-                                    className="p-2 text-amber-500/50 hover:text-red-500 transition-colors"
-                                    aria-label="Limpar rascunhos"
-                                    title="Limpar rascunhos"
-                                >
-                                    <History className="w-4 h-4" />
-                                </button>
                             </div>
                         </Card>
                     )}
                 </div>
 
-                {view === 'history' ? (
+                {success ? (
+                    <SuccessView onBack={() => {
+                        setSuccess(false);
+                        setView('history');
+                        loadHistory(1, true);
+                    }} />
+                ) : view === 'history' ? (
                     <div className="max-w-2xl mx-auto space-y-8 pb-24">
                         <ProfessionalHeader
                             userName={user?.name || 'Profissional'}
@@ -559,21 +548,21 @@ export function CreateReport() {
 
                         <div className="flex flex-col gap-4">
 
-                            <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
+                            <div className="flex gap-2 overflow-x-auto pb-4 no-scrollbar">
                                 {[
-                                    { id: '', label: 'Todos' },
+                                    { id: '', label: 'Histórico Completo' },
                                     { id: 'SENT', label: 'Enviados' },
-                                    { id: 'IN_REVIEW', label: 'Em Análise' },
-                                    { id: 'FORWARDED', label: 'Encaminhados' },
-                                    { id: 'RESOLVED', label: 'Resolvidos' },
+                                    { id: 'IN_REVIEW', label: 'Monitoramento' },
+                                    { id: 'FORWARDED', label: 'Em Auditoria' },
+                                    { id: 'RESOLVED', label: 'Finalizados' },
                                 ].map(filter => (
                                     <button
                                         type="button"
                                         key={filter.id}
                                         onClick={() => { setStatusFilter(filter.id); setPage(1); }}
-                                        className={`px-4 py-2 rounded-lg text-xs font-semibold uppercase tracking-wide transition-all border shrink-0 whitespace-nowrap ${statusFilter === filter.id
-                                            ? 'bg-[var(--accent-primary)] text-[var(--accent-text)] border-[var(--accent-primary)] shadow-sm'
-                                            : 'bg-[var(--bg-primary)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:bg-[var(--bg-tertiary)]'
+                                        className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.15em] transition-all border whitespace-nowrap shadow-lg ${statusFilter === filter.id
+                                            ? 'bg-indigo-600 text-white border-indigo-500 shadow-indigo-500/20'
+                                            : 'bg-slate-100 text-slate-500 border-slate-200 hover:bg-slate-200 hover:text-slate-700 dark:bg-black/20 dark:text-slate-400 dark:border-white/5 dark:hover:bg-white/5 dark:hover:text-slate-200'
                                             }`}
                                     >
                                         {filter.label}
@@ -606,22 +595,27 @@ export function CreateReport() {
                                 ))}
 
                                 {hasMore && (
-                                    <Button variant="secondary" size="lg" fullWidth onClick={handleLoadMore} className="mt-4">
-                                        Carregar Mais
+                                    <Button variant="secondary" size="lg" fullWidth onClick={handleLoadMore} className="mt-8 bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-600 dark:bg-white/5 dark:hover:bg-white/10 dark:border-white/5 dark:text-slate-400 font-black uppercase tracking-[0.2em] h-14 !rounded-2xl transition-all">
+                                        Carregar Mais Registros
                                     </Button>
                                 )}
                             </div>
                         )}
                     </div>
                 ) : (
-                    <div className="max-w-xl mx-auto space-y-8 animate-in slide-in-from-bottom-5 duration-500 pb-24">
-                        <div className="flex items-center justify-between">
+                    <div className="max-w-2xl mx-auto space-y-8 animate-in slide-in-from-bottom-5 duration-700 pb-24">
+                        <div className="flex items-center justify-between mb-2">
                             <ProfessionalHeader
                                 userName={user?.name || 'Profissional'}
                                 isConnected={isConnected}
                             />
-                            <Button variant="ghost" size="sm" onClick={() => setView('history')}>
-                                Cancelar
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setView('history')}
+                                className="text-slate-500 hover:text-rose-400 font-black uppercase tracking-widest text-[10px]"
+                            >
+                                [ abortar ]
                             </Button>
                         </div>
 
@@ -638,15 +632,15 @@ export function CreateReport() {
                 )}
             </div>
 
-            {view === 'history' && (
+            {view === 'history' && !success && (
                 <button
                     type="button"
                     onClick={() => setView('form')}
-                    className="fixed bottom-8 right-6 w-14 h-14 bg-[var(--accent-primary)] rounded-2xl flex items-center justify-center text-[var(--accent-text)] shadow-xl shadow-[var(--accent-primary)]/30 active:scale-95 transition-all hover:-translate-y-1 z-30 group"
-                    aria-label="Novo Relatório"
-                    title="Novo Relatório"
+                    className="fixed bottom-8 right-6 w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-[0_10px_30px_rgba(99,102,241,0.4)] active:scale-95 transition-all hover:bg-indigo-500 hover:-translate-y-2 z-30 group border border-indigo-400/20"
+                    aria-label="Novo Registro"
+                    title="Novo Registro"
                 >
-                    <Plus className="w-7 h-7 group-hover:rotate-90 transition-transform" />
+                    <Plus className="w-8 h-8 group-hover:rotate-90 transition-transform duration-500" />
                 </button>
             )}
 

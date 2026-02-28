@@ -21,8 +21,8 @@ export class ReportService {
         return this.reportRepository.updateStatus(id, status, feedback, operatorName, departmentId, userRole);
     }
 
-    async getDashboardStats(supervisorId: string) {
-        return this.reportRepository.findStatsBySupervisor(supervisorId);
+    async getDashboardStats(supervisorId: string, startDate?: Date, endDate?: Date) {
+        return this.reportRepository.findStatsBySupervisor(supervisorId, startDate, endDate);
     }
 
     async listReports(supervisorId: string, page?: number, limit?: number, status?: ReportStatus, startDate?: Date, endDate?: Date) {
@@ -37,12 +37,12 @@ export class ReportService {
         return this.reportRepository.findByDepartment(departmentId, page, limit, status, startDate, endDate);
     }
 
-    async getDepartmentStats(departmentId: string) {
-        return this.reportRepository.findStatsByDepartment(departmentId);
+    async getDepartmentStats(departmentId: string, startDate?: Date, endDate?: Date) {
+        return this.reportRepository.findStatsByDepartment(departmentId, startDate, endDate);
     }
 
-    async getAdvancedStats(userId: string, role: string) {
-        return this.reportRepository.getAdvancedStats(userId, role);
+    async getAdvancedStats(userId: string, role: string, status?: ReportStatus, startDate?: Date, endDate?: Date) {
+        return this.reportRepository.getAdvancedStats(userId, role, status, startDate, endDate);
     }
 
     async findByProtocol(protocol: string) {

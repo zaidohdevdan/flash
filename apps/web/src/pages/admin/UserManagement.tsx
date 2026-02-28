@@ -177,29 +177,29 @@ export function UserManagement() {
         <div className="space-y-6 animate-in fade-in duration-500">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-black text-[var(--text-primary)] uppercase tracking-tight mb-1">
+                    <h1 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight mb-1">
                         Gestão de Usuários
                     </h1>
-                    <p className="text-xs text-[var(--text-secondary)] font-medium">Controle de acessos e hierarquia corporativa</p>
+                    <p className="text-[12px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest mt-1">Controle de acessos e hierarquia corporativa</p>
                 </div>
                 <Button variant="primary" onClick={openCreateModal} className="shrink-0">
                     <UserPlus className="w-4 h-4 mr-2" /> Novo Cadastro
                 </Button>
             </div>
 
-            <Card variant="white" className="p-3 flex flex-col md:flex-row gap-4 items-center border-[var(--border-subtle)]">
+            <Card variant="white" className="p-3 bg-white/70 dark:bg-black/60 border border-slate-200 dark:border-white/5 shadow-xl backdrop-blur-md flex flex-col md:flex-row gap-4 items-center">
                 <div className="relative flex-1 w-full">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-tertiary)]" />
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500" />
                     <input
                         type="text"
                         placeholder="Buscar usuários..."
                         value={searchQuery}
                         onChange={e => setSearchQuery(e.target.value)}
-                        className="w-full pl-10 pr-4 py-3 bg-[var(--bg-tertiary)] border-transparent border rounded-xl focus:bg-[var(--bg-primary)] focus:border-[var(--accent-primary)] outline-none transition-all text-sm font-medium text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)]"
+                        className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-black/40 border-slate-200 dark:border-white/5 border rounded-xl focus:bg-white dark:focus:bg-black/60 focus:border-indigo-500 outline-none transition-all text-sm font-bold text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 uppercase tracking-tight"
                     />
                 </div>
-                <div className="flex items-center gap-2 bg-[var(--bg-tertiary)] p-1.5 rounded-xl w-full md:w-auto border border-[var(--border-subtle)]">
-                    <Filter className="w-4 h-4 text-[var(--text-tertiary)] ml-2 hidden md:block" />
+                <div className="flex items-center gap-2 bg-slate-50 dark:bg-black/40 p-1.5 rounded-xl w-full md:w-auto border border-slate-200 dark:border-white/5 shadow-inner">
+                    <Filter className="w-4 h-4 text-slate-400 dark:text-slate-500 ml-2 hidden md:block" />
                     <select
                         title="Filtrar por Papel"
                         value={roleFilter}
@@ -215,18 +215,18 @@ export function UserManagement() {
                 </div>
             </Card>
 
-            <Card variant="white" className="overflow-hidden border-[var(--border-subtle)]">
+            <Card variant="white" className="overflow-hidden bg-white/70 dark:bg-black/60 border border-slate-200 dark:border-white/5 shadow-2xl backdrop-blur-md rounded-2xl">
                 <div className="overflow-x-auto w-full">
-                    <table className="w-full min-w-max text-left border-collapse">
+                    <table className="w-full min-max text-left border-collapse">
                         <thead>
-                            <tr className="bg-[var(--bg-tertiary)] text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest border-b border-[var(--border-subtle)]">
+                            <tr className="bg-slate-50 dark:bg-black/40 text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest border-b border-slate-200 dark:border-white/5">
                                 <th className="px-6 py-4">Usuário / Identidade</th>
                                 <th className="px-6 py-4">Nível / Papel</th>
                                 <th className="px-6 py-4">Supervisão / Dep</th>
                                 <th className="px-6 py-4 text-right">Ações</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-[var(--border-subtle)]">
+                        <tbody className="divide-y divide-slate-200 dark:divide-white/5">
                             {filteredUsers.length === 0 ? (
                                 <tr>
                                     <td colSpan={4} className="px-6 py-24 text-center text-[var(--text-tertiary)]">
@@ -239,12 +239,12 @@ export function UserManagement() {
                                     <tr key={u.id} className="table-row-hover group">
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 rounded-xl bg-[var(--bg-tertiary)] flex items-center justify-center text-[var(--accent-primary)] font-black text-sm border border-[var(--border-subtle)]">
+                                                <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-black text-sm border border-indigo-100 dark:border-indigo-500/20 shadow-inner">
                                                     {u.name.charAt(0)}
                                                 </div>
                                                 <div>
-                                                    <p className="font-bold text-[var(--text-primary)] text-sm leading-tight mb-0.5">{u.name}</p>
-                                                    <p className="text-xs text-[var(--text-secondary)]">{u.email}</p>
+                                                    <p className="font-black text-slate-900 dark:text-white text-sm leading-tight mb-0.5 uppercase tracking-tight">{u.name}</p>
+                                                    <p className="text-[11px] font-bold text-slate-500 dark:text-slate-500">{u.email}</p>
                                                 </div>
                                             </div>
                                         </td>
@@ -258,15 +258,15 @@ export function UserManagement() {
                                             {u.supervisor ? (
                                                 <div className="flex items-center gap-2">
                                                     <Shield className="w-3.5 h-3.5 text-purple-500" />
-                                                    <span className="text-xs font-semibold text-[var(--text-secondary)]">{u.supervisor}</span>
+                                                    <span className="text-[11px] font-black text-slate-600 dark:text-slate-400 uppercase tracking-tight">{u.supervisor}</span>
                                                 </div>
                                             ) : u.departmentName ? (
                                                 <div className="flex items-center gap-2">
                                                     <Filter className="w-3.5 h-3.5 text-blue-500" />
-                                                    <span className="text-xs font-semibold text-[var(--text-secondary)]">{u.departmentName}</span>
+                                                    <span className="text-[11px] font-black text-slate-600 dark:text-slate-400 uppercase tracking-tight">{u.departmentName}</span>
                                                 </div>
                                             ) : (
-                                                <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase">Direto / Global</span>
+                                                <span className="text-[11px] font-black text-slate-400 dark:text-slate-600 uppercase tracking-widest">Direto / Global</span>
                                             )}
                                         </td>
                                         <td className="px-6 py-4 text-right">

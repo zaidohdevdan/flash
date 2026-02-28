@@ -116,40 +116,46 @@ export const ConferenceModal: React.FC<ConferenceModalProps> = ({
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-0 md:p-10 animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-0 md:p-10 animate-in fade-in duration-500">
             {/* Backdrop */}
             <div
-                className="absolute inset-0 bg-slate-900/40 backdrop-blur-md"
+                className="absolute inset-0 bg-black/60 backdrop-blur-xl"
                 onClick={onClose}
             />
 
             {/* Modal Content */}
-            <div className="relative w-full h-full md:max-w-6xl md:h-[85vh] bg-[var(--bg-primary)] rounded-none md:rounded-[2.5rem] shadow-2xl overflow-hidden border border-[var(--border-subtle)] flex flex-col">
+            <div className="relative w-full h-full md:max-w-6xl md:h-[85vh] bg-white dark:bg-[#020617] rounded-none md:rounded-[3rem] shadow-2xl overflow-hidden border border-slate-200 dark:border-white/5 flex flex-col backdrop-blur-3xl">
                 {/* Header */}
-                <div className="px-6 py-4 bg-[var(--bg-primary)] border-b border-[var(--border-subtle)] flex justify-between items-center shrink-0">
-                    <div className="flex items-center gap-3">
-                        <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                        <h2 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-widest">War Room Operacional</h2>
-                        <span className="text-[10px] text-[var(--text-tertiary)] font-bold bg-[var(--bg-secondary)] px-2 py-1 rounded-md uppercase border border-[var(--border-subtle)]">AO VIVO</span>
+                <div className="px-8 py-6 bg-slate-50 dark:bg-black/40 border-b border-slate-200 dark:border-white/5 flex justify-between items-center shrink-0 backdrop-blur-md">
+                    <div className="flex items-center gap-4">
+                        <div className="relative">
+                            <div className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse shadow-[0_0_10px_rgba(244,63,94,0.6)]" />
+                            <div className="absolute inset-0 w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping" />
+                        </div>
+                        <div>
+                            <h2 className="text-xs font-black text-slate-800 dark:text-white uppercase tracking-[0.3em] leading-none">War Room Operacional</h2>
+                            <p className="text-[9px] font-black text-indigo-500 dark:text-indigo-400 uppercase tracking-widest mt-1.5 opacity-80">Conexão Segura Ativa</p>
+                        </div>
+                        <span className="ml-2 text-[9px] text-white font-black bg-rose-600 px-3 py-1 rounded-full uppercase tracking-widest border border-rose-500/30">AO VIVO</span>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-4">
                         {onInviteClick && (
                             <button
                                 type="button"
                                 onClick={onInviteClick}
-                                className="flex items-center gap-2 px-4 py-2 hover:bg-[var(--bg-secondary)] rounded-xl transition-all text-[var(--accent-primary)] font-black uppercase tracking-widest text-[10px] border border-[var(--accent-primary)]/20"
+                                className="flex items-center gap-2 px-6 py-2.5 bg-indigo-600/10 hover:bg-indigo-600/20 rounded-xl transition-all text-indigo-400 font-black uppercase tracking-widest text-[10px] border border-indigo-500/30 shadow-lg shadow-indigo-500/10 active:scale-95"
                                 title="Convidar Mais Membros"
                             >
                                 <UserPlus className="w-4 h-4" />
-                                <span className="hidden sm:inline">Convidar</span>
+                                <span className="hidden sm:inline">Convocar</span>
                             </button>
                         )}
 
                         <button
                             type="button"
                             onClick={handleCleanExit}
-                            className="p-2 hover:bg-[var(--bg-secondary)] rounded-xl transition-colors text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
+                            className="p-3 bg-slate-100 dark:bg-white/5 hover:bg-rose-500/10 dark:hover:bg-rose-500/20 rounded-2xl transition-all text-slate-500 dark:text-slate-400 hover:text-rose-500 dark:hover:text-rose-400 border border-slate-200 dark:border-white/5 active:scale-90"
                             title="Sair da Sala"
                         >
                             <X className="w-6 h-6" />
@@ -158,8 +164,8 @@ export const ConferenceModal: React.FC<ConferenceModalProps> = ({
                 </div>
 
                 {/* Content Area */}
-                <div className="flex-1 bg-[var(--bg-secondary)] relative overflow-hidden">
-                    {/* Jitsi Meeting - Unmount strictly on termination for clean re-entry */}
+                <div className="flex-1 bg-slate-900 dark:bg-black relative overflow-hidden">
+                    {/* Jitsi Meeting */}
                     <div className="absolute inset-0">
                         {!isTerminated && (
                             <JitsiMeeting
@@ -196,7 +202,7 @@ export const ConferenceModal: React.FC<ConferenceModalProps> = ({
                                     SHOW_WATERMARK_FOR_GUESTS: false,
                                     SHOW_BRAND_WATERMARK: false,
                                     BRAND_WATERMARK_LINK: '',
-                                    DEFAULT_BACKGROUND: 'linear-gradient(to bottom, #0f172a, #1e293b)',
+                                    DEFAULT_BACKGROUND: '#020617',
                                 }}
                                 userInfo={{
                                     displayName: userName,
@@ -261,38 +267,38 @@ export const ConferenceModal: React.FC<ConferenceModalProps> = ({
 
                     {/* Reconnection Overlay */}
                     {isReconnecting && !isTerminated && (
-                        <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-8 bg-slate-900/60 backdrop-blur-sm z-20 animate-in fade-in duration-300">
-                            <div className="w-16 h-16 border-4 border-[var(--accent-primary)]/20 border-t-[var(--accent-primary)] rounded-full animate-spin mb-6" />
-                            <h3 className="text-xl font-black text-white uppercase tracking-tighter mb-2">
+                        <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-8 bg-black/80 backdrop-blur-xl z-20 animate-in fade-in duration-300">
+                            <div className="w-20 h-20 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin mb-8 shadow-2xl shadow-indigo-500/20" />
+                            <h3 className="text-2xl font-black text-white uppercase tracking-[0.4em] mb-3">
                                 Reconectando...
                             </h3>
-                            <p className="text-slate-300 font-bold uppercase tracking-widest text-[10px] max-w-xs">
-                                Houve uma oscilação na ponte de vídeo. Aguarde um instante enquanto estabilizamos sua conexão.
+                            <p className="text-slate-500 font-bold uppercase tracking-[0.2em] text-[10px] max-w-sm leading-relaxed">
+                                HOUVE UMA OSCILAÇÃO NA PONTE DE VÍDEO.<br />AGUARDE ENQUANTO REESTABELECEMOS O CANAL.
                             </p>
                         </div>
                     )}
 
                     {/* Termination Overlay */}
                     {isTerminated && (
-                        <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-8 bg-[var(--bg-primary)] animate-in zoom-in-95 duration-500 z-30">
-                            <div className="relative mb-8">
-                                <div className="absolute inset-0 bg-[var(--accent-primary)]/20 blur-[50px] rounded-full" />
-                                <div className="relative w-24 h-24 bg-[var(--accent-primary)] rounded-[2rem] flex items-center justify-center shadow-2xl shadow-[var(--accent-primary)]/40 border border-[var(--border-subtle)] active:scale-95 transition-transform">
-                                    <Zap className="w-12 h-12 text-[var(--accent-text)] fill-current drop-shadow-[0_0_8px_rgba(253,224,71,0.6)] animate-vibrate-fast" />
+                        <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-8 bg-white dark:bg-[#020617] animate-in zoom-in-95 duration-700 z-30">
+                            <div className="relative mb-12">
+                                <div className="absolute inset-0 bg-indigo-500/20 blur-[80px] rounded-full" />
+                                <div className="relative w-32 h-32 bg-indigo-600 rounded-[2.5rem] flex items-center justify-center shadow-2xl shadow-indigo-500/40 border border-indigo-300 dark:border-white/10 active:scale-95 transition-transform duration-500 group">
+                                    <Zap className="w-16 h-16 text-white fill-current drop-shadow-[0_0_15px_rgba(255,255,255,0.4)] animate-pulse" />
                                 </div>
-                                <div className="absolute -bottom-2 -right-2 bg-emerald-500 text-white rounded-full p-2 shadow-lg scale-110 animate-bounce">
-                                    <CheckCircle2 className="w-6 h-6" />
+                                <div className="absolute -bottom-3 -right-3 bg-emerald-500 text-white rounded-2xl p-3 shadow-2xl scale-110 animate-bounce border-4 border-white dark:border-[#020617]">
+                                    <CheckCircle2 className="w-8 h-8" />
                                 </div>
                             </div>
 
-                            <h3 className="text-2xl font-black text-[var(--text-primary)] uppercase tracking-tighter mb-2">
-                                Conferência Encerrada
+                            <h3 className="text-3xl font-black text-slate-900 dark:text-white uppercase tracking-[0.4em] mb-4">
+                                Canal Desativado
                             </h3>
-                            <p className="text-[var(--text-tertiary)] font-bold uppercase tracking-widest text-[10px] mb-8 max-w-xs">
-                                Todos os registros foram salvos e a sala foi liberada.
+                            <p className="text-slate-500 font-black uppercase tracking-[0.2em] text-[10px] mb-12 max-w-sm leading-relaxed">
+                                TODOS OS REGISTROS DE ÁUDIO E VÍDEO FORAM<br />DEVIDAMENTE INDEXADOS E A SALA LIBERADA.
                             </p>
 
-                            <div className="flex flex-col gap-3">
+                            <div className="flex flex-col sm:flex-row gap-5">
                                 <button
                                     type="button"
                                     onClick={() => {
@@ -301,20 +307,26 @@ export const ConferenceModal: React.FC<ConferenceModalProps> = ({
                                         setMountKey(prev => prev + 1);
                                         intentionalExitRef.current = false;
                                     }}
-                                    className="px-8 py-3 bg-[var(--accent-primary)] text-[var(--accent-text)] rounded-2xl font-black uppercase tracking-widest text-xs hover:brightness-110 transition-all active:scale-95 shadow-xl shadow-[var(--accent-primary)]/20"
+                                    className="px-12 py-4 bg-indigo-600 text-white rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-indigo-500 transition-all active:scale-95 shadow-2xl shadow-indigo-600/30 border border-indigo-400/20"
                                 >
-                                    Retorne Já!
+                                    Reativar Canal
                                 </button>
                                 <button
                                     type="button"
                                     onClick={onClose}
-                                    className="px-8 py-2 text-[var(--text-tertiary)] font-bold uppercase tracking-widest text-[10px] hover:text-[var(--text-primary)] transition-colors"
+                                    className="px-12 py-4 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-slate-200 dark:hover:bg-white/10 transition-all border border-slate-200 dark:border-white/5"
                                 >
                                     Sair da Sala
                                 </button>
                             </div>
 
-                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60%] h-[60%] bg-[var(--accent-primary)]/5 rounded-full blur-[100px] pointer-events-none" />
+                            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 opacity-20">
+                                <div className="flex gap-2">
+                                    <div className="w-1 h-1 bg-slate-500 rounded-full" />
+                                    <div className="w-1 h-1 bg-slate-500 rounded-full" />
+                                    <div className="w-1 h-1 bg-slate-500 rounded-full" />
+                                </div>
+                            </div>
                         </div>
                     )}
                 </div>

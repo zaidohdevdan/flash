@@ -29,9 +29,9 @@ export interface IReportRepository {
     findAll(supervisorId: string, page?: number, limit?: number, status?: ReportStatus, startDate?: Date, endDate?: Date): Promise<ReportWithUser[]>;
     findByUserId(userId: string, page?: number, limit?: number, status?: ReportStatus, startDate?: Date, endDate?: Date): Promise<ReportWithUser[]>;
     findByDepartment(departmentId: string, page?: number, limit?: number, status?: ReportStatus, startDate?: Date, endDate?: Date): Promise<ReportWithUser[]>;
-    findStatsBySupervisor(supervisorId: string): Promise<{ status: string, _count: number }[]>;
-    findStatsByDepartment(departmentId: string): Promise<{ status: string, _count: number }[]>;
-    getAdvancedStats(userId: string, role: string): Promise<any>;
+    findStatsBySupervisor(supervisorId: string, startDate?: Date, endDate?: Date): Promise<{ status: string, _count: number }[]>;
+    findStatsByDepartment(departmentId: string, startDate?: Date, endDate?: Date): Promise<{ status: string, _count: number }[]>;
+    getAdvancedStats(userId: string, role: string, status?: ReportStatus, startDate?: Date, endDate?: Date): Promise<any>;
     findByProtocol(protocol: string): Promise<ReportWithUser | null>;
     archiveByProtocol(protocol: string): Promise<void>;
     restoreByProtocol(protocol: string): Promise<void>;
