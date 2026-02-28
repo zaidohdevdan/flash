@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, LogOut, Settings as SettingsIcon, PieChart, Users, Building2, LifeBuoy, FolderArchive, Mail, Activity, Target, Network, Calendar, HelpCircle, Archive, MessageSquare } from 'lucide-react';
+import { LayoutDashboard, LogOut, Settings as SettingsIcon, PieChart, Users, Building2, LifeBuoy, FolderArchive, Mail, Activity, Target, Network, Calendar, HelpCircle, Archive, MessageSquare, Video } from 'lucide-react';
 
 interface SidebarNavProps {
     user?: {
@@ -23,6 +23,7 @@ export function SidebarNav({ user, onProfileClick, onLogout }: SidebarNavProps) 
     const supervisorItems = [
         { icon: Target, label: 'Inteligência', path: '/supervisor/intelligence' },
         { icon: Network, label: 'Operações', path: '/supervisor/operations' },
+        { icon: Video, label: 'Videoconferência', path: '/supervisor/conference' },
         { icon: Calendar, label: 'Agenda', path: '/supervisor/schedule' },
         { icon: HelpCircle, label: 'Suporte', path: '/supervisor/support' },
         { icon: Archive, label: 'Arquivo', path: '/supervisor/archive' },

@@ -226,7 +226,7 @@ export function ManagerDashboard() {
     } : null, [user]);
 
     const {
-        socketRef,
+        socket,
         onlineUserIds,
         unreadMessages,
         markAsRead,
@@ -521,7 +521,7 @@ export function ManagerDashboard() {
                     currentUser={{ id: user.id || '', name: user.name || '', role: user.role || '' }}
                     targetUser={chatTarget}
                     onClose={handleCloseChat}
-                    socket={socketRef.current}
+                    socket={socket}
                 />
             )}
 

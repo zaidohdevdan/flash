@@ -9,7 +9,7 @@ export class PrismaChatRepository implements IChatRepository {
         });
     }
 
-    async save(data: { fromId: string, toId: string, text?: string, audioUrl?: string, audioPublicId?: string, room: string, expiresAt?: Date }): Promise<ChatMessage> {
+    async save(data: { fromId: string, toId: string, text?: string, audioUrl?: string, audioPublicId?: string, room: string, expiresAt?: Date, createdAt?: Date }): Promise<ChatMessage> {
         return prisma.chatMessage.create({
             data
         });

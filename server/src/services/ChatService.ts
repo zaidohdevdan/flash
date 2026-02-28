@@ -5,11 +5,15 @@ import { PrismaChatRepository } from '../repositories/implementations/PrismaChat
 export class ChatService {
     private chatRepository: IChatRepository;
 
+    static getRoomName(id1: string, id2: string) {
+        return `private-${[String(id1), String(id2)].map(id => id.trim().toLowerCase()).sort().join('-')}`;
+    }
+
     constructor(chatRepository: IChatRepository = new PrismaChatRepository()) {
         this.chatRepository = chatRepository;
     }
 
-    async saveMessage(data: { fromId: string, toId: string, text?: string, audioUrl?: string, audioPublicId?: string, room: string }) {
+    async saveMessage(data: { fromId: string, toId: string, text?: string, audioUrl?: string, audioPublicId?: string, room: string, createdAt?: Date }) {
         let expiresAt: Date | undefined;
         if (data.audioUrl) {
             expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutos

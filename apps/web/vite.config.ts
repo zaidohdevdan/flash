@@ -58,7 +58,18 @@ export default defineConfig({
       }
     })
   ],
-  server: { fs: { strict: false } },
+  server: {
+    host: '127.0.0.1',
+    port: 5173,
+    strictPort: true,
+    fs: { strict: false },
+    hmr: {
+      host: '127.0.0.1',
+      port: 5173,
+      clientPort: 5173,
+      protocol: 'ws',
+    },
+  },
   define: { global: 'globalThis' },
   esbuild: { target: 'es2022' },
   build: {

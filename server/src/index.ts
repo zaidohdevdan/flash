@@ -19,10 +19,6 @@ TerminalLogger.init();
 
 const chatService = new ChatService();
 
-const getRoomName = (id1: string, id2: string) => {
-    return `private-${[String(id1), String(id2)].map(id => id.trim().toLowerCase()).sort().join('-')}`;
-};
-
 // ---------- Tipagens globais ----------
 
 declare global {
@@ -133,19 +129,23 @@ async function bootstrap() {
                     presenceService.addUser(String(userId), user?.name || 'Unknown', user?.role || 'PROFESSIONAL');
                 } catch (err) {
                     console.error(`[Socket] Erro ao buscar dados do usuário ${userId} para entrar na sala:`, err);
+                    // Still add to presence even if DB lookup fails
+                    presenceService.addUser(String(userId), String(socket.handshake.query.userName || 'Desconhecido'), 'PROFESSIONAL');
                 }
 
+                // Broadcast to all clients that this user is now online
                 io.emit('user_online', {
                     userId: roomName,
                 });
+
+                // Send the full current presence list to just the connecting socket
+                // (must happen AFTER presenceService.addUser so the new user is included)
+                socket.emit('initial_presence_list', presenceService.getOnlineUsers().map(u => u.userId));
             } else {
                 console.warn(
                     `[Socket] [WARN] Connection without userId - socketId=${socket.id}`,
                 );
             }
-
-            // Envia lista inicial de quem está online
-            socket.emit('initial_presence_list', presenceService.getOnlineUsers().map(u => u.userId));
 
             socket.on('join_private_chat', (data: { targetUserId: string }) => {
                 const myId = socket.handshake.query.userId as string;
@@ -153,7 +153,7 @@ async function bootstrap() {
 
                 if (!targetUserId || !myId) return;
 
-                const roomName = getRoomName(myId, targetUserId);
+                const roomName = ChatService.getRoomName(myId, targetUserId);
 
                 socket.join(roomName);
                 // console.log(`[Socket] ${myId} joined room ${roomName}`);
@@ -165,7 +165,7 @@ async function bootstrap() {
 
                 if (!targetUserId || !myId) return;
 
-                const roomName = getRoomName(myId, targetUserId);
+                const roomName = ChatService.getRoomName(myId, targetUserId);
                 console.log(`[Socket] Mensagem de ${myId} para ${targetUserId} na sala ${roomName}`);
 
                 // Persist message in database
@@ -236,8 +236,9 @@ async function bootstrap() {
         });
 
         const PORT = process.env.PORT || 3000;
-        httpServer.listen(PORT, () => {
-            console.log(`[HTTP] Server is running on port ${PORT}`);
+        const HOST = '0.0.0.0'; // Bind to all interfaces (IPv4/IPv6)
+        httpServer.listen(Number(PORT), HOST, () => {
+            console.log(`[HTTP] Server is running on http://${HOST}:${PORT}`);
 
             // Inicia o sistema de agendamento de tarefas
             startScheduler(io);

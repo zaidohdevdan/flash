@@ -32,6 +32,7 @@ const SupervisorSchedule = lazy(() => import('./pages/supervisor/Schedule').then
 const SupervisorSupport = lazy(() => import('./pages/supervisor/Support').then(m => ({ default: m.Support })));
 const SupervisorArchive = lazy(() => import('./pages/supervisor/Archive').then(m => ({ default: m.Archive })));
 const SupervisorChat = lazy(() => import('./pages/supervisor/Chat').then(m => ({ default: m.SupervisorChat })));
+const SupervisorConference = lazy(() => import('./pages/supervisor/Conference').then(m => ({ default: m.Conference })));
 
 // Loading Component
 const PageLoader = () => (
@@ -107,6 +108,7 @@ function AppRoutes() {
         <Route path="support" element={<SupervisorSupport />} />
         <Route path="archive" element={<SupervisorArchive />} />
         <Route path="chat" element={<SupervisorChat />} />
+        <Route path="conference" element={<SupervisorConference />} />
       </Route>
 
       {/* Admin Central Hub */}

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { Socket } from 'socket.io-client';
-import { Send, Mic, X, MessageSquare, Square, Trash2, Hourglass, Pencil, Check, CheckCheck, Trash, User, RefreshCw } from 'lucide-react';
+import { Send, Mic, X, MessageSquare, Square, Trash2, Hourglass, Pencil, Check, CheckCheck, Trash, User, RefreshCw, Video } from 'lucide-react';
 import { api } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { db } from '../services/db';
@@ -29,9 +29,10 @@ interface ChatWidgetProps {
     socket: Socket | null;
     onRead?: (userId: string) => void;
     inline?: boolean;
+    onVideoClick?: () => void;
 }
 
-export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead, inline = false }: ChatWidgetProps) {
+export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead, inline = false, onVideoClick }: ChatWidgetProps) {
     const { notificationsEnabled } = useAuth();
     const [inputText, setInputText] = useState('');
     const [isRecording, setIsRecording] = useState(false);
@@ -96,7 +97,7 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead, i
                 const response = await api.get(`/chat/history/${encodeURIComponent(chatRoom)}`);
                 for (const msg of response.data) {
                     await db.chatMessages.put({
-                        id: msg.id,
+                        id: msg.id || crypto.randomUUID(),
                         fromId: msg.fromId || msg.from,
                         toId: (msg.fromId || msg.from) === currentUser.id ? targetUser.id : currentUser.id,
                         roomName: chatRoom,
@@ -151,7 +152,7 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead, i
         const handlePrivateMessage = async (msg: Message) => {
             if (isMounted) {
                 await db.chatMessages.put({
-                    id: msg.id,
+                    id: msg.id || crypto.randomUUID(),
                     fromId: msg.fromId || msg.from || '',
                     toId: (msg.fromId || msg.from) === currentUser.id ? targetUser.id : currentUser.id,
                     roomName: chatRoom,
@@ -227,6 +228,7 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead, i
         if (!inputText.trim()) return;
 
         const messageData = {
+            id: crypto.randomUUID(),
             fromId: currentUser.id,
             toId: targetUser.id,
             roomName: chatRoom,
@@ -387,6 +389,16 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead, i
                     </div>
                 </div>
                 <div className="flex items-center gap-1 text-[var(--text-tertiary)]">
+                    {onVideoClick && (
+                        <button
+                            type="button"
+                            onClick={onVideoClick}
+                            className="p-1.5 hover:bg-[var(--bg-secondary)] rounded-lg transition hover:text-indigo-500"
+                            title="Iniciar Videoconferência"
+                        >
+                            <Video className="w-4 h-4" />
+                        </button>
+                    )}
                     <button
                         type="button"
                         onClick={handleClearHistory}

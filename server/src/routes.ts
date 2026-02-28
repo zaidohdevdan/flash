@@ -92,6 +92,7 @@ routes.post('/chat/media', AuthMiddleware, upload.single('file'), mediaControlle
 routes.get('/chat/unread-count', AuthMiddleware, ChatController.unreadCount);
 routes.get('/chat/unread-senders', AuthMiddleware, ChatController.unreadSenders);
 routes.get('/chat/history/:room', AuthMiddleware, ChatController.listHistory);
+routes.post('/chat/messages', AuthMiddleware, ChatController.sendMessage);
 routes.patch('/chat/history/:room/read', AuthMiddleware, ChatController.markRoomAsRead);
 routes.delete('/chat/history/:room', AuthMiddleware, ChatController.clearHistory);
 routes.patch('/chat/messages/:id', AuthMiddleware, ChatController.updateMessage);

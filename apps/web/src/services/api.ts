@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000'
+    baseURL: import.meta.env.VITE_API_URL || 'http://127.0.0.1:3000'
 });
 
 // Interceptor para adicionar o token em todas as requisições
@@ -28,6 +28,6 @@ export function formatUrl(url: string | null | undefined): string | undefined {
     if (formattedUrl.startsWith('http') || formattedUrl.startsWith('data:')) return formattedUrl;
 
     // Fallback for local uploads if they exist in the future or if any relative paths were stored
-    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+    const baseUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:3000';
     return `${baseUrl}${formattedUrl.startsWith('/') ? '' : '/'}${formattedUrl}`;
 }

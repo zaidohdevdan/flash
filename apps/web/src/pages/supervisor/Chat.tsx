@@ -5,7 +5,7 @@ import { useDashboardSocket } from '../../hooks/useDashboardSocket';
 import { ChatWidget } from '../../components/ChatWidget';
 import { Card, Avatar } from '../../components/ui';
 import { Search, RefreshCw, MessageSquare } from 'lucide-react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 
 interface UserContact {
     id: string;
@@ -17,8 +17,9 @@ interface UserContact {
 export function SupervisorChat() {
     const { user } = useAuth();
     const socketUser = user ? { id: user.id || '', name: user.name || '', role: user.role || '' } : null;
-    const { socketRef } = useDashboardSocket({ user: socketUser });
+    const { socket, onlineUserIds } = useDashboardSocket({ user: socketUser });
     const [searchParams, setSearchParams] = useSearchParams();
+    const navigate = useNavigate();
 
     const [subordinates, setSubordinates] = useState<UserContact[]>([]);
     const [contacts, setContacts] = useState<UserContact[]>([]);
@@ -80,6 +81,13 @@ export function SupervisorChat() {
 
     const filteredContacts = allContacts.filter(c => c.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
+    const handleStartVideo = () => {
+        if (!activeChatId) return;
+        // Generate a room name based on the chat (similar to ChatWidget's internal logic for stability)
+        const roomName = `war-room-${[user?.id || '', activeChatId].map(id => id.trim().toLowerCase()).sort().join('-')}`;
+        navigate(`/supervisor/conference?room=${roomName}`);
+    };
+
     return (
         <div className="flex flex-col overflow-hidden animate-in fade-in duration-500" style={{ height: 'calc(100vh - 9rem)' }}>
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-5 flex-shrink-0">
@@ -123,11 +131,16 @@ export function SupervisorChat() {
                                             : 'bg-transparent border-transparent hover:bg-slate-50 dark:hover:bg-white/5'
                                             }`}
                                     >
-                                        <Avatar
-                                            src={contact.avatarUrl}
-                                            alt={contact.name}
-                                            size="sm"
-                                        />
+                                        <div className="relative flex-shrink-0">
+                                            <Avatar
+                                                src={contact.avatarUrl}
+                                                alt={contact.name}
+                                                size="sm"
+                                            />
+                                            {onlineUserIds.includes(contact.id) && (
+                                                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-400 border-2 border-white dark:border-slate-900 rounded-full" />
+                                            )}
+                                        </div>
                                         <div className="flex-1 text-left">
                                             <h4 className={`text-sm font-bold ${activeChatId === contact.id ? 'text-indigo-900 dark:text-indigo-100' : 'text-slate-900 dark:text-slate-200'}`}>
                                                 {contact.name}
@@ -151,7 +164,8 @@ export function SupervisorChat() {
                             currentUser={user}
                             targetUser={selectedUser}
                             onClose={handleCloseChat}
-                            socket={socketRef.current}
+                            socket={socket}
+                            onVideoClick={handleStartVideo}
                         />
                     ) : (
                         <Card className="flex flex-col items-center justify-center h-full bg-white dark:bg-black/20 border border-slate-200 dark:border-white/5 shadow-xl backdrop-blur-xl">

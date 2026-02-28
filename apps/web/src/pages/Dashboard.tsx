@@ -136,7 +136,7 @@ export function Dashboard() {
     } : null, [user]);
 
     const {
-        socketRef,
+        socket,
         onlineUserIds,
         unreadMessages,
         markAsRead,
@@ -633,7 +633,7 @@ export function Dashboard() {
                     currentUser={{ id: user.id || '', name: user.name || '', role: user.role || '' }}
                     targetUser={chatTarget}
                     onClose={handleCloseChat}
-                    socket={socketRef.current}
+                    socket={socket}
                     onRead={markAsRead}
                 />
             )}

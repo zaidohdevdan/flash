@@ -102,5 +102,56 @@ export const ChatController = {
             console.error('Erro ao buscar remetentes de não lidas:', error);
             return res.status(500).json({ error: 'Erro ao buscar remetentes.' });
         }
+    },
+
+    async sendMessage(req: Request, res: Response) {
+        try {
+            const fromId = req.userId!;
+            const { targetUserId, text, audioUrl, audioPublicId, createdAt } = req.body;
+
+            if (!targetUserId) {
+                return res.status(400).json({ error: 'targetUserId é obrigatório.' });
+            }
+
+            const room = ChatService.getRoomName(fromId, targetUserId);
+
+            const savedMsg = await chatService.saveMessage({
+                fromId,
+                toId: targetUserId,
+                text,
+                audioUrl,
+                audioPublicId,
+                room,
+                createdAt: createdAt ? new Date(createdAt) : undefined
+            });
+
+            // Se tiver createdAt original (sincronização offline), podemos precisar ajustar
+            // Mas o Prisma já gera um se não passarmos. Se quisermos manter o original:
+            // (Ajustar repository se necessário, mas por agora vamos usar o savedMsg)
+
+            // Emitir via Socket.IO para todos na sala (incluindo o remetente em outras abas)
+            req.io.to(room).emit('private_message', {
+                id: savedMsg.id,
+                from: fromId,
+                text,
+                audioUrl,
+                createdAt: savedMsg.createdAt,
+                expiresAt: savedMsg.expiresAt
+            });
+
+            // Notificação em tempo real
+            req.io.to(targetUserId).emit('new_chat_notification', {
+                from: fromId,
+                fromName: 'Alguém', // Pode ser melhorado buscando o nome
+                text: text || (audioUrl ? 'Mensagem de áudio' : 'Nova mensagem'),
+                createdAt: savedMsg.createdAt,
+                expiresAt: savedMsg.expiresAt
+            });
+
+            return res.status(201).json(savedMsg);
+        } catch (error) {
+            console.error('Erro ao enviar mensagem via API:', error);
+            return res.status(500).json({ error: 'Erro ao enviar mensagem.' });
+        }
     }
 }

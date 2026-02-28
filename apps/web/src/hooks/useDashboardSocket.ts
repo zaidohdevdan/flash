@@ -1,10 +1,11 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
-import { io, Socket } from 'socket.io-client';
+import { io } from 'socket.io-client';
 import { toast } from 'react-hot-toast';
 import { db } from '../services/db';
 import { api } from '../services/api';
+import type { Socket } from 'socket.io-client';
 
-const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:3000';
 
 interface User {
     id: string;
@@ -28,27 +29,47 @@ interface UseDashboardSocketOptions {
     notificationsEnabled?: boolean;
 }
 
-export const useDashboardSocket = ({ user, onNotification, onConferenceInvite, onNewNotification, onNewReport, onReportStatusUpdate, notificationsEnabled = true }: UseDashboardSocketOptions) => {
-    // Store socket in a ref so it is NEVER temporarily null between renders.
-    // useState causes a null window during StrictMode cleanup that breaks child components.
+export const useDashboardSocket = ({
+    user,
+    onNotification,
+    onConferenceInvite,
+    onNewNotification,
+    onNewReport,
+    onReportStatusUpdate,
+    notificationsEnabled = true,
+}: UseDashboardSocketOptions) => {
+    // Internal ref for the socket — event handlers always access the live instance.
     const socketRef = useRef<Socket | null>(null);
+
+    // State-driven values for UI reactivity
     const [onlineUserIds, setOnlineUserIds] = useState<string[]>([]);
     const [unreadMessages, setUnreadMessages] = useState<Record<string, boolean>>({});
     const [isConnected, setIsConnected] = useState(false);
 
-    // Using ref for unread state to access in handlers without re-firing effects
+    // socket state: updated inside event callbacks (safe per React rules — not in effect body)
+    const [socket, setSocket] = useState<Socket | null>(null);
+
+    // Version counter: triggers re-render so consumers see the updated socket state.
+    const [, setSocketVersion] = useState(0);
+
+    // Ref mirror of unreadMessages to avoid stale closures in async handlers
     const unreadMessagesRef = useRef<Record<string, boolean>>({});
 
+    // Audio
     const notificationAudioRef = useRef<HTMLAudioElement | null>(null);
     const playNotificationSound = useCallback(() => {
         if (!notificationsEnabled) return;
         if (!notificationAudioRef.current) {
-            notificationAudioRef.current = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+            // Tiny base64 WAV beep — no external CDN dependency, works in all browsers
+            notificationAudioRef.current = new Audio(
+                'data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU' +
+                'lvT18AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=='
+            );
         }
         notificationAudioRef.current.play().catch(e => console.error('Erro ao tocar som:', e));
     }, [notificationsEnabled]);
 
-    // Use a ref for the callback to avoid re-triggering the socket connection effect
+    // Stable refs for callbacks — avoids re-creating the socket when callbacks change
     const onNotificationRef = useRef(onNotification);
     const onConferenceInviteRef = useRef(onConferenceInvite);
     const onNewNotificationRef = useRef(onNewNotification);
@@ -63,50 +84,67 @@ export const useDashboardSocket = ({ user, onNotification, onConferenceInvite, o
         onReportStatusUpdateRef.current = onReportStatusUpdate;
     }, [onNotification, onConferenceInvite, onNewNotification, onNewReport, onReportStatusUpdate]);
 
+    // Main connection effect
     useEffect(() => {
         if (!user?.id) return;
 
-        // Use stable primitives for the connection
         const userId = user.id;
         const userRole = user.role;
         const userName = user.name;
 
         const newSocket = io(SOCKET_URL, {
-            query: { userId, role: userRole, userName }
+            query: { userId, role: userRole, userName },
         });
 
-        // Assign to ref immediately – no re-render triggered
         socketRef.current = newSocket;
 
-        newSocket.on('connect', () => setIsConnected(true));
-        newSocket.on('disconnect', () => setIsConnected(false));
+        newSocket.on('connect', () => {
+            setSocket(newSocket);  // safe: called inside an event callback, not effect body
+            setIsConnected(true);
+            setSocketVersion(v => v + 1);
+        });
+
+        newSocket.on('disconnect', () => {
+            setSocket(null);
+            setIsConnected(false);
+            setSocketVersion(v => v + 1);
+        });
+
+        newSocket.on('connect_error', (err) => {
+            console.error('[Socket] Connection Error:', err.message);
+            setSocket(null);
+            setIsConnected(false);
+        });
 
         newSocket.on('initial_presence_list', (ids: string[]) => {
             setOnlineUserIds(ids);
         });
 
-        newSocket.on('user_online', ({ userId }: { userId: string }) => {
-            setOnlineUserIds(prev => prev.includes(userId) ? prev : [...prev, userId]);
+        newSocket.on('user_online', ({ userId: uid }: { userId: string }) => {
+            setOnlineUserIds(prev => prev.includes(uid) ? prev : [...prev, uid]);
         });
 
-        newSocket.on('user_offline', ({ userId }: { userId: string }) => {
-            setOnlineUserIds(prev => prev.filter(id => id !== userId));
+        newSocket.on('user_offline', ({ userId: uid }: { userId: string }) => {
+            setOnlineUserIds(prev => prev.filter(id => id !== uid));
         });
 
-        const handleChatNotification = async (data: { from: string; fromName?: string; text: string; roomName?: string }) => {
-            // Persist message metadata for offline visibility
+        const handleChatNotification = async (data: {
+            from: string;
+            fromName?: string;
+            text: string;
+            roomName?: string;
+        }) => {
             if (data.roomName) {
                 await db.chatMessages.put({
                     fromId: data.from,
-                    toId: user.id,
+                    toId: userId,
                     roomName: data.roomName,
                     text: data.text,
                     createdAt: new Date().toISOString(),
-                    read: false
+                    read: false,
                 }).catch(e => console.error('Error persisting chat notification:', e));
             }
 
-            // Always update internal unread state
             setUnreadMessages(prev => {
                 const next = { ...prev, [data.from]: true };
                 unreadMessagesRef.current = next;
@@ -125,8 +163,8 @@ export const useDashboardSocket = ({ user, onNotification, onConferenceInvite, o
                         background: '#333',
                         color: '#fff',
                         fontSize: '12px',
-                        fontWeight: 'bold'
-                    }
+                        fontWeight: 'bold',
+                    },
                 });
             }
         };
@@ -134,13 +172,10 @@ export const useDashboardSocket = ({ user, onNotification, onConferenceInvite, o
         newSocket.on('new_chat_notification', handleChatNotification);
 
         newSocket.on('conference_invite', (data: { roomId: string; hostId: string; hostRole: string }) => {
-            if (onConferenceInviteRef.current) {
-                onConferenceInviteRef.current(data);
-            }
+            onConferenceInviteRef.current?.(data);
         });
 
         newSocket.on('new_notification', async (data: NotificationPayload) => {
-            // Persist to Dexie for offline access
             const notifId = (data.id as string) || `local-${Date.now()}`;
             await db.notifications.put({
                 id: notifId,
@@ -149,7 +184,7 @@ export const useDashboardSocket = ({ user, onNotification, onConferenceInvite, o
                 type: (data.type as string) || 'system',
                 read: false,
                 createdAt: (data.createdAt as string) || new Date().toISOString(),
-                link: data.link as string | undefined
+                link: data.link as string | undefined,
             }).catch(e => console.error('Error persisting notification:', e));
 
             if (onNewNotificationRef.current) {
@@ -164,54 +199,39 @@ export const useDashboardSocket = ({ user, onNotification, onConferenceInvite, o
                         background: '#3b82f6',
                         color: '#fff',
                         fontSize: '12px',
-                        fontWeight: 'bold'
-                    }
+                        fontWeight: 'bold',
+                    },
                 });
             }
         });
 
-        // Listen for new reports
         newSocket.on('new_report_to_review', () => {
-            if (onNewReportRef.current) {
-                onNewReportRef.current();
-            }
+            onNewReportRef.current?.();
         });
 
-        // Listen for report status updates
         newSocket.on('report_status_updated_for_supervisor', () => {
-            if (onReportStatusUpdateRef.current) {
-                onReportStatusUpdateRef.current();
-            }
+            onReportStatusUpdateRef.current?.();
         });
 
         return () => {
-            newSocket.off('connect');
-            newSocket.off('disconnect');
-            newSocket.off('initial_presence_list');
-            newSocket.off('user_online');
-            newSocket.off('user_offline');
-            newSocket.off('new_chat_notification');
-            newSocket.off('conference_invite');
-            newSocket.off('new_notification');
-            newSocket.off('new_report_to_review');
-            newSocket.off('report_status_updated_for_supervisor');
             newSocket.disconnect();
             socketRef.current = null;
+            setSocket(null);
+            setIsConnected(false);
+            setSocketVersion(v => v + 1);
         };
     }, [user?.id, user?.name, user?.role, playNotificationSound]);
 
-    // Fetch initial unread status on mount/reconnect
+    // Fetch initial unread chat status when connected
     useEffect(() => {
         if (!user?.id || !isConnected) return;
 
         const fetchUnread = async () => {
             try {
                 const res = await api.get('/chat/unread-senders');
-                const senderIds = res.data; // Array of IDs
+                const senderIds: string[] = res.data;
                 const unreadMap: Record<string, boolean> = {};
-                senderIds.forEach((id: string) => {
-                    unreadMap[id] = true;
-                });
+                senderIds.forEach(id => { unreadMap[id] = true; });
                 setUnreadMessages(unreadMap);
                 unreadMessagesRef.current = unreadMap;
             } catch (error) {
@@ -231,14 +251,11 @@ export const useDashboardSocket = ({ user, onNotification, onConferenceInvite, o
     }, []);
 
     return {
-        // socketRef is a stable ref — its .current is the live socket or null.
-        // Using a ref avoids the temporary null that useState creates during
-        // StrictMode cleanup, which caused "socket.on is not a function" crashes.
-        socketRef,
+        socket,
         onlineUserIds,
         unreadMessages,
         isConnected,
         playNotificationSound,
-        markAsRead
+        markAsRead,
     };
 };
