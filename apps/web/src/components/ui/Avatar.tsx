@@ -14,6 +14,8 @@ export interface AvatarProps {
     size?: 'sm' | 'md' | 'lg' | 'xl';
     /** Exibe o indicador de status online (verde/cinza). */
     isOnline?: boolean;
+    /** Exibe um ponto vermelho pulsante para mensagens não lidas. */
+    hasUnread?: boolean;
     /** Classes CSS adicionais para o container. */
     className?: string;
 }
@@ -27,6 +29,7 @@ export const Avatar: React.FC<AvatarProps> = ({
     alt = 'Usuário',
     size = 'md',
     isOnline,
+    hasUnread,
     className = ''
 }) => {
     const sizeClasses = {
@@ -76,6 +79,19 @@ export const Avatar: React.FC<AvatarProps> = ({
           border-2 border-[var(--bg-primary)] 
           rounded-full 
           ${isOnline ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.4)]' : 'bg-[var(--text-tertiary)]'}
+        `} />
+            )}
+
+            {hasUnread && (
+                <div className={`
+          absolute -top-0.5 -right-0.5 
+          ${size === 'sm' ? 'w-2.5 h-2.5' : 'w-3.5 h-3.5'} 
+          bg-rose-500 
+          border-2 border-[var(--bg-primary)] 
+          rounded-full 
+          animate-pulse
+          shadow-[0_0_10px_rgba(244,63,94,0.5)]
+          z-10
         `} />
             )}
         </div>

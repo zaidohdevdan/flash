@@ -1,11 +1,11 @@
 import { useState, useEffect, useMemo } from 'react';
 import { api } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
+import { useSearchParams, useNavigate, useOutletContext } from 'react-router-dom';
+import type { Socket } from 'socket.io-client';
 import { ChatWidget } from '../../components/ChatWidget';
 import { Card, Avatar } from '../../components/ui';
 import { Search, RefreshCw, MessageSquare } from 'lucide-react';
-import { useSearchParams, useNavigate, useOutletContext } from 'react-router-dom';
-import type { Socket } from 'socket.io-client';
 
 interface UserContact {
     id: string;
@@ -14,7 +14,7 @@ interface UserContact {
     avatarUrl?: string;
 }
 
-export function SupervisorChat() {
+export function ManagerChat() {
     const { user } = useAuth();
     const { socket, onlineUserIds = [], unreadMessages = {}, markAsRead } = useOutletContext<{
         socket: Socket | null,
@@ -35,8 +35,8 @@ export function SupervisorChat() {
             setIsLoading(true);
             try {
                 const [subRes, contactsRes] = await Promise.all([
-                    api.get('/subordinates'),
-                    api.get('/support-network') // e.g., admins or other managers depending on backend
+                    api.get('/users/subordinates'),
+                    api.get('/users/network')
                 ]);
                 setSubordinates(subRes.data);
                 setContacts(contactsRes.data);
@@ -49,8 +49,6 @@ export function SupervisorChat() {
         fetchContacts();
     }, []);
 
-    // Also include any generic admins, if they are returned in support-network.
-    // Dashboard.tsx combined both into a single selectable list.
     const allContacts = useMemo(() => {
         const map = new Map<string, UserContact>();
         [...subordinates, ...contacts].forEach(c => {
@@ -63,7 +61,6 @@ export function SupervisorChat() {
 
     const activeChatId = searchParams.get('chat');
 
-    // Derived selected user
     const selectedUser = useMemo(() => {
         if (!activeChatId) return null;
         return allContacts.find(c => c.id === activeChatId) || null;
@@ -94,17 +91,18 @@ export function SupervisorChat() {
 
     const handleStartVideo = () => {
         if (!activeChatId) return;
-        // Generate a room name based on the chat (similar to ChatWidget's internal logic for stability)
         const roomName = `war-room-${[user?.id || '', activeChatId].map(id => id.trim().toLowerCase()).sort().join('-')}`;
-        navigate(`/supervisor/conference?room=${roomName}`);
+        // Temporarily, we can use the supervisor's conference route if Manager doesn't have one, or just an alert here.
+        // Assuming we will add /manager/conference
+        navigate(`/manager/conference?room=${roomName}`);
     };
 
     return (
         <div className="flex flex-col h-[calc(100dvh-10rem)] lg:h-[calc(100dvh-12rem)] overflow-hidden animate-in fade-in duration-500">
             <div className={`flex-col md:flex-row md:items-center justify-between gap-4 mb-5 flex-shrink-0 ${activeChatId ? 'hidden lg:flex' : 'flex'}`}>
                 <div>
-                    <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter uppercase">Central de Mensagens</h1>
-                    <p className="text-slate-500 dark:text-slate-400 font-bold mt-2 uppercase tracking-[0.2em] text-[10px]">Comunicação Direta P2P</p>
+                    <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter uppercase">Comunicação Operacional</h1>
+                    <p className="text-slate-500 dark:text-slate-400 font-bold mt-2 uppercase tracking-[0.2em] text-[10px]">Portal de Mensagens e War Room</p>
                 </div>
             </div>
 
@@ -116,7 +114,7 @@ export function SupervisorChat() {
                             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                             <input
                                 type="text"
-                                placeholder="Buscar contatos..."
+                                placeholder="Buscar Rede de Contatos..."
                                 className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/5 rounded-xl text-[11px] font-black uppercase tracking-widest text-slate-900 dark:text-slate-200 focus:ring-2 focus:ring-indigo-500/50 outline-none transition-all placeholder:text-slate-400"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -158,7 +156,7 @@ export function SupervisorChat() {
                                                 {contact.name}
                                             </h4>
                                             <p className={`text-[9px] uppercase tracking-widest font-bold mt-0.5 ${activeChatId === contact.id ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-500'}`}>
-                                                {contact.role === 'PROFESSIONAL' ? 'Agente Opc.' : contact.role === 'ADMIN' ? 'Administração' : contact.role}
+                                                {contact.role === 'PROFESSIONAL' ? 'Agente Operacional' : contact.role === 'SUPERVISOR' ? 'Comandante/Gestor' : contact.role}
                                             </p>
                                         </div>
                                     </button>
@@ -188,7 +186,7 @@ export function SupervisorChat() {
                                 <MessageSquare className="w-8 h-8 text-slate-400 dark:text-slate-500" />
                             </div>
                             <h3 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight">Selecione uma conversa</h3>
-                            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-2">Escolha um contato na lista para iniciar</p>
+                            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-2">Escolha um contato na lista para iniciar a comunicação</p>
                         </Card>
                     )}
                 </div>
@@ -197,7 +195,4 @@ export function SupervisorChat() {
     );
 }
 
-// Ensure default export if used with Next.js or React.lazy where appropriate, 
-// though our App.tsx expects named export `SupervisorChat` in some places.
-// We'll export both.
-export default SupervisorChat;
+export default ManagerChat;

@@ -129,6 +129,7 @@ export const useDashboardSocket = ({
         });
 
         const handleChatNotification = async (data: {
+            id?: string;
             from: string;
             fromName?: string;
             text: string;
@@ -136,6 +137,7 @@ export const useDashboardSocket = ({
         }) => {
             if (data.roomName) {
                 await db.chatMessages.put({
+                    id: data.id,
                     fromId: data.from,
                     toId: userId,
                     roomName: data.roomName,

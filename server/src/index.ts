@@ -159,9 +159,9 @@ async function bootstrap() {
                 // console.log(`[Socket] ${myId} joined room ${roomName}`);
             });
 
-            socket.on('private_message', (data: { targetUserId: string, text?: string, audioUrl?: string, audioPublicId?: string }) => {
+            socket.on('private_message', (data: { id?: string, targetUserId: string, text?: string, audioUrl?: string, audioPublicId?: string }) => {
                 const myId = socket.handshake.query.userId as string;
-                const { targetUserId, text, audioUrl, audioPublicId } = data;
+                const { id, targetUserId, text, audioUrl, audioPublicId } = data;
 
                 if (!targetUserId || !myId) return;
 
@@ -170,6 +170,7 @@ async function bootstrap() {
 
                 // Persist message in database
                 chatService.saveMessage({
+                    id,
                     fromId: String(myId),
                     toId: String(targetUserId),
                     text,
@@ -188,9 +189,11 @@ async function bootstrap() {
 
                     // Emit a separate notification event to the recipient's private room
                     io.to(String(targetUserId)).emit('new_chat_notification', {
+                        id: savedMsg.id,
                         from: myId,
                         fromName: socket.handshake.query.userName || 'Alguém',
                         text: text || (audioUrl ? 'Mensagem de áudio' : 'Nova mensagem'),
+                        roomName: roomName,
                         createdAt: savedMsg.createdAt,
                         expiresAt: savedMsg.expiresAt
                     });

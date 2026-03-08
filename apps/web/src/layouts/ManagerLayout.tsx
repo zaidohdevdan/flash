@@ -5,13 +5,13 @@ import { useAuth } from '../contexts/AuthContext';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../services/db';
 import { api } from '../services/api';
+import { toast } from 'react-hot-toast';
 import { useDashboardSocket } from '../hooks/useDashboardSocket';
 
-export function AdminLayout() {
+export function ManagerLayout() {
     const { user, signOut, notificationsEnabled } = useAuth();
     const navigate = useNavigate();
     const [searchTerm, setSearchTerm] = useState('');
-
     const notifications = useLiveQuery(() => db.notifications.orderBy('createdAt').reverse().toArray()) || [];
 
     const { socket, onlineUserIds, unreadMessages, markAsRead } = useDashboardSocket({
@@ -27,20 +27,22 @@ export function AdminLayout() {
             ]);
         } catch (error) {
             console.error('Erro ao marcar como lida:', error);
+            await db.notifications.update(id, { read: true });
         }
     };
 
     const handleMarkAllAsRead = async () => {
         try {
-            await api.post('/notifications/mark-all-read');
+            await api.post('/notifications/read-all');
             const allLocal = await db.notifications.toArray();
             await db.transaction('rw', db.notifications, async () => {
                 for (const n of allLocal) {
                     await db.notifications.update(n.id, { read: true });
                 }
             });
+            toast.success('Todas marcadas como lidas');
         } catch (error) {
-            console.error('Erro ao marcar todas como lidas:', error);
+            console.error('Erro ao marcar todas:', error);
         }
     };
 
@@ -51,7 +53,8 @@ export function AdminLayout() {
                 db.notifications.delete(id)
             ]);
         } catch (error) {
-            console.error('Erro ao excluir notificação:', error);
+            console.error('Erro:', error);
+            await db.notifications.delete(id);
         }
     };
 

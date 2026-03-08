@@ -40,6 +40,7 @@ export const AnalysisModal: React.FC<AnalysisModalProps> = ({
             isOpen={isOpen}
             onClose={onClose}
             title={modalTitle}
+            variant="dark"
             subtitle="DETERMINE O PRÓXIMO PROTOCOLO OPERACIONAL"
             maxWidth="lg"
             footer={
@@ -75,12 +76,12 @@ export const AnalysisModal: React.FC<AnalysisModalProps> = ({
                     onChange={e => setFeedback(e.target.value)}
                     placeholder="DESCREVA A ANÁLISE OU INSTRUÇÕES PARA ESTE REGISTRO..."
                     rows={6}
-                    className="bg-white dark:bg-black/40 border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-700 font-bold text-xs !rounded-2xl backdrop-blur-md"
+                    className="bg-white/5 border-white/10 text-white placeholder:text-slate-700 font-bold text-xs !rounded-2xl backdrop-blur-md"
                 />
 
                 <div className="space-y-5">
-                    <label className="text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.3em] ml-1">ETAPA OPERACIONAL</label>
-                    <div className="grid grid-cols-3 gap-2 p-1.5 bg-slate-50 dark:bg-black/40 rounded-2xl border border-slate-200 dark:border-white/5 backdrop-blur-md">
+                    <label className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em] ml-1">ETAPA OPERACIONAL</label>
+                    <div className="grid grid-cols-3 gap-2 p-1.5 bg-white/5 rounded-2xl border border-white/5 backdrop-blur-md">
                         {[
                             { id: 'IN_REVIEW', label: 'ANÁLISE', activeColor: 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' },
                             { id: 'FORWARDED', label: 'TRAMITAR', activeColor: 'bg-amber-600 text-white shadow-lg shadow-amber-500/20' },
@@ -105,7 +106,7 @@ export const AnalysisModal: React.FC<AnalysisModalProps> = ({
                                     <select
                                         value={selectedDeptId}
                                         onChange={e => setSelectedDeptId(e.target.value)}
-                                        className="w-full px-6 py-4 bg-white dark:bg-black/40 border border-slate-200 dark:border-white/5 rounded-2xl outline-none focus:border-indigo-500/50 transition-all font-black text-slate-800 dark:text-white appearance-none text-[11px] uppercase tracking-widest backdrop-blur-md shadow-inner"
+                                        className="w-full px-6 py-4 bg-white/5 border border-white/5 rounded-2xl outline-none focus:border-indigo-500/50 transition-all font-black text-white appearance-none text-[11px] uppercase tracking-widest backdrop-blur-md shadow-inner"
                                         aria-label="Selecionar Destino"
                                         title="Selecionar Destino"
                                     >

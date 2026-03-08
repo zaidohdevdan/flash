@@ -9,44 +9,43 @@ export class PrismaChatRepository implements IChatRepository {
         });
     }
 
-    async save(data: { fromId: string, toId: string, text?: string, audioUrl?: string, audioPublicId?: string, room: string, expiresAt?: Date, createdAt?: Date }): Promise<ChatMessage> {
+    async save(data: { id?: string, fromId: string, toId: string, text?: string, audioUrl?: string, audioPublicId?: string, room: string, expiresAt?: Date, createdAt?: Date }): Promise<ChatMessage> {
         return prisma.chatMessage.create({
             data
         });
     }
 
-    async findByRoom(room: string): Promise<ChatMessage[]> {
+    async findByRoom(room: string, userId?: string): Promise<ChatMessage[]> {
         return prisma.chatMessage.findMany({
-            where: { room },
+            where: {
+                room,
+                AND: [
+                    { deletedForEveryone: false },
+                    userId ? {
+                        OR: [
+                            { fromId: userId, deletedForSender: false },
+                            { toId: userId, deletedForReceiver: false },
+                            { fromId: { not: userId }, toId: { not: userId } } // Security fallback, though room logic handles this
+                        ]
+                    } : {}
+                ]
+            },
             orderBy: { createdAt: 'asc' }
         });
     }
 
     async softDeleteByRoom(room: string, userId: string): Promise<void> {
-        // Find all messages in the room
-        const messages = await prisma.chatMessage.findMany({
-            where: { room }
+        // Bulk update for messages sent by the user
+        await prisma.chatMessage.updateMany({
+            where: { room, fromId: userId },
+            data: { deletedForSender: true }
         });
 
-        const updates = messages.map(msg => {
-            if (msg.fromId === userId) {
-                return prisma.chatMessage.update({
-                    where: { id: msg.id },
-                    data: { deletedForSender: true }
-                });
-            } else if (msg.toId === userId) {
-                // If there's no deletedForReceiver, we might need a different approach or we add deletedForReceiver
-                // Wait, if I just add deletedForReceiver to schema it will require db push.
-                // Or I can delete it if both have deleted it? But for now let's just use deletedForReceiver?
-                return prisma.chatMessage.update({
-                    where: { id: msg.id },
-                    data: { deletedForReceiver: true }
-                });
-            }
-            return Promise.resolve();
+        // Bulk update for messages received by the user
+        await prisma.chatMessage.updateMany({
+            where: { room, toId: userId },
+            data: { deletedForReceiver: true }
         });
-
-        await Promise.all(updates);
     }
 
     async deleteByRoom(room: string): Promise<void> {
@@ -78,12 +77,13 @@ export class PrismaChatRepository implements IChatRepository {
         });
     }
 
-    async softDelete(id: string, type: 'me' | 'everyone'): Promise<ChatMessage> {
+    async softDelete(id: string, type: 'me' | 'everyone' | 'sender' | 'receiver'): Promise<ChatMessage> {
         return prisma.chatMessage.update({
             where: { id },
             data: {
-                deletedForSender: type === 'me' ? true : undefined,
-                deletedForEveryone: type === 'everyone' ? true : undefined
+                deletedForSender: (type === 'me' || type === 'sender') ? true : undefined,
+                deletedForReceiver: (type === 'receiver') ? true : undefined,
+                deletedForEveryone: (type === 'everyone') ? true : undefined
             }
         });
     }

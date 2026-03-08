@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { DashboardLayout } from './DashboardLayout';
 import { useAuth } from '../contexts/AuthContext';
@@ -5,11 +6,18 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../services/db';
 import { api } from '../services/api';
 import { toast } from 'react-hot-toast';
+import { useDashboardSocket } from '../hooks/useDashboardSocket';
 
 export function SupervisorLayout() {
-    const { user, signOut } = useAuth();
+    const { user, signOut, notificationsEnabled } = useAuth();
     const navigate = useNavigate();
+    const [searchTerm, setSearchTerm] = useState('');
     const notifications = useLiveQuery(() => db.notifications.orderBy('createdAt').reverse().toArray()) || [];
+
+    const { socket, onlineUserIds, unreadMessages, markAsRead } = useDashboardSocket({
+        user: user ? { id: user.id || '', name: user.name || '', role: user.role || '' } : null,
+        notificationsEnabled
+    });
 
     const handleMarkAsRead = async (id: string) => {
         try {
@@ -59,8 +67,10 @@ export function SupervisorLayout() {
             onMarkAsRead={handleMarkAsRead}
             onMarkAllAsRead={handleMarkAllAsRead}
             onDelete={handleDeleteNotification}
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
         >
-            <Outlet />
+            <Outlet context={{ socket, onlineUserIds, unreadMessages, markAsRead, searchTerm, setSearchTerm }} />
         </DashboardLayout>
     );
 }

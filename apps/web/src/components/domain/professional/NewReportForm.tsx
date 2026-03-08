@@ -36,14 +36,14 @@ export const NewReportForm: FC<NewReportFormProps> = ({
                     Evidências Fotográficas <span className="text-slate-400 dark:text-slate-600">[{previews.length}/10]</span>
                 </label>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
                     {previews.map((preview, index) => (
-                        <div key={index} className="relative aspect-square rounded-2xl bg-slate-100 dark:bg-black/40 border border-slate-200 dark:border-white/5 overflow-hidden group shadow-2xl backdrop-blur-sm">
+                        <div key={index} className="relative aspect-square rounded-2xl bg-slate-100 dark:bg-black/40 border border-slate-200 dark:border-white/5 overflow-hidden group shadow-md md:shadow-2xl backdrop-blur-sm">
                             <img src={preview} alt={`Evidence ${index + 1}`} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                             <button
                                 type="button"
                                 onClick={() => onRemoveImage(index)}
-                                className="absolute top-2 right-2 p-2 bg-rose-500/90 text-white rounded-xl shadow-lg backdrop-blur-md transition-all hover:bg-rose-600 scale-0 group-hover:scale-100"
+                                className="absolute top-2 right-2 p-2 bg-rose-500/90 text-white rounded-xl shadow-lg backdrop-blur-md transition-all hover:bg-rose-600 scale-100 md:scale-0 md:group-hover:scale-100 hover:scale-110"
                                 title="Remover"
                             >
                                 <X className="w-4 h-4" />

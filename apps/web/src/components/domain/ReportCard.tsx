@@ -50,10 +50,10 @@ export const ReportCard: React.FC<ReportCardProps> = React.memo(({
                     {/* Modern Decorative Background */}
                     <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 blur-[60px] -mr-16 -mt-16 group-hover:bg-indigo-500/10 transition-colors" />
 
-                    <div className="relative z-10">
-                        <div className="flex justify-between items-start mb-4">
+                    <div className="relative z-10 w-full">
+                        <div className="flex flex-wrap justify-between items-start mb-4 gap-2 w-full">
                             <div
-                                className="flex items-center gap-2 px-3 py-1.5 bg-white/5 dark:bg-black/20 rounded-xl border border-white/10 dark:border-white/5 group-hover:border-indigo-500/30 transition-all cursor-copy"
+                                className="flex items-center gap-2 px-3 py-1.5 bg-white/5 dark:bg-black/20 rounded-xl border border-white/10 dark:border-white/5 group-hover:border-indigo-500/30 transition-all cursor-copy shrink-0"
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     navigator.clipboard.writeText(protocol);
@@ -61,9 +61,11 @@ export const ReportCard: React.FC<ReportCardProps> = React.memo(({
                                 }}
                             >
                                 <Hash className="w-3.5 h-3.5 text-indigo-400 opacity-60" />
-                                <span className="text-[13px] font-black text-slate-800 dark:text-white uppercase tracking-[0.2em]">{protocol}</span>
+                                <span className="text-[12px] font-black text-slate-800 dark:text-white uppercase tracking-[0.2em]">{protocol}</span>
                             </div>
-                            <Badge status={report.status} className="origin-top-right shadow-lg shadow-black/20" />
+                            <div className="scale-90 origin-top-right shrink-0">
+                                <Badge status={report.status} className="shadow-lg shadow-black/20" />
+                            </div>
                         </div>
 
                         <div className="space-y-1">

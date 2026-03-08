@@ -41,11 +41,9 @@ const MemberItem = React.memo(({ member, onClick }: { member: TeamMember, onClic
                     src={member.avatarUrl}
                     size="md"
                     isOnline={member.isOnline}
+                    hasUnread={member.hasUnread}
                     className="group-hover/item:scale-110 transition-transform ring-2 ring-slate-200 dark:ring-white/5 shadow-2xl"
                 />
-                {member.hasUnread && (
-                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-rose-500 rounded-full border-2 border-white dark:border-[#020617] animate-bounce shadow-lg" />
-                )}
             </div>
 
             <div className="flex-1 min-w-0">

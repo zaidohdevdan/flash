@@ -9,6 +9,7 @@ interface UseReportsParams {
     startDate?: string;
     endDate?: string;
     search?: string;
+    endpoint?: string;
 }
 
 export function useReports({
@@ -17,7 +18,8 @@ export function useReports({
     status,
     startDate,
     endDate,
-    search
+    search,
+    endpoint
 }: UseReportsParams) {
     return useQuery({
         queryKey: ['reports', { page, limit, status, startDate, endDate, search }],
@@ -31,7 +33,7 @@ export function useReports({
             // Search is typically handled client-side in the component based on current implementation
             // but if backend supported it, we'd append it here.
 
-            const { data } = await api.get<Report[]>(`/reports?${params.toString()}`);
+            const { data } = await api.get<Report[]>(`${endpoint || '/reports'}?${params.toString()}`);
             return data;
         },
         placeholderData: keepPreviousData,

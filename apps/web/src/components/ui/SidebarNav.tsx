@@ -16,8 +16,17 @@ export function SidebarNav({ user, onProfileClick, onLogout }: SidebarNavProps) 
     const location = useLocation();
 
     const menuItems = [
-        { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard', roles: ['PROFESSIONAL'] },
-        { icon: LayoutDashboard, label: 'Painel Gestor', path: '/manager-dashboard', roles: ['MANAGER'] },
+        { icon: Target, label: 'Novo Registro', path: '/dashboard/new', roles: ['PROFESSIONAL'] },
+        { icon: LayoutDashboard, label: 'Visão Geral', path: '/dashboard/overview', roles: ['PROFESSIONAL'] },
+        { icon: MessageSquare, label: 'Comunicação', path: '/dashboard/chat', roles: ['PROFESSIONAL'] },
+    ];
+
+    const managerItems = [
+        { icon: Target, label: 'Inteligência Gestora', path: '/manager/intelligence' },
+        { icon: Network, label: 'Esteira Operacional', path: '/manager/operations' },
+        { icon: Users, label: 'Equipe & War Room', path: '/manager/team' },
+        { icon: Archive, label: 'Arquivo Base', path: '/manager/archive' },
+        { icon: MessageSquare, label: 'Comunicação', path: '/manager/chat' },
     ];
 
     const supervisorItems = [
@@ -48,6 +57,7 @@ export function SidebarNav({ user, onProfileClick, onLogout }: SidebarNavProps) 
         if (!user) return [];
         if (user.role === 'ADMIN') return [...adminItems, ...commonItems];
         if (user.role === 'SUPERVISOR') return [...supervisorItems, ...commonItems];
+        if (user.role === 'MANAGER') return [...managerItems, ...commonItems];
 
         const roleSpecific = menuItems.filter(item => item.roles.includes(user?.role || ''));
         return [...roleSpecific, ...commonItems];

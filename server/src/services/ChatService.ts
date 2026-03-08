@@ -13,7 +13,7 @@ export class ChatService {
         this.chatRepository = chatRepository;
     }
 
-    async saveMessage(data: { fromId: string, toId: string, text?: string, audioUrl?: string, audioPublicId?: string, room: string, createdAt?: Date }) {
+    async saveMessage(data: { id?: string, fromId: string, toId: string, text?: string, audioUrl?: string, audioPublicId?: string, room: string, createdAt?: Date }) {
         let expiresAt: Date | undefined;
         if (data.audioUrl) {
             expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutos
@@ -22,15 +22,7 @@ export class ChatService {
     }
 
     async getHistory(room: string, userId: string) {
-        const messages = await this.chatRepository.findByRoom(room);
-
-        // Filtrar mensagens
-        return messages.filter(msg => {
-            if (msg.deletedForEveryone) return false;
-            if (msg.fromId === userId && msg.deletedForSender) return false;
-            if (msg.toId === userId && msg.deletedForReceiver) return false;
-            return true;
-        });
+        return this.chatRepository.findByRoom(room, userId);
     }
 
     async deleteHistory(room: string, userId: string) {
@@ -47,23 +39,31 @@ export class ChatService {
 
         // Se for "para todos":
         if (type === 'everyone') {
-            // Se tiver áudio/mídia, remover do Cloudinary
+            // Apenas o remetente pode apagar para todos
+            if (message.fromId !== userId) {
+                throw new Error('Sem permissão para apagar mensagem de terceiros para todos.');
+            }
+
+            // Se tiver áudio/mídia, remover do Cloudinary (sem await para não travar o banco)
             if (message.audioPublicId) {
-                try {
-                    await cloudinary.uploader.destroy(message.audioPublicId, { resource_type: 'video' });
-                } catch (e) {
-                    console.error('[ChatService] Error deleting from Cloudinary:', e);
-                }
+                cloudinary.uploader.destroy(message.audioPublicId, { resource_type: 'video' }).catch(e => {
+                    console.error('[ChatService] Error deleting from Cloudinary (Async):', e);
+                });
             }
             // Chama o softDelete com tag 'everyone'
             return this.chatRepository.softDelete(id, 'everyone');
         }
 
         // Se for "para mim":
-        // Apenas marca flag deletedForSender
         if (type === 'me') {
-            return this.chatRepository.softDelete(id, 'me');
+            if (message.fromId === userId) {
+                return this.chatRepository.softDelete(id, 'sender');
+            } else if (message.toId === userId) {
+                return this.chatRepository.softDelete(id, 'receiver');
+            }
         }
+
+        throw new Error('Mensagem não pertence a este usuário.');
     }
 
     async markAsRead(room: string, userId: string) {

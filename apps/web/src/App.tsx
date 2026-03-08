@@ -7,12 +7,16 @@ import { UserSettingsEffects } from './components/UserSettingsEffects';
 // Lazy loaded pages
 const Login = lazy(() => import('./pages/Login').then(m => ({ default: m.Login })));
 const Register = lazy(() => import('./pages/Register').then(m => ({ default: m.Register })));
-const CreateReport = lazy(() => import('./pages/CreateReport').then(m => ({ default: m.CreateReport })));
-const ManagerDashboard = lazy(() => import('./pages/ManagerDashboard').then(m => ({ default: m.ManagerDashboard })));
 const Home = lazy(() => import('./pages/Home').then(m => ({ default: m.Home })));
 const Analytics = lazy(() => import('./pages/Analytics').then(m => ({ default: m.Analytics })));
 const Profile = lazy(() => import('./pages/Profile').then(m => ({ default: m.Profile })));
 const Settings = lazy(() => import('./pages/Settings'));
+
+// Professional Modular Pages
+const ProfessionalLayout = lazy(() => import('./layouts/ProfessionalLayout').then(m => ({ default: m.ProfessionalLayout })));
+const ProfessionalOverview = lazy(() => import('./pages/professional/Overview').then(m => ({ default: m.Overview })));
+const ProfessionalNewReport = lazy(() => import('./pages/professional/NewReport').then(m => ({ default: m.NewReport })));
+const ProfessionalChat = lazy(() => import('./pages/professional/Chat').then(m => ({ default: m.Chat })));
 
 // Admin Modular Pages
 const AdminOverview = lazy(() => import('./pages/admin/AdminOverview').then(m => ({ default: m.AdminOverview })));
@@ -33,6 +37,14 @@ const SupervisorSupport = lazy(() => import('./pages/supervisor/Support').then(m
 const SupervisorArchive = lazy(() => import('./pages/supervisor/Archive').then(m => ({ default: m.Archive })));
 const SupervisorChat = lazy(() => import('./pages/supervisor/Chat').then(m => ({ default: m.SupervisorChat })));
 const SupervisorConference = lazy(() => import('./pages/supervisor/Conference').then(m => ({ default: m.Conference })));
+
+// Manager Modular Pages
+const ManagerLayout = lazy(() => import('./layouts/ManagerLayout').then(m => ({ default: m.ManagerLayout })));
+const ManagerIntelligence = lazy(() => import('./pages/manager/Intelligence').then(m => ({ default: m.Intelligence })));
+const ManagerOperations = lazy(() => import('./pages/manager/Operations').then(m => ({ default: m.Operations })));
+const ManagerTeam = lazy(() => import('./pages/manager/Team').then(m => ({ default: m.Team })));
+const ManagerArchive = lazy(() => import('./pages/manager/Archive').then(m => ({ default: m.Archive })));
+const ManagerChat = lazy(() => import('./pages/manager/Chat').then(m => ({ default: m.ManagerChat })));
 
 // Loading Component
 const PageLoader = () => (
@@ -62,8 +74,10 @@ function PrivateRoute({ children, role }: { children: React.ReactNode, role?: st
     if (!roles.includes(user?.role || '')) {
       if (user?.role === 'ADMIN') return <Navigate to="/admin/overview" />;
       if (user?.role === 'SUPERVISOR') return <Navigate to="/supervisor/intelligence" />;
-      if (user?.role === 'PROFESSIONAL') return <Navigate to="/dashboard" />;
-      if (user?.role === 'MANAGER') return <Navigate to="/manager-dashboard" />;
+      if (user?.role === 'PROFESSIONAL') return <Navigate to="/dashboard/new" />;
+      if (user?.role === 'MANAGER') return <Navigate to="/manager/intelligence" />;
+      // Fallback
+      return <Navigate to="/login" />;
     }
   }
 
@@ -76,8 +90,10 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
   if (isAuthenticated) {
     if (user?.role === 'ADMIN') return <Navigate to="/admin/overview" />;
     if (user?.role === 'SUPERVISOR') return <Navigate to="/supervisor/intelligence" />;
-    if (user?.role === 'PROFESSIONAL') return <Navigate to="/dashboard" />; // Note: The old professional route /create-report is now bound to /dashboard visually for them
-    if (user?.role === 'MANAGER') return <Navigate to="/manager-dashboard" />;
+    if (user?.role === 'PROFESSIONAL') return <Navigate to="/dashboard/new" />;
+    if (user?.role === 'MANAGER') return <Navigate to="/manager/intelligence" />;
+    // Fallback if role is unrecognized
+    return <Navigate to="/" />;
   }
 
   return <>{children}</>;
@@ -90,14 +106,15 @@ function AppRoutes() {
       <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
       <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
 
-      <Route path="/dashboard" element={
-        <PrivateRoute role={['PROFESSIONAL', 'SUPERVISOR']}>
-          {/* Default fallback for legacy endpoints / professional specific dashboard */}
-          {useAuth().user?.role === 'SUPERVISOR' ? <Navigate to="/supervisor/intelligence" replace /> : <CreateReport />}
-        </PrivateRoute>
-      } />
+      {/* Professional Central Hub */}
+      <Route path="/dashboard" element={<PrivateRoute role={['PROFESSIONAL', 'SUPERVISOR']}><ProfessionalLayout /></PrivateRoute>}>
+        <Route index element={<Navigate to="new" replace />} />
+        <Route path="overview" element={<ProfessionalOverview />} />
+        <Route path="new" element={<ProfessionalNewReport />} />
+        <Route path="chat" element={<ProfessionalChat />} />
+      </Route>
 
-      <Route path="/create-report" element={<Navigate to="/dashboard" replace />} />
+      <Route path="/create-report" element={<Navigate to="/dashboard/new" replace />} />
 
       {/* Supervisor Central Hub */}
       <Route path="/supervisor" element={<PrivateRoute role="SUPERVISOR"><SupervisorLayout /></PrivateRoute>}>
@@ -123,12 +140,16 @@ function AppRoutes() {
         <Route path="logs" element={<AdminLogs />} />
       </Route>
 
-
-      <Route path="/manager-dashboard" element={
-        <PrivateRoute role="MANAGER">
-          <ManagerDashboard />
-        </PrivateRoute>
-      } />
+      {/* Manager Central Hub */}
+      <Route path="/manager" element={<PrivateRoute role="MANAGER"><ManagerLayout /></PrivateRoute>}>
+        <Route index element={<Navigate to="intelligence" replace />} />
+        <Route path="intelligence" element={<ManagerIntelligence />} />
+        <Route path="operations" element={<ManagerOperations />} />
+        <Route path="team" element={<ManagerTeam />} />
+        <Route path="archive" element={<ManagerArchive />} />
+        <Route path="chat" element={<ManagerChat />} />
+        <Route path="conference" element={<SupervisorConference />} />
+      </Route>
 
       <Route path="/analytics" element={
         <PrivateRoute role={['SUPERVISOR', 'MANAGER']}>

@@ -119,10 +119,10 @@ export function Home() {
 
     useEffect(() => {
         if (!loading && isAuthenticated && user) {
-            if (user.role === 'ADMIN') navigate('/admin-dashboard');
-            else if (user.role === 'SUPERVISOR') navigate('/dashboard');
-            else if (user.role === 'PROFESSIONAL') navigate('/create-report');
-            else if (user.role === 'MANAGER') navigate('/manager-dashboard');
+            if (user.role === 'ADMIN') navigate('/admin/overview');
+            else if (user.role === 'SUPERVISOR') navigate('/supervisor/intelligence');
+            else if (user.role === 'PROFESSIONAL') navigate('/dashboard/new');
+            else if (user.role === 'MANAGER') navigate('/manager/intelligence');
         }
     }, [isAuthenticated, user, loading, navigate]);
 

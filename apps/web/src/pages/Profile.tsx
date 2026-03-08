@@ -84,10 +84,10 @@ export function Profile() {
 
             // Redirecionar baseado na role
             setTimeout(() => {
-                if (user?.role === 'SUPERVISOR') navigate('/dashboard');
-                else if (user?.role === 'MANAGER') navigate('/manager-dashboard');
-                else if (user?.role === 'ADMIN') navigate('/admin-dashboard');
-                else navigate('/create-report');
+                if (user?.role === 'SUPERVISOR') navigate('/supervisor/intelligence');
+                else if (user?.role === 'MANAGER') navigate('/manager/intelligence');
+                else if (user?.role === 'ADMIN') navigate('/admin/overview');
+                else navigate('/dashboard/overview');
             }, 1000);
 
         } catch (error) {

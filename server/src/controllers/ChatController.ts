@@ -3,6 +3,9 @@ import { ChatService } from '../services/ChatService';
 
 const chatService = new ChatService();
 
+// Validação de ObjectId do MongoDB (24 caracteres hex)
+const isValidObjectId = (id: any) => /^[0-9a-fA-F]{24}$/.test(String(id));
+
 export const ChatController = {
     async listHistory(req: Request, res: Response) {
         try {
@@ -34,6 +37,10 @@ export const ChatController = {
             const { text } = req.body;
             const userId = req.userId!;
 
+            if (!isValidObjectId(id)) {
+                return res.status(404).json({ error: 'Mensagem não encontrada (ID inválido).' });
+            }
+
             const message = await chatService.getMessageById(id as string);
             if (!message) return res.status(404).json({ error: 'Mensagem não encontrada.' });
             if (message.fromId !== userId) return res.status(403).json({ error: 'Não autorizado.' });
@@ -50,19 +57,21 @@ export const ChatController = {
         try {
             const { id } = req.params;
             const userId = req.userId!;
-
-            const message = await chatService.getMessageById(id as string);
-            if (!message) return res.status(404).json({ error: 'Mensagem não encontrada.' });
-            if (message.fromId !== userId) return res.status(403).json({ error: 'Não autorizado.' });
-
             const { type } = req.query; // 'me' | 'everyone'
             const deleteType = (type === 'me' || type === 'everyone') ? type : 'everyone';
 
+            if (!isValidObjectId(id)) {
+                return res.status(404).json({ error: 'Mensagem não encontrada (ID inválido).' });
+            }
+
+            // O ChatService já valida se o usuário tem permissão (fromId ou toId)
             await chatService.deleteMessage(id as string, userId, deleteType);
             return res.status(204).send();
-        } catch (error) {
+        } catch (error: any) {
             console.error('Erro ao deletar mensagem:', error);
-            return res.status(500).json({ error: 'Erro ao deletar mensagem.' });
+            const status = error.message?.includes('permissão') ? 403 :
+                error.message?.includes('encontrada') ? 404 : 500;
+            return res.status(status).json({ error: error.message || 'Erro ao deletar mensagem.' });
         }
     },
 
@@ -107,15 +116,19 @@ export const ChatController = {
     async sendMessage(req: Request, res: Response) {
         try {
             const fromId = req.userId!;
-            const { targetUserId, text, audioUrl, audioPublicId, createdAt } = req.body;
+            const { id, targetUserId, text, audioUrl, audioPublicId, createdAt } = req.body;
 
             if (!targetUserId) {
                 return res.status(400).json({ error: 'targetUserId é obrigatório.' });
             }
 
+            // Se o ID enviado não for um ObjectId válido, ignoramos para que o banco gere um novo
+            const sanitizedId = isValidObjectId(id) ? id : undefined;
+
             const room = ChatService.getRoomName(fromId, targetUserId);
 
             const savedMsg = await chatService.saveMessage({
+                id: sanitizedId,
                 fromId,
                 toId: targetUserId,
                 text,

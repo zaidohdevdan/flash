@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
+import { useState, useRef, useEffect, useMemo, useCallback, useSyncExternalStore } from 'react';
 import { Socket } from 'socket.io-client';
 import { Send, Mic, X, MessageSquare, Square, Trash2, Hourglass, Pencil, Check, CheckCheck, Trash, User, RefreshCw, Video } from 'lucide-react';
 import { api } from '../services/api';
@@ -6,9 +6,17 @@ import { useAuth } from '../contexts/AuthContext';
 import { db } from '../services/db';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { toast } from 'react-hot-toast';
+import { Avatar } from './ui';
 
 const getRoomName = (id1: string, id2: string) => {
     return `private-${[id1, id2].map(id => id.trim().toLowerCase()).sort().join('-')}`;
+};
+
+// Helper para gerar IDs compatíveis com MongoDB (24 hex chars)
+const generateMongoId = () => {
+    const timestamp = Math.floor(Date.now() / 1000).toString(16).padStart(8, '0');
+    const randomHex = Array.from({ length: 16 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
+    return timestamp + randomHex;
 };
 
 interface Message {
@@ -24,7 +32,7 @@ interface Message {
 
 interface ChatWidgetProps {
     currentUser: { id: string; role: string; name: string };
-    targetUser: { id: string; name: string; role?: string }; // Who we are talking to
+    targetUser: { id: string; name: string; role?: string; avatarUrl?: string | null; isOnline?: boolean }; // Who we are talking to
     onClose: () => void;
     socket: Socket | null;
     onRead?: (userId: string) => void;
@@ -95,17 +103,19 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead, i
         const fetchHistory = async () => {
             try {
                 const response = await api.get(`/chat/history/${encodeURIComponent(chatRoom)}`);
-                for (const msg of response.data) {
-                    await db.chatMessages.put({
-                        id: msg.id || crypto.randomUUID(),
-                        fromId: msg.fromId || msg.from,
-                        toId: (msg.fromId || msg.from) === currentUser.id ? targetUser.id : currentUser.id,
-                        roomName: chatRoom,
-                        text: msg.text,
-                        audioUrl: msg.audioUrl,
-                        createdAt: msg.createdAt,
-                        read: !!msg.read
-                    });
+                const messagesToPut = response.data.map((msg: Message) => ({
+                    id: msg.id || generateMongoId(),
+                    fromId: msg.fromId || msg.from,
+                    toId: (msg.fromId || msg.from) === currentUser.id ? targetUser.id : currentUser.id,
+                    roomName: chatRoom,
+                    text: msg.text,
+                    audioUrl: msg.audioUrl,
+                    createdAt: msg.createdAt,
+                    read: !!msg.read
+                }));
+
+                if (messagesToPut.length > 0) {
+                    await db.chatMessages.bulkPut(messagesToPut);
                 }
             } catch (error) {
                 console.error('Error fetching chat history:', error);
@@ -116,24 +126,20 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead, i
         markRoomAsReadRef.current();
     }, [chatRoom, currentUser.id, targetUser.id]);
 
-    // Track whether the socket is genuinely connected using plain .on/.off
-    const [isSocketConnected, setIsSocketConnected] = useState(false);
-    useEffect(() => {
-        if (!socket) {
-            setIsSocketConnected(false);
-            return;
-        }
-        // May already be connected when the prop arrives
-        if (socket.connected) setIsSocketConnected(true);
-        const handleConnect = () => setIsSocketConnected(true);
-        const handleDisconnect = () => setIsSocketConnected(false);
-        socket.on('connect', handleConnect);
-        socket.on('disconnect', handleDisconnect);
-        return () => {
-            socket.off('connect', handleConnect);
-            socket.off('disconnect', handleDisconnect);
-        };
-    }, [socket]);
+    // Track whether the socket is genuinely connected using useSyncExternalStore
+    const isSocketConnected = useSyncExternalStore(
+        useCallback((onStoreChange) => {
+            if (!socket) return () => { };
+            socket.on('connect', onStoreChange);
+            socket.on('disconnect', onStoreChange);
+            return () => {
+                socket.off('connect', onStoreChange);
+                socket.off('disconnect', onStoreChange);
+            };
+        }, [socket]),
+        () => socket?.connected ?? false,
+        () => false // Server snapshot
+    );
 
     // Emit join_private_chat only when both room + connection are ready
     const hasJoinedRef = useRef<string | null>(null);
@@ -152,7 +158,7 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead, i
         const handlePrivateMessage = async (msg: Message) => {
             if (isMounted) {
                 await db.chatMessages.put({
-                    id: msg.id || crypto.randomUUID(),
+                    id: msg.id || generateMongoId(),
                     fromId: msg.fromId || msg.from || '',
                     toId: (msg.fromId || msg.from) === currentUser.id ? targetUser.id : currentUser.id,
                     roomName: chatRoom,
@@ -224,11 +230,11 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead, i
         scrollToBottom();
     }, [allMessages]);
 
+
     const handleSendMessage = async () => {
         if (!inputText.trim()) return;
-
         const messageData = {
-            id: crypto.randomUUID(),
+            id: generateMongoId(),
             fromId: currentUser.id,
             toId: targetUser.id,
             roomName: chatRoom,
@@ -236,23 +242,25 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead, i
             createdAt: new Date().toISOString()
         };
 
+        // Optimistic insert
+        await db.chatMessages.add(messageData);
+        setInputText('');
+
         if (!navigator.onLine || !socket) {
-            await db.chatMessages.add(messageData);
             await db.pendingMessages.add({
                 toId: targetUser.id,
                 text: inputText,
                 createdAt: Date.now()
             });
-            setInputText('');
             toast.success('Mensagem salva offline. Será enviada ao reconectar.', { icon: '💾' });
             return;
         }
 
         socket.emit('private_message', {
+            id: messageData.id,
             targetUserId: targetUser.id,
-            text: inputText
+            text: messageData.text
         });
-        setInputText('');
     };
 
     const startRecording = async () => {
@@ -302,7 +310,20 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead, i
             const audioPublicId = response.data.publicId;
 
             if (socket) {
+                const messageData = {
+                    id: generateMongoId(),
+                    fromId: currentUser.id,
+                    toId: targetUser.id,
+                    roomName: chatRoom,
+                    audioUrl,
+                    createdAt: new Date().toISOString()
+                };
+
+                // Optimistic insert
+                await db.chatMessages.add(messageData);
+
                 socket.emit('private_message', {
+                    id: messageData.id,
                     targetUserId: targetUser.id,
                     audioUrl,
                     audioPublicId
@@ -317,11 +338,18 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead, i
     const handleClearHistory = async () => {
         if (!window.confirm('Deseja limpar o histórico desta conversa?')) return;
         try {
-            await api.delete(`/chat/history/${encodeURIComponent(chatRoom)}`);
+            // Optimistic update: Clear local DB immediately
             await db.chatMessages.where('roomName').equals(chatRoom).delete();
+
+            // Sync with backend in the background
+            api.delete(`/chat/history/${encodeURIComponent(chatRoom)}`).catch(error => {
+                console.error('Background error clearing chat history:', error);
+                toast.error('Erro ao sincronizar limpeza de histórico.');
+            });
+
         } catch (error) {
-            console.error('Error clearing chat history:', error);
-            alert('Erro ao limpar histórico.');
+            console.error('Error in optimistic clear history:', error);
+            toast.error('Erro ao limpar histórico localmente.');
         }
     };
 
@@ -347,16 +375,25 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead, i
 
     const confirmDelete = async (messageId: string, type: 'me' | 'everyone') => {
         try {
-            await api.delete(`/chat/messages/${messageId}?type=${type}`);
-            if (type === 'everyone') {
-                socket?.emit('delete_message', { messageId, roomName: chatRoom });
-            }
+            // Optimistic update: Delete from local UI/DB first
             await db.chatMessages.delete(messageId);
             setSelectedMessageId(null);
             setShowDeleteMenuFor(null);
+
+            // Notify others immediately via socket if it's for everyone
+            if (type === 'everyone') {
+                socket?.emit('delete_message', { messageId, roomName: chatRoom });
+            }
+
+            // Sync with backend in the background
+            api.delete(`/chat/messages/${messageId}?type=${type}`).catch(error => {
+                console.error('Background error deleting message:', error);
+                toast.error('Erro ao sincronizar exclusão com o servidor.');
+            });
+
         } catch (error) {
-            console.error('Error deleting message:', error);
-            alert('Erro ao excluir mensagem.');
+            console.error('Error in optimistic delete:', error);
+            toast.error('Erro ao excluir mensagem localmente.');
         }
     };
 
@@ -375,9 +412,12 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead, i
             {/* Header */}
             <div className="p-4 bg-[var(--bg-primary)]/80 backdrop-blur-xl text-[var(--text-primary)] flex justify-between items-center border-b border-[var(--border-subtle)]">
                 <div className="flex items-center gap-3">
-                    <div className="bg-[var(--accent-primary)]/10 p-2 rounded-full text-[var(--accent-primary)]">
-                        <MessageSquare className="w-5 h-5" />
-                    </div>
+                    <Avatar
+                        src={targetUser?.avatarUrl || null}
+                        alt={targetUser?.name}
+                        size="md"
+                        isOnline={targetUser?.isOnline}
+                    />
                     <div>
                         <h3 className="font-bold text-sm text-[var(--text-primary)]">{targetUser.name}</h3>
                         <p className="text-[10px] text-[var(--text-tertiary)] uppercase tracking-wider">
