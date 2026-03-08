@@ -156,24 +156,24 @@ export function AdminTickets() {
                 </button>
             </div>
 
-            <Card variant="white" className="p-4 grid grid-cols-1 md:grid-cols-4 gap-4 border-[var(--border-subtle)]">
-                <div className="relative col-span-1 md:col-span-3">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-tertiary)]" />
+            <Card variant="white" className="p-3 grid grid-cols-1 md:grid-cols-4 gap-4 bg-white/70 dark:bg-black/60 border border-slate-200 dark:border-white/5 shadow-xl backdrop-blur-md">
+                <div className="relative col-span-1 md:col-span-3 w-full">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500" />
                     <input
                         type="text"
                         placeholder="Buscar por Protocolo..."
                         value={filters.protocol}
                         onChange={e => setFilters(prev => ({ ...prev, protocol: e.target.value }))}
-                        className="w-full pl-10 pr-4 py-3 bg-[var(--bg-tertiary)] border-transparent border rounded-xl focus:bg-[var(--bg-primary)] focus:border-[var(--accent-primary)] outline-none transition-all text-sm font-medium text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)]"
+                        className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-black/40 border-slate-200 dark:border-white/5 border rounded-xl focus:bg-white dark:focus:bg-black/60 focus:border-indigo-500 outline-none transition-all text-sm font-bold text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 uppercase tracking-tight"
                     />
                 </div>
-                <div className="relative">
-                    <FilterIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-tertiary)]" />
+                <div className="flex items-center gap-2 bg-slate-50 dark:bg-black/40 p-1.5 rounded-xl w-full md:w-auto border border-slate-200 dark:border-white/5 shadow-inner relative">
+                    <FilterIcon className="w-4 h-4 text-slate-400 dark:text-slate-500 ml-2 hidden md:block" />
                     <select
                         title="Filtrar por Status"
                         value={filters.status}
                         onChange={e => setFilters(prev => ({ ...prev, status: e.target.value }))}
-                        className="w-full pl-10 pr-4 py-3 bg-[var(--bg-tertiary)] border-transparent border rounded-xl outline-none focus:ring-2 focus:ring-[var(--border-subtle)] appearance-none text-sm font-medium text-[var(--text-secondary)]"
+                        className="bg-transparent border-none outline-none text-xs font-bold text-slate-600 dark:text-slate-400 py-2 px-4 cursor-pointer uppercase tracking-wide w-full md:w-auto appearance-none"
                     >
                         <option value="">Status (Todos)</option>
                         <option value="OPEN">Em Aberto</option>
@@ -183,11 +183,11 @@ export function AdminTickets() {
                 </div>
             </Card>
 
-            <Card variant="white" className="overflow-hidden border-[var(--border-subtle)]">
+            <Card variant="white" className="overflow-hidden bg-white/70 dark:bg-black/60 border border-slate-200 dark:border-white/5 shadow-2xl backdrop-blur-md rounded-2xl">
                 <div className="overflow-x-auto w-full">
                     <table className="w-full min-w-max text-left border-collapse">
                         <thead>
-                            <tr className="bg-[var(--bg-tertiary)] text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest border-b border-[var(--border-subtle)]">
+                            <tr className="bg-slate-50 dark:bg-black/40 text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest border-b border-slate-200 dark:border-white/5">
                                 <th className="px-6 py-4">Data / Protocolo</th>
                                 <th className="px-6 py-4">Usuário / Prioridade</th>
                                 <th className="px-6 py-4">Problema Relatado</th>
@@ -208,21 +208,21 @@ export function AdminTickets() {
                                     <tr key={ticket.id} className="table-row-hover group">
                                         <td className="px-6 py-4">
                                             <div className="flex flex-col gap-1">
-                                                <div className="flex items-center gap-1.5 text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider">
-                                                    <Clock className="w-3 h-3" />
+                                                <div className="flex items-center gap-1.5 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+                                                    <Clock className="w-3 h-3 opacity-50" />
                                                     {format(new Date(ticket.createdAt), "dd/MM/yy 'às' HH:mm", { locale: ptBR })}
                                                 </div>
-                                                <span className="font-mono text-sm font-black text-[var(--text-primary)]">
+                                                <span className="font-mono text-sm font-black text-slate-900 dark:text-white">
                                                     #{ticket.protocol}
                                                 </span>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="flex flex-col gap-1">
-                                                <span className="font-bold text-sm text-[var(--text-primary)] flex items-center gap-2">
+                                                <span className="font-black text-sm text-slate-900 dark:text-white flex items-center gap-2 uppercase tracking-tight">
                                                     {ticket.supervisor.name}
                                                     {ticket.supervisor.id === 'CURRENT_USER_ID' && (
-                                                        <span className="text-[10px] bg-[var(--accent-primary)]/10 text-[var(--accent-primary)] px-2 py-0.5 rounded-full uppercase tracking-wider">Você</span>
+                                                        <span className="text-[10px] bg-indigo-500/10 text-indigo-500 px-2 py-0.5 rounded-full uppercase tracking-wider">Você</span>
                                                     )}
                                                 </span>
                                                 <span className={`text-[10px] font-black uppercase tracking-widest flex items-center gap-1 ${getPriorityStyle(ticket.priority)}`}>
@@ -233,10 +233,10 @@ export function AdminTickets() {
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="max-w-xs xl:max-w-sm">
-                                                <p className="text-sm font-bold text-[var(--text-primary)] mb-1">
+                                                <p className="text-sm font-black text-slate-900 dark:text-white mb-1 uppercase tracking-tight leading-tight">
                                                     {ticket.subject.replace(/_/g, ' ')}
                                                 </p>
-                                                <p className="text-sm text-[var(--text-secondary)] font-medium leading-relaxed line-clamp-2">
+                                                <p className="text-[13px] text-slate-500 dark:text-slate-400 font-bold leading-relaxed line-clamp-2">
                                                     {ticket.message || 'Sem descrição adicional'}
                                                 </p>
                                                 {ticket.category && (

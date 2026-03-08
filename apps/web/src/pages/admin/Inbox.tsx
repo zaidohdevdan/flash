@@ -128,24 +128,24 @@ export function AdminInbox() {
                 </button>
             </div>
 
-            <Card variant="white" className="p-4 border-[var(--border-subtle)]">
+            <Card variant="white" className="p-3 bg-white/70 dark:bg-black/60 border border-slate-200 dark:border-white/5 shadow-xl backdrop-blur-md">
                 <div className="relative w-full">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-tertiary)]" />
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500" />
                     <input
                         type="text"
                         placeholder="Buscar por Nome, Empresa, E-mail ou Assunto..."
                         value={searchQuery}
                         onChange={e => setSearchQuery(e.target.value)}
-                        className="w-full pl-10 pr-4 py-3 bg-[var(--bg-tertiary)] border-transparent border rounded-xl focus:bg-[var(--bg-primary)] focus:border-[var(--accent-primary)] outline-none transition-all text-sm font-medium text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)]"
+                        className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-black/40 border-slate-200 dark:border-white/5 border rounded-xl focus:bg-white dark:focus:bg-black/60 focus:border-indigo-500 outline-none transition-all text-sm font-bold text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 uppercase tracking-tight"
                     />
                 </div>
             </Card>
 
-            <Card variant="white" className="overflow-hidden border-[var(--border-subtle)]">
+            <Card variant="white" className="overflow-hidden bg-white/70 dark:bg-black/60 border border-slate-200 dark:border-white/5 shadow-2xl backdrop-blur-md rounded-2xl">
                 <div className="overflow-x-auto w-full">
                     <table className="w-full min-w-max text-left border-collapse">
                         <thead>
-                            <tr className="bg-[var(--bg-tertiary)] text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest border-b border-[var(--border-subtle)]">
+                            <tr className="bg-slate-50 dark:bg-black/40 text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest border-b border-slate-200 dark:border-white/5">
                                 <th className="px-6 py-4">Remetente / Empresa</th>
                                 <th className="px-6 py-4">Mensagem de Contato</th>
                                 <th className="px-6 py-4">Status / Tempo</th>
@@ -162,20 +162,20 @@ export function AdminInbox() {
                                 </tr>
                             ) : (
                                 displayedMessages.map(contact => (
-                                    <tr key={contact.id} className={`table-row-hover group transition-colors ${!contact.read ? 'bg-blue-500/10' : ''}`}>
+                                    <tr key={contact.id} className={`table-row-hover group transition-colors ${!contact.read ? 'bg-indigo-500/5 dark:bg-indigo-500/10' : ''}`}>
                                         <td className="px-6 py-4">
                                             <div className="flex flex-col gap-1 w-48 truncate">
-                                                <span className={`text-sm ${!contact.read ? 'font-black text-indigo-700' : 'font-bold text-[var(--text-primary)]'}`}>
+                                                <span className={`text-sm ${!contact.read ? 'font-black text-indigo-600 dark:text-indigo-400' : 'font-black text-slate-900 dark:text-white uppercase tracking-tight'}`}>
                                                     {contact.name}
                                                 </span>
-                                                <span className={`text-xs ${!contact.read ? 'font-medium text-indigo-500' : 'text-[var(--text-secondary)]'}`}>
+                                                <span className={`text-[11px] font-bold ${!contact.read ? 'text-indigo-500/80' : 'text-slate-500 dark:text-slate-500'}`}>
                                                     {contact.email}
                                                 </span>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="max-w-md xl:max-w-xl">
-                                                <p className={`text-sm leading-relaxed whitespace-pre-wrap ${!contact.read ? 'text-indigo-900 font-medium' : 'text-[var(--text-secondary)]'}`}>
+                                                <p className={`text-sm leading-relaxed whitespace-pre-wrap ${!contact.read ? 'text-indigo-900 dark:text-indigo-100 font-bold' : 'text-slate-600 dark:text-slate-400 font-medium'}`}>
                                                     {contact.message}
                                                 </p>
                                             </div>
@@ -185,11 +185,11 @@ export function AdminInbox() {
                                                 {contact.read ? (
                                                     <Badge status="RESOLVED" label="LIDA" />
                                                 ) : (
-                                                    <span className="text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg border border-indigo-200 bg-indigo-100 text-indigo-600 flex items-center gap-1.5 shadow-sm">
+                                                    <span className="text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg border border-indigo-200 dark:border-indigo-500/30 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center gap-1.5 shadow-sm">
                                                         <AlertCircle className="w-3.5 h-3.5" /> NOVA
                                                     </span>
                                                 )}
-                                                <div className="flex items-center gap-1.5 text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider mt-1">
+                                                <div className="flex items-center gap-1.5 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-1">
                                                     <Clock className="w-3 h-3" />
                                                     {format(new Date(contact.createdAt), "dd/MM/yy 'às' HH:mm", { locale: ptBR })}
                                                 </div>
