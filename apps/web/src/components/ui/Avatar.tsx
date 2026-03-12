@@ -74,23 +74,24 @@ export const Avatar: React.FC<AvatarProps> = ({
 
             {isOnline !== undefined && (
                 <div className={`
-          absolute -bottom-0.5 -right-0.5 
-          ${size === 'sm' ? 'w-2.5 h-2.5' : 'w-3.5 h-3.5'} 
-          border-2 border-[var(--bg-primary)] 
+          absolute -bottom-1 -right-1 
+          ${size === 'sm' ? 'w-2.5 h-2.5' : 'w-4 h-4'} 
+          border-[3px] border-white dark:border-[#020617] 
           rounded-full 
-          ${isOnline ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.4)]' : 'bg-[var(--text-tertiary)]'}
+          ${isOnline ? 'bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.7)] animate-pulse' : 'bg-slate-500'}
+          transition-colors duration-500
         `} />
             )}
 
             {hasUnread && (
                 <div className={`
-          absolute -top-0.5 -right-0.5 
-          ${size === 'sm' ? 'w-2.5 h-2.5' : 'w-3.5 h-3.5'} 
+          absolute -top-1 -right-1 
+          ${size === 'sm' ? 'w-2.5 h-2.5' : 'w-4 h-4'} 
           bg-rose-500 
-          border-2 border-[var(--bg-primary)] 
+          border-[3px] border-white dark:border-[#020617] 
           rounded-full 
-          animate-pulse
-          shadow-[0_0_10px_rgba(244,63,94,0.5)]
+          animate-bounce
+          shadow-[0_0_15px_rgba(244,63,94,0.6)]
           z-10
         `} />
             )}

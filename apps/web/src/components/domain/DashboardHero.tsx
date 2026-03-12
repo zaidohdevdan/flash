@@ -1,4 +1,5 @@
 import { BarChart3, AlertCircle, Download, Video, Calendar, LifeBuoy, History as HistoryIcon, type LucideIcon } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { Button } from '../ui';
 import { KpiCard } from './KpiCard';
 
@@ -60,9 +61,39 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
     onHistoryClick,
     children
 }) => {
+    const btnMotion = {
+        whileHover: { scale: 1.05, y: -2 },
+        whileTap: { scale: 0.95 },
+        transition: { type: 'spring', stiffness: 400, damping: 10 }
+    } as const;
+
     return (
-        <div className="pb-10 animate-in fade-in slide-in-from-top-4 duration-700">
-            <div className="flex flex-col gap-8 mb-10">
+        <div className="pb-10 relative overflow-hidden">
+            {/* Tactical Scanning Scanline */}
+            <style>
+                {`
+                    @keyframes scanline {
+                        0% { transform: translateY(-100%); opacity: 0; }
+                        50% { opacity: 0.5; }
+                        100% { transform: translateY(100vh); opacity: 0; }
+                    }
+                    .tactical-scanline {
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 4px;
+                        background: linear-gradient(to right, transparent, rgba(99, 102, 241, 0.2), transparent);
+                        box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
+                        z-index: 10;
+                        pointer-events: none;
+                        animation: scanline 8s linear infinite;
+                    }
+                `}
+            </style>
+            <div className="tactical-scanline" />
+
+            <div className="flex flex-col gap-8 mb-10 relative z-20">
                 {/* Header Section */}
                 <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-8">
                     <div>
@@ -71,64 +102,76 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
                     </div>
                     <div className="flex flex-wrap items-center gap-3">
                         {onAnalyticsClick && (
-                            <Button
-                                variant="secondary"
-                                onClick={onAnalyticsClick}
-                                className="bg-white/70 dark:bg-white/5 border-slate-200 dark:border-white/5 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white font-black uppercase tracking-widest text-[11px] h-10 px-4 rounded-xl shadow-sm transition-all"
-                            >
-                                <BarChart3 className="w-4 h-4 mr-2 text-indigo-500 dark:text-indigo-400" />
-                                Inteligência
-                            </Button>
+                            <motion.div {...btnMotion}>
+                                <Button
+                                    variant="secondary"
+                                    onClick={onAnalyticsClick}
+                                    className="bg-white/70 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white font-black uppercase tracking-widest text-[11px] h-10 px-4 rounded-xl shadow-lg shadow-black/5 transition-all"
+                                >
+                                    <BarChart3 className="w-4 h-4 mr-2 text-indigo-500 dark:text-indigo-400" />
+                                    Inteligência
+                                </Button>
+                            </motion.div>
                         )}
                         {onExportClick && (
-                            <Button
-                                variant="secondary"
-                                onClick={onExportClick}
-                                className="bg-white/70 dark:bg-white/5 border-slate-200 dark:border-white/5 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white font-black uppercase tracking-widest text-[11px] h-10 px-4 rounded-xl shadow-sm transition-all"
-                            >
-                                <Download className="w-4 h-4 mr-2 text-indigo-500 dark:text-indigo-400" />
-                                Transmitir
-                            </Button>
+                            <motion.div {...btnMotion}>
+                                <Button
+                                    variant="secondary"
+                                    onClick={onExportClick}
+                                    className="bg-white/70 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white font-black uppercase tracking-widest text-[11px] h-10 px-4 rounded-xl shadow-lg shadow-black/5 transition-all"
+                                >
+                                    <Download className="w-4 h-4 mr-2 text-indigo-500 dark:text-indigo-400" />
+                                    Transmitir
+                                </Button>
+                            </motion.div>
                         )}
                         {onConferenceClick && (
-                            <Button
-                                variant="secondary"
-                                onClick={onConferenceClick}
-                                className="bg-indigo-50 dark:bg-indigo-600/20 border-indigo-200 dark:border-indigo-500/20 text-indigo-600 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-600/30 hover:text-indigo-700 dark:hover:text-indigo-200 font-black uppercase tracking-widest text-[11px] h-10 px-4 rounded-xl shadow-[0_0_15px_rgba(99,102,241,0.1)] transition-all"
-                            >
-                                <Video className="w-4 h-4 mr-2" />
-                                Operações
-                            </Button>
+                            <motion.div {...btnMotion}>
+                                <Button
+                                    variant="secondary"
+                                    onClick={onConferenceClick}
+                                    className="bg-indigo-50 dark:bg-indigo-600/20 border-indigo-200 dark:border-indigo-500/20 text-indigo-600 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-600/30 hover:text-indigo-700 dark:hover:text-indigo-200 font-black uppercase tracking-widest text-[11px] h-10 px-4 rounded-xl shadow-xl shadow-indigo-500/10 transition-all"
+                                >
+                                    <Video className="w-4 h-4 mr-2" />
+                                    Operações
+                                </Button>
+                            </motion.div>
                         )}
                         {onAgendaClick && (
-                            <Button
-                                variant="secondary"
-                                onClick={onAgendaClick}
-                                className="bg-white/70 dark:bg-white/5 border-slate-200 dark:border-white/5 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white font-black uppercase tracking-widest text-[11px] h-10 px-4 rounded-xl shadow-sm transition-all"
-                            >
-                                <Calendar className="w-4 h-4 mr-2 text-indigo-500 dark:text-indigo-400" />
-                                Agenda
-                            </Button>
+                            <motion.div {...btnMotion}>
+                                <Button
+                                    variant="secondary"
+                                    onClick={onAgendaClick}
+                                    className="bg-white/70 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white font-black uppercase tracking-widest text-[11px] h-10 px-4 rounded-xl shadow-lg shadow-black/5 transition-all"
+                                >
+                                    <Calendar className="w-4 h-4 mr-2 text-indigo-500 dark:text-indigo-400" />
+                                    Agenda
+                                </Button>
+                            </motion.div>
                         )}
                         {onSupportClick && (
-                            <Button
-                                variant="secondary"
-                                onClick={onSupportClick}
-                                className="bg-white/70 dark:bg-white/5 border-slate-200 dark:border-white/5 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white font-black uppercase tracking-widest text-[11px] h-10 px-4 rounded-xl shadow-sm transition-all"
-                            >
-                                <LifeBuoy className="w-4 h-4 mr-2 text-indigo-500 dark:text-indigo-400" />
-                                Suporte
-                            </Button>
+                            <motion.div {...btnMotion}>
+                                <Button
+                                    variant="secondary"
+                                    onClick={onSupportClick}
+                                    className="bg-white/70 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white font-black uppercase tracking-widest text-[11px] h-10 px-4 rounded-xl shadow-lg shadow-black/5 transition-all"
+                                >
+                                    <LifeBuoy className="w-4 h-4 mr-2 text-indigo-500 dark:text-indigo-400" />
+                                    Suporte
+                                </Button>
+                            </motion.div>
                         )}
                         {onHistoryClick && (
-                            <Button
-                                variant="secondary"
-                                onClick={onHistoryClick}
-                                className="bg-white/70 dark:bg-white/5 border-slate-200 dark:border-white/5 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white font-black uppercase tracking-widest text-[11px] h-10 px-4 rounded-xl shadow-sm transition-all"
-                            >
-                                <HistoryIcon className="w-4 h-4 mr-2 text-indigo-500 dark:text-indigo-400" />
-                                Arquivos
-                            </Button>
+                            <motion.div {...btnMotion}>
+                                <Button
+                                    variant="secondary"
+                                    onClick={onHistoryClick}
+                                    className="bg-white/70 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white font-black uppercase tracking-widest text-[11px] h-10 px-4 rounded-xl shadow-lg shadow-black/5 transition-all"
+                                >
+                                    <HistoryIcon className="w-4 h-4 mr-2 text-indigo-500 dark:text-indigo-400" />
+                                    Arquivos
+                                </Button>
+                            </motion.div>
                         )}
                         {children}
                     </div>

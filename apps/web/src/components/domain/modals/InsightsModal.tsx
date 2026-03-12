@@ -80,7 +80,6 @@ ${d.predictions.trend === 'UP'
             isOpen={isOpen}
             onClose={onClose}
             title="Flash Intelligence"
-            variant="dark"
             subtitle="Análise Preditiva e Insights"
             maxWidth="lg"
             footer={
@@ -119,7 +118,7 @@ ${d.predictions.trend === 'UP'
                     </div>
                 ) : (
                     <div className="space-y-6 animate-in slide-in-from-bottom-2 duration-500">
-                        <div className="p-6 bg-white/5 rounded-2xl border border-white/5 shadow-inner backdrop-blur-md">
+                        <div className="p-6 bg-slate-50 dark:bg-white/5 rounded-2xl border border-slate-200 dark:border-white/5 shadow-inner">
                             <pre className="whitespace-pre-wrap font-sans text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-bold">
                                 {insightText}
                             </pre>

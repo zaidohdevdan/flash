@@ -46,7 +46,7 @@ export function Chat() {
                     isConnected={navigator.onLine}
                 />
             </div>
-            <div className="flex-1 bg-white dark:bg-black/40 border border-slate-200 dark:border-white/5 rounded-[2rem] shadow-2xl overflow-hidden relative">
+            <div className="flex-1 min-h-0 flex flex-col relative">
                 <ChatWidget
                     inline
                     currentUser={{ id: user.id || '', name: user.name || '', role: user.role || '' }}

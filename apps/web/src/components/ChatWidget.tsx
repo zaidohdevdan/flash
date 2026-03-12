@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useMemo, useCallback, useSyncExternalStore } from 'react';
 import { Socket } from 'socket.io-client';
-import { Send, Mic, X, MessageSquare, Square, Trash2, Hourglass, Pencil, Check, CheckCheck, Trash, User, RefreshCw, Video } from 'lucide-react';
+import { Send, Mic, X, MessageSquare, Square, Trash2, Hourglass, Pencil, Check, CheckCheck, Trash, User, RefreshCw, Video, Play, Pause } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { db } from '../services/db';
@@ -39,6 +40,74 @@ interface ChatWidgetProps {
     inline?: boolean;
     onVideoClick?: () => void;
 }
+
+const TacticalAudioPlayer = ({ src, isMe }: { src: string, isMe: boolean }) => {
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [progress, setProgress] = useState(0);
+    const audioRef = useRef<HTMLAudioElement | null>(null);
+
+    const togglePlay = () => {
+        if (!audioRef.current) return;
+        if (isPlaying) {
+            audioRef.current.pause();
+        } else {
+            audioRef.current.play();
+        }
+        setIsPlaying(!isPlaying);
+    };
+
+    const handleTimeUpdate = () => {
+        if (audioRef.current) {
+            const p = (audioRef.current.currentTime / audioRef.current.duration) * 100;
+            setProgress(p);
+        }
+    };
+
+    const handleEnded = () => {
+        setIsPlaying(false);
+        setProgress(0);
+    };
+
+    return (
+        <div className={`p-2.5 sm:p-3 rounded-2xl flex items-center gap-3 ${isMe ? 'bg-black/20' : 'bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10'}`}>
+            <audio
+                ref={audioRef}
+                src={src}
+                onTimeUpdate={handleTimeUpdate}
+                onEnded={handleEnded}
+                onPlay={() => setIsPlaying(true)}
+                onPause={() => setIsPlaying(false)}
+            />
+            <button
+                onClick={togglePlay}
+                className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-all active:scale-90 ${isMe ? 'bg-indigo-500 shadow-lg shadow-indigo-500/20' : 'bg-indigo-500/20'}`}
+            >
+                {isPlaying ? (
+                    <Pause className={`w-3 h-3 ${isMe ? 'text-white' : 'text-indigo-500'}`} fill="currentColor" />
+                ) : (
+                    <Play className={`w-3 h-3 ml-0.5 ${isMe ? 'text-white' : 'text-indigo-500'}`} fill="currentColor" />
+                )}
+            </button>
+            <div className="flex flex-col gap-1 min-w-[120px] flex-1">
+                <div className="h-1 w-full bg-indigo-500/10 dark:bg-white/5 rounded-full overflow-hidden relative">
+                    <motion.div
+                        className="absolute inset-y-0 left-0 bg-indigo-500"
+                        animate={{ width: `${progress}%` }}
+                        transition={{ type: 'spring', bounce: 0, duration: 0.1 }}
+                    />
+                    {isPlaying && (
+                        <div className="absolute inset-0 bg-indigo-500/10 animate-pulse" />
+                    )}
+                </div>
+                <div className="flex justify-between items-center">
+                    <span className={`text-[8px] font-black uppercase tracking-[0.1em] ${isMe ? 'text-white/40' : 'text-slate-500 dark:text-slate-400'}`}>
+                        {isPlaying ? 'Decoding Stream...' : 'Tatical Audio Log'}
+                    </span>
+                </div>
+            </div>
+        </div>
+    );
+};
 
 export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead, inline = false, onVideoClick }: ChatWidgetProps) {
     const { notificationsEnabled } = useAuth();
@@ -404,36 +473,50 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead, i
     };
 
     return (
-        <div className={
-            inline
-                ? "w-full h-full flex flex-col bg-white dark:bg-black/20 md:rounded-[2.5rem] border border-slate-200 dark:border-white/5 shadow-xl backdrop-blur-xl overflow-hidden"
-                : "fixed inset-0 sm:top-auto sm:left-auto sm:bottom-6 sm:right-6 w-full sm:w-[400px] md:w-[440px] h-[100dvh] sm:h-[650px] sm:max-h-[calc(100vh-4rem)] bg-[var(--bg-primary)]/90 backdrop-blur-[32px] sm:rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden sm:border border-[var(--border-subtle)] ring-1 ring-black/5 z-[60] animate-in slide-in-from-bottom-5 fade-in duration-500"
-        }>
+        <motion.div
+            initial={inline ? { opacity: 0 } : { opacity: 0, y: 20, scale: 0.95 }}
+            animate={inline ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
+            exit={inline ? { opacity: 0 } : { opacity: 0, y: 20, scale: 0.95 }}
+            className={
+                inline
+                    ? "w-full h-full flex flex-col bg-white/70 dark:bg-black/60 md:rounded-[2.5rem] border border-slate-200 dark:border-white/5 shadow-2xl backdrop-blur-xl overflow-hidden"
+                    : "fixed inset-0 sm:top-auto sm:left-auto sm:bottom-6 sm:right-6 w-full sm:w-[400px] md:w-[440px] h-[100dvh] sm:h-[650px] sm:max-h-[calc(100vh-4rem)] bg-white/90 dark:bg-[#020617]/90 backdrop-blur-[32px] sm:rounded-[3rem] shadow-[0_32px_128px_-16px_rgba(0,0,0,0.5)] flex flex-col overflow-hidden sm:border border-slate-200 dark:border-white/10 z-[60]"
+            }
+        >
             {/* Header */}
-            <div className="p-4 bg-[var(--bg-primary)]/80 backdrop-blur-xl text-[var(--text-primary)] flex justify-between items-center border-b border-[var(--border-subtle)]">
-                <div className="flex items-center gap-3">
-                    <Avatar
-                        src={targetUser?.avatarUrl || null}
-                        alt={targetUser?.name}
-                        size="md"
-                        isOnline={targetUser?.isOnline}
-                    />
+            <div className="p-5 bg-white/10 dark:bg-white/5 backdrop-blur-2xl flex justify-between items-center border-b border-slate-200 dark:border-white/5 relative overflow-hidden">
+                {/* Tactical Gradient Top */}
+                <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-indigo-500/50 to-transparent" />
+
+                <div className="flex items-center gap-3.5 relative z-10">
+                    <div className="relative">
+                        <Avatar
+                            src={targetUser?.avatarUrl || null}
+                            alt={targetUser?.name}
+                            size="md"
+                            isOnline={targetUser?.isOnline}
+                            className="ring-2 ring-white/10 dark:ring-white/5"
+                        />
+                        {targetUser?.isOnline && (
+                            <div className="absolute -top-1 -left-1 w-2 h-2 bg-emerald-500 rounded-full animate-ping opacity-40" />
+                        )}
+                    </div>
                     <div>
-                        <h3 className="font-bold text-sm text-[var(--text-primary)]">{targetUser.name}</h3>
-                        <p className="text-[10px] text-[var(--text-tertiary)] uppercase tracking-wider">
-                            {targetUser.role === 'ADMIN' ? 'Administrador' :
-                                targetUser.role === 'SUPERVISOR' ? 'Supervisor' :
-                                    targetUser.role === 'PROFESSIONAL' ? 'Profissional' :
-                                        targetUser.role === 'MANAGER' ? 'Gestor' : 'Contato'}
-                        </p>
+                        <h3 className="font-black text-xs text-slate-900 dark:text-white uppercase tracking-tight">{targetUser.name}</h3>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                            <div className={`w-1 h-1 rounded-full ${targetUser?.isOnline ? 'bg-emerald-500' : 'bg-slate-500'}`} />
+                            <p className="text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em]">
+                                {targetUser?.isOnline ? 'Live Connection' : 'Offline Mode'}
+                            </p>
+                        </div>
                     </div>
                 </div>
-                <div className="flex items-center gap-1 text-[var(--text-tertiary)]">
+                <div className="flex items-center gap-2 relative z-10">
                     {onVideoClick && (
                         <button
                             type="button"
                             onClick={onVideoClick}
-                            className="p-1.5 hover:bg-[var(--bg-secondary)] rounded-lg transition hover:text-indigo-500"
+                            className="p-2.5 hover:bg-indigo-500/10 dark:hover:bg-white/5 rounded-xl transition-all hover:text-indigo-500 dark:text-slate-400"
                             title="Iniciar Videoconferência"
                         >
                             <Video className="w-4 h-4" />
@@ -442,7 +525,7 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead, i
                     <button
                         type="button"
                         onClick={handleClearHistory}
-                        className="p-1.5 hover:bg-[var(--bg-secondary)] rounded-lg transition hover:text-[var(--text-primary)]"
+                        className="p-2.5 hover:bg-white/10 rounded-xl transition-all text-slate-400 hover:text-slate-900 dark:hover:text-white"
                         title="Limpar Histórico"
                     >
                         <Trash2 className="w-4 h-4" />
@@ -450,7 +533,7 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead, i
                     <button
                         type="button"
                         onClick={onClose}
-                        className="p-1 hover:bg-[var(--bg-secondary)] rounded-full transition hover:text-[var(--text-primary)]"
+                        className="p-2 hover:bg-rose-500/10 rounded-xl transition-all text-slate-400 hover:text-rose-500"
                         title="Fechar Chat"
                     >
                         <X className="w-5 h-5" />
@@ -459,194 +542,222 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead, i
             </div>
 
             {/* Messages Area */}
-            <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4 overscroll-contain chat-scrollbar">
+            <div className="flex-1 min-h-0 overflow-y-auto p-5 space-y-6 overscroll-contain chat-scrollbar bg-[#f8fafc]/50 dark:bg-black/20">
                 {allMessages.length === 0 && (
-                    <div className="flex flex-col items-center justify-center h-full text-[var(--text-tertiary)] opacity-50">
-                        <MessageSquare className="w-12 h-12 mb-2" />
-                        <p className="text-xs font-medium">Inicie uma conversa segura</p>
+                    <div className="flex flex-col items-center justify-center h-full text-slate-400 dark:text-slate-500 animate-in fade-in duration-1000">
+                        <div className="w-16 h-16 rounded-[2rem] bg-indigo-500/10 flex items-center justify-center mb-4 border border-indigo-500/20">
+                            <MessageSquare className="w-8 h-8 text-indigo-500 animate-pulse" />
+                        </div>
+                        <p className="text-[10px] font-black uppercase tracking-[0.3em]">Criptografia Militar Ativa</p>
+                        <p className="text-[9px] font-bold uppercase tracking-widest mt-2 opacity-50">Canal de Comunicação Ponto-a-Ponto</p>
                     </div>
                 )}
 
-                {allMessages.map((msg, idx) => {
-                    const isMe = msg.fromId === currentUser.id;
-                    const isSelected = selectedMessageId === msg.id;
-                    const isEditing = editingMessageId === msg.id;
-                    const isPending = !msg.id;
+                <AnimatePresence initial={false}>
 
-                    return (
-                        <div key={idx} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
-                            <div
-                                onClick={() => isMe && !isEditing && msg.id && setSelectedMessageId(isSelected ? null : msg.id)}
-                                className={`group relative max-w-[85%] p-3.5 rounded-2xl shadow-sm text-sm transition-all cursor-pointer ${isMe
-                                    ? 'bg-[var(--accent-primary)] text-[var(--accent-text)] rounded-tr-none'
-                                    : 'bg-[var(--bg-secondary)] border border-[var(--border-subtle)] text-[var(--text-primary)] rounded-tl-none'
-                                    } ${isSelected ? 'ring-2 ring-[var(--accent-primary)] ring-offset-2 ring-offset-[var(--bg-primary)]' : ''}`}
+                    {allMessages.map((msg, idx) => {
+                        const isMe = msg.fromId === currentUser.id;
+                        const isSelected = selectedMessageId === msg.id;
+                        const isEditing = editingMessageId === msg.id;
+                        const isPending = !msg.id;
+
+                        return (
+                            <motion.div
+                                key={msg.id || idx}
+                                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}
                             >
-                                {isEditing ? (
-                                    <div className="flex flex-col gap-2 min-w-[200px]">
-                                        <textarea
-                                            value={editText}
-                                            onChange={e => setEditText(e.target.value)}
-                                            className="w-full bg-[var(--bg-primary)] text-[var(--text-primary)] placeholder-[var(--text-tertiary)] border border-[var(--border-medium)] outline-none rounded-lg p-2 text-xs resize-none focus:border-[var(--accent-primary)] transition-colors"
-                                            rows={2}
-                                            autoFocus
-                                            placeholder="Editar mensagem..."
-                                        />
-                                        <div className="flex justify-end gap-2">
-                                            <button
-                                                type="button"
-                                                onClick={() => setEditingMessageId(null)}
-                                                className="p-1 hover:bg-black/5 rounded text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-                                                title="Cancelar"
-                                            >
-                                                <X className="w-3.5 h-3.5" />
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={handleUpdateMessage}
-                                                className="p-1 bg-[var(--bg-primary)] text-[var(--accent-primary)] rounded hover:bg-[var(--bg-secondary)] border border-[var(--border-subtle)]"
-                                                title="Salvar"
-                                            >
-                                                <Check className="w-3.5 h-3.5" />
-                                            </button>
+                                <div
+                                    onClick={() => isMe && !isEditing && msg.id && setSelectedMessageId(isSelected ? null : msg.id)}
+                                    className={`group relative max-w-[85%] p-4 rounded-3xl shadow-xl transition-all cursor-pointer ${isMe
+                                        ? 'bg-gradient-to-br from-indigo-600 to-blue-700 text-white rounded-tr-none shadow-indigo-500/20'
+                                        : 'bg-white dark:bg-black/60 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white rounded-tl-none'
+                                        } ${isSelected ? 'ring-2 ring-indigo-500 ring-offset-4 dark:ring-offset-[#020617] scale-[1.02]' : ''}`}
+                                >
+                                    {/* Outgoing Glow */}
+                                    {isMe && (
+                                        <div className="absolute inset-0 bg-indigo-500/20 blur-xl -z-10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    )}
+                                    {isEditing ? (
+                                        <div className="flex flex-col gap-3 min-w-[240px]">
+                                            <textarea
+                                                value={editText}
+                                                onChange={e => setEditText(e.target.value)}
+                                                className="w-full bg-black/20 text-white placeholder-white/40 border border-white/20 outline-none rounded-xl p-3 text-xs resize-none focus:border-white/40 transition-all font-bold"
+                                                rows={2}
+                                                autoFocus
+                                                placeholder="Editar mensagem..."
+                                            />
+                                            <div className="flex justify-end gap-2">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setEditingMessageId(null)}
+                                                    className="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-white text-[10px] font-black uppercase tracking-widest transition-all"
+                                                >
+                                                    Cancelar
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={handleUpdateMessage}
+                                                    className="px-3 py-1.5 bg-white text-indigo-600 hover:bg-indigo-50 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all shadow-lg"
+                                                >
+                                                    Salvar
+                                                </button>
+                                            </div>
                                         </div>
-                                    </div>
-                                ) : (
-                                    <>
-                                        {msg.text && <p className="whitespace-pre-wrap leading-relaxed font-medium">{msg.text}</p>}
-                                        {msg.audioUrl && (
-                                            <div className="space-y-1.5">
-                                                <audio controls src={msg.audioUrl} className="h-8 max-w-[200px] opacity-80 hover:opacity-100 transition-opacity" />
-                                                {msg.expiresAt && (
-                                                    <div className="flex items-center justify-end gap-1 text-[9px] font-bold text-red-500 bg-red-50 px-2 py-0.5 rounded-full border border-red-200 animate-pulse">
-                                                        <Hourglass className="w-2.5 h-2.5" />
-                                                        <span>
-                                                            {(() => {
-                                                                const diff = new Date(msg.expiresAt).getTime() - now;
-                                                                if (diff <= 0) return 'Expirando...';
-                                                                const mins = Math.floor(diff / 60000);
-                                                                const secs = Math.floor((diff % 60000) / 1000);
-                                                                return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-                                                            })()}
-                                                        </span>
+                                    ) : (
+                                        <>
+                                            {msg.text && <p className={`whitespace-pre-wrap leading-relaxed font-bold text-[13px] tracking-tight ${isMe ? 'text-white' : 'text-slate-900 dark:text-slate-100'}`}>{msg.text}</p>}
+                                            {msg.audioUrl && (
+                                                <div className="space-y-2">
+                                                    <TacticalAudioPlayer src={msg.audioUrl} isMe={isMe} />
+                                                    {msg.expiresAt && (
+                                                        <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-rose-500/10 border border-rose-500/20 rounded-full animate-pulse">
+                                                            <Hourglass className="w-2.5 h-2.5 text-rose-500" />
+                                                            <span className="text-[9px] font-black text-rose-500 uppercase tracking-widest">
+                                                                Expira em {(() => {
+                                                                    const diff = new Date(msg.expiresAt).getTime() - now;
+                                                                    if (diff <= 0) return 'NOW';
+                                                                    const mins = Math.floor(diff / 60000);
+                                                                    const secs = Math.floor((diff % 60000) / 1000);
+                                                                    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+                                                                })()}
+                                                            </span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+                                            <div className="flex items-center justify-end gap-1.5 mt-2">
+                                                <span className={`text-[8px] font-black uppercase tracking-[0.15em] opacity-40 ${isMe ? 'text-white' : 'text-slate-500 dark:text-slate-400'}`}>
+                                                    {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                </span>
+                                                {isPending ? (
+                                                    <RefreshCw className="w-3 h-3 text-white/40 animate-spin" />
+                                                ) : isMe ? (
+                                                    msg.read ? (
+                                                        <CheckCheck className="w-3.5 h-3.5 text-emerald-400" />
+                                                    ) : (
+                                                        <Check className="w-3.5 h-3.5 text-white/30" />
+                                                    )
+                                                ) : null}
+                                            </div>
+                                        </>
+                                    )}
+
+                                    {isSelected && isMe && !isEditing && (
+                                        <div className="absolute -left-14 top-0 flex flex-col gap-2 animate-in slide-in-from-right-2 fade-in z-20">
+                                            <button
+                                                type="button"
+                                                onClick={(e) => { e.stopPropagation(); handleStartEdit(msg); }}
+                                                className="p-3 bg-white/10 dark:bg-black/40 backdrop-blur-xl shadow-2xl border border-white/10 rounded-2xl text-slate-400 hover:text-indigo-500 hover:scale-110 transition-all"
+                                                title="Editar"
+                                            >
+                                                <Pencil className="w-4 h-4" />
+                                            </button>
+                                            <div className="relative">
+                                                <button
+                                                    type="button"
+                                                    onClick={(e) => { e.stopPropagation(); if (showDeleteMenuFor === msg.id) setShowDeleteMenuFor(null); else setShowDeleteMenuFor(msg.id!); }}
+                                                    className="p-3 bg-white/10 dark:bg-black/40 backdrop-blur-xl shadow-2xl border border-white/10 rounded-2xl text-slate-400 hover:text-rose-500 hover:scale-110 transition-all"
+                                                    title="Excluir"
+                                                >
+                                                    <Trash className="w-4 h-4" />
+                                                </button>
+
+                                                {showDeleteMenuFor === msg.id && (
+                                                    <div className="absolute right-full mr-3 top-0 bg-white dark:bg-[#0f172a] shadow-[0_32px_128px_-16px_rgba(0,0,0,0.5)] rounded-2xl border border-slate-200 dark:border-white/10 p-1.5 min-w-[170px] flex flex-col z-50 animate-in zoom-in-95 duration-200">
+                                                        <button
+                                                            type="button"
+                                                            onClick={(e) => { e.stopPropagation(); confirmDelete(msg.id!, 'me'); }}
+                                                            className="px-4 py-2.5 text-left text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5 rounded-xl flex items-center gap-3 transition-colors"
+                                                        >
+                                                            <User className="w-3.5 h-3.5" /> Apagar Local
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={(e) => { e.stopPropagation(); confirmDelete(msg.id!, 'everyone'); }}
+                                                            className="px-4 py-2.5 text-left text-[10px] font-black uppercase tracking-widest text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-xl flex items-center gap-3 transition-colors"
+                                                        >
+                                                            <Trash2 className="w-3.5 h-3.5" /> Apagar Geral
+                                                        </button>
                                                     </div>
                                                 )}
                                             </div>
-                                        )}
-                                        <div className="flex items-center justify-end gap-1.5 mt-1.5">
-                                            <span className={`text-[9px] font-bold opacity-60 ${isMe ? 'text-[var(--accent-text)]' : 'text-[var(--text-tertiary)]'}`}>
-                                                {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                            </span>
-                                            {isPending ? (
-                                                <RefreshCw className="w-3 h-3 text-[var(--accent-text)] opacity-40 animate-spin" />
-                                            ) : isMe ? (
-                                                msg.read ? (
-                                                    <CheckCheck className="w-3.5 h-3.5 text-white fill-white" />
-                                                ) : (
-                                                    <Check className="w-3.5 h-3.5 text-white opacity-60" />
-                                                )
-                                            ) : null}
                                         </div>
-                                    </>
-                                )}
-
-                                {isSelected && isMe && !isEditing && (
-                                    <div className="absolute -left-12 top-0 flex flex-col gap-1 animate-in slide-in-from-right-2 fade-in z-20">
-                                        <button
-                                            type="button"
-                                            onClick={(e) => { e.stopPropagation(); handleStartEdit(msg); }}
-                                            className="p-2 bg-[var(--bg-primary)] shadow-md border border-[var(--border-subtle)] rounded-full text-[var(--text-tertiary)] hover:text-[var(--accent-primary)] hover:bg-[var(--bg-secondary)] transition"
-                                            title="Editar"
-                                        >
-                                            <Pencil className="w-3.5 h-3.5" />
-                                        </button>
-                                        <div className="relative">
-                                            <button
-                                                type="button"
-                                                onClick={(e) => { e.stopPropagation(); if (showDeleteMenuFor === msg.id) setShowDeleteMenuFor(null); else setShowDeleteMenuFor(msg.id!); }}
-                                                className="p-2 bg-[var(--bg-primary)] shadow-md border border-[var(--border-subtle)] rounded-full text-[var(--text-tertiary)] hover:text-red-500 hover:bg-[var(--bg-secondary)] transition"
-                                                title="Excluir"
-                                            >
-                                                <Trash className="w-3.5 h-3.5" />
-                                            </button>
-
-                                            {showDeleteMenuFor === msg.id && (
-                                                <div className="absolute right-full mr-2 top-0 bg-[var(--bg-primary)] shadow-xl rounded-xl border border-[var(--border-subtle)] p-1 min-w-[140px] flex flex-col z-50 animate-in zoom-in-95 duration-200">
-                                                    <button
-                                                        type="button"
-                                                        onClick={(e) => { e.stopPropagation(); confirmDelete(msg.id!, 'me'); }}
-                                                        className="px-3 py-2 text-left text-xs font-bold text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] rounded-lg flex items-center gap-2 transition-colors"
-                                                    >
-                                                        <User className="w-3 h-3" /> Apagar para mim
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        onClick={(e) => { e.stopPropagation(); confirmDelete(msg.id!, 'everyone'); }}
-                                                        className="px-3 py-2 text-left text-xs font-bold text-red-500 hover:bg-red-50 rounded-lg flex items-center gap-2 transition-colors"
-                                                    >
-                                                        <Trash2 className="w-3 h-3" /> Apagar para todos
-                                                    </button>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    );
-                })}
+                                    )}
+                                </div>
+                            </motion.div>
+                        );
+                    })}
+                </AnimatePresence>
                 <div ref={messagesEndRef} />
             </div>
 
             {/* Input Area */}
-            <div className="p-3 bg-[var(--bg-primary)]/80 border-t border-[var(--border-subtle)] backdrop-blur-md">
+            <div className="p-5 bg-white/70 dark:bg-black/60 border-t border-slate-200 dark:border-white/5 backdrop-blur-2xl relative">
+                {/* Visual indicator of recording/typing */}
+                <div className="absolute -top-[1px] left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-indigo-500/30 to-transparent" />
+
                 {isRecording ? (
-                    <div className="flex items-center justify-between bg-red-50 p-3 rounded-xl border border-red-200 animate-pulse">
-                        <div className="flex items-center gap-3 text-red-500">
-                            <div className="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping" />
-                            <span className="text-xs font-bold font-mono tracking-wider">{formatTime(recordingTime)}</span>
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="flex items-center justify-between bg-rose-500/10 p-4 rounded-2xl border border-rose-500/20"
+                    >
+                        <div className="flex items-center gap-3 text-rose-500">
+                            <div className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping shadow-[0_0_12px_rgba(244,63,94,0.6)]" />
+                            <span className="text-xs font-black font-mono tracking-[0.2em]">{formatTime(recordingTime)}</span>
                         </div>
-                        <span className="text-xs text-red-500 font-medium">Gravando Áudio...</span>
+                        <span className="text-[10px] text-rose-500 font-black uppercase tracking-[0.2em] animate-pulse">Capturando Áudio Tático...</span>
                         <button
                             type="button"
                             title="Parar Gravação"
                             onClick={stopRecording}
-                            className="p-2 bg-red-100/50 text-red-600 rounded-full hover:bg-red-100 transition border border-red-200"
+                            className="p-3 bg-rose-500 text-white rounded-xl hover:bg-rose-600 transition-all shadow-lg shadow-rose-500/20 active:scale-90"
                         >
                             <Square className="w-4 h-4 fill-current" />
                         </button>
-                    </div>
+                    </motion.div>
                 ) : (
-                    <div className="flex items-center gap-2 relative">
+                    <div className="flex items-center gap-3 relative">
                         <button
                             type="button"
                             onClick={startRecording}
-                            className="p-3 bg-[var(--bg-secondary)] text-[var(--text-secondary)] rounded-xl hover:bg-red-50 hover:text-red-500 hover:border-red-200 transition-all active:scale-95 border border-[var(--border-subtle)]"
+                            className="p-4 bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 rounded-2xl hover:bg-rose-500/10 hover:text-rose-500 border border-transparent hover:border-rose-500/20 transition-all active:scale-90 shadow-sm"
                             title="Gravar Áudio"
                         >
                             <Mic className="w-5 h-5" />
                         </button>
 
-                        <input
-                            type="text"
-                            value={inputText}
-                            onChange={e => setInputText(e.target.value)}
-                            onKeyDown={e => e.key === 'Enter' && handleSendMessage()}
-                            placeholder="Digite sua mensagem..."
-                            className="flex-1 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] outline-none text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] px-4 py-3 rounded-xl focus:ring-2 focus:ring-[var(--accent-primary)]/40 focus:bg-[var(--bg-primary)] transition-all font-medium"
-                        />
+                        <div className="flex-1 relative group">
+                            <input
+                                type="text"
+                                value={inputText}
+                                onChange={e => setInputText(e.target.value)}
+                                onKeyDown={e => e.key === 'Enter' && handleSendMessage()}
+                                placeholder="Transmitir mensagem..."
+                                className="w-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 outline-none text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 px-5 py-4 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:bg-white dark:focus:bg-black/40 focus:border-indigo-500/40 transition-all font-bold tracking-tight"
+                            />
+                            {/* Visual caret focus decoration */}
+                            <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-1.5 opacity-0 group-focus-within:opacity-100 transition-opacity pointer-events-none">
+                                <span className="text-[9px] font-black text-indigo-500/50 uppercase tracking-widest">Secure Line</span>
+                                <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
+                            </div>
+                        </div>
+
                         <button
                             type="button"
                             onClick={handleSendMessage}
                             disabled={!inputText.trim()}
-                            className="p-3 bg-[var(--accent-primary)] text-[var(--accent-text)] rounded-xl shadow-lg shadow-[var(--accent-primary)]/20 hover:bg-[var(--accent-primary)]/90 disabled:opacity-50 disabled:shadow-none transition active:scale-95"
+                            className="p-4 bg-indigo-600 dark:bg-indigo-500 text-white rounded-2xl shadow-[0_8px_32px_-8px_rgba(99,102,241,0.5)] hover:bg-indigo-700 dark:hover:bg-indigo-400 disabled:opacity-50 disabled:shadow-none transition-all active:scale-90 flex items-center justify-center border border-indigo-400/20"
                             title="Enviar"
                         >
-                            <Send className="w-4 h-4" />
+                            <Send className="w-5 h-5" />
                         </button>
                     </div>
                 )}
             </div>
-        </div>
+        </motion.div>
     );
 }

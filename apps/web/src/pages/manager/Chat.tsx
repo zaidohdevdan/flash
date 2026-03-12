@@ -167,7 +167,7 @@ export function ManagerChat() {
                 </div>
 
                 {/* Right Column: Chat Window */}
-                <div className={`flex-1 min-h-0 flex-col ${!activeChatId ? 'hidden lg:flex' : 'flex'}`}>
+                <div className={`flex-1 min-h-0 relative ${!activeChatId ? 'hidden lg:flex' : 'flex'}`}>
                     {selectedUser && user ? (
                         <ChatWidget
                             inline

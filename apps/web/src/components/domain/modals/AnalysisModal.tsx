@@ -34,13 +34,23 @@ export const AnalysisModal: React.FC<AnalysisModalProps> = ({
     title
 }) => {
     const modalTitle = title || "Análise de Relatório";
+    const [isDark, setIsDark] = React.useState(document.documentElement.classList.contains('dark'));
+
+    // Detect theme changes reactively
+    React.useEffect(() => {
+        const observer = new MutationObserver(() => {
+            setIsDark(document.documentElement.classList.contains('dark'));
+        });
+        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+        return () => observer.disconnect();
+    }, []);
 
     return (
         <Modal
             isOpen={isOpen}
             onClose={onClose}
             title={modalTitle}
-            variant="dark"
+            variant={isDark ? 'dark' : 'light'}
             subtitle="DETERMINE O PRÓXIMO PROTOCOLO OPERACIONAL"
             maxWidth="lg"
             footer={
@@ -48,7 +58,10 @@ export const AnalysisModal: React.FC<AnalysisModalProps> = ({
                     <Button
                         variant="secondary"
                         onClick={onClose}
-                        className="flex-1 bg-slate-100 dark:bg-white/5 border-slate-200 dark:border-white/5 text-slate-600 dark:text-slate-400 font-black uppercase tracking-widest text-[11px] h-12 !rounded-xl"
+                        className={`flex-1 font-black uppercase tracking-widest text-[11px] h-12 !rounded-xl border shadow-sm transition-all ${isDark
+                                ? 'bg-white/5 border-white/5 text-slate-400 hover:bg-white/10 hover:text-white'
+                                : 'bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200 hover:text-slate-900'
+                            }`}
                     >
                         Abortar
                     </Button>
@@ -56,8 +69,8 @@ export const AnalysisModal: React.FC<AnalysisModalProps> = ({
                         variant="primary"
                         onClick={onConfirm}
                         className={`flex-[2] font-black uppercase tracking-[0.2em] text-[11px] h-12 !rounded-xl transition-all shadow-2xl ${targetStatus === 'RESOLVED'
-                            ? 'bg-emerald-600 hover:bg-emerald-500 shadow-emerald-500/20'
-                            : 'bg-indigo-600 hover:bg-indigo-500 shadow-indigo-500/20'
+                                ? 'bg-emerald-600 hover:bg-emerald-500 shadow-emerald-500/20'
+                                : 'bg-indigo-600 hover:bg-indigo-500 shadow-indigo-500/20'
                             }`}
                     >
                         {targetStatus === 'RESOLVED'
@@ -76,12 +89,16 @@ export const AnalysisModal: React.FC<AnalysisModalProps> = ({
                     onChange={e => setFeedback(e.target.value)}
                     placeholder="DESCREVA A ANÁLISE OU INSTRUÇÕES PARA ESTE REGISTRO..."
                     rows={6}
-                    className="bg-white/5 border-white/10 text-white placeholder:text-slate-700 font-bold text-xs !rounded-2xl backdrop-blur-md"
+                    className={`font-bold text-xs !rounded-2xl backdrop-blur-md transition-all border ${isDark
+                            ? 'bg-white/5 border-white/10 text-white placeholder:text-slate-700'
+                            : 'bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-indigo-500/50'
+                        }`}
                 />
 
                 <div className="space-y-5">
-                    <label className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em] ml-1">ETAPA OPERACIONAL</label>
-                    <div className="grid grid-cols-3 gap-2 p-1.5 bg-white/5 rounded-2xl border border-white/5 backdrop-blur-md">
+                    <label className={`text-[11px] font-black uppercase tracking-[0.3em] ml-1 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>ETAPA OPERACIONAL</label>
+                    <div className={`grid grid-cols-3 gap-2 p-1.5 rounded-2xl border backdrop-blur-md transition-all ${isDark ? 'bg-white/5 border-white/5' : 'bg-slate-50 border-slate-200/50'
+                        }`}>
                         {[
                             { id: 'IN_REVIEW', label: 'ANÁLISE', activeColor: 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' },
                             { id: 'FORWARDED', label: 'TRAMITAR', activeColor: 'bg-amber-600 text-white shadow-lg shadow-amber-500/20' },
@@ -91,7 +108,10 @@ export const AnalysisModal: React.FC<AnalysisModalProps> = ({
                                 type="button"
                                 key={opt.id}
                                 onClick={() => setTargetStatus(opt.id as AnalysisModalProps['targetStatus'])}
-                                className={`py-3 text-[11px] font-black tracking-widest rounded-xl transition-all border ${targetStatus === opt.id ? opt.activeColor + ' border-transparent' : 'text-slate-500 border-transparent hover:text-slate-700 dark:hover:text-slate-300'}`}
+                                className={`py-3 text-[11px] font-black tracking-widest rounded-xl transition-all border ${targetStatus === opt.id
+                                        ? opt.activeColor + ' border-transparent'
+                                        : 'text-slate-500 border-transparent hover:text-slate-700 dark:hover:text-slate-300'
+                                    }`}
                             >
                                 {opt.label}
                             </button>
@@ -101,12 +121,15 @@ export const AnalysisModal: React.FC<AnalysisModalProps> = ({
                     {targetStatus === 'FORWARDED' && (
                         <div className="space-y-5 animate-in slide-in-from-top-4 duration-500 pt-2">
                             <div className="space-y-3">
-                                <label className="text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.3em] ml-1">DESTINO DA TRAMITAÇÃO</label>
+                                <label className={`text-[11px] font-black uppercase tracking-[0.3em] ml-1 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>DESTINO DA TRAMITAÇÃO</label>
                                 <div className="relative group/select">
                                     <select
                                         value={selectedDeptId}
                                         onChange={e => setSelectedDeptId(e.target.value)}
-                                        className="w-full px-6 py-4 bg-white/5 border border-white/5 rounded-2xl outline-none focus:border-indigo-500/50 transition-all font-black text-white appearance-none text-[11px] uppercase tracking-widest backdrop-blur-md shadow-inner"
+                                        className={`w-full px-6 py-4 border rounded-2xl outline-none transition-all font-black appearance-none text-[11px] uppercase tracking-widest backdrop-blur-md shadow-inner ${isDark
+                                                ? 'bg-white/5 border-white/5 text-white focus:border-indigo-500/50'
+                                                : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-indigo-500/50'
+                                            }`}
                                         aria-label="Selecionar Destino"
                                         title="Selecionar Destino"
                                     >
