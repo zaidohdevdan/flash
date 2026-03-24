@@ -195,7 +195,7 @@ export function Home() {
                     </div>
 
                     {/* Desktop Navigation Links */}
-                    <div className="hidden lg:flex items-center gap-8 xl:gap-10 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-[0.15em]">
+                    <div className="hidden lg:flex items-center gap-6 xl:gap-8 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-[0.15em] mx-auto">
                         <a href="#features" className="hover:text-slate-900 dark:hover:text-white transition-colors relative group">
                             Recursos
                             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#d4e720] transition-all group-hover:w-full" />
@@ -215,7 +215,7 @@ export function Home() {
                     </div>
 
                     {/* Action Area (Selectors + CTA) */}
-                    <div className="flex items-center gap-2 sm:gap-4 ml-auto">
+                    <div className="flex items-center gap-2 sm:gap-4">
                         {/* Settings Toggles - Hidden on Mobile, shown on Desktop */}
                         <div className="hidden lg:flex items-center gap-1 sm:gap-2 border-r border-slate-200 dark:border-slate-800 pr-2 sm:pr-4">
                             <button

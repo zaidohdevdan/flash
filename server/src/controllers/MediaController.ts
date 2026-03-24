@@ -4,6 +4,15 @@ import { MediaService } from '../services/MediaService'
 export class MediaController {
     constructor(private mediaService: MediaService) { }
 
+    private signMedia = (item: any) => {
+        if (!item) return item;
+        return {
+            ...item,
+            secureUrl: MediaService.signUrl(item.publicId, item.resourceType || 'auto', false, item.format),
+            downloadUrl: MediaService.signUrl(item.publicId, item.resourceType || 'auto', true, item.format)
+        };
+    };
+
     upload = async (req: Request, res: Response) => {
         try {
             const userId = req.userId; // ajustar middleware
@@ -20,10 +29,11 @@ export class MediaController {
                 reportId,
                 options: {
                     folder: `flash/reports/${reportId}`,
+                    resourceType: 'auto'
                 }
             });
 
-            return res.status(201).json(media)
+            return res.status(201).json(this.signMedia(media))
         } catch (error) {
             console.error(error);
             return res.status(500).json({ message: 'Erro ao fazer upload de mídia' });
@@ -47,7 +57,7 @@ export class MediaController {
                 }
             });
 
-            return res.status(201).json(media)
+            return res.status(201).json(this.signMedia(media))
         } catch (error) {
             console.error(error);
             return res.status(500).json({ message: 'Erro ao fazer upload de mídia genérica' });
@@ -57,7 +67,7 @@ export class MediaController {
         try {
             const reportId = req.params.reportId as string
             const media = await this.mediaService.listByReport(reportId);
-            return res.json(media);
+            return res.json(media.map(this.signMedia));
         } catch (error) {
             console.error(error);
             return res.status(500).json({ message: 'Erro ao listar mídias' });

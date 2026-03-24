@@ -11,23 +11,23 @@ export function NewReport() {
     const { user } = useAuth();
 
     const [comment, setComment] = useState('');
-    const [images, setImages] = useState<File[]>([]);
+    const [files, setFiles] = useState<File[]>([]);
     const [previews, setPreviews] = useState<string[]>([]);
     const [sending, setSending] = useState(false);
     const [success, setSuccess] = useState(false);
 
-    function handleImagesChange(e: React.ChangeEvent<HTMLInputElement>) {
-        const files = Array.from(e.target.files || []);
-        if (files.length > 0) {
-            const newImages = [...images, ...files];
-            setImages(newImages);
-            const newPreviews = files.map(file => URL.createObjectURL(file));
-            setPreviews([...previews, ...newPreviews]);
+    function handleFilesChange(e: React.ChangeEvent<HTMLInputElement>) {
+        const selectedFiles = Array.from(e.target.files || []);
+        if (selectedFiles.length > 0) {
+            const newFiles = [...files, ...selectedFiles].slice(0, 10);
+            setFiles(newFiles);
+            const newPreviews = selectedFiles.map(file => URL.createObjectURL(file));
+            setPreviews([...previews, ...newPreviews].slice(0, 10));
         }
     }
 
-    function handleRemoveImage(index: number) {
-        setImages(prev => prev.filter((_, i) => i !== index));
+    function handleRemoveFile(index: number) {
+        setFiles(prev => prev.filter((_, i) => i !== index));
         setPreviews(prev => {
             URL.revokeObjectURL(prev[index]);
             return prev.filter((_, i) => i !== index);
@@ -36,16 +36,16 @@ export function NewReport() {
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
-        if (images.length === 0) return toast.error('Por favor, tire uma foto para o relatório.');
+        if (files.length === 0) return toast.error('Por favor, anexe pelo menos um arquivo ou foto.');
 
         setSending(true);
 
         try {
             if (!navigator.onLine) {
-                if (images.length > 0) {
+                if (files.length > 0) {
                     await db.pendingReports.add({
                         comment,
-                        imageBlob: images[0],
+                        imageBlob: files[0], // Mantido como imageBlob por compatibilidade com o DB local, mas aceita qualquer arquivo
                         previewUrl: previews[0]!,
                         createdAt: Date.now(),
                         status: 'pending'
@@ -53,7 +53,7 @@ export function NewReport() {
 
                     setSuccess(true);
                     setComment('');
-                    setImages([]);
+                    setFiles([]);
                     setPreviews([]);
                     toast.success('Relatório salvo localmente! Será enviado assim que houver internet.', {
                         icon: '💾',
@@ -63,28 +63,32 @@ export function NewReport() {
                 return;
             }
 
-            const uploadPromises = images.map(async (img) => {
+            const uploadPromises = files.map(async (file) => {
                 const cloudinaryData = new FormData();
-                cloudinaryData.append('file', img);
+                cloudinaryData.append('file', file);
                 cloudinaryData.append('upload_preset', 'flash_preset');
 
-                const cloudinaryRes = await fetch('https://api.cloudinary.com/v1_1/dfr8mjlnb/image/upload', {
+                // Usamos 'auto' para que o Cloudinary identifique se é imagem, vídeo ou raw (pdf, doc, etc)
+                const cloudinaryRes = await fetch('https://api.cloudinary.com/v1_1/dfr8mjlnb/auto/upload', {
                     method: 'POST',
                     body: cloudinaryData
                 });
 
-                if (!cloudinaryRes.ok) throw new Error('Falha no upload da imagem');
+                if (!cloudinaryRes.ok) throw new Error('Falha no upload do arquivo');
                 return cloudinaryRes.json();
             });
 
             const cloudinaryResults = await Promise.all(uploadPromises);
-            const mainImageUrl = cloudinaryResults[0].secure_url;
+            
+            // Procura a primeira imagem para ser o thumbnail principal, se não houver, usa o primeiro arquivo
+            const firstImage = cloudinaryResults.find(res => res.resource_type === 'image');
+            const mainImageUrl = firstImage ? firstImage.secure_url : cloudinaryResults[0].secure_url;
 
             const mediaItems = cloudinaryResults.map(res => ({
                 publicId: res.public_id,
                 url: res.url,
                 secureUrl: res.secure_url,
-                format: res.format,
+                format: res.format || (res.resource_type === 'raw' ? res.public_id.split('.').pop() : ''),
                 width: res.width,
                 height: res.height,
                 bytes: res.bytes,
@@ -117,7 +121,7 @@ export function NewReport() {
 
             setSuccess(true);
             setComment('');
-            setImages([]);
+            setFiles([]);
             setPreviews([]);
         } catch (error) {
             console.error(error);
@@ -143,9 +147,10 @@ export function NewReport() {
             <NewReportForm
                 comment={comment}
                 onCommentChange={setComment}
+                files={files}
                 previews={previews}
-                onImagesChange={handleImagesChange}
-                onRemoveImage={handleRemoveImage}
+                onFilesChange={handleFilesChange}
+                onRemoveFile={handleRemoveFile}
                 onSubmit={handleSubmit}
                 isSending={sending}
             />

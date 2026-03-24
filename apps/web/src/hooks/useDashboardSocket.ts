@@ -27,6 +27,7 @@ interface UseDashboardSocketOptions {
     onNewReport?: () => void;
     onReportStatusUpdate?: () => void;
     notificationsEnabled?: boolean;
+    enableBrowserPush?: boolean;
 }
 
 export const useDashboardSocket = ({
@@ -37,6 +38,7 @@ export const useDashboardSocket = ({
     onNewReport,
     onReportStatusUpdate,
     notificationsEnabled = true,
+    enableBrowserPush = true,
 }: UseDashboardSocketOptions) => {
     // Internal ref for the socket — event handlers always access the live instance.
     const socketRef = useRef<Socket | null>(null);
@@ -102,6 +104,10 @@ export const useDashboardSocket = ({
             setSocket(newSocket);  // safe: called inside an event callback, not effect body
             setIsConnected(true);
             setSocketVersion(v => v + 1);
+            // Request browser push permission once per session
+            if (enableBrowserPush && 'Notification' in window && Notification.permission === 'default') {
+                Notification.requestPermission().catch(() => {/* silently ignore */});
+            }
         });
 
         newSocket.on('disconnect', () => {
@@ -207,8 +213,24 @@ export const useDashboardSocket = ({
             }
         });
 
-        newSocket.on('new_report_to_review', () => {
+        newSocket.on('new_report_to_review', (payload?: { message?: string; data?: { id?: string; comment?: string; user?: { name?: string } } }) => {
             onNewReportRef.current?.();
+
+            if (enableBrowserPush && 'Notification' in window && Notification.permission === 'granted') {
+                const protocol = payload?.data?.id ? `#${payload.data.id.slice(-6).toUpperCase()}` : '';
+                const authorName = payload?.data?.user?.name || 'Agente';
+                const comment = payload?.data?.comment || 'Sem descrição';
+                const notif = new Notification(`⚠️ Novo Protocolo ${protocol}`, {
+                    body: `${authorName}: "${comment.slice(0, 80)}${comment.length > 80 ? '...' : ''}"`,
+                    icon: '/favicon.ico',
+                    tag: `report-${payload?.data?.id || Date.now()}`,
+                    requireInteraction: true,
+                });
+                notif.onclick = () => {
+                    window.focus();
+                    notif.close();
+                };
+            }
         });
 
         newSocket.on('report_status_updated_for_supervisor', () => {
@@ -222,7 +244,7 @@ export const useDashboardSocket = ({
             setIsConnected(false);
             setSocketVersion(v => v + 1);
         };
-    }, [user?.id, user?.name, user?.role, playNotificationSound]);
+    }, [user?.id, user?.name, user?.role, playNotificationSound, enableBrowserPush]);
 
     // Fetch initial unread chat status when connected
     useEffect(() => {

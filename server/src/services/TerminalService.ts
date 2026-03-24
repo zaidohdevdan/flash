@@ -156,8 +156,10 @@ Digite 'help <comando>' para detalhes e flags.
         if (!subCommand) return { type: 'error', message: 'Uso incorreto. Ex: user create, user rm' };
 
         if (subCommand === 'rm') {
-            const identifier = args[0];
-            if (!identifier || identifier.startsWith('--')) return { type: 'error', message: 'Identificador (E-mail ou ID) obrigatório. Ex: user rm teste@flash.com' };
+            const { parsed, raw } = this.parseArgs(args);
+            const identifier = raw[0] || (parsed.force !== 'true' ? parsed.force : '');
+
+            if (!identifier) return { type: 'error', message: 'Identificador (E-mail ou ID) obrigatório. Ex: user rm teste@flash.com' };
 
             const user = await prisma.user.findFirst({
                 where: { OR: [{ email: identifier }, { id: identifier }] }
@@ -169,8 +171,9 @@ Digite 'help <comando>' para detalhes e flags.
         }
 
         if (subCommand === 'info') {
-            const identifier = args[0];
-            if (!identifier || identifier.startsWith('--')) return { type: 'error', message: 'Identificador (E-mail ou ID) obrigatório. Ex: user info 65f... ou user info email@doc.com' };
+            const { raw } = this.parseArgs(args);
+            const identifier = raw[0];
+            if (!identifier) return { type: 'error', message: 'Identificador (E-mail ou ID) obrigatório. Ex: user info 65f... ou user info email@doc.com' };
 
             const user = await prisma.user.findFirst({
                 where: { OR: [{ email: identifier }, { id: identifier }] }
@@ -230,11 +233,9 @@ Digite 'help <comando>' para detalhes e flags.
                 return { type: 'success', message: `Usuário '${parsed.name}' (${parsed.email}) criado como ${validRole}.` };
             }
             case 'edit': {
-                if (raw.length > 1) {
-                    return { type: 'error', message: `Comando malformado. Argumento inesperado: '${raw[1]}'. Use formato de flag (ex: --name "João")` };
-                }
-                const identifier = args[0];
-                if (!identifier || identifier.startsWith('--')) return { type: 'error', message: 'Identificador (E-mail ou ID) é obrigatório. Ex: user edit alvo@flash.com ...' };
+                const { parsed, raw } = this.parseArgs(args);
+                const identifier = raw[0];
+                if (!identifier) return { type: 'error', message: 'Identificador (E-mail ou ID) é obrigatório. Ex: user edit alvo@flash.com ...' };
 
                 const user = await prisma.user.findFirst({
                     where: { OR: [{ email: identifier }, { id: identifier }] }
@@ -261,11 +262,9 @@ Digite 'help <comando>' para detalhes e flags.
                 return { type: 'success', message: `Perfil do usuário '${user.email}' atualizado.` };
             }
             case 'passwd': {
-                if (raw.length > 1) {
-                    return { type: 'error', message: `Comando malformado. Argumento inesperado: '${raw[1]}'.` };
-                }
-                const identifier = args[0];
-                if (!identifier || identifier.startsWith('--')) return { type: 'error', message: 'Identificador (E-mail ou ID) é obrigatório. Ex: user passwd alvo@flash.com --new xyz' };
+                const { parsed, raw } = this.parseArgs(args);
+                const identifier = raw[0];
+                if (!identifier) return { type: 'error', message: 'Identificador (E-mail ou ID) é obrigatório. Ex: user passwd alvo@flash.com --new xyz' };
                 if (!parsed.new) return { type: 'error', message: '--new senha é obrigatório.' };
 
                 const user = await prisma.user.findFirst({
@@ -281,11 +280,9 @@ Digite 'help <comando>' para detalhes e flags.
                 return { type: 'success', message: `Senha de '${user.email}' atualizada com sucesso.` };
             }
             case 'link': {
-                if (raw.length > 1) {
-                    return { type: 'error', message: `Comando malformado. Argumento inesperado: '${raw[1]}'.` };
-                }
-                const proIdentifier = args[0];
-                if (!proIdentifier || proIdentifier.startsWith('--')) return { type: 'error', message: 'Identificador do profissional (E-mail ou ID) é obrigatório.' };
+                const { parsed, raw } = this.parseArgs(args);
+                const proIdentifier = raw[0];
+                if (!proIdentifier) return { type: 'error', message: 'Identificador do profissional (E-mail ou ID) é obrigatório.' };
                 if (!parsed.to) return { type: 'error', message: '--to <email_super|id_super> é obrigatório.' };
 
                 const professional = await prisma.user.findFirst({
@@ -319,10 +316,11 @@ Digite 'help <comando>' para detalhes e flags.
     private static async handleReportCommand(subCommand: string, args: string[]): Promise<TerminalOutput> {
         if (subCommand === 'rm') {
             const { parsed, raw } = this.parseArgs(args);
-            const protocolId = args[0];
-
-            if (raw.length > 1) {
-                return { type: 'error', message: `Comando malformado. Argumento inesperado: '${raw[1]}'.` };
+            // Protocol ID can be in raw[0] (report rm E0012E --hard)
+            // Or swallowed by parsed.hard (report rm --hard E0012E)
+            let protocolId = raw[0];
+            if (!protocolId && parsed.hard && parsed.hard !== 'true') {
+                protocolId = parsed.hard;
             }
 
             if (!parsed.hard) return { type: 'error', message: 'Aviso de Segurança: Relatórios são cruciais. Para forçar a deleção definitiva, use a flag --hard. O argumento dever ser parte do protocolo.' };
@@ -365,10 +363,9 @@ Digite 'help <comando>' para detalhes e flags.
             return { type: 'error', message: `Sub-comando desconhecido: db ${subCommand}. Use 'db ls', 'db count' ou 'db analyze'` };
         }
 
-        const model = args[0];
-        if (!model) return { type: 'error', message: 'Especifique o que listar: users, reports, tickets, logs' };
-
         const { parsed, raw } = this.parseArgs(args);
+        const model = raw[0];
+        if (!model) return { type: 'error', message: 'Especifique o que listar: users, reports, tickets, logs' };
 
         if (raw.length > 1) {
             return { type: 'error', message: `Comando malformado. Argumento solto inesperado: '${raw[1]}'. Use sempre as flags corretas (ex: --limit 8)` };

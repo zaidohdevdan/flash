@@ -12,6 +12,7 @@ export interface IMedia {
     folder: string;
     userId?: string;
     reportId?: string;
+    downloadUrl?: string;
 }
 
 export interface IUploadResponse {

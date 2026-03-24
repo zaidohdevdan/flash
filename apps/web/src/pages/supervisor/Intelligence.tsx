@@ -28,7 +28,11 @@ import {
 import { motion, AnimatePresence, type Variants } from 'framer-motion';
 import { Card, Button } from '../../components/ui';
 import { InsightsModal } from '../../components/domain/modals/InsightsModal';
+import { useNavigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
+import { useDashboardSocket } from '../../hooks/useDashboardSocket';
+import { RecentReportsBar } from '../../components/domain/RecentReportsBar';
 
 interface AnalyticsData {
     efficiency: { avgResolutionTime: string; resolvedCount: number; };
@@ -53,9 +57,39 @@ const FILTER_OPTIONS = [
     { id: 'RESOLVED', label: 'Baixados' }
 ];
 
+const CONTAINER_VARIANTS: Variants = {
+    hidden: { opacity: 0 },
+    visible: {
+        opacity: 1,
+        transition: {
+            staggerChildren: 0.1,
+            delayChildren: 0.2
+        }
+    }
+} as const;
+
+const ITEM_VARIANTS: Variants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: {
+            type: 'spring',
+            stiffness: 100,
+            damping: 15
+        }
+    }
+} as const;
+
 export function Intelligence() {
+    const navigate = useNavigate();
+    const { user } = useAuth();
     const [stats, setStats] = useState<Stats[]>([]);
     const [reports, setReports] = useState<Report[]>([]); // For the map
+    const [viewedReports, setViewedReports] = useState<string[]>(() => {
+        const saved = localStorage.getItem('viewed_reports_supervisor');
+        return saved ? JSON.parse(saved) : [];
+    });
     const [statusFilter, setStatusFilter] = useState('');
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
@@ -135,9 +169,36 @@ export function Intelligence() {
         loadAnalytics();
     }, [loadStats, loadDepartments, loadAnalytics]);
 
+    const socketUser = useMemo(() => user ? { id: user.id || '', name: user.name || '', role: user.role || '' } : null, [user]);
+
+    useDashboardSocket({
+        user: socketUser,
+        onNewReport: () => {
+            loadStats();
+            loadAnalytics();
+            loadReportsForMap();
+        },
+        onReportStatusUpdate: () => {
+            loadStats();
+            loadAnalytics();
+            loadReportsForMap();
+        }
+    });
+
     useEffect(() => {
         loadReportsForMap();
     }, [loadReportsForMap]);
+
+    useEffect(() => {
+        localStorage.setItem('viewed_reports_supervisor', JSON.stringify(viewedReports));
+    }, [viewedReports]);
+
+    const handleReportClick = (reportId: string) => {
+        if (!viewedReports.includes(reportId)) {
+            setViewedReports(prev => [...prev, reportId]);
+        }
+        navigate(`/supervisor/operations?highlight=${reportId}`);
+    };
 
     const timelineData = useMemo(() => {
         const hourMap: Record<number, { total: number; sent: number; resolved: number }> = {};
@@ -186,38 +247,22 @@ export function Intelligence() {
         return { healthScore, resolutionRate, slaScore, scoreColor, scoreLabel, gaugeData, trendBonus };
     }, [analyticsData]);
 
-    const containerVariants: Variants = {
-        hidden: { opacity: 0 },
-        visible: {
-            opacity: 1,
-            transition: {
-                staggerChildren: 0.1,
-                delayChildren: 0.2
-            }
-        }
-    } as const;
-
-    const itemVariants: Variants = {
-        hidden: { opacity: 0, y: 20 },
-        visible: {
-            opacity: 1,
-            y: 0,
-            transition: {
-                type: 'spring',
-                stiffness: 100,
-                damping: 15
-            }
-        }
-    } as const;
+    const handleViewAll = useCallback(() => navigate('/supervisor/operations'), [navigate]);
 
     return (
         <motion.div
             className="flex flex-col gap-6"
             initial="hidden"
             animate="visible"
-            variants={containerVariants}
+            variants={CONTAINER_VARIANTS}
         >
-            <motion.div variants={itemVariants}>
+            <RecentReportsBar 
+                events={timelineData.recentEvents} 
+                viewed={viewedReports} 
+                onReportClick={handleReportClick} 
+                onViewAll={handleViewAll}
+            />
+            <motion.div variants={ITEM_VARIANTS}>
                 <DashboardHero
                     title="Centro de Inteligência"
                     subtitle="Visão Panorâmica e Indicadores Essenciais da Operação."
@@ -226,6 +271,7 @@ export function Intelligence() {
                     statusFilter={statusFilter}
                     onStatusFilterChange={setStatusFilter}
                     filters={FILTER_OPTIONS}
+                    reports={reports}
                     showDateFilters={true}
                     startDate={startDate}
                     endDate={endDate}
@@ -237,7 +283,7 @@ export function Intelligence() {
             </motion.div>
 
             {/* ANALYTICS SECTION */}
-            <motion.div variants={itemVariants} className="space-y-8 mt-2">
+            <motion.div variants={ITEM_VARIANTS} className="space-y-8 mt-2">
                 <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                     <div>
                         <h2 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center gap-3">
@@ -331,14 +377,7 @@ export function Intelligence() {
                             {/* Gargalo Setorial */}
                             <Card variant="white" className="relative p-6 bg-white dark:bg-black/40 backdrop-blur-xl border border-rose-500/40 hover:border-rose-500/60 rounded-[2rem] transition-all duration-500 shadow-[0_0_40px_-10px_rgba(244,63,94,0.4)] group overflow-hidden flex flex-col justify-between min-h-[160px]">
                                 <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-rose-500/15 to-transparent opacity-50 pointer-events-none transition-opacity duration-500 group-hover:opacity-100" />
-                                {analyticsData.bottlenecks?.criticalSector && (
-                                    <>
-                                        <div className="absolute inset-0 rounded-[2rem] border-[3px] border-rose-500/30 animate-[pulse_2s_infinite] pointer-events-none" />
-                                        <div className="absolute top-0 right-0 w-24 h-24 bg-rose-500/10 dark:bg-rose-500/20 rounded-bl-[100px] flex items-start justify-end p-4 pointer-events-none">
-                                            <div className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping" />
-                                        </div>
-                                    </>
-                                )}
+
                                 <div className="flex items-center justify-between mb-4 relative z-10">
                                     <div className="p-3 bg-rose-500/20 backdrop-blur-md border border-white/10 rounded-2xl text-rose-600 dark:text-rose-400 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3">
                                         <AlertCircle className="w-6 h-6" />
@@ -377,45 +416,6 @@ export function Intelligence() {
                                 </div>
                             </Card>
 
-                            {/* RECENT REPORTS CARD */}
-                            <Card variant="white" className="relative p-7 bg-white dark:bg-black/40 backdrop-blur-xl border border-blue-500/20 hover:border-blue-500/40 rounded-[2rem] transition-all duration-500 shadow-[0_0_30px_-10px_rgba(59,130,246,0.15)] col-span-1 md:col-span-2 lg:col-span-4 overflow-hidden group">
-                                <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-blue-500/5 to-transparent opacity-50 pointer-events-none transition-opacity duration-500 group-hover:opacity-100" />
-                                <div className="relative z-10">
-                                    <div className="flex items-center justify-between mb-8">
-                                        <h3 className="text-[11px] font-black text-slate-900 dark:text-white uppercase tracking-[0.25em] flex items-center gap-3">
-                                            <div className="p-2 rounded-xl bg-blue-500/10 text-blue-500">
-                                                <Activity className="w-4 h-4" />
-                                            </div>
-                                            Últimos Recebimentos
-                                        </h3>
-                                        <div className="h-px flex-1 bg-gradient-to-r from-transparent via-slate-200 dark:via-white/10 to-transparent mx-6" />
-                                    </div>
-                                    <div className="flex flex-wrap items-center gap-8">
-                                        {timelineData.recentEvents.slice(0, 5).map((report: Report, idx: number) => (
-                                            <div key={report.id} className="flex items-center gap-4 group/item cursor-pointer" style={{ animationDelay: `${idx * 100}ms` }}>
-                                                <div className="relative">
-                                                    <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-white/5 p-0.5 border border-slate-200 dark:border-white/10 overflow-hidden shadow-lg group-hover/item:shadow-blue-500/20 group-hover/item:border-blue-500/50 group-hover/item:scale-110 transition-all duration-500">
-                                                        <img
-                                                            src={report.user?.avatarUrl || `https://ui-avatars.com/api/?name=${report.user?.name}&background=3b82f6&color=fff`}
-                                                            alt={report.user?.name}
-                                                            className="w-full h-full object-cover rounded-[14px]"
-                                                        />
-                                                    </div>
-                                                    <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white dark:border-[#0f172a] rounded-full shadow-sm" />
-                                                </div>
-                                                <div className="flex flex-col">
-                                                    <span className="text-[13px] font-black text-slate-900 dark:text-white uppercase tracking-tight group-hover/item:text-blue-500 transition-colors">
-                                                        #{report.id.slice(-6).toUpperCase()}
-                                                    </span>
-                                                    <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em] mt-0.5">
-                                                        {report.createdAt ? new Date(report.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '--:--'}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            </Card>
                         </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -878,9 +878,7 @@ export function Intelligence() {
                                         <div className="flex-1">
                                             <p className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-3">Eventos Recentes</p>
                                             <div className="space-y-2 overflow-y-auto max-h-[120px] custom-scrollbar pr-1">
-                                                {[...reports]
-                                                    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-                                                    .slice(0, 8)
+                                                {timelineData.recentEvents
                                                     .map(r => {
                                                         const statusColor = r.status === 'RESOLVED' ? 'bg-emerald-500' : r.status === 'SENT' ? 'bg-rose-500' : r.status === 'FORWARDED' ? 'bg-amber-500' : 'bg-indigo-500';
                                                         const statusLabel = r.status === 'RESOLVED' ? 'Baixado' : r.status === 'SENT' ? 'Alerta' : r.status === 'FORWARDED' ? 'Encaminhado' : 'Em Análise';

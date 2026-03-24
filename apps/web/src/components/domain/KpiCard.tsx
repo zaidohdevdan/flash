@@ -9,6 +9,7 @@ interface KpiCardProps {
     variant: 'blue' | 'purple' | 'emerald' | 'orange' | 'rose';
     trend?: string;
     isCritical?: boolean;
+    items?: { id: string; comment: string }[];
 }
 
 export const KpiCard: React.FC<KpiCardProps> = ({
@@ -17,7 +18,8 @@ export const KpiCard: React.FC<KpiCardProps> = ({
     icon: Icon,
     variant,
     trend,
-    isCritical
+    isCritical,
+    items
 }) => {
     // Mission Control Tactical Colors
     const colorMap = {
@@ -97,6 +99,25 @@ export const KpiCard: React.FC<KpiCardProps> = ({
                     </p>
                 </div>
             </div>
+
+            {/* List Overlay on Hover */}
+            {items && items.length > 0 && (
+                <div className="absolute inset-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-50 overflow-y-auto flex flex-col gap-2 no-scrollbar pointer-events-none group-hover:pointer-events-auto">
+                    <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] sticky top-0 bg-white/95 dark:bg-slate-900/95 pb-2 z-10 w-full block">
+                        Detalhamento ({items.length})
+                    </span>
+                    <div className="flex flex-col gap-2 pb-2">
+                        {items.slice(0, 20).map(item => (
+                            <div key={item.id} className="bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/10 rounded-xl p-2.5 flex flex-col gap-1 hover:border-indigo-500/30 transition-colors">
+                                <span className="text-[10px] font-black text-indigo-500 dark:text-indigo-400 uppercase tracking-widest flex items-center gap-1">
+                                    <span className="opacity-50">#</span>{item.id.slice(-6).toUpperCase()}
+                                </span>
+                                <span className="text-[11px] text-slate-700 dark:text-slate-300 font-medium line-clamp-2 leading-relaxed">"{item.comment}"</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
         </Card>
     );
 };

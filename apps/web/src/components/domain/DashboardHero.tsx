@@ -24,6 +24,7 @@ interface DashboardHeroProps {
     statusFilter: string;
     onStatusFilterChange: (status: string) => void;
     filters: FilterOption[];
+    reports?: { id: string; comment: string; status: string }[];
     showDateFilters?: boolean;
     startDate?: string;
     endDate?: string;
@@ -47,6 +48,7 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
     statusFilter,
     onStatusFilterChange,
     filters,
+    reports,
     showDateFilters,
     startDate,
     endDate,
@@ -69,29 +71,6 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
 
     return (
         <div className="pb-10 relative overflow-hidden">
-            {/* Tactical Scanning Scanline */}
-            <style>
-                {`
-                    @keyframes scanline {
-                        0% { transform: translateY(-100%); opacity: 0; }
-                        50% { opacity: 0.5; }
-                        100% { transform: translateY(100vh); opacity: 0; }
-                    }
-                    .tactical-scanline {
-                        position: absolute;
-                        top: 0;
-                        left: 0;
-                        width: 100%;
-                        height: 4px;
-                        background: linear-gradient(to right, transparent, rgba(99, 102, 241, 0.2), transparent);
-                        box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
-                        z-index: 10;
-                        pointer-events: none;
-                        animation: scanline 8s linear infinite;
-                    }
-                `}
-            </style>
-            <div className="tactical-scanline" />
 
             <div className="flex flex-col gap-8 mb-10 relative z-20">
                 {/* Header Section */}
@@ -251,6 +230,7 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {kpiConfigs.map(kpi => {
                     const value = stats.find(s => s.status === kpi.status)?._count || 0;
+                    const items = reports?.filter(r => r.status === kpi.status).map(r => ({ id: r.id, comment: r.comment })) || [];
                     return (
                         <KpiCard
                             key={kpi.status}
@@ -260,6 +240,7 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
                             variant={kpi.status === 'SENT' && value > 0 ? 'rose' : kpi.color}
                             trend={kpi.trend}
                             isCritical={kpi.status === 'SENT' && value > 0}
+                            items={items}
                         />
                     );
                 })}

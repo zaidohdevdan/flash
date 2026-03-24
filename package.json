@@ -7,13 +7,14 @@
   "scripts": {
     "dev:web": "bun --cwd apps/web dev",
     "dev:server": "bun --cwd server dev",
-    "dev": "bun run dev:server & bun run dev:web",
+    "dev": "concurrently -n \"WEB,SERVER\" -c \"magenta,cyan\" \"bun run dev:web\" \"bun run dev:server\"",
     "build": "bun --cwd apps/web build",
     "start": "bun --cwd server start",
     "install:all": "bun install"
   },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "concurrently": "^9.2.1"
   },
   "workspaces": [
     "apps/*",

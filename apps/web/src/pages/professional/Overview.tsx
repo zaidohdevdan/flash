@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import type { Socket } from 'socket.io-client';
-import { useOutletContext } from 'react-router-dom';
+import { useOutletContext, useNavigate } from 'react-router-dom';
 import { api } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 import { useDashboardSocket } from '../../hooks/useDashboardSocket';
@@ -12,6 +12,7 @@ import type { Report } from '../../types';
 
 export function Overview() {
     const { user } = useAuth();
+    const navigate = useNavigate();
     const { socket, searchTerm } = useOutletContext<{ socket: Socket | null; searchTerm: string }>();
 
     const [history, setHistory] = useState<Report[]>([]);
@@ -77,9 +78,9 @@ export function Overview() {
         loadHistory(nextPage, false, statusFilter);
     }
 
-    // Dummy navigation for modular highlight card, chat routing will be handled by App.tsx child routes later
+    // Navigate to the professional chat page (route: /dashboard/chat)
     const handleOpenChat = () => {
-        // We'll wire this to navigate to Chat later
+        navigate('/dashboard/chat');
     };
 
     return (

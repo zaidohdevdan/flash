@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { api } from '../../services/api';
 import { useReports } from '../../hooks/useReports';
 import { ReportFeed } from '../../components/domain/ReportFeed';
@@ -10,6 +11,8 @@ import { toast } from 'react-hot-toast';
 import type { Report, Department } from '../../types';
 
 export function Operations() {
+    const [searchParams] = useSearchParams();
+    const highlightId = searchParams.get('highlight');
     const [page, setPage] = useState(1);
     const [statusFilter, setStatusFilter] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
@@ -146,6 +149,7 @@ export function Operations() {
             <div className="flex-1 bg-white dark:bg-black/20 rounded-[2.5rem] border border-slate-200 dark:border-white/5 shadow-xl p-6 lg:p-8 backdrop-blur-xl">
                 <ReportFeed
                     reports={displayReports}
+                    highlightedId={highlightId}
                     searchTerm={searchTerm}
                     onSearchChange={setSearchTerm}
                     hasMore={hasMore}

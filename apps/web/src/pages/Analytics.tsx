@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
@@ -42,8 +42,21 @@ export function Analytics() {
     const { user, signOut } = useAuth();
     const [data, setData] = useState<AnalyticsData | null>(null);
     const [loading, setLoading] = useState(true);
-    const [isReady, setIsReady] = useState(false);
+    const [isAreaChartReady, setIsAreaChartReady] = useState(false);
+    const [isPieChartReady, setIsPieChartReady] = useState(false);
     const [isInsightsOpen, setIsInsightsOpen] = useState(false);
+
+    const statusParams = useMemo(() => {
+        if (!data) return [];
+        return data.sectorPerformance.reduce((acc: { name: string; value: number; color: string }[], curr) => {
+            acc[0].value += curr.resolved;
+            acc[1].value += curr.forwarded;
+            return acc;
+        }, [
+            { name: 'Resolvidos', value: 0, color: '#10b981' },
+            { name: 'Em Setor', value: 0, color: '#8b5cf6' }
+        ]);
+    }, [data]);
 
     useEffect(() => {
         loadData();
@@ -53,7 +66,8 @@ export function Analytics() {
         try {
             const response = await api.get('/reports/analytics');
             setData(response.data);
-            setTimeout(() => setIsReady(true), 300);
+            setTimeout(() => setIsAreaChartReady(true), 200);
+            setTimeout(() => setIsPieChartReady(true), 600);
         } catch (error) {
             console.error('Erro ao carregar analytics:', error);
         } finally {
@@ -61,27 +75,18 @@ export function Analytics() {
         }
     };
 
-    if (loading) {
+    if (loading || !data) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-[var(--bg-primary)]">
                 <div className="flex flex-col items-center gap-4">
                     <div className="w-12 h-12 border-4 border-[var(--accent-primary)]/20 border-t-[var(--accent-primary)] rounded-full animate-spin" />
-                    <p className="text-xs font-bold text-[var(--accent-primary)] uppercase tracking-widest animate-pulse">Carregando Analytics...</p>
+                    <p className="text-xs font-bold text-[var(--accent-primary)] uppercase tracking-widest animate-pulse">
+                        {loading ? 'Carregando Analytics...' : 'Preparando Dados...'}
+                    </p>
                 </div>
             </div>
         );
     }
-
-    if (!data) return null;
-
-    const statusParams = data.sectorPerformance.reduce((acc: { name: string; value: number; color: string }[], curr) => {
-        acc[0].value += curr.resolved;
-        acc[1].value += curr.forwarded;
-        return acc;
-    }, [
-        { name: 'Resolvidos', value: 0, color: '#10b981' },
-        { name: 'Em Setor', value: 0, color: '#8b5cf6' }
-    ]);
 
     return (
         <DashboardLayout
@@ -201,7 +206,7 @@ export function Analytics() {
                         </div>
 
                         <div className="h-[300px] w-full min-w-0">
-                            {isReady && (
+                            {isAreaChartReady && (
                                 <ResponsiveContainer width="100%" height={300}>
                                     <AreaChart data={data.volume}>
                                         <defs>
@@ -310,7 +315,7 @@ export function Analytics() {
 
                             <div className="h-[300px] w-full min-w-0 flex items-center justify-center relative">
                                 <div className="absolute inset-0 bg-blue-500/5 rounded-full blur-3xl opacity-50" />
-                                {isReady && (
+                                {isPieChartReady && (
                                     <ResponsiveContainer width="100%" height={300}>
                                         <PieChart>
                                             <Pie

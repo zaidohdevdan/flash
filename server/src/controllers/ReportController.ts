@@ -12,6 +12,28 @@ const reportService = new ReportService();
 const mediaRepository = new PrismaMediaRepository(prisma);
 const mediaService = new MediaService(mediaRepository);
 
+const signReportMedia = (report: any) => {
+    if (!report) return report;
+    const sign = (item: any, isDownload: boolean) => {
+        if (item.publicId) {
+            return MediaService.signUrl(item.publicId, item.resourceType || 'auto', isDownload, item.format);
+        }
+        return item.secureUrl;
+    };
+
+    if (report.media && Array.isArray(report.media)) {
+        report.media = report.media.map((m: any) => ({
+            ...m,
+            secureUrl: sign(m, false),
+            downloadUrl: sign(m, true)
+        }));
+        if (report.media.length > 0 && report.media[0].secureUrl) {
+            report.imageUrl = report.media[0].secureUrl;
+        }
+    }
+    return report;
+};
+
 export const ReportController = {
     // Dashboard Stats for chart
     stats: async (req: Request, res: Response) => {
@@ -62,7 +84,7 @@ export const ReportController = {
                 startDate ? new Date(startDate as string) : undefined,
                 endDate ? new Date(endDate as string) : undefined,
             );
-            return res.json(reports);
+            return res.json(reports.map(signReportMedia));
         } catch (error) {
             return res.status(500).json({ error: 'Erro ao listar relatórios' });
         }
@@ -86,7 +108,7 @@ export const ReportController = {
                 startDate ? new Date(startDate as string) : undefined,
                 endDate ? new Date(endDate as string) : undefined,
             );
-            return res.json(reports);
+            return res.json(reports.map(signReportMedia));
         } catch (error) {
             return res.status(500).json({ error: 'Erro ao listar relatórios do departamento' });
         }
@@ -181,7 +203,7 @@ export const ReportController = {
                 };
             });
 
-            return res.json(safeReports);
+            return res.json(safeReports.map(signReportMedia));
         } catch (error) {
             return res.status(500).json({ error: 'Erro ao listar histórico' });
         }
@@ -194,9 +216,9 @@ export const ReportController = {
 
         console.log(`[Report] Criando reporte para usuário: ${userId}`);
 
-        if (!imageUrl) {
-            console.error("[Report] Erro: Imagem não fornecida (URL)");
-            return res.status(400).json({ error: "Imagem é obrigatória" });
+        if (!imageUrl && (!mediaItems || mediaItems.length === 0)) {
+            console.error("[Report] Erro: Nenhuma mídia (imagem ou arquivo) fornecida");
+            return res.status(400).json({ error: "É necessário anexar pelo menos um arquivo ou imagem." });
         }
 
         try {
@@ -244,7 +266,7 @@ export const ReportController = {
                 console.warn("[Report] Usuário não possui supervisor vinculado para notificação real-time.");
             }
 
-            return res.status(201).json(report);
+            return res.status(201).json(signReportMedia(report));
         } catch (error) {
             console.error("[Report] ERRO CRÍTICO na criação do relatório:", error);
             return res.status(500).json({ error: "Erro ao criar relatório" });
@@ -340,7 +362,7 @@ export const ReportController = {
                 console.log(`[Socket] Evento ${eventName} emitido para sala dept-${finalDeptId}. ReportId: ${id}`);
             }
 
-            return res.status(200).json(updatedReport);
+            return res.status(200).json(signReportMedia(updatedReport));
         } catch (error) {
             return res.status(500).json({ error: 'Erro ao atualizar status' });
         }
@@ -359,7 +381,7 @@ export const ReportController = {
                 return res.status(404).json({ error: 'Relatório não encontrado através deste protocolo.' });
             }
 
-            return res.status(200).json(report);
+            return res.status(200).json(signReportMedia(report));
         } catch (error) {
             console.error('[Report] Erro ao buscar por protocolo:', error);
             return res.status(500).json({ error: 'Erro ao buscar relatório por protocolo' });

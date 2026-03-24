@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useMemo, useCallback, useSyncExternalStore } from 'react';
 import { Socket } from 'socket.io-client';
-import { Send, Mic, X, MessageSquare, Square, Trash2, Hourglass, Pencil, Check, CheckCheck, Trash, User, RefreshCw, Video, Play, Pause } from 'lucide-react';
+import { Send, X, MessageSquare, Trash2, Hourglass, Pencil, Check, CheckCheck, Trash, User, RefreshCw, Video, Play, Pause } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
@@ -112,8 +112,6 @@ const TacticalAudioPlayer = ({ src, isMe }: { src: string, isMe: boolean }) => {
 export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead, inline = false, onVideoClick }: ChatWidgetProps) {
     const { notificationsEnabled } = useAuth();
     const [inputText, setInputText] = useState('');
-    const [isRecording, setIsRecording] = useState(false);
-    const [recordingTime, setRecordingTime] = useState(0);
     const [now, setNow] = useState(() => Date.now());
     const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null);
     const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
@@ -121,9 +119,6 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead, i
     const [showDeleteMenuFor, setShowDeleteMenuFor] = useState<string | null>(null);
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
-    const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-    const chunksRef = useRef<Blob[]>([]);
-    const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const notificationAudioRef = useRef<HTMLAudioElement | null>(null);
 
     // Identificador único da sala baseado em IDs ordenados
@@ -332,77 +327,6 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead, i
         });
     };
 
-    const startRecording = async () => {
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            const mediaRecorder = new MediaRecorder(stream);
-            mediaRecorderRef.current = mediaRecorder;
-            chunksRef.current = [];
-
-            mediaRecorder.ondataavailable = (e) => {
-                if (e.data.size > 0) chunksRef.current.push(e.data);
-            };
-
-            mediaRecorder.onstop = uploadAudio;
-
-            mediaRecorder.start();
-            setIsRecording(true);
-            setRecordingTime(0);
-
-            timerRef.current = setInterval(() => {
-                setRecordingTime(prev => prev + 1);
-            }, 1000);
-
-        } catch (err) {
-            console.error('Error accessing microphone:', err);
-            alert('Erro ao acessar o microfone. Verifique as permissões.');
-        }
-    };
-
-    const stopRecording = () => {
-        if (mediaRecorderRef.current && isRecording) {
-            mediaRecorderRef.current.stop();
-            setIsRecording(false);
-            if (timerRef.current) clearInterval(timerRef.current);
-            mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
-        }
-    };
-
-    const uploadAudio = async () => {
-        const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
-        const formData = new FormData();
-        formData.append('file', blob, 'audio-message.webm');
-
-        try {
-            const response = await api.post('/chat/media', formData);
-            const audioUrl = response.data.secureUrl;
-            const audioPublicId = response.data.publicId;
-
-            if (socket) {
-                const messageData = {
-                    id: generateMongoId(),
-                    fromId: currentUser.id,
-                    toId: targetUser.id,
-                    roomName: chatRoom,
-                    audioUrl,
-                    createdAt: new Date().toISOString()
-                };
-
-                // Optimistic insert
-                await db.chatMessages.add(messageData);
-
-                socket.emit('private_message', {
-                    id: messageData.id,
-                    targetUserId: targetUser.id,
-                    audioUrl,
-                    audioPublicId
-                });
-            }
-        } catch (error) {
-            console.error('Error uploading audio:', error);
-            alert('Erro ao enviar áudio.');
-        }
-    };
 
     const handleClearHistory = async () => {
         if (!window.confirm('Deseja limpar o histórico desta conversa?')) return;
@@ -466,11 +390,6 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead, i
         }
     };
 
-    const formatTime = (seconds: number) => {
-        const mins = Math.floor(seconds / 60);
-        const secs = seconds % 60;
-        return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-    };
 
     return (
         <motion.div
@@ -699,37 +618,7 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead, i
                 {/* Visual indicator of recording/typing */}
                 <div className="absolute -top-[1px] left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-indigo-500/30 to-transparent" />
 
-                {isRecording ? (
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="flex items-center justify-between bg-rose-500/10 p-4 rounded-2xl border border-rose-500/20"
-                    >
-                        <div className="flex items-center gap-3 text-rose-500">
-                            <div className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping shadow-[0_0_12px_rgba(244,63,94,0.6)]" />
-                            <span className="text-xs font-black font-mono tracking-[0.2em]">{formatTime(recordingTime)}</span>
-                        </div>
-                        <span className="text-[10px] text-rose-500 font-black uppercase tracking-[0.2em] animate-pulse">Capturando Áudio Tático...</span>
-                        <button
-                            type="button"
-                            title="Parar Gravação"
-                            onClick={stopRecording}
-                            className="p-3 bg-rose-500 text-white rounded-xl hover:bg-rose-600 transition-all shadow-lg shadow-rose-500/20 active:scale-90"
-                        >
-                            <Square className="w-4 h-4 fill-current" />
-                        </button>
-                    </motion.div>
-                ) : (
                     <div className="flex items-center gap-3 relative">
-                        <button
-                            type="button"
-                            onClick={startRecording}
-                            className="p-4 bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 rounded-2xl hover:bg-rose-500/10 hover:text-rose-500 border border-transparent hover:border-rose-500/20 transition-all active:scale-90 shadow-sm"
-                            title="Gravar Áudio"
-                        >
-                            <Mic className="w-5 h-5" />
-                        </button>
-
                         <div className="flex-1 relative group">
                             <input
                                 type="text"
@@ -756,7 +645,6 @@ export function ChatWidget({ currentUser, targetUser, onClose, socket, onRead, i
                             <Send className="w-5 h-5" />
                         </button>
                     </div>
-                )}
             </div>
         </motion.div>
     );

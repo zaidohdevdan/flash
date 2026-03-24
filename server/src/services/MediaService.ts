@@ -47,7 +47,8 @@ export class MediaService {
             const stream = cloudinary.uploader.upload_stream(
                 {
                     folder: options?.folder ?? 'flash',
-                    resource_type: options?.resourceType ?? 'image',
+                    resource_type: options?.resourceType ?? 'auto',
+                    type: 'upload',
                     upload_preset: 'flash_preset',
                     width: options?.width,
                     height: options?.height,
@@ -70,8 +71,8 @@ export class MediaService {
 
         let finalBuffer = buffer;
 
-        // Só otimiza se for explicitamente imagem ou se não houver resourceType (default)
-        if (!options?.resourceType || options.resourceType === 'image') {
+        // Só otimiza se for explicitamente imagem. Se for 'auto' ou 'raw', ignora.
+        if (options?.resourceType === 'image') {
             finalBuffer = await this.otimizedBuffer(buffer)
         }
 
@@ -116,5 +117,23 @@ export class MediaService {
         }
 
         return cloudinaryResult;
+    }
+
+    static signUrl(publicId: string, resourceType: string = 'auto', isDownload: boolean = false, format?: string): string {
+        const options: any = {
+            resource_type: resourceType,
+            secure: true,
+            sign_url: true,
+        };
+
+        if (format) {
+            options.format = format;
+        }
+
+        if (isDownload) {
+            options.flags = 'attachment';
+        }
+
+        return cloudinary.url(publicId, options);
     }
 }

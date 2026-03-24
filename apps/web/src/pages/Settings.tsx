@@ -22,7 +22,75 @@ import toast from 'react-hot-toast';
 type Theme = 'light' | 'dark' | 'system';
 type Density = 'comfortable' | 'compact';
 
-const GeneralSettings = () => {
+const THEMES: { id: Theme; label: string; icon: typeof Sun; preview: React.ReactNode }[] = [
+    {
+        id: 'light', label: 'Claro', icon: Sun,
+        preview: (
+            <div className="w-full h-14 rounded-lg bg-slate-100 border border-slate-200 overflow-hidden flex flex-col pointer-events-none">
+                <div className="h-3 bg-white border-b border-slate-100 flex items-center px-2 gap-1">
+                    <div className="w-3 h-1.5 rounded bg-indigo-400/80" />
+                    <div className="w-5 h-1.5 rounded bg-slate-200" />
+                    <div className="w-4 h-1.5 rounded bg-slate-200" />
+                </div>
+                <div className="flex flex-1 gap-1.5 p-1.5">
+                    <div className="w-5 bg-white border border-slate-100 rounded" />
+                    <div className="flex-1 flex flex-col gap-1">
+                        <div className="h-2 bg-slate-200 rounded w-3/4" />
+                        <div className="h-2 bg-slate-100 rounded w-1/2" />
+                        <div className="h-2 bg-indigo-100 rounded w-2/3" />
+                    </div>
+                </div>
+            </div>
+        ),
+    },
+    {
+        id: 'dark', label: 'Escuro / Tactical', icon: Moon,
+        preview: (
+            <div className="w-full h-14 rounded-lg bg-[#020617] border border-white/10 overflow-hidden flex flex-col pointer-events-none shadow-inner">
+                <div className="h-3 bg-black/60 border-b border-white/5 flex items-center px-2 gap-1">
+                    <div className="w-3 h-1.5 rounded bg-indigo-500 shadow-sm" />
+                    <div className="w-5 h-1 rounded bg-white/5" />
+                    <div className="w-4 h-1 rounded bg-white/5" />
+                </div>
+                <div className="flex flex-1 gap-1.5 p-1.5 bg-[radial-gradient(circle_at_top_right,rgba(99,102,241,0.05),transparent)]">
+                    <div className="w-5 bg-black/40 border border-white/5 rounded-md" />
+                    <div className="flex-1 flex flex-col gap-1">
+                        <div className="h-2 bg-indigo-500/20 rounded-full w-3/4" />
+                        <div className="h-1.5 bg-white/5 rounded-full w-1/2" />
+                        <div className="h-2 bg-slate-500/10 rounded-full w-2/3" />
+                    </div>
+                </div>
+            </div>
+        ),
+    },
+    {
+        id: 'system', label: 'Automático', icon: Monitor,
+        preview: (
+            <div className="w-full h-14 rounded-lg overflow-hidden flex border border-slate-200 pointer-events-none">
+                <div className="w-1/2 bg-slate-100 flex flex-col">
+                    <div className="h-3 bg-white border-b border-slate-100 flex items-center px-1">
+                        <div className="w-3 h-1.5 rounded bg-indigo-400/70" />
+                    </div>
+                    <div className="flex-1 p-1 flex flex-col gap-0.5">
+                        <div className="h-1.5 bg-slate-200 rounded" />
+                        <div className="h-1.5 bg-slate-100 rounded w-3/4" />
+                    </div>
+                </div>
+                <div className="w-1/2 bg-[#020617] flex flex-col">
+                    <div className="h-3 bg-[#0f172a] border-b border-white/5 flex items-center px-1">
+                        <div className="w-3 h-1.5 rounded bg-indigo-500/80" />
+                    </div>
+                    <div className="flex-1 p-1 flex flex-col gap-0.5">
+                        <div className="h-1.5 bg-white/15 rounded" />
+                        <div className="h-1.5 bg-white/8 rounded w-3/4" />
+                    </div>
+                </div>
+            </div>
+        ),
+    },
+];
+
+const GeneralSettings = React.memo(() => {
     const { user, updateUser } = useAuth();
     const [displayName, setDisplayName] = useState(user?.name || '');
     const [isSaving, setIsSaving] = useState(false);
@@ -80,9 +148,9 @@ const GeneralSettings = () => {
             </form>
         </div>
     );
-};
+});
 
-const AppearanceSettings = () => {
+const AppearanceSettings = React.memo(() => {
     const { user } = useAuth();
     const [theme, setTheme] = useState<Theme>(() => {
         if (user?.id) return (localStorage.getItem(`settings_${user.id}_theme`) as Theme) || 'system';
@@ -110,74 +178,6 @@ const AppearanceSettings = () => {
         document.documentElement.setAttribute('data-density', newDensity);
     };
 
-    const themes: { id: Theme; label: string; icon: typeof Sun; preview: React.ReactNode }[] = [
-        {
-            id: 'light', label: 'Claro', icon: Sun,
-            preview: (
-                <div className="w-full h-14 rounded-lg bg-slate-100 border border-slate-200 overflow-hidden flex flex-col pointer-events-none">
-                    <div className="h-3 bg-white border-b border-slate-100 flex items-center px-2 gap-1">
-                        <div className="w-3 h-1.5 rounded bg-indigo-400/80" />
-                        <div className="w-5 h-1.5 rounded bg-slate-200" />
-                        <div className="w-4 h-1.5 rounded bg-slate-200" />
-                    </div>
-                    <div className="flex flex-1 gap-1.5 p-1.5">
-                        <div className="w-5 bg-white border border-slate-100 rounded" />
-                        <div className="flex-1 flex flex-col gap-1">
-                            <div className="h-2 bg-slate-200 rounded w-3/4" />
-                            <div className="h-2 bg-slate-100 rounded w-1/2" />
-                            <div className="h-2 bg-indigo-100 rounded w-2/3" />
-                        </div>
-                    </div>
-                </div>
-            ),
-        },
-        {
-            id: 'dark', label: 'Escuro / Tactical', icon: Moon,
-            preview: (
-                <div className="w-full h-14 rounded-lg bg-[#020617] border border-white/10 overflow-hidden flex flex-col pointer-events-none shadow-inner">
-                    <div className="h-3 bg-black/60 border-b border-white/5 flex items-center px-2 gap-1">
-                        <div className="w-3 h-1.5 rounded bg-indigo-500 shadow-sm" />
-                        <div className="w-5 h-1 rounded bg-white/5" />
-                        <div className="w-4 h-1 rounded bg-white/5" />
-                    </div>
-                    <div className="flex flex-1 gap-1.5 p-1.5 bg-[radial-gradient(circle_at_top_right,rgba(99,102,241,0.05),transparent)]">
-                        <div className="w-5 bg-black/40 border border-white/5 rounded-md" />
-                        <div className="flex-1 flex flex-col gap-1">
-                            <div className="h-2 bg-indigo-500/20 rounded-full w-3/4" />
-                            <div className="h-1.5 bg-white/5 rounded-full w-1/2" />
-                            <div className="h-2 bg-slate-500/10 rounded-full w-2/3" />
-                        </div>
-                    </div>
-                </div>
-            ),
-        },
-        {
-            id: 'system', label: 'Automático', icon: Monitor,
-            preview: (
-                <div className="w-full h-14 rounded-lg overflow-hidden flex border border-slate-200 pointer-events-none">
-                    <div className="w-1/2 bg-slate-100 flex flex-col">
-                        <div className="h-3 bg-white border-b border-slate-100 flex items-center px-1">
-                            <div className="w-3 h-1.5 rounded bg-indigo-400/70" />
-                        </div>
-                        <div className="flex-1 p-1 flex flex-col gap-0.5">
-                            <div className="h-1.5 bg-slate-200 rounded" />
-                            <div className="h-1.5 bg-slate-100 rounded w-3/4" />
-                        </div>
-                    </div>
-                    <div className="w-1/2 bg-[#020617] flex flex-col">
-                        <div className="h-3 bg-[#0f172a] border-b border-white/5 flex items-center px-1">
-                            <div className="w-3 h-1.5 rounded bg-indigo-500/80" />
-                        </div>
-                        <div className="flex-1 p-1 flex flex-col gap-0.5">
-                            <div className="h-1.5 bg-white/15 rounded" />
-                            <div className="h-1.5 bg-white/8 rounded w-3/4" />
-                        </div>
-                    </div>
-                </div>
-            ),
-        },
-    ];
-
     return (
         <div className="space-y-6 animate-in">
             <div className="flex flex-col gap-1">
@@ -189,7 +189,7 @@ const AppearanceSettings = () => {
                 <div className="space-y-3">
                     <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Tema do Sistema</label>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        {themes.map(({ id, label, icon: Icon, preview }) => {
+                        {THEMES.map(({ id, label, icon: Icon, preview }) => {
                             const isSelected = theme === id;
                             return (
                                 <button
@@ -240,9 +240,9 @@ const AppearanceSettings = () => {
             </Card>
         </div>
     );
-};
+});
 
-const NotificationSettings = () => {
+const NotificationSettings = React.memo(() => {
     const { notificationsEnabled, setNotificationsEnabled, desktopNotificationsEnabled, setDesktopNotificationsEnabled } = useAuth();
 
     return (
@@ -286,9 +286,9 @@ const NotificationSettings = () => {
             </Card>
         </div>
     );
-};
+});
 
-const SecuritySettings = () => {
+const SecuritySettings = React.memo(() => {
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -324,16 +324,16 @@ const SecuritySettings = () => {
                         <div className="space-y-4">
                             <div className="space-y-1.5">
                                 <label htmlFor="current-password" className={labelCls}>Senha Atual</label>
-                                <input id="current-password" type="password" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} className={inputCls} placeholder="••••••••" required />
+                                <input id="current-password" type="password" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} className={inputCls} placeholder="••••••••" required autoComplete="current-password" />
                             </div>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div className="space-y-1.5">
                                     <label htmlFor="new-password" className={labelCls}>Nova Senha</label>
-                                    <input id="new-password" type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} className={inputCls} placeholder="••••••••" required />
+                                    <input id="new-password" type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} className={inputCls} placeholder="••••••••" required autoComplete="new-password" />
                                 </div>
                                 <div className="space-y-1.5">
                                     <label htmlFor="confirm-password" className={labelCls}>Confirmar Nova Senha</label>
-                                    <input id="confirm-password" type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} className={inputCls} placeholder="••••••••" required />
+                                    <input id="confirm-password" type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} className={inputCls} placeholder="••••••••" required autoComplete="new-password" />
                                 </div>
                             </div>
                         </div>
@@ -349,9 +349,9 @@ const SecuritySettings = () => {
             </form>
         </div>
     );
-};
+});
 
-const OfflineSettings = () => {
+const OfflineSettings = React.memo(() => {
     const [stats, setStats] = useState({ pendingReports: 0, chatMessages: 0, notifications: 0 });
     const [isLoading, setIsLoading] = useState(false);
 
@@ -416,7 +416,7 @@ const OfflineSettings = () => {
             </Card>
         </div>
     );
-};
+});
 
 
 // --- Main Page ---

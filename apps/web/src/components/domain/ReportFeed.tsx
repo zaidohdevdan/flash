@@ -15,6 +15,7 @@ interface ReportFeedProps {
     emptyMessage?: string;
     isLoading?: boolean;
     variant?: 'list' | 'grid' | 'minimal';
+    highlightedId?: string | null;
 }
 
 export const ReportFeed: React.FC<ReportFeedProps> = ({
@@ -24,7 +25,8 @@ export const ReportFeed: React.FC<ReportFeedProps> = ({
     renderReportActions,
     emptyMessage,
     isLoading = false,
-    variant = 'list'
+    variant = 'list',
+    highlightedId
 }) => {
     const displayMessage = emptyMessage || "Radar de Operações Limpo";
 
@@ -46,6 +48,7 @@ export const ReportFeed: React.FC<ReportFeedProps> = ({
                             showUser
                             actions={renderReportActions(report)}
                             variant={variant}
+                            isHighlighted={report.id === highlightedId}
                         />
                     ))}
                 </div>

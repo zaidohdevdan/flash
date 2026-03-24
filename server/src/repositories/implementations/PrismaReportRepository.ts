@@ -33,7 +33,7 @@ export class PrismaReportRepository implements IReportRepository {
                 history: {
                     create: {
                         status: 'SENT',
-                        comment: 'Relatório enviado pelo profissional.',
+                        comment: comment || 'Relatório enviado pelo profissional.',
                         userName: userName,
                         userRole: userRole
                     }

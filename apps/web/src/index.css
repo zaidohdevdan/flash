@@ -220,6 +220,15 @@
   animation: float 6s ease-in-out infinite;
 }
 
+@keyframes alert-intermittent {
+  0%, 100% { border-color: rgba(244, 63, 94, 0.2); box-shadow: 0 0 0 rgba(244, 63, 94, 0); }
+  50% { border-color: rgba(244, 63, 110, 0.8); box-shadow: 0 0 20px rgba(244, 63, 94, 0.3); }
+}
+
+.animate-alert-intermittent {
+  animation: alert-intermittent 2s ease-in-out infinite;
+}
+
 @keyframes reflection {
   0% {
     background-position: 200% center;

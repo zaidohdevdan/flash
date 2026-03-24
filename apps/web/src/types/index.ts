@@ -20,6 +20,7 @@ export interface Media {
     height?: number;
     bytes: number;
     resourceType: string;
+    downloadUrl?: string;
 }
 
 export interface Report {

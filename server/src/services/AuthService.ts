@@ -32,7 +32,7 @@ export class AuthService {
                 departmentId: user.departmentId
             },
             secret,
-            { expiresIn: '1d' }
+            { expiresIn: '7d' }
         );
 
         return {

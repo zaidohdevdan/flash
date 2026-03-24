@@ -24,6 +24,7 @@ import {
 } from 'recharts';
 import { motion, AnimatePresence, type Variants } from 'framer-motion';
 import { Card, Button } from '../../components/ui';
+import { useNavigate } from 'react-router-dom';
 import { InsightsModal } from '../../components/domain/modals/InsightsModal';
 
 interface AnalyticsData {
@@ -50,8 +51,13 @@ const FILTER_OPTIONS = [
 ];
 
 export function Intelligence() {
+    const navigate = useNavigate();
     const [stats, setStats] = useState<Stats[]>([]);
     const [reports, setReports] = useState<Report[]>([]);
+    const [viewedReports, setViewedReports] = useState<string[]>(() => {
+        const saved = localStorage.getItem('viewed_reports_manager');
+        return saved ? JSON.parse(saved) : [];
+    });
     const [statusFilter, setStatusFilter] = useState('');
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
@@ -131,6 +137,17 @@ export function Intelligence() {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         loadReportsForMap();
     }, [loadReportsForMap]);
+
+    useEffect(() => {
+        localStorage.setItem('viewed_reports_manager', JSON.stringify(viewedReports));
+    }, [viewedReports]);
+
+    const handleReportClick = (reportId: string) => {
+        if (!viewedReports.includes(reportId)) {
+            setViewedReports(prev => [...prev, reportId]);
+        }
+        navigate(`/manager/operations?highlight=${reportId}`);
+    };
 
     const containerVariants: Variants = {
         hidden: { opacity: 0 },
@@ -302,26 +319,45 @@ export function Intelligence() {
                                     <div className="h-px flex-1 bg-slate-100 dark:bg-white/5 mx-4" />
                                 </div>
                                 <div className="flex flex-wrap items-center gap-6">
-                                    {reports.slice(0, 5).map((report) => (
-                                        <div key={report.id} className="flex items-center gap-3 group">
-                                            <div className="relative">
-                                                <img
-                                                    src={report.user?.avatarUrl || `https://ui-avatars.com/api/?name=${report.user?.name}&background=6366f1&color=fff`}
-                                                    alt={report.user?.name}
-                                                    className="w-10 h-10 rounded-full border-2 border-white dark:border-slate-800 shadow-lg group-hover:scale-110 transition-transform object-cover"
-                                                />
-                                                <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-white dark:border-slate-800 rounded-full" />
+                                    {reports.slice(0, 5).map((report, idx) => {
+                                        const isViewed = viewedReports.includes(report.id);
+                                        return (
+                                            <div 
+                                                key={report.id} 
+                                                onClick={() => handleReportClick(report.id)}
+                                                className={`
+                                                    flex items-center gap-3 group cursor-pointer p-2 rounded-2xl border-2 transition-all duration-500
+                                                    ${isViewed 
+                                                        ? 'border-transparent hover:bg-indigo-500/5' 
+                                                        : 'border-rose-500/20 bg-rose-500/5 animate-alert-intermittent hover:border-rose-500/40'
+                                                    }
+                                                `}
+                                                style={{ animationDelay: `${idx * 100}ms` }}
+                                            >
+                                                <div className="relative">
+                                                    <div className={`
+                                                        w-10 h-10 rounded-full border-2 p-0.5 overflow-hidden shadow-lg group-hover:scale-110 transition-transform
+                                                        ${isViewed ? 'border-white dark:border-slate-800' : 'border-rose-500/50 ring-2 ring-rose-500/30'}
+                                                    `}>
+                                                        <img
+                                                            src={report.user?.avatarUrl || `https://ui-avatars.com/api/?name=${report.user?.name}&background=6366f1&color=fff`}
+                                                            alt={report.user?.name}
+                                                            className="w-full h-full object-cover rounded-full"
+                                                        />
+                                                    </div>
+                                                    <div className={`absolute -bottom-1 -right-1 w-3.5 h-3.5 border-2 border-white dark:border-slate-800 rounded-full ${isViewed ? 'bg-emerald-500' : 'bg-rose-500 animate-pulse'}`} />
+                                                </div>
+                                                <div className="flex flex-col">
+                                                    <span className={`text-[12px] font-black uppercase tracking-tight transition-colors ${isViewed ? 'text-slate-900 dark:text-white group-hover:text-indigo-500' : 'text-rose-500'}`}>
+                                                        #{report.id.slice(-6).toUpperCase()}
+                                                    </span>
+                                                    <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+                                                        {report.createdAt ? new Date(report.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '--:--'}
+                                                    </span>
+                                                </div>
                                             </div>
-                                            <div className="flex flex-col">
-                                                <span className="text-[12px] font-black text-slate-900 dark:text-white uppercase tracking-tight">
-                                                    #{report.id.slice(-6).toUpperCase()}
-                                                </span>
-                                                <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
-                                                    {report.createdAt ? new Date(report.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '--:--'}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
                             </Card>
                         </div>

@@ -152,7 +152,7 @@ export function Conference() {
                     {!isTerminated ? (
                         <div className="absolute inset-0 transition-opacity duration-1000" style={{ opacity: isReady ? 1 : 0 }}>
                             <JitsiMeeting
-                                domain="meet.ffmuc.net"
+                                domain="meet.jit.si"
                                 roomName={roomName}
                                 configOverwrite={{
                                     startWithAudioMuted: false,
