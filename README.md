@@ -64,4 +64,4 @@ Crie um arquivo `.env` na raiz baseado no `.env.example`:
 
 ---
 
-Desenvolvido com ⚡ por [Seu Nome/Time]
+Desenvolvido com ⚡ por Daniel de Almeida 
