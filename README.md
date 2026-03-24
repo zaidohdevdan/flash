@@ -7,7 +7,7 @@ Flash é uma plataforma robusta de gestão operacional projetada para conectar s
 ## ✨ Funcionalidades Principais
 
 - **📡 Monitoramento em Tempo Real**: Acompanhe a localização e status da equipe ao vivo.
-- **💬 Comunicação Integrada**: Chat direto e em grupo com suporte a áudio e mídia.
+- **💬 Comunicação Integrada**: Chat direto e em grupo.
 - **📝 Relatórios Avançados**: Criação de relatórios com geolocalização e funcionamento offline.
 - **🎨 Design Mission Control**: Interface de alto contraste otimizada para legibilidade e performance.
 - **🔄 Sincronização Inteligente**: Suporte robusto para operação offline com Dexie.js.
